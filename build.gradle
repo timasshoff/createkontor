@@ -107,6 +107,17 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    unitTest {
+        // Enable JUnit support in the moddev plugin
+        enable()
+        // Configure which mod is being tested.
+        // This allows NeoForge to load the test/ classes and resources as belonging to the mod.
+        testedMod = mods."${mod_id}" // <mod name> must match the name in the mods { } block.
+        // Configure which mods are loaded in the test environment, if the default (all declared mods) is not appropriate.
+        // This must contain testedMod, and can include other mods as well.
+        // loadedMods = [mods.<mod name >, mods.<mod name 2>]
+    }
 }
 
 // Sets up a dependency configuration called 'localRuntime'.
@@ -147,6 +158,13 @@ dependencies {
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
     implementation("com.lowdragmc.ldlib2:ldlib2-neoforge-${minecraft_version}:${ldlib2_version}:all")
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
