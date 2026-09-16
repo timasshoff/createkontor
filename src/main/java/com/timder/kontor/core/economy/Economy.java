@@ -1,0 +1,258 @@
+package com.timder.kontor.core.economy;
+
+import com.timder.kontor.core.economy.event.CompetitorEnteredEvent;
+import com.timder.kontor.core.economy.event.CompetitorExitedEvent;
+import com.timder.kontor.core.economy.event.EconomyEvent;
+import com.timder.kontor.core.macro.MacroRules;
+import com.timder.kontor.core.macro.MacroState;
+import com.timder.kontor.core.market.*;
+import com.timder.kontor.core.port.RecipeGraph;
+import com.timder.kontor.core.port.Rng;
+import com.timder.kontor.core.raw.RawMaterialDefinition;
+import com.timder.kontor.core.raw.RawMaterialRules;
+import com.timder.kontor.core.raw.RawMaterialSnapshot;
+import com.timder.kontor.core.raw.RawMaterialState;
+import com.timder.kontor.core.value.ItemId;
+import com.timder.kontor.core.value.ValueResult;
+import com.timder.kontor.core.value.ValueRules;
+
+import java.util.*;
+
+public final class Economy {
+
+    /**
+     * The length of one trading tick
+     */
+    public static final long TRADING_TICK_LENGTH = 2000;
+
+    /**
+     * The length of one trading day
+     */
+    public static final long DAY_LENGTH = TRADING_TICK_LENGTH * MarketRules.TRADING_TICKS_PER_DAY;
+
+    private final RecipeGraph graph;
+    private final EconomyParams params;
+    private final Rng rng;
+
+    private final List<RawMaterialDefinition> rawMaterialDefinitions;
+    private final List<MarketDefinition> marketDefinitions;
+    private final Map<ItemId, Double> valueOverrides;
+
+    private final Map<ItemId, RawMaterialState> rawMaterialStates = new LinkedHashMap<>();
+    private final Map<ItemId, MarketState> marketStates = new LinkedHashMap<>();
+    private final Map<ItemId, MarketParams> marketParamsMap = new LinkedHashMap<>();
+    private final Map<ItemId, Double> currentDemand = new LinkedHashMap<>();
+    private final Map<ItemId, DayResult> lastDayResults = new LinkedHashMap<>();
+    private final Map<ItemId, Double> lastTickDelivered = new LinkedHashMap<>();
+
+    /**
+     * Every item reachable from the configured markets.
+     * Only discovered once.
+     */
+    private final Set<ItemId> discoveredScope;
+
+    private final MacroState macro;
+    private long ticksElapsed = 0;
+
+    /**
+     * Builds a fresh economy and opens the first day.
+     * @param rawMaterialDefinitions Every raw material that is supposed to be simulated
+     * @param marketDefinitions Every market that is supposed to be simulated
+     * @param valueOverrides Fixed values that override any (computed) recipe. May be empty.
+     * @param params Global settings for the economy
+     * @param graph The recipe graph
+     * @param rng A source of randomness
+     */
+    public Economy(List<RawMaterialDefinition> rawMaterialDefinitions,
+                   List<MarketDefinition> marketDefinitions,
+                   Map<ItemId, Double> valueOverrides,
+                   EconomyParams params,
+                   RecipeGraph graph,
+                   Rng rng) {
+        this.rawMaterialDefinitions = List.copyOf(rawMaterialDefinitions);
+        this.marketDefinitions = List.copyOf(marketDefinitions);
+        this.valueOverrides = Map.copyOf(valueOverrides);
+        this.params = Objects.requireNonNull(params, "params must not be null.");
+        this.graph = Objects.requireNonNull(graph, "graph must not be null.");
+        this.rng = Objects.requireNonNull(rng, "rng must not be null.");
+
+        for (RawMaterialDefinition def : this.rawMaterialDefinitions) {
+            rawMaterialStates.put(def.id(), RawMaterialState.fresh(def.params()));
+        }
+
+        for (MarketDefinition def : this.marketDefinitions) {
+            marketStates.put(def.id(), MarketState.fresh(def.params()));
+            marketParamsMap.put(def.id(), def.params());
+            lastTickDelivered.put(def.id(), 0.0);
+        }
+
+        List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
+        this.discoveredScope = ValueRules.discover(roots, graph);
+
+        this.macro = MacroState.fresh(params.macro(), rng);
+        openNewDay();
+    }
+
+    /**
+     * Advanced as many whole trading ticks as possible until reaching the target tick.
+     * @param targetTick The game tick to advance to
+     * @return A list of every event that happened along the way. Can be empty.
+     */
+    public List<EconomyEvent> advanceTo(long targetTick) {
+        List<EconomyEvent> events = new ArrayList<>();
+
+        while (ticksElapsed + TRADING_TICK_LENGTH <= targetTick) {
+            ticksElapsed += TRADING_TICK_LENGTH;
+            runTradingTick();
+
+            if (ticksElapsed % DAY_LENGTH == 0) {
+                events.addAll(closeDay());
+                openNewDay();
+            }
+        }
+
+        return events;
+    }
+
+    public List<EconomyEvent> advanceTicks(long deltaTicks) {
+        return advanceTo(ticksElapsed + deltaTicks);
+    }
+
+    private void runTradingTick() {
+        for (MarketDefinition def : marketDefinitions) {
+            MarketState state = marketStates.get(def.id());
+            double demandPerTick = currentDemand.get(def.id()) / MarketRules.TRADING_TICKS_PER_DAY;
+
+            double actual = state.getDeliveredThisTick();
+            double expected = lastTickDelivered.getOrDefault(def.id(), 0.0);
+
+            MarketRules.advanceTradingTick(state, actual, expected, demandPerTick);
+            lastTickDelivered.put(def.id(), actual);
+        }
+    }
+
+    private List<EconomyEvent> closeDay() {
+        List<EconomyEvent> events = new ArrayList<>();
+
+        for (MarketDefinition def : marketDefinitions) {
+            MarketState state = marketStates.get(def.id());
+            MarketParams marketParams = marketParamsMap.get(def.id());
+
+            DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()));
+            lastDayResults.put(def.id(), result);
+
+            if (result.competitorClosed()) {
+                events.add(new CompetitorExitedEvent(def.id()));
+            } else if (result.competitorOpened()) {
+                events.add(new CompetitorEnteredEvent(def.id()));
+            }
+        }
+
+        return events;
+    }
+
+    private void openNewDay() {
+        MacroRules.advanceDay(macro, params.macro(), rng);
+
+        for (RawMaterialDefinition def : rawMaterialDefinitions) {
+            RawMaterialRules.advanceDay(rawMaterialStates.get(def.id()), def.params(), params.priceProcess(), rng);
+        }
+
+        double technicalProgress = MacroRules.technicalProgress(macro, params.progress());
+
+        Map<ItemId, Double> leafValues = new HashMap<>();
+        for (RawMaterialDefinition def : rawMaterialDefinitions) {
+            leafValues.put(def.id(), rawMaterialStates.get(def.id()).getPrice());
+        }
+        leafValues.putAll(valueOverrides);
+
+        Map<ItemId, Double> marketPrices = new HashMap<>();
+        for (MarketDefinition def : marketDefinitions) {
+            marketPrices.put(def.id(), marketStates.get(def.id()).getPriceLevel());
+        }
+
+        ValueResult result = ValueRules.computeValues(discoveredScope, graph, params.processCosts(), leafValues, marketPrices, technicalProgress);
+        double trend = MacroRules.trend(macro, params.macro());
+
+        for (MarketDefinition def : marketDefinitions) {
+            Double newCost = result.referenceCost().get(def.id());
+            MarketParams previous = marketParamsMap.get(def.id());
+
+            double referenceCost = newCost != null ? newCost : previous.referenceCost();
+            double plantSize = def.params().plantSize() * trend; // Grows plant size with trend & therefor with demand
+            MarketParams updated = new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
+            marketParamsMap.put(def.id(), updated);
+
+            double demand = MacroRules.demand(def.baseDemand(), macro, params.macro(), updated.cycleSensitivity());
+            currentDemand.put(def.id(), demand);
+        }
+    }
+
+    private MarketState stateOf(ItemId market) {
+        MarketState state = marketStates.get(market);
+        if (state == null) {
+            throw new IllegalArgumentException("No such market: " + market);
+        }
+        return state;
+    }
+
+    /**
+     * Records a successful delivery to the market.
+     * @param market The market that received a delivery
+     * @param quantity The amount of product delivered
+     */
+    public void recordDelivery(ItemId market, double quantity) {
+        stateOf(market).recordDelivery(quantity);
+    }
+
+    public void recordPurchase(ItemId material, double quantity) {
+        RawMaterialState state = rawMaterialStates.get(material);
+        if (state == null) {
+            throw new IllegalArgumentException("No such raw material: " + material);
+        }
+
+        state.recordPurchase(quantity);
+    }
+
+    public MarketSnapshot marketSnapshot(ItemId market) {
+        MarketState state = stateOf(market);
+        MarketParams marketParams = marketParamsMap.get(market);
+        DayResult result = lastDayResults.get(market);
+
+        return new MarketSnapshot(market,
+                state.getPriceLevel(),
+                state.getDeviation(),
+                state.getDisplayedPrice(),
+                state.getCompanies(),
+                state.getVisibleCompanies(),
+                marketParams.referenceCost(),
+                currentDemand.getOrDefault(market, Double.NaN),
+                result != null ? result.utilisation() : Double.NaN,
+                result != null ? result.overflow() : Double.NaN);
+    }
+
+    public RawMaterialSnapshot rawMaterialSnapshot(ItemId material) {
+        RawMaterialState state = rawMaterialStates.get(material);
+        if (state == null) {
+            throw new IllegalArgumentException("No such raw material: " + material);
+        }
+
+        return new RawMaterialSnapshot(material, state.getPrice());
+    }
+
+    public List<ItemId> marketIds() {
+        return marketDefinitions.stream().map(MarketDefinition::id).toList();
+    }
+
+    public List<ItemId> rawMaterialIds() {
+        return rawMaterialDefinitions.stream().map(RawMaterialDefinition::id).toList();
+    }
+
+    public long ticksElapsed() {
+        return ticksElapsed;
+    }
+
+    public long currentDay() {
+        return ticksElapsed / DAY_LENGTH;
+    }
+}

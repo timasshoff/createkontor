@@ -1,5 +1,10 @@
 package com.timder.kontor;
 
+import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType;
+import com.timder.kontor.client.TestUI;
+import com.timder.kontor.game.TestCommand;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -63,6 +68,8 @@ public class CreateKontor {
                 output.accept(EXAMPLE_ITEM.get());// Add the example item to the tab. For your own tabs, this method is preferred over the event
             }).build());
 
+    public static final ResourceLocation MY_UI_ID = ResourceLocation.fromNamespaceAndPath("mymod", "my_ui");
+
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public CreateKontor(IEventBus modEventBus, ModContainer modContainer) {
@@ -80,6 +87,10 @@ public class CreateKontor {
         // Note that this is necessary if and only if we want *this* class (CreateKontor) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
+
+        PlayerUIMenuType.register(MY_UI_ID, player -> p -> TestUI.createModularUI());
+
+        NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
@@ -106,6 +117,11 @@ public class CreateKontor {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(EXAMPLE_BLOCK_ITEM);
         }
+    }
+
+    public static void onRegisterCommands(RegisterCommandsEvent event) {
+        // Pass the dispatcher from the event into your custom command class
+        TestCommand.register(event.getDispatcher());
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
