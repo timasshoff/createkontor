@@ -1,0 +1,9 @@
+{
+  "capacity_response": 0.06,
+  "cycle_sensitivity": 1.2,
+  "id": "building",
+  "price_response": 0.1,
+  "price_sensitivity": 3.0,
+  "reputation_weight": 0.5,
+  "target_margin": 0.12
+}

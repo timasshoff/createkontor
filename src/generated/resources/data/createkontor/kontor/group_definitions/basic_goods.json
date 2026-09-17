@@ -1,0 +1,9 @@
+{
+  "capacity_response": 0.06,
+  "cycle_sensitivity": 0.3,
+  "id": "basic_goods",
+  "price_response": 0.12,
+  "price_sensitivity": 4.0,
+  "reputation_weight": 0.3,
+  "target_margin": 0.1
+}

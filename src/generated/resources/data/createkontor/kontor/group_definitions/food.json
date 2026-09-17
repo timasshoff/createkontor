@@ -1,0 +1,9 @@
+{
+  "capacity_response": 0.05,
+  "cycle_sensitivity": 0.2,
+  "id": "food",
+  "price_response": 0.1,
+  "price_sensitivity": 2.0,
+  "reputation_weight": 0.8,
+  "target_margin": 0.11
+}

@@ -1,5 +1,6 @@
 package com.timder.kontor.game;
 
+import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.economy.EconomyParams;
 import com.timder.kontor.core.macro.MacroState;
@@ -13,6 +14,8 @@ import com.timder.kontor.core.raw.RawMaterialDefinition;
 import com.timder.kontor.core.raw.RawMaterialParams;
 import com.timder.kontor.core.raw.RawMaterialState;
 import com.timder.kontor.core.value.ItemId;
+import com.timder.kontor.core.value.ProcessCosts;
+import com.timder.kontor.data.KontorData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -61,8 +64,19 @@ public class EconomySavedData extends SavedData {
     private static EconomySavedData load(CompoundTag tag, MinecraftServer server) {
         Economy.SaveState saveState = readSaveState(tag);
         Rng rng = SeededRng.forName(server.overworld().getSeed(), "economy");
-        Economy economy = Economy.restore(rawMaterialDefinitions(), marketDefinitions(), Map.of(),
-                EconomyParams.standard(), FullRecipeGraph.createRecipeGraph(server), rng, saveState);
+        Economy economy = Economy.restore(
+                KontorData.getRawMaterials(),
+                KontorData.getMarketDefinitions(),
+                Map.of(),
+                new EconomyParams(
+                        EconomyConfig.toMacroParams(),
+                        EconomyConfig.toProgressParams(),
+                        EconomyConfig.toPriceProcessParams(),
+                        new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
+                ),
+                FullRecipeGraph.createRecipeGraph(server),
+                rng,
+                saveState);
         return new EconomySavedData(economy);
     }
 
@@ -74,24 +88,18 @@ public class EconomySavedData extends SavedData {
 
     private static Economy buildFreshEconomy(MinecraftServer server) {
         Rng rng = SeededRng.forName(server.overworld().getSeed(), "economy");
-        return new Economy(rawMaterialDefinitions(), marketDefinitions(), Map.of(), EconomyParams.standard(), FullRecipeGraph.createRecipeGraph(server), rng);
-    }
-
-    /*
-    The following 2 methods are AI generated placeholders.
-     */
-
-    private static List<RawMaterialDefinition> rawMaterialDefinitions() {
-        return List.of(new RawMaterialDefinition(
-                new ItemId("minecraft:raw_iron"),
-                new RawMaterialParams(6.20, 0.025, 3000.0)));
-    }
-
-    private static List<MarketDefinition> marketDefinitions() {
-        return List.of(new MarketDefinition(
-                new ItemId("create:iron_sheet"),
-                new MarketParams(8.06, 720.0, 0.80, GroupDef.metal()),
-                1800.0));
+        return new Economy(
+                KontorData.getRawMaterials(),
+                KontorData.getMarketDefinitions(),
+                Map.of(),
+                new EconomyParams(
+                        EconomyConfig.toMacroParams(),
+                        EconomyConfig.toProgressParams(),
+                        EconomyConfig.toPriceProcessParams(),
+                        new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
+                ),
+                FullRecipeGraph.createRecipeGraph(server),
+                rng);
     }
 
     /*
@@ -139,7 +147,7 @@ public class EconomySavedData extends SavedData {
         MacroState.SaveState macro = readMacro(tag.getCompound("Macro"));
 
         Map<ItemId, MarketDefinition> definitionsById = new LinkedHashMap<>();
-        for (MarketDefinition def : marketDefinitions()) {
+        for (MarketDefinition def : KontorData.getMarketDefinitions()) {
             definitionsById.put(def.id(), def);
         }
 
