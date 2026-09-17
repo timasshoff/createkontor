@@ -1,9 +1,10 @@
-package com.timder.kontor;
+package com.timder.kontor.game;
 
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
 import com.simibubi.create.content.processing.sequenced.SequencedRecipe;
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.port.RecipeGraph;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.core.value.RecipeInput;
@@ -11,6 +12,7 @@ import com.timder.kontor.core.value.RecipeNode;
 import com.timder.kontor.core.value.RecipeOutput;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -19,7 +21,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class FullRecipeGraph implements RecipeGraph {
 
@@ -28,6 +29,10 @@ public class FullRecipeGraph implements RecipeGraph {
      * Maps a ressource location (id) to all recipes that output this item.
      */
     private final Map<String, List<RecipeNode>> graph = new HashMap<>();
+
+    public static FullRecipeGraph createRecipeGraph(MinecraftServer server) {
+        return new FullRecipeGraph(server.getRecipeManager().getRecipes());
+    }
 
     public FullRecipeGraph(Collection<RecipeHolder<?>> recipeHolders) {
         var registryAccess = ServerLifecycleHooks.getCurrentServer().registryAccess();

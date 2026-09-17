@@ -119,4 +119,16 @@ public final class MacroState {
     public String toString() {
         return "MacroState[day=%d, index=%.4f, cycle=%d/%d, amplitude=%.3f]".formatted(day, index, day - cycleStart, cycleLength, cycleAmplitude);
     }
+
+    public record SaveState(long day, double index, double previousIndex, long cycleStart, int cycleLength, double cycleAmplitude, double noise) {}
+
+    public SaveState getSaveState() {
+        return new SaveState(day, index, previousIndex, cycleStart, cycleLength, cycleAmplitude, noise);
+    }
+
+    public static MacroState restore(SaveState saveState) {
+        MacroState state = new MacroState(saveState.day(), saveState.index(), saveState.cycleStart(), saveState.cycleLength(), saveState.cycleAmplitude(), saveState.noise());
+        state.previousIndex = saveState.previousIndex();
+        return state;
+    }
 }

@@ -1,10 +1,8 @@
 package com.timder.kontor;
 
-import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType;
-import com.timder.kontor.client.TestUI;
-import com.timder.kontor.core.value.ItemId;
-import com.timder.kontor.core.value.RecipeNode;
-import com.timder.kontor.game.TestCommand;
+import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.EconomyTickHandler;
+import com.timder.kontor.game.command.KontorCommands;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.slf4j.Logger;
@@ -20,8 +18,6 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
-import java.util.List;
-
 @Mod(CreateKontor.MODID)
 public class CreateKontor {
 
@@ -33,8 +29,7 @@ public class CreateKontor {
     public CreateKontor(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         NeoForge.EVENT_BUS.register(this);
-
-        PlayerUIMenuType.register(MY_UI_ID, player -> p -> TestUI.createModularUI());
+        NeoForge.EVENT_BUS.register(EconomyTickHandler.class);
 
         NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
 
@@ -46,16 +41,11 @@ public class CreateKontor {
     }
 
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        TestCommand.register(event.getDispatcher());
+        KontorCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        var server = event.getServer();
-        FullRecipeGraph recipeGraph = new FullRecipeGraph(server.getRecipeManager().getRecipes());
-        List<RecipeNode> t = recipeGraph.recipesFor(new ItemId("minecraft:iron_nugget"));
-        for (RecipeNode n : t) {
-            LOGGER.info(n.toString());
-        }
+        EconomySavedData.get(event.getServer());
     }
 }

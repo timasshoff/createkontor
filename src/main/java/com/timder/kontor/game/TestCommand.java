@@ -7,7 +7,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.timder.kontor.CreateKontor;
-import com.timder.kontor.client.TestUI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

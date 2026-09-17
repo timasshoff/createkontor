@@ -154,4 +154,19 @@ public final class MarketState {
     public String toString() {
         return "MarketState[price=%.2f, companies=%.2f, deliveredToday=%.0f]".formatted(priceLevel, companies, deliveredToday);
     }
+
+    public record SaveState(double priceLevel, double companies, double competitorReputation, double deviation, double deliveredToday, double deliveredThisTick) {}
+
+    public SaveState getSaveState() {
+        return new SaveState(priceLevel, companies, competitorReputation, deviation, deliveredToday, deliveredThisTick);
+    }
+
+    public static MarketState restore(SaveState snapshot) {
+        MarketState state = new MarketState(snapshot.priceLevel(), snapshot.companies());
+        state.competitorReputation = snapshot.competitorReputation();
+        state.deviation = snapshot.deviation();
+        state.deliveredToday = snapshot.deliveredToday();
+        state.deliveredThisTick = snapshot.deliveredThisTick();
+        return state;
+    }
 }

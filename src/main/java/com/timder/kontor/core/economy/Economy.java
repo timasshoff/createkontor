@@ -55,6 +55,109 @@ public final class Economy {
     private long ticksElapsed = 0;
 
     /**
+     * A persistable snapshot of everything the economy needs.
+     */
+    public record SaveState(
+            long ticksElapsed,
+            MacroState.SaveState macro,
+            Map<ItemId, RawMaterialState.SaveState> rawMaterialStates,
+            Map<ItemId, MarketState.SaveState> marketStates,
+            Map<ItemId, MarketParams> marketParams,
+            Map<ItemId, Double> currentDemand,
+            Map<ItemId, DayResult> lastDayResults,
+            Map<ItemId, Double> lastTickDelivered
+    ) {
+        public SaveState {
+            rawMaterialStates = Map.copyOf(rawMaterialStates);
+            marketStates = Map.copyOf(marketStates);
+            marketParams = Map.copyOf(marketParams);
+            currentDemand = Map.copyOf(currentDemand);
+            lastDayResults = Map.copyOf(lastDayResults);
+            lastTickDelivered = Map.copyOf(lastTickDelivered);
+        }
+    }
+
+    /**
+     * Captures the current economy as a save state for persistence.
+     * @return The save state
+     */
+    public SaveState getSaveState() {
+        Map<ItemId, RawMaterialState.SaveState> rawSaveStates = new LinkedHashMap<>();
+        for (Map.Entry<ItemId, RawMaterialState> entry : rawMaterialStates.entrySet()) {
+            rawSaveStates.put(entry.getKey(), entry.getValue().getSaveState());
+        }
+
+        Map<ItemId, MarketState.SaveState> marketSaveStates = new LinkedHashMap<>();
+        for (Map.Entry<ItemId, MarketState> entry : marketStates.entrySet()) {
+            marketSaveStates.put(entry.getKey(), entry.getValue().getSaveState());
+        }
+
+        return new SaveState(ticksElapsed, macro.getSaveState(), rawSaveStates, marketSaveStates, marketParamsMap, currentDemand, lastDayResults, lastTickDelivered);
+    }
+
+    /**
+     * Restores the economy from a previously saves save-state.
+     * Changes in the market or raw material definitions will lead to a fresh start of that definition.
+     * @param rawMaterialDefinitions Every raw material that is supposed to be simulated
+     * @param marketDefinitions Every market that is supposed to be simulated
+     * @param valueOverrides Fixed values that override any (computed) recipe. May be empty.
+     * @param params Global settings for the economy
+     * @param graph The recipe graph
+     * @param rng A source of randomness
+     * @return
+     */
+    public static Economy restore(List<RawMaterialDefinition> rawMaterialDefinitions,
+                                  List<MarketDefinition> marketDefinitions,
+                                  Map<ItemId, Double> valueOverrides,
+                                  EconomyParams params,
+                                  RecipeGraph graph,
+                                  Rng rng,
+                                  SaveState saveState) {
+        return new Economy(rawMaterialDefinitions, marketDefinitions, valueOverrides, params, graph, rng, saveState);
+    }
+
+    private Economy(List<RawMaterialDefinition> rawMaterialDefinitions,
+                    List<MarketDefinition> marketDefinitions,
+                    Map<ItemId, Double> valueOverrides,
+                    EconomyParams params,
+                    RecipeGraph graph,
+                    Rng rng,
+                    SaveState saveState) {
+        this.rawMaterialDefinitions = List.copyOf(rawMaterialDefinitions);
+        this.marketDefinitions = List.copyOf(marketDefinitions);
+        this.valueOverrides = Map.copyOf(valueOverrides);
+        this.params = Objects.requireNonNull(params, "params must not be null.");
+        this.graph = Objects.requireNonNull(graph, "graph must not be null.");
+        this.rng = Objects.requireNonNull(rng, "rng must not be null.");
+
+        for (RawMaterialDefinition def : this.rawMaterialDefinitions) {
+            RawMaterialState.SaveState saved = saveState.rawMaterialStates().get(def.id());
+            rawMaterialStates.put(def.id(), saved != null
+                    ? RawMaterialState.restore(saved)
+                    : RawMaterialState.fresh(def.params()));
+        }
+
+        for (MarketDefinition def : this.marketDefinitions) {
+            MarketState.SaveState saved = saveState.marketStates().get(def.id());
+            marketStates.put(def.id(), marketStates != null
+                    ? MarketState.restore(saved)
+                    : MarketState.fresh(def.params()));
+
+            marketParamsMap.put(def.id(), saveState.marketParams().getOrDefault(def.id(), def.params()));
+            lastTickDelivered.put(def.id(), saveState.lastTickDelivered().getOrDefault(def.id(), 0.0));
+        }
+
+        currentDemand.putAll(saveState.currentDemand());
+        lastDayResults.putAll(saveState.lastDayResults());
+
+        List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
+        this.discoveredScope = ValueRules.discover(roots, graph);
+
+        this.macro = MacroState.restore(saveState.macro());
+        this.ticksElapsed = saveState.ticksElapsed();
+    }
+
+    /**
      * Builds a fresh economy and opens the first day.
      * @param rawMaterialDefinitions Every raw material that is supposed to be simulated
      * @param marketDefinitions Every market that is supposed to be simulated
@@ -254,5 +357,26 @@ public final class Economy {
 
     public long currentDay() {
         return ticksElapsed / DAY_LENGTH;
+    }
+
+    @Override
+    public String toString() {
+        return "Economy{" +
+                "graph=" + graph +
+                ", params=" + params +
+                ", rng=" + rng +
+                ", rawMaterialDefinitions=" + rawMaterialDefinitions +
+                ", marketDefinitions=" + marketDefinitions +
+                ", valueOverrides=" + valueOverrides +
+                ", rawMaterialStates=" + rawMaterialStates +
+                ", marketStates=" + marketStates +
+                ", marketParamsMap=" + marketParamsMap +
+                ", currentDemand=" + currentDemand +
+                ", lastDayResults=" + lastDayResults +
+                ", lastTickDelivered=" + lastTickDelivered +
+                ", discoveredScope=" + discoveredScope +
+                ", macro=" + macro +
+                ", ticksElapsed=" + ticksElapsed +
+                '}';
     }
 }

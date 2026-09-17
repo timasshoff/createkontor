@@ -52,4 +52,16 @@ public final class RawMaterialState {
     public String toString() {
         return "RawMaterialState[price=%.4f, purchasedToday=%.1f]".formatted(price, purchasedToday);
     }
+
+    public record SaveState(double price, double purchasedToday) {}
+
+    public SaveState getSaveState() {
+        return new SaveState(price, purchasedToday);
+    }
+
+    public static RawMaterialState restore(SaveState snapshot) {
+        RawMaterialState state = new RawMaterialState(snapshot.price());
+        state.purchasedToday = snapshot.purchasedToday();
+        return state;
+    }
 }
