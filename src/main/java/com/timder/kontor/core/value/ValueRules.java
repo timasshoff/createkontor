@@ -36,9 +36,11 @@ public final class ValueRules {
             Set<ItemId> next = new HashSet<>();
             for (ItemId item : frontier) {
                 for (RecipeNode recipeNode : graph.recipesFor(item)) {
-                    for (Ingredient ingredient : recipeNode.inputs()) {
-                        if (scope.add(ingredient.item())) {
-                            next.add(ingredient.item());
+                    for (RecipeInput recipeInput : recipeNode.inputs()) {
+                        for (ItemId alternative : recipeInput.alternatives()) {
+                            if (scope.add(alternative)) {
+                                next.add(alternative);
+                            }
                         }
                     }
                 }
@@ -51,13 +53,13 @@ public final class ValueRules {
 
     /**
      * Computes a reference cost for every item that is not already externally known.
-     * @param scope A reference cost will be computed for these items
+     * @param scope A reference cost will be computed for these alternatives
      * @param graph The recipe graph to search
      * @param processCosts The cost per process
      * @param leafValues Raw materials and any other fixed values. Items in this map will never have its recipes evaluated.
      * @param marketPrices Current market price of every item that has a market. Reference cost may differ from market price.
      * @param technicalProgress The technical progress
-     * @return Reference costs, the recipe each reference cost came from, depths and not-valued items
+     * @return Reference costs, the recipe each reference cost came from, depths and not-valued alternatives
      */
     public static ValueResult computeValues(Set<ItemId> scope,
                                             RecipeGraph graph,
@@ -86,31 +88,51 @@ public final class ValueRules {
                 int bestDepth = 0;
 
                 for (RecipeNode recipe : graph.recipesFor(item)) {
-                    if (recipe.yield() <= 0) {
-                        continue;
-                    }
-
                     double ingredientCost = 0.0;
                     int deepestIngredient = -1;
                     boolean usable = true;
 
-                    for (Ingredient ingredient : recipe.inputs()) {
-                        double value = ingredientValue(ingredient.item(), referenceCost, marketPrices, leafValues);
+                    for (RecipeInput recipeInput : recipe.inputs()) {
+                        Cheapest cheapest = cheapestAlternative(recipeInput.alternatives(), referenceCost, marketPrices, leafValues);
 
-                        if (Double.isInfinite(value)) {
+                        if (Double.isInfinite(cheapest.value())) {
                             usable = false;
                             break;
                         }
 
-                        ingredientCost += ingredient.quantity() * value;
-                        deepestIngredient = Math.max(deepestIngredient, depth.getOrDefault(ingredient.item(), -1));
+                        ingredientCost += recipeInput.quantity() * cheapest.value();
+                        deepestIngredient = Math.max(deepestIngredient, depth.getOrDefault(cheapest.item(), -1));
                     }
 
                     if (!usable) {
                         continue;
                     }
 
-                    double cost = CostRules.recipeCost(ingredientCost, processCosts.of(recipe.process()), technicalProgress, recipe.yield());
+                    // Gemeinsame Kosten des Laufs auf alle Outputs verteilen, gewichtet nach
+                    // (erwartete Menge * bekannter Wert) - siehe CostRules.jointRecipeCost.
+                    double targetValue = -1;
+                    double totalWeightedOutputValue = 0.0;
+
+                    for (RecipeOutput recipeOutput : recipe.outputs()) {
+                        double value = ingredientValue(recipeOutput.item(), referenceCost, marketPrices, leafValues);
+
+                        if (Double.isInfinite(value)) {
+                            usable = false;
+                            break;
+                        }
+
+                        totalWeightedOutputValue += recipeOutput.yield() * value;
+                        if (recipeOutput.item().equals(item)) {
+                            targetValue = value;
+                        }
+                    }
+
+                    if (!usable || targetValue < 0 || totalWeightedOutputValue <= 0) {
+                        continue;
+                    }
+
+                    double cost = CostRules.jointRecipeCost(ingredientCost, processCosts.of(recipe.process()), technicalProgress,
+                            targetValue, totalWeightedOutputValue);
 
                     if (cost < bestCost) {
                         bestCost = cost;
@@ -146,15 +168,9 @@ public final class ValueRules {
     }
 
     /**
-     * The value to use for an item when it appears as an ingredient.
-     * Either its external leaf value, otherwise its current market price.
-     * If there is no market price, the just-computed reference cost will be used.
-     * Positive Infinity if none of these are known.
-     * @param item
-     * @param referenceCost
-     * @param marketPrices
-     * @param leafValues
-     * @return
+     * The value to use for a single item when it appears as an ingredient. Either its
+     * external leaf value, otherwise its current market price. If there is no market price,
+     * the just-computed reference cost will be used. Positive Infinity if none of these are known.
      */
     public static double ingredientValue(ItemId item, Map<ItemId, Double> referenceCost, Map<ItemId, Double> marketPrices,
                                          Map<ItemId, Double> leafValues) {
@@ -171,4 +187,33 @@ public final class ValueRules {
         return referenceCost.getOrDefault(item, Double.POSITIVE_INFINITY);
     }
 
+    /**
+     * The value to use for a set of alternatives when they appear as an ingredient
+     */
+    public static double ingredientValue(List<ItemId> alternatives, Map<ItemId, Double> referenceCost, Map<ItemId, Double> marketPrices,
+                                         Map<ItemId, Double> leafValues) {
+        return cheapestAlternative(alternatives, referenceCost, marketPrices, leafValues).value();
+    }
+
+    /**
+     * Which alternative of a {@link RecipeInput} would actually be used, and at what value
+     */
+    private static Cheapest cheapestAlternative(List<ItemId> alternatives, Map<ItemId, Double> referenceCost,
+                                                Map<ItemId, Double> marketPrices, Map<ItemId, Double> leafValues) {
+        ItemId cheapestItem = alternatives.get(0);
+        double cheapestValue = ingredientValue(cheapestItem, referenceCost, marketPrices, leafValues);
+
+        for (int i = 1; i < alternatives.size(); i++) {
+            ItemId candidate = alternatives.get(i);
+            double candidateValue = ingredientValue(candidate, referenceCost, marketPrices, leafValues);
+            if (candidateValue < cheapestValue) {
+                cheapestValue = candidateValue;
+                cheapestItem = candidate;
+            }
+        }
+
+        return new Cheapest(cheapestItem, cheapestValue);
+    }
+
+    private record Cheapest(ItemId item, double value) {}
 }

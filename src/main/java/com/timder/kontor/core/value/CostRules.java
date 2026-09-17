@@ -32,4 +32,22 @@ public final class CostRules {
         return recipeCost(ingredientQuantity * ingredientValue, processingCost, technicalProgress, yield);
     }
 
+    /**
+     * The cost of one unit of a SPECIFIC output from a run that produces several outputs
+     * together.
+     *
+     * @param totalIngredientCost Sum of every ingredient's cost * quantity for one run
+     * @param processingCost Cost of the processing step itself, for one run
+     * @param technicalProgress The technical progress of the economy
+     * @param targetValue The best known value of the output being priced
+     * @param totalWeightedOutputValue Sum, over every output of this run, of (that output's expected yield * its own best known value)
+     * @return The cost per unit of the target output
+     */
+    public static double jointRecipeCost(double totalIngredientCost, double processingCost, double technicalProgress, double targetValue, double totalWeightedOutputValue) {
+        if (totalWeightedOutputValue <= 0) throw new IllegalArgumentException("totalWeightedOutputValue must be positive");
+
+        double jointCost = totalIngredientCost + processingCost * technicalProgress;
+        return jointCost * targetValue / totalWeightedOutputValue;
+    }
+
 }

@@ -28,7 +28,7 @@ public class ValueRulesTest {
                 .add(COPPER_INGOT.value(), 1.0, RAW_COPPER.value(), 1.0, "smelting")
                 .add(ZINC_INGOT.value(), 1.0, RAW_ZINC.value(), 1.0, "smelting")
                 .add(new RecipeNode(BRASS_INGOT, 2.0,
-                        List.of(new Ingredient(COPPER_INGOT, 1.0), new Ingredient(ZINC_INGOT, 1.0)), "mixing_heated"));
+                        List.of(new RecipeInput(List.of(COPPER_INGOT), 1.0), new RecipeInput(List.of(ZINC_INGOT), 1.0)), "mixing_heated"));
     }
 
     private static final Map<ItemId, Double> LEAVES = Map.of(RAW_IRON, 6.20, RAW_COPPER, 2.00, RAW_ZINC, 3.00);
@@ -99,7 +99,7 @@ public class ValueRulesTest {
         assertTrue(viaIron < viaBrass, "test setup check: iron should be the cheaper route here");
 
         assertEquals(viaIron, result.referenceCost().get(gear), 0.0001);
-        assertEquals(iron, result.standardRecipe().get(gear).inputs().get(0).item());
+        assertEquals(iron, result.standardRecipe().get(gear).inputs().get(0).alternatives());
     }
 
     private ValueResult compute(FakeRecipeGraph graph) {

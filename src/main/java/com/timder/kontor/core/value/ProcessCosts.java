@@ -7,7 +7,7 @@ import java.util.Map;
  * @param costs The known processes and their cost per run
  * @param defaultCost The default cost used for processes that are not recognised
  */
-public record ProcessCosts(
+public record ProcessCosts( // TODO Discuss how to handle / implement create:sequenced_assembly recipes
         Map<String, Double> costs,
         double defaultCost
 ) {
