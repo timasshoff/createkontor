@@ -91,6 +91,36 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "stone_bricks_slabs", "minecraft:stone_bricks_slabs", "building", 1800, 0.85));
         futures.add(save(cache, "stone_bricks_wall", "minecraft:stone_bricks_wall", "building", 1800, 0.85));
 
+        /*
+        Group: Metal
+         */
+        futures.add(save(cache, "iron_ingot", "minecraft:iron_ingot", "metal", 2200, 0.80));
+        futures.add(save(cache, "iron_sheet", "create:iron_sheet", "metal", 1800, 0.80));
+
+        futures.add(save(cache, "copper_ingot", "minecraft:copper_ingot", "metal", 1600, 0.80));
+        futures.add(save(cache, "copper_sheet", "create:copper_sheet", "metal", 900, 0.80));
+
+        futures.add(save(cache, "gold_ingot", "minecraft:gold_ingot", "metal", 700, 0.75));
+        futures.add(save(cache, "gold_sheet", "create:gold_sheet", "metal", 500, 0.75));
+
+        futures.add(save(cache, "zinc_ingot", "create:zinc_ingot", "metal", 1400, 0.80));
+
+        futures.add(save(cache, "brass_ingot", "create:brass_ingot", "metal", 1200, 0.80));
+        futures.add(save(cache, "brass_sheet", "create:brass_sheet", "metal", 700, 0.80));
+
+        futures.add(save(cache, "sturdy_sheet", "create:sturdy_sheet", "metal", 900, 0.70));
+
+        futures.add(save(cache, "andesite_alloy", "create:andesite_alloy", "metal", 2500, 0.85));
+        futures.add(save(cache, "netherite_ingot", "minecraft:netherite_ingot", "metal", 40, 0.70));
+
+        /*
+        Group: Mechanical
+         */
+        futures.add(save(cache, "cogwheel", "create:cogwheel", "mechanical", 2000, 0.85));
+        futures.add(save(cache, "large_cogwheel", "create:large_cogwheel", "mechanical", 1200, 0.85));
+        futures.add(save(cache, "precision_mechanism", "create:precision_mechanism", "mechanical", 300, 0.75));
+        futures.add(save(cache, "electron_tube", "create:electron_tube", "mechanical", 250, 0.75));
+
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 

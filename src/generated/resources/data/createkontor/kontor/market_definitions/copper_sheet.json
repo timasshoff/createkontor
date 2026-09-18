@@ -1,0 +1,6 @@
+{
+  "base_demand": 900.0,
+  "group": "metal",
+  "item": "create:copper_sheet",
+  "target_utilisation": 0.8
+}

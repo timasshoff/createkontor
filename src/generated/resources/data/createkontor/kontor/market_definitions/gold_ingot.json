@@ -1,0 +1,6 @@
+{
+  "base_demand": 700.0,
+  "group": "metal",
+  "item": "minecraft:gold_ingot",
+  "target_utilisation": 0.75
+}

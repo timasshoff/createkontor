@@ -1,0 +1,6 @@
+{
+  "base_demand": 2500.0,
+  "group": "metal",
+  "item": "create:andesite_alloy",
+  "target_utilisation": 0.85
+}

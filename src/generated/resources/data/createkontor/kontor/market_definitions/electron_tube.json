@@ -1,0 +1,6 @@
+{
+  "base_demand": 250.0,
+  "group": "mechanical",
+  "item": "create:electron_tube",
+  "target_utilisation": 0.75
+}

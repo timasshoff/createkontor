@@ -1,0 +1,6 @@
+{
+  "base_demand": 1200.0,
+  "group": "metal",
+  "item": "create:brass_ingot",
+  "target_utilisation": 0.8
+}

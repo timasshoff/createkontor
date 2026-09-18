@@ -10,8 +10,6 @@ import com.timder.kontor.core.market.MarketParams;
 import com.timder.kontor.core.market.MarketState;
 import com.timder.kontor.core.port.Rng;
 import com.timder.kontor.core.port.SeededRng;
-import com.timder.kontor.core.raw.RawMaterialDefinition;
-import com.timder.kontor.core.raw.RawMaterialParams;
 import com.timder.kontor.core.raw.RawMaterialState;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.core.value.ProcessCosts;
@@ -25,7 +23,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class EconomySavedData extends SavedData {
@@ -57,7 +54,7 @@ public class EconomySavedData extends SavedData {
      */
     private static EconomySavedData create(MinecraftServer server) {
         Economy economy = buildFreshEconomy(server);
-        economy.advanceTo(WARMUP_TICKS);
+        economy.advanceTicksQuietly(WARMUP_TICKS);
         return new EconomySavedData(economy);
     }
 

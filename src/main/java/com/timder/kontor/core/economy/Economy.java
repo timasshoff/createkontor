@@ -8,10 +8,7 @@ import com.timder.kontor.core.macro.MacroState;
 import com.timder.kontor.core.market.*;
 import com.timder.kontor.core.port.RecipeGraph;
 import com.timder.kontor.core.port.Rng;
-import com.timder.kontor.core.raw.RawMaterialDefinition;
-import com.timder.kontor.core.raw.RawMaterialRules;
-import com.timder.kontor.core.raw.RawMaterialSnapshot;
-import com.timder.kontor.core.raw.RawMaterialState;
+import com.timder.kontor.core.raw.*;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.core.value.ValueResult;
 import com.timder.kontor.core.value.ValueRules;
@@ -29,6 +26,13 @@ public final class Economy {
      * The length of one trading day
      */
     public static final long DAY_LENGTH = TRADING_TICK_LENGTH * MarketRules.TRADING_TICKS_PER_DAY;
+
+    /** How many days of history to keep per market/raw material. Oldest entries drop first. */
+    public static final int HISTORY_LENGTH_DAYS = 360;
+    public static final int HISTORY_LENGTH_TICKS = HISTORY_LENGTH_DAYS * MarketRules.TRADING_TICKS_PER_DAY;
+
+    private final Map<ItemId, Deque<MarketHistoryEntry>> marketHistory = new LinkedHashMap<>();
+    private final Map<ItemId, Deque<RawMaterialHistoryEntry>> rawMaterialHistory = new LinkedHashMap<>();
 
     private final RecipeGraph graph;
     private final EconomyParams params;
@@ -135,16 +139,18 @@ public final class Economy {
             rawMaterialStates.put(def.id(), saved != null
                     ? RawMaterialState.restore(saved)
                     : RawMaterialState.fresh(def.params()));
+            rawMaterialHistory.put(def.id(), new ArrayDeque<>());
         }
 
         for (MarketDefinition def : this.marketDefinitions) {
             MarketState.SaveState saved = saveState.marketStates().get(def.id());
-            marketStates.put(def.id(), marketStates != null
+            marketStates.put(def.id(), saved != null
                     ? MarketState.restore(saved)
                     : MarketState.fresh(def.params()));
 
             marketParamsMap.put(def.id(), saveState.marketParams().getOrDefault(def.id(), def.params()));
             lastTickDelivered.put(def.id(), saveState.lastTickDelivered().getOrDefault(def.id(), 0.0));
+            marketHistory.put(def.id(), new ArrayDeque<>());
         }
 
         currentDemand.putAll(saveState.currentDemand());
@@ -181,12 +187,14 @@ public final class Economy {
 
         for (RawMaterialDefinition def : this.rawMaterialDefinitions) {
             rawMaterialStates.put(def.id(), RawMaterialState.fresh(def.params()));
+            rawMaterialHistory.put(def.id(), new ArrayDeque<>());
         }
 
         for (MarketDefinition def : this.marketDefinitions) {
             marketStates.put(def.id(), MarketState.fresh(def.params()));
             marketParamsMap.put(def.id(), def.params());
             lastTickDelivered.put(def.id(), 0.0);
+            marketHistory.put(def.id(), new ArrayDeque<>());
         }
 
         List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
@@ -221,6 +229,19 @@ public final class Economy {
         return advanceTo(ticksElapsed + deltaTicks);
     }
 
+    /**
+     * Forwards the economy by ticksElapsed + delta ticks without
+     * changing the ticksElapsed counter.
+     * @param deltaTicks The ticks to advance
+     * @return The economy events
+     */
+    public List<EconomyEvent> advanceTicksQuietly(long deltaTicks) {
+        long before = ticksElapsed;
+        List<EconomyEvent> events = advanceTo(ticksElapsed + deltaTicks);
+        ticksElapsed = before;
+        return events;
+    }
+
     private void runTradingTick() {
         for (MarketDefinition def : marketDefinitions) {
             MarketState state = marketStates.get(def.id());
@@ -231,11 +252,18 @@ public final class Economy {
 
             MarketRules.advanceTradingTick(state, actual, expected, demandPerTick);
             lastTickDelivered.put(def.id(), actual);
+
+            recordMarketHistory(def.id(), state, actual);
         }
     }
 
     private List<EconomyEvent> closeDay() {
         List<EconomyEvent> events = new ArrayList<>();
+        long day = macro.getDay();
+
+        for (RawMaterialDefinition def : rawMaterialDefinitions) {
+            recordRawMaterialHistory(def.id(), day);
+        }
 
         for (MarketDefinition def : marketDefinitions) {
             MarketState state = marketStates.get(def.id());
@@ -291,6 +319,30 @@ public final class Economy {
         }
     }
 
+    private void recordRawMaterialHistory(ItemId id, long day) {
+        Deque<RawMaterialHistoryEntry> history = rawMaterialHistory.get(id);
+        history.addLast(new RawMaterialHistoryEntry(id, day, rawMaterialStates.get(id).getPrice()));
+        if (history.size() > HISTORY_LENGTH_DAYS) {
+            history.removeFirst();
+        }
+    }
+
+    private void recordMarketHistory(ItemId id, MarketState state, double delivered) {
+        Deque<MarketHistoryEntry> history = marketHistory.get(id);
+        history.addLast(new MarketHistoryEntry(
+                id,
+                ticksElapsed,
+                macro.getDay(),
+                state.getPriceLevel(),
+                state.getDeviation(),
+                state.getDisplayedPrice(),
+                state.getCompanies(),
+                delivered));
+        if (history.size() > HISTORY_LENGTH_TICKS) {
+            history.removeFirst();
+        }
+    }
+
     private MarketState stateOf(ItemId market) {
         MarketState state = marketStates.get(market);
         if (state == null) {
@@ -341,6 +393,22 @@ public final class Economy {
         }
 
         return new RawMaterialSnapshot(material, state.getPrice());
+    }
+
+    public List<MarketHistoryEntry> marketHistory(ItemId market) {
+        Deque<MarketHistoryEntry> history = marketHistory.get(market);
+        if (history == null) {
+            throw new IllegalArgumentException("No such market: " + market);
+        }
+        return List.copyOf(history);
+    }
+
+    public List<RawMaterialHistoryEntry> rawMaterialHistory(ItemId material) {
+        Deque<RawMaterialHistoryEntry> history = rawMaterialHistory.get(material);
+        if (history == null) {
+            throw new IllegalArgumentException("No such raw material: " + material);
+        }
+        return List.copyOf(history);
     }
 
     public List<ItemId> marketIds() {

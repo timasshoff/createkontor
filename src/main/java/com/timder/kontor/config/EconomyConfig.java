@@ -51,7 +51,7 @@ public class EconomyConfig {
         MAX_INDEX = builder.comment("Maximum cycle index")
                 .defineInRange("maxIndex", 1.30, 1.0E-6, Double.MAX_VALUE);
         TREND_PER_DAY = builder.comment("Long-term demand growth")
-                .defineInRange("maxIndex", 1.30, 0, Double.MAX_VALUE);
+                .defineInRange("trendPerDay", 0.0015, 0, Double.MAX_VALUE);
         builder.pop();
 
         builder.comment("Technical Progress").push("progress");

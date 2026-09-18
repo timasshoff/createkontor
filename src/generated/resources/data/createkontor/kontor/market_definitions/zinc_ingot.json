@@ -1,0 +1,6 @@
+{
+  "base_demand": 1400.0,
+  "group": "metal",
+  "item": "create:zinc_ingot",
+  "target_utilisation": 0.8
+}

@@ -106,7 +106,7 @@ public class KontorCommands {
         Economy economy = data.getEconomy();
 
         int days = IntegerArgumentType.getInteger(context, "days");
-        economy.advanceTicks(days * Economy.DAY_LENGTH);
+        economy.advanceTicksQuietly(days * Economy.DAY_LENGTH);
         data.setDirty();
 
         source.sendSuccess(() -> Component.literal("Advanced the economy by " + days + " days."), false);

@@ -1,0 +1,6 @@
+{
+  "base_demand": 2200.0,
+  "group": "metal",
+  "item": "minecraft:iron_ingot",
+  "target_utilisation": 0.8
+}

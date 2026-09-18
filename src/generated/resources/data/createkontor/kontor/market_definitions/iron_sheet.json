@@ -1,0 +1,6 @@
+{
+  "base_demand": 1800.0,
+  "group": "metal",
+  "item": "create:iron_sheet",
+  "target_utilisation": 0.8
+}
