@@ -1,0 +1,6 @@
+{
+  "base_demand": 1800.0,
+  "group": "building",
+  "item": "minecraft:stone_bricks_slabs",
+  "target_utilisation": 0.85
+}

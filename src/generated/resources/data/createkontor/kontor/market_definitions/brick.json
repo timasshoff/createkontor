@@ -1,0 +1,6 @@
+{
+  "base_demand": 1500.0,
+  "group": "building",
+  "item": "minecraft:brick",
+  "target_utilisation": 0.8
+}

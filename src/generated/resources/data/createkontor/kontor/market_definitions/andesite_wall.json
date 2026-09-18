@@ -1,0 +1,6 @@
+{
+  "base_demand": 1400.0,
+  "group": "building",
+  "item": "minecraft:andesite_wall",
+  "target_utilisation": 0.8
+}

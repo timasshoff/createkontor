@@ -28,6 +28,7 @@ public class GroupDefDataProvider implements DataProvider {
         futures.add(save(cache, "metal", "metal", 3.5, 0.5, 0.12, 0.1, 0.05, 0.8));
         futures.add(save(cache, "mechanical", "mechanical", 2.5, 1.0, 0.15, 0.8, 0.04, 1.0));
         futures.add(save(cache, "food", "food", 2.0, 0.8, 0.11, 0.1, 0.05, 0.2));
+        futures.add(save(cache, "luxury", "luxury", 1.5, 0.9, 0.3, 0.08, 0.04, 1.3));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }

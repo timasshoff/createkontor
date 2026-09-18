@@ -1,0 +1,6 @@
+{
+  "base_demand": 1000.0,
+  "group": "building",
+  "item": "minecraft:polished_andesite",
+  "target_utilisation": 0.8
+}

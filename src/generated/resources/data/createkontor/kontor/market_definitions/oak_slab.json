@@ -1,6 +1,6 @@
 {
   "base_demand": 1800.0,
-  "group": "metal",
-  "item": "create:iron_sheet",
+  "group": "building",
+  "item": "minecraft:oak_slab",
   "target_utilisation": 0.8
 }

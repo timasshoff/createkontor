@@ -1,0 +1,6 @@
+{
+  "base_demand": 1600.0,
+  "group": "building",
+  "item": "minecraft:glass",
+  "target_utilisation": 0.8
+}

@@ -1,0 +1,6 @@
+{
+  "base_demand": 1800.0,
+  "group": "building",
+  "item": "minecraft:warped_stairs",
+  "target_utilisation": 0.8
+}

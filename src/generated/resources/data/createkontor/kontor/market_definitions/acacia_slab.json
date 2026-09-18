@@ -1,0 +1,6 @@
+{
+  "base_demand": 1800.0,
+  "group": "building",
+  "item": "minecraft:acacia_slab",
+  "target_utilisation": 0.8
+}

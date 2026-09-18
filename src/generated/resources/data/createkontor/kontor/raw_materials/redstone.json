@@ -1,0 +1,6 @@
+{
+  "base_value": 3.0,
+  "daily_volatility": 0.03,
+  "item": "minecraft:redstone",
+  "reference_volume": 4000.0
+}

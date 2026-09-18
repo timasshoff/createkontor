@@ -1,0 +1,6 @@
+{
+  "base_demand": 2000.0,
+  "group": "building",
+  "item": "minecraft:stone_bricks",
+  "target_utilisation": 0.85
+}

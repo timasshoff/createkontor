@@ -1,0 +1,9 @@
+{
+  "capacity_response": 0.04,
+  "cycle_sensitivity": 1.3,
+  "id": "luxury",
+  "price_response": 0.08,
+  "price_sensitivity": 1.5,
+  "reputation_weight": 0.9,
+  "target_margin": 0.3
+}

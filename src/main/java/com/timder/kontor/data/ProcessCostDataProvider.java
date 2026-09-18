@@ -24,7 +24,7 @@ public class ProcessCostDataProvider implements DataProvider {
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         Map<String, Double> entries = new LinkedHashMap<>();
-        entries.put("minecraft:crafting", 0.10);
+        entries.put("minecraft:crafting", 1.00);
         entries.put("minecraft:smelting", 0.40);
         entries.put("minecraft:blasting", 0.40);
         entries.put("minecraft:smoking", 0.30);
