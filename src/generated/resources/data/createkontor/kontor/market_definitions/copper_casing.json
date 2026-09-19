@@ -1,0 +1,6 @@
+{
+  "base_demand": 1400.0,
+  "group": "mechanical",
+  "item": "create:copper_casing",
+  "target_utilisation": 0.7
+}

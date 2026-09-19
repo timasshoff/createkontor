@@ -1,6 +1,6 @@
 {
   "base_demand": 250.0,
   "group": "mechanical",
-  "item": "create:precision_mechanism",
+  "item": "create:nixie_tube",
   "target_utilisation": 0.75
 }

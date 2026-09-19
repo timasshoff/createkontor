@@ -27,6 +27,7 @@ public class RawMaterialDataProvider implements DataProvider {
         Seeds & Food-related
          */
         futures.add(save(cache, "wheat", "minecraft:wheat", 1.0, 0.02, 6000.0));
+        futures.add(save(cache, "kelp", "minecraft:kelp", 0.3, 0.02, 8000.0));
 
         /*
         Gems & Ores
@@ -36,11 +37,12 @@ public class RawMaterialDataProvider implements DataProvider {
         futures.add(save(cache, "raw_iron", "minecraft:raw_iron", 6.2, 0.025, 3000.0));
         futures.add(save(cache, "raw_zinc", "create:raw_zinc", 5.5, 0.03, 2800.0));
         futures.add(save(cache, "redstone", "minecraft:redstone", 3.0, 0.03, 4000.0));
+        futures.add(save(cache, "amethyst_shard", "minecraft:amethyst_shard", 3.5, 0.05, 2000.0));
         futures.add(save(cache, "quartz", "minecraft:quartz", 3.5, 0.03, 3500.0));
         futures.add(save(cache, "raw_gold", "minecraft:raw_gold", 9.5, 0.035, 1800));
         futures.add(save(cache, "lapis_lazuli", "minecraft:lapis_lazuli", 7.0, 0.035, 2200));
-        futures.add(save(cache, "emerald", "minecraft:emerald", 24.0, 0.045, 400));
-        futures.add(save(cache, "diamond", "minecraft:diamond", 28.0, 0.045, 200));
+        futures.add(save(cache, "emerald", "minecraft:emerald", 100.0, 0.045, 400));
+        futures.add(save(cache, "diamond", "minecraft:diamond", 120.0, 0.045, 200));
         futures.add(save(cache, "ancient_debris", "minecraft:ancient_debris", 180.0, 0.06, 100));
 
         /*

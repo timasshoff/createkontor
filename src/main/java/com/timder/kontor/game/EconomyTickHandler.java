@@ -1,6 +1,5 @@
 package com.timder.kontor.game;
 
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.economy.Economy;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;

@@ -45,15 +45,15 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "birch_stairs", "minecraft:birch_stairs", "building", 1800, 0.80));
         futures.add(save(cache, "birch_slab", "minecraft:birch_slab", "building", 1800, 0.80));
 
-        futures.add(save(cache, "jungle_planks", "minecraft:jungle", "building", 2800, 0.85));
+        futures.add(save(cache, "jungle_planks", "minecraft:jungle_planks", "building", 2800, 0.85));
         futures.add(save(cache, "jungle_stairs", "minecraft:jungle_stairs", "building", 1800, 0.80));
         futures.add(save(cache, "birch_slab", "minecraft:birch_slab", "building", 1800, 0.80));
 
-        futures.add(save(cache, "acacia_planks", "minecraft:acacia", "building", 2800, 0.85));
+        futures.add(save(cache, "acacia_planks", "minecraft:acacia_planks", "building", 2800, 0.85));
         futures.add(save(cache, "acacia_stairs", "minecraft:acacia_stairs", "building", 1800, 0.80));
         futures.add(save(cache, "acacia_slab", "minecraft:acacia_slab", "building", 1800, 0.80));
 
-        futures.add(save(cache, "dark_oak_planks", "minecraft:acacia", "building", 2800, 0.85));
+        futures.add(save(cache, "dark_oak_planks", "minecraft:dark_oak_planks", "building", 2800, 0.85));
         futures.add(save(cache, "dark_oak_stairs", "minecraft:dark_oak_stairs", "building", 1800, 0.80));
         futures.add(save(cache, "dark_oak_slab", "minecraft:dark_oak_slab", "building", 1800, 0.80));
 
@@ -87,7 +87,7 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "cobblestone_wall", "minecraft:cobblestone_stairs", "building", 800, 0.80));
 
         futures.add(save(cache, "stone_bricks", "minecraft:stone_bricks", "building", 2000, 0.85));
-        futures.add(save(cache, "stone_bricks_stairs", "minecraft:stone_bricks", "building", 1800, 0.85));
+        futures.add(save(cache, "stone_bricks_stairs", "minecraft:stone_bricks_stairs", "building", 1800, 0.85));
         futures.add(save(cache, "stone_bricks_slabs", "minecraft:stone_bricks_slabs", "building", 1800, 0.85));
         futures.add(save(cache, "stone_bricks_wall", "minecraft:stone_bricks_wall", "building", 1800, 0.85));
 
@@ -101,7 +101,7 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "copper_sheet", "create:copper_sheet", "metal", 900, 0.80));
 
         futures.add(save(cache, "gold_ingot", "minecraft:gold_ingot", "metal", 700, 0.75));
-        futures.add(save(cache, "gold_sheet", "create:gold_sheet", "metal", 500, 0.75));
+        futures.add(save(cache, "golden_sheet", "create:golden_sheet", "metal", 500, 0.75));
 
         futures.add(save(cache, "zinc_ingot", "create:zinc_ingot", "metal", 1400, 0.80));
 
@@ -116,10 +116,21 @@ public class MarketDefinitionDataProvider implements DataProvider {
         /*
         Group: Mechanical
          */
+        futures.add(save(cache, "andesite_casing", "create:andesite_casing", "mechanical", 1900, 0.75));
+        futures.add(save(cache, "brass_casing", "create:brass_casing", "mechanical", 1200, 0.7));
+        futures.add(save(cache, "copper_casing", "create:copper_casing", "mechanical", 1400, 0.7));
+        futures.add(save(cache, "railway_casing", "create:railway_casing", "mechanical", 750, 0.7));
+
+        futures.add(save(cache, "shaft", "create:shaft", "mechanical", 2500, 0.9));
+        futures.add(save(cache, "gearbox", "create:gearbox", "mechanical", 2000, 0.85));
         futures.add(save(cache, "cogwheel", "create:cogwheel", "mechanical", 2000, 0.85));
         futures.add(save(cache, "large_cogwheel", "create:large_cogwheel", "mechanical", 1200, 0.85));
-        futures.add(save(cache, "precision_mechanism", "create:precision_mechanism", "mechanical", 300, 0.75));
+        futures.add(save(cache, "belt_connector", "create:belt_connector", "mechanical", 1000, 0.8));
+
+        futures.add(save(cache, "precision_mechanism", "create:precision_mechanism", "mechanical", 250, 0.75));
         futures.add(save(cache, "electron_tube", "create:electron_tube", "mechanical", 250, 0.75));
+        futures.add(save(cache, "nixie_tube", "create:nixie_tube", "mechanical", 250, 0.75));
+        futures.add(save(cache, "factory_gauge", "create:factory_gauge", "mechanical", 300, 0.75));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }

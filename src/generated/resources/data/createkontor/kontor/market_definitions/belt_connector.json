@@ -1,0 +1,6 @@
+{
+  "base_demand": 1000.0,
+  "group": "mechanical",
+  "item": "create:belt_connector",
+  "target_utilisation": 0.8
+}

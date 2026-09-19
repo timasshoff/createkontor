@@ -1,0 +1,6 @@
+{
+  "base_demand": 1900.0,
+  "group": "mechanical",
+  "item": "create:andesite_casing",
+  "target_utilisation": 0.75
+}

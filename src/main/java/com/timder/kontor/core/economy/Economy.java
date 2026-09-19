@@ -69,7 +69,9 @@ public final class Economy {
             Map<ItemId, MarketParams> marketParams,
             Map<ItemId, Double> currentDemand,
             Map<ItemId, DayResult> lastDayResults,
-            Map<ItemId, Double> lastTickDelivered
+            Map<ItemId, Double> lastTickDelivered,
+            Map<ItemId, List<MarketHistoryEntry>> marketHistory,
+            Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistory
     ) {
         public SaveState {
             rawMaterialStates = Map.copyOf(rawMaterialStates);
@@ -78,6 +80,8 @@ public final class Economy {
             currentDemand = Map.copyOf(currentDemand);
             lastDayResults = Map.copyOf(lastDayResults);
             lastTickDelivered = Map.copyOf(lastTickDelivered);
+            marketHistory = Map.copyOf(marketHistory);
+            rawMaterialHistory = Map.copyOf(rawMaterialHistory);
         }
     }
 
@@ -96,7 +100,27 @@ public final class Economy {
             marketSaveStates.put(entry.getKey(), entry.getValue().getSaveState());
         }
 
-        return new SaveState(ticksElapsed, macro.getSaveState(), rawSaveStates, marketSaveStates, marketParamsMap, currentDemand, lastDayResults, lastTickDelivered);
+        Map<ItemId, List<MarketHistoryEntry>> marketHistorySave = new LinkedHashMap<>();
+        for (Map.Entry<ItemId, Deque<MarketHistoryEntry>> entry : marketHistory.entrySet()) {
+            marketHistorySave.put(entry.getKey(), List.copyOf(entry.getValue()));
+        }
+
+        Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistorySave = new LinkedHashMap<>();
+        for (Map.Entry<ItemId, Deque<RawMaterialHistoryEntry>> entry : rawMaterialHistory.entrySet()) {
+            rawMaterialHistorySave.put(entry.getKey(), List.copyOf(entry.getValue()));
+        }
+
+        return new SaveState(
+                ticksElapsed,
+                macro.getSaveState(),
+                rawSaveStates,
+                marketSaveStates,
+                marketParamsMap,
+                currentDemand,
+                lastDayResults,
+                lastTickDelivered,
+                marketHistorySave,
+                rawMaterialHistorySave);
     }
 
     /**
@@ -139,7 +163,8 @@ public final class Economy {
             rawMaterialStates.put(def.id(), saved != null
                     ? RawMaterialState.restore(saved)
                     : RawMaterialState.fresh(def.params()));
-            rawMaterialHistory.put(def.id(), new ArrayDeque<>());
+            List<RawMaterialHistoryEntry> savedHistory = saveState.rawMaterialHistory().getOrDefault(def.id(), List.of());
+            rawMaterialHistory.put(def.id(), new ArrayDeque<>(savedHistory));
         }
 
         for (MarketDefinition def : this.marketDefinitions) {
@@ -150,7 +175,8 @@ public final class Economy {
 
             marketParamsMap.put(def.id(), saveState.marketParams().getOrDefault(def.id(), def.params()));
             lastTickDelivered.put(def.id(), saveState.lastTickDelivered().getOrDefault(def.id(), 0.0));
-            marketHistory.put(def.id(), new ArrayDeque<>());
+            List<MarketHistoryEntry> savedHistory = saveState.marketHistory().getOrDefault(def.id(), List.of());
+            marketHistory.put(def.id(), new ArrayDeque<>(savedHistory));
         }
 
         currentDemand.putAll(saveState.currentDemand());

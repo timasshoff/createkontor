@@ -4,12 +4,10 @@ import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.economy.EconomyParams;
 import com.timder.kontor.core.macro.MacroState;
-import com.timder.kontor.core.market.GroupDef;
-import com.timder.kontor.core.market.MarketDefinition;
-import com.timder.kontor.core.market.MarketParams;
-import com.timder.kontor.core.market.MarketState;
+import com.timder.kontor.core.market.*;
 import com.timder.kontor.core.port.Rng;
 import com.timder.kontor.core.port.SeededRng;
+import com.timder.kontor.core.raw.RawMaterialHistoryEntry;
 import com.timder.kontor.core.raw.RawMaterialState;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.core.value.ProcessCosts;
@@ -22,7 +20,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class EconomySavedData extends SavedData {
@@ -109,10 +109,12 @@ public class EconomySavedData extends SavedData {
 
         ListTag rawMaterials = new ListTag();
         for (Map.Entry<ItemId, RawMaterialState.SaveState> entry : saveState.rawMaterialStates().entrySet()) {
+            ItemId id = entry.getKey();
             CompoundTag entryTag = new CompoundTag();
-            entryTag.putString("Id", entry.getKey().value());
+            entryTag.putString("Id", id.value());
             entryTag.putDouble("Price", entry.getValue().price());
             entryTag.putDouble("PurchasedToday", entry.getValue().purchasedToday());
+            entryTag.put("History", writeRawMaterialHistory(saveState.rawMaterialHistory().getOrDefault(id, List.of())));
             rawMaterials.add(entryTag);
         }
         tag.put("RawMaterials", rawMaterials);
@@ -135,6 +137,7 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("PlantSize", params.plantSize());
             entryTag.putDouble("Demand", saveState.currentDemand().getOrDefault(id, 0.0));
             entryTag.putDouble("LastTickDelivered", saveState.lastTickDelivered().getOrDefault(id, 0.0));
+            entryTag.put("History", writeMarketHistory(saveState.marketHistory().getOrDefault(id, List.of())));
             markets.add(entryTag);
         }
         tag.put("Markets", markets);
@@ -149,17 +152,20 @@ public class EconomySavedData extends SavedData {
         }
 
         Map<ItemId, RawMaterialState.SaveState> rawMaterialStates = new LinkedHashMap<>();
+        Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistory = new LinkedHashMap<>();
         for (Tag t : tag.getList("RawMaterials", Tag.TAG_COMPOUND)) {
             CompoundTag entryTag = (CompoundTag) t;
             ItemId id = new ItemId(entryTag.getString("Id"));
             rawMaterialStates.put(id, new RawMaterialState.SaveState(
                     entryTag.getDouble("Price"), entryTag.getDouble("PurchasedToday")));
+            rawMaterialHistory.put(id, readRawMaterialHistory(id, entryTag.getList("History", Tag.TAG_COMPOUND)));
         }
 
         Map<ItemId, MarketState.SaveState> marketStates = new LinkedHashMap<>();
         Map<ItemId, MarketParams> marketParams = new LinkedHashMap<>();
         Map<ItemId, Double> currentDemand = new LinkedHashMap<>();
         Map<ItemId, Double> lastTickDelivered = new LinkedHashMap<>();
+        Map<ItemId, List<MarketHistoryEntry>> marketHistory = new LinkedHashMap<>();
 
         for (Tag t : tag.getList("Markets", Tag.TAG_COMPOUND)) {
             CompoundTag entryTag = (CompoundTag) t;
@@ -182,9 +188,11 @@ public class EconomySavedData extends SavedData {
 
             currentDemand.put(id, entryTag.getDouble("Demand"));
             lastTickDelivered.put(id, entryTag.getDouble("LastTickDelivered"));
+            marketHistory.put(id, readMarketHistory(id, entryTag.getList("History", Tag.TAG_COMPOUND)));
         }
 
-        return new Economy.SaveState(tag.getLong("TicksElapsed"), macro, rawMaterialStates, marketStates, marketParams, currentDemand, Map.of(), lastTickDelivered);
+        return new Economy.SaveState(tag.getLong("TicksElapsed"), macro, rawMaterialStates, marketStates,
+                marketParams, currentDemand, Map.of(), lastTickDelivered, marketHistory, rawMaterialHistory);
     }
 
     private static CompoundTag writeMacro(MacroState.SaveState saveState) {
@@ -204,5 +212,54 @@ public class EconomySavedData extends SavedData {
                 tag.getLong("Day"), tag.getDouble("Index"), tag.getDouble("PreviousIndex"),
                 tag.getLong("CycleStart"), tag.getInt("CycleLength"),
                 tag.getDouble("CycleAmplitude"), tag.getDouble("Noise"));
+    }
+
+    private static List<RawMaterialHistoryEntry> readRawMaterialHistory(ItemId id, ListTag historyTag) {
+        List<RawMaterialHistoryEntry> history = new ArrayList<>();
+        for (Tag t : historyTag) {
+            CompoundTag entryTag = (CompoundTag) t;
+            history.add(new RawMaterialHistoryEntry(id, entryTag.getLong("Day"), entryTag.getDouble("Price")));
+        }
+        return history;
+    }
+
+    private static ListTag writeRawMaterialHistory(List<RawMaterialHistoryEntry> history) {
+        ListTag historyTag = new ListTag();
+        for (RawMaterialHistoryEntry entry : history) {
+            CompoundTag entryTag = new CompoundTag();
+            entryTag.putLong("Day", entry.day());
+            entryTag.putDouble("Price", entry.price());
+            historyTag.add(entryTag);
+        }
+        return historyTag;
+    }
+
+    private static List<MarketHistoryEntry> readMarketHistory(ItemId id, ListTag historyTag) {
+        List<MarketHistoryEntry> history = new ArrayList<>();
+        for (Tag t : historyTag) {
+            CompoundTag entryTag = (CompoundTag) t;
+            history.add(new MarketHistoryEntry(id,
+                    entryTag.getLong("Tick"), entryTag.getLong("Day"),
+                    entryTag.getDouble("PriceLevel"), entryTag.getDouble("Deviation"),
+                    entryTag.getDouble("DisplayedPrice"), entryTag.getDouble("Companies"),
+                    entryTag.getDouble("DeliveredThisTick")));
+        }
+        return history;
+    }
+
+    private static ListTag writeMarketHistory(List<MarketHistoryEntry> history) {
+        ListTag historyTag = new ListTag();
+        for (MarketHistoryEntry entry : history) {
+            CompoundTag entryTag = new CompoundTag();
+            entryTag.putLong("Tick", entry.tick());
+            entryTag.putLong("Day", entry.day());
+            entryTag.putDouble("PriceLevel", entry.priceLevel());
+            entryTag.putDouble("Deviation", entry.deviation());
+            entryTag.putDouble("DisplayedPrice", entry.displayedPrice());
+            entryTag.putDouble("Companies", entry.companies());
+            entryTag.putDouble("DeliveredThisTick", entry.deliveredThisTick());
+            historyTag.add(entryTag);
+        }
+        return historyTag;
     }
 }

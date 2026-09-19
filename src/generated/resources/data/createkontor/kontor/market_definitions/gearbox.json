@@ -1,0 +1,6 @@
+{
+  "base_demand": 2000.0,
+  "group": "mechanical",
+  "item": "create:gearbox",
+  "target_utilisation": 0.85
+}

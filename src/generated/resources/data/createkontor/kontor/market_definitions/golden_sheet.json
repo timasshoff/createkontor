@@ -1,6 +1,6 @@
 {
   "base_demand": 500.0,
   "group": "metal",
-  "item": "create:gold_sheet",
+  "item": "create:golden_sheet",
   "target_utilisation": 0.75
 }

@@ -1,6 +1,6 @@
 {
   "base_demand": 2800.0,
   "group": "building",
-  "item": "minecraft:acacia",
+  "item": "minecraft:dark_oak_planks",
   "target_utilisation": 0.85
 }
