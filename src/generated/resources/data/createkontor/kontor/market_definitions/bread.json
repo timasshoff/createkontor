@@ -1,0 +1,6 @@
+{
+  "base_demand": 3500.0,
+  "group": "food",
+  "item": "minecraft:bread",
+  "target_utilisation": 0.9
+}

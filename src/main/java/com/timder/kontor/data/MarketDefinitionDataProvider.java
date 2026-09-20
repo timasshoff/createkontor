@@ -113,6 +113,8 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "andesite_alloy", "create:andesite_alloy", "metal", 2500, 0.85));
         futures.add(save(cache, "netherite_ingot", "minecraft:netherite_ingot", "metal", 40, 0.70));
 
+        futures.add(save(cache, "rose_quartz", "create:rose_quartz", "metal", 700, 0.8));
+
         /*
         Group: Mechanical
          */
@@ -131,6 +133,12 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "electron_tube", "create:electron_tube", "mechanical", 250, 0.75));
         futures.add(save(cache, "nixie_tube", "create:nixie_tube", "mechanical", 250, 0.75));
         futures.add(save(cache, "factory_gauge", "create:factory_gauge", "mechanical", 300, 0.75));
+
+        /*
+        Group: Food
+         */
+        futures.add(save(cache, "bread", "minecraft:bread", "food", 3500, 0.9));
+        futures.add(save(cache, "wheat_flour", "create:wheat_flour", "food", 3000, 0.8));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }

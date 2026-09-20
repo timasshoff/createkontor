@@ -4,7 +4,9 @@ import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.data.*;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.EconomyTickHandler;
-import com.timder.kontor.game.command.KontorCommands;
+import com.timder.kontor.game.command.EconomyCommands;
+import com.timder.kontor.game.command.MarketCommands;
+import com.timder.kontor.game.command.RawMaterialCommands;
 import net.minecraft.data.DataGenerator;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -68,7 +70,9 @@ public class CreateKontor {
     }
 
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        KontorCommands.register(event.getDispatcher());
+        MarketCommands.register(event.getDispatcher());
+        RawMaterialCommands.register(event.getDispatcher());
+        EconomyCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

@@ -1,0 +1,6 @@
+{
+  "base_demand": 700.0,
+  "group": "metal",
+  "item": "create:rose_quartz",
+  "target_utilisation": 0.8
+}

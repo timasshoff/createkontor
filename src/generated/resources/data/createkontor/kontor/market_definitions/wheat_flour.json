@@ -1,0 +1,6 @@
+{
+  "base_demand": 3000.0,
+  "group": "food",
+  "item": "create:wheat_flour",
+  "target_utilisation": 0.8
+}
