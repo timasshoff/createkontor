@@ -45,8 +45,6 @@ public class CreateKontor {
         NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
 
         modContainer.registerConfig(ModConfig.Type.SERVER, EconomyConfig.SPEC);
-
-        KontorMenus.register();
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

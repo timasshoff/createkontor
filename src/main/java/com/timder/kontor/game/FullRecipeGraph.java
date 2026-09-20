@@ -31,10 +31,7 @@ public class FullRecipeGraph implements RecipeGraph {
     private final Map<String, List<RecipeNode>> graph = new HashMap<>();
 
     public static FullRecipeGraph createRecipeGraph(MinecraftServer server) {
-        FullRecipeGraph frg = new FullRecipeGraph(server.getRecipeManager().getRecipes());
-        frg.recipesFor(new ItemId("minecraft:netherite_scrap"))
-                .forEach(node -> CreateKontor.LOGGER.info("netherite_scrap recipe: {}", node));
-        return frg;
+        return new  FullRecipeGraph(server.getRecipeManager().getRecipes());
     }
 
     public FullRecipeGraph(Collection<RecipeHolder<?>> recipeHolders) {

@@ -87,9 +87,9 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "cobblestone_wall", "minecraft:cobblestone_stairs", "building", 800, 0.80));
 
         futures.add(save(cache, "stone_bricks", "minecraft:stone_bricks", "building", 2000, 0.85));
-        futures.add(save(cache, "stone_bricks_stairs", "minecraft:stone_bricks_stairs", "building", 1800, 0.85));
-        futures.add(save(cache, "stone_bricks_slabs", "minecraft:stone_bricks_slabs", "building", 1800, 0.85));
-        futures.add(save(cache, "stone_bricks_wall", "minecraft:stone_bricks_wall", "building", 1800, 0.85));
+        futures.add(save(cache, "stone_brick_stairs", "minecraft:stone_bricks_stairs", "building", 1800, 0.85));
+        futures.add(save(cache, "stone_brick_slabs", "minecraft:stone_bricks_slabs", "building", 1800, 0.85));
+        futures.add(save(cache, "stone_brick_wall", "minecraft:stone_bricks_wall", "building", 1800, 0.85));
 
         /*
         Group: Metal
