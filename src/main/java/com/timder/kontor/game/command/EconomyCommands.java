@@ -39,7 +39,7 @@ public class EconomyCommands {
                                                 .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                         .executes(EconomyCommands::recordDelivery))))
                                 .then(Commands.literal("graph")
-                                        .then(Commands.argument("days", IntegerArgumentType.integer(1, 360))
+                                        .then(Commands.argument("days", IntegerArgumentType.integer(1, Economy.HISTORY_LENGTH_DAYS))
                                                 .executes(EconomyCommands::graph)))));
     }
 
