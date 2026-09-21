@@ -3,6 +3,7 @@ package com.timder.kontor.core.economy;
 import com.timder.kontor.core.economy.event.CompetitorEnteredEvent;
 import com.timder.kontor.core.economy.event.CompetitorExitedEvent;
 import com.timder.kontor.core.economy.event.EconomyEvent;
+import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.core.macro.MacroRules;
 import com.timder.kontor.core.macro.MacroState;
 import com.timder.kontor.core.macro.Phase;
@@ -34,6 +35,7 @@ public final class Economy {
 
     private final Map<ItemId, Deque<MarketHistoryEntry>> marketHistory = new LinkedHashMap<>();
     private final Map<ItemId, Deque<RawMaterialHistoryEntry>> rawMaterialHistory = new LinkedHashMap<>();
+    private final Deque<MacroHistoryEntry> macroHistory;
 
     private final RecipeGraph graph;
     private final EconomyParams params;
@@ -72,7 +74,8 @@ public final class Economy {
             Map<ItemId, DayResult> lastDayResults,
             Map<ItemId, Double> lastTickDelivered,
             Map<ItemId, List<MarketHistoryEntry>> marketHistory,
-            Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistory
+            Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistory,
+            List<MacroHistoryEntry> macroHistory
     ) {
         public SaveState {
             rawMaterialStates = Map.copyOf(rawMaterialStates);
@@ -111,6 +114,8 @@ public final class Economy {
             rawMaterialHistorySave.put(entry.getKey(), List.copyOf(entry.getValue()));
         }
 
+        List<MacroHistoryEntry> macroHistorySave = new LinkedList<>(macroHistory);
+
         return new SaveState(
                 ticksElapsed,
                 macro.getSaveState(),
@@ -121,7 +126,8 @@ public final class Economy {
                 lastDayResults,
                 lastTickDelivered,
                 marketHistorySave,
-                rawMaterialHistorySave);
+                rawMaterialHistorySave,
+                macroHistorySave);
     }
 
     /**
@@ -180,6 +186,8 @@ public final class Economy {
             marketHistory.put(def.id(), new ArrayDeque<>(savedHistory));
         }
 
+        this.macroHistory = new ArrayDeque<>(saveState.macroHistory);
+
         currentDemand.putAll(saveState.currentDemand());
         lastDayResults.putAll(saveState.lastDayResults());
 
@@ -223,6 +231,8 @@ public final class Economy {
             lastTickDelivered.put(def.id(), 0.0);
             marketHistory.put(def.id(), new ArrayDeque<>());
         }
+
+        macroHistory = new ArrayDeque<>();
 
         List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
         this.discoveredScope = ValueRules.discover(roots, graph);
@@ -306,6 +316,8 @@ public final class Economy {
             }
         }
 
+        recordMacroHistory();
+
         return events;
     }
 
@@ -364,9 +376,17 @@ public final class Economy {
                 state.getDeviation(),
                 state.getDisplayedPrice(),
                 state.getCompanies(),
-                delivered));
+                delivered
+        ));
         if (history.size() > HISTORY_LENGTH_TICKS) {
             history.removeFirst();
+        }
+    }
+
+    private void recordMacroHistory() {
+        macroHistory.addLast(new MacroHistoryEntry(macro.getDay(), macro.getIndex()));
+        if (macroHistory.size() > HISTORY_LENGTH_DAYS) {
+            macroHistory.removeFirst();
         }
     }
 
@@ -436,6 +456,10 @@ public final class Economy {
             throw new IllegalArgumentException("No such raw material: " + material);
         }
         return List.copyOf(history);
+    }
+
+    public List<MacroHistoryEntry> macroHistory() {
+        return List.copyOf(macroHistory);
     }
 
     public List<ItemId> marketIds() {

@@ -3,14 +3,24 @@ package com.timder.kontor.game.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.timder.kontor.chart.ChartSpec;
+import com.timder.kontor.chart.EconomyCharts;
+import com.timder.kontor.chart.RawMaterialCharts;
 import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.core.macro.MacroHistoryEntry;
+import com.timder.kontor.core.raw.RawMaterialHistoryEntry;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.network.ChartPayload;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+import java.util.List;
 
 public class EconomyCommands {
 
@@ -27,7 +37,10 @@ public class EconomyCommands {
                                 .then(Commands.literal("recordDelivery")
                                         .then(Commands.argument("product", ResourceLocationArgument.id())
                                                 .then(Commands.argument("amount", IntegerArgumentType.integer(1))
-                                                        .executes(EconomyCommands::recordDelivery))))));
+                                                        .executes(EconomyCommands::recordDelivery))))
+                                .then(Commands.literal("graph")
+                                        .then(Commands.argument("days", IntegerArgumentType.integer(1, Economy.HISTORY_LENGTH_DAYS))
+                                                .executes(EconomyCommands::graph)))));
     }
 
     private static int advance(CommandContext<CommandSourceStack> context) {
@@ -70,6 +83,35 @@ public class EconomyCommands {
         }
 
         source.sendSuccess(() -> Component.literal("Recorded delivery for: " + itemId), false);
+        return 1;
+    }
+
+    private static int graph(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            source.sendFailure(Component.literal("Only a player can open the graph."));
+            return 0;
+        }
+
+        Economy economy = EconomySavedData.get(source.getServer()).getEconomy();
+
+        int days = IntegerArgumentType.getInteger(context, "days");
+
+        List<MacroHistoryEntry> history = economy.macroHistory();
+        List<MacroHistoryEntry> window = history.subList(Math.max(0, history.size() - days), history.size());
+
+        ChartSpec spec;
+        try {
+            spec = EconomyCharts.full(window);
+        } catch (IllegalArgumentException e) {
+            source.sendFailure(Component.literal("Cannot build the chart: " + e.getMessage()));
+            return 0;
+        }
+
+        PacketDistributor.sendToPlayer(player, new ChartPayload(spec));
+        source.sendSuccess(() -> Component.literal("Opening economy graph (" + window.size() + " points)."), false);
         return 1;
     }
 }

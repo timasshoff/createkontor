@@ -3,6 +3,7 @@ package com.timder.kontor.game;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.economy.EconomyParams;
+import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.core.macro.MacroState;
 import com.timder.kontor.core.market.*;
 import com.timder.kontor.core.port.Rng;
@@ -141,6 +142,7 @@ public class EconomySavedData extends SavedData {
             markets.add(entryTag);
         }
         tag.put("Markets", markets);
+        tag.put("MacroHistory", writeMacroHistory(saveState.macroHistory()));
     }
 
     private static Economy.SaveState readSaveState(CompoundTag tag) {
@@ -191,8 +193,10 @@ public class EconomySavedData extends SavedData {
             marketHistory.put(id, readMarketHistory(id, entryTag.getList("History", Tag.TAG_COMPOUND)));
         }
 
+        List<MacroHistoryEntry> macroHistory = readMacroHistory(tag.getList("MacroHistory", Tag.TAG_COMPOUND));
+
         return new Economy.SaveState(tag.getLong("TicksElapsed"), macro, rawMaterialStates, marketStates,
-                marketParams, currentDemand, Map.of(), lastTickDelivered, marketHistory, rawMaterialHistory);
+                marketParams, currentDemand, Map.of(), lastTickDelivered, marketHistory, rawMaterialHistory, macroHistory);
     }
 
     private static CompoundTag writeMacro(MacroState.SaveState saveState) {
@@ -258,6 +262,26 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("DisplayedPrice", entry.displayedPrice());
             entryTag.putDouble("Companies", entry.companies());
             entryTag.putDouble("DeliveredThisTick", entry.deliveredThisTick());
+            historyTag.add(entryTag);
+        }
+        return historyTag;
+    }
+
+    private static List<MacroHistoryEntry> readMacroHistory(ListTag historyTag) {
+        List<MacroHistoryEntry> history = new ArrayList<>();
+        for (Tag t : historyTag) {
+            CompoundTag entryTag = (CompoundTag) t;
+            history.add(new MacroHistoryEntry(entryTag.getLong("Day"), entryTag.getDouble("Index")));
+        }
+        return history;
+    }
+
+    private static ListTag writeMacroHistory(List<MacroHistoryEntry> history) {
+        ListTag historyTag = new ListTag();
+        for (MacroHistoryEntry entry : history) {
+            CompoundTag entryTag = new CompoundTag();
+            entryTag.putLong("Day", entry.day());
+            entryTag.putDouble("Index", entry.index());
             historyTag.add(entryTag);
         }
         return historyTag;
