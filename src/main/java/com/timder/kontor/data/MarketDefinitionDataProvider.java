@@ -111,7 +111,7 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "sturdy_sheet", "create:sturdy_sheet", "metal", 900, 0.70));
 
         futures.add(save(cache, "andesite_alloy", "create:andesite_alloy", "metal", 2500, 0.85));
-        futures.add(save(cache, "netherite_ingot", "minecraft:netherite_ingot", "metal", 40, 0.70));
+        futures.add(save(cache, "netherite_ingot", "minecraft:netherite_ingot", "metal", 100, 0.70));
 
         futures.add(save(cache, "rose_quartz", "create:rose_quartz", "metal", 700, 0.8));
 

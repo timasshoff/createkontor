@@ -6,7 +6,7 @@ import com.timder.kontor.core.macro.MacroRules;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EconomyCharts {
+public final class EconomyCharts {
 
     public static ChartSpec full(List<MacroHistoryEntry> entries) {
         int count = entries.size();
