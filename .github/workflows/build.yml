@@ -28,3 +28,25 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build
+
+      # The jar only exists on the runner, which is thrown away when the job ends.
+      # Without an upload step there is nothing to download.
+      # Runs only if the build (including the tests) succeeded.
+      - name: Upload mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: createkontor-jar
+          path: build/libs/*.jar
+          if-no-files-found: error
+
+      # Runs only if something above failed. The test reports are the one place where the
+      # full stack trace of a test failure is written down.
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests
+            build/test-results
+          if-no-files-found: ignore
