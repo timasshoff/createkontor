@@ -5,6 +5,7 @@ import com.timder.kontor.core.economy.event.CompetitorExitedEvent;
 import com.timder.kontor.core.economy.event.EconomyEvent;
 import com.timder.kontor.core.macro.MacroRules;
 import com.timder.kontor.core.macro.MacroState;
+import com.timder.kontor.core.macro.Phase;
 import com.timder.kontor.core.market.*;
 import com.timder.kontor.core.port.RecipeGraph;
 import com.timder.kontor.core.port.Rng;
@@ -451,6 +452,10 @@ public final class Economy {
 
     public long currentDay() {
         return ticksElapsed / DAY_LENGTH;
+    }
+
+    public Phase currentPhase() {
+        return MacroRules.phase(macro);
     }
 
     @Override
