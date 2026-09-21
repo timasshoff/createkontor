@@ -97,8 +97,7 @@ public class RawMaterialCommands {
             return 0;
         }
 
-        int wanted = days * MarketRules.TRADING_TICKS_PER_DAY;
-        List<RawMaterialHistoryEntry> window = history.subList(Math.max(0, history.size() - wanted), history.size());
+        List<RawMaterialHistoryEntry> window = history.subList(Math.max(0, history.size() - days), history.size());
 
         ChartSpec spec;
         try {

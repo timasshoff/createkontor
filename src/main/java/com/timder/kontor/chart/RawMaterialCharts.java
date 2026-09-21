@@ -8,8 +8,6 @@ import java.util.List;
 
 public class RawMaterialCharts {
 
-    private static final int COLOR_PRICE = 0xFF2A78D6;
-
     public static ChartSpec full(ResourceLocation material, List<RawMaterialHistoryEntry> entries) {
         int count = entries.size();
         double[] x = new double[count];
@@ -24,7 +22,7 @@ public class RawMaterialCharts {
         }
 
         return ChartSpec.builder(material.toString())
-                .series(new ChartSeries("Price in $", COLOR_PRICE, x, price))
+                .series(new ChartSeries("Price in $", ChartColors.BLUE, x, price))
                 .xAxis("d", "now")
                 .pointLabels(pointLabels)
                 .build();

@@ -13,9 +13,7 @@ import java.util.List;
  */
 public final class MarketCharts {
 
-    private static final int COLOR_PRICE = 0xFF2A78D6;
-    private static final int COLOR_COMPETITORS = 0xFFAB0F0F;
-    private static final int COLOR_REFERENCE_COST = 0xFF1BAF7A;
+
 
     public static ChartSpec full(ResourceLocation market, double referenceCost, List<MarketHistoryEntry> entries) {
         int count = entries.size();
@@ -33,9 +31,9 @@ public final class MarketCharts {
         }
 
         return ChartSpec.builder(market.toString())
-                .series(new ChartSeries("Price in $", COLOR_PRICE, x, price))
-                .series(new ChartSeries("Competitors", COLOR_COMPETITORS, x, competitors))
-                .referenceLine("Reference cost (now)", referenceCost, COLOR_REFERENCE_COST)
+                .series(new ChartSeries("Price in $", ChartColors.BLUE, x, price))
+                .series(new ChartSeries("Competitors", ChartColors.RED, x, competitors))
+                .referenceLine("Reference cost (now)", referenceCost, ChartColors.TEAL)
                 .xAxis("d", "now")
                 .pointLabels(pointLabels)
                 .build();
