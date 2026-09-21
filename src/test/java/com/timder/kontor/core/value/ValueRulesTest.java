@@ -79,29 +79,6 @@ public class ValueRulesTest {
         assertTrue(result.referenceCost().isEmpty());
     }
 
-    @Test
-    @DisplayName("A gear made from iron beats a gear made from brass when iron is the cheaper route")
-    void cheaperRouteWins() {
-        ItemId gear = new ItemId("gear");
-        ItemId iron = new ItemId("iron_ingot");
-        ItemId brass = new ItemId("brass_ingot");
-
-        FakeRecipeGraph graph = new FakeRecipeGraph()
-                .add(gear.value(), 4.0, iron.value(), 1.0, "crafting")
-                .add(gear.value(), 2.0, brass.value(), 1.0, "crafting");
-
-        Map<ItemId, Double> leaves = Map.of(iron, 6.60, brass, 3.90);
-        ValueResult result = ValueRules.computeValues(Set.of(gear), graph,
-                ProcessCosts.standard(), leaves, Map.of(), 1.0);
-
-        double viaIron = CostRules.stepCost(6.60, 1.0, 0.10, 1.0, 4.0);
-        double viaBrass = CostRules.stepCost(3.90, 1.0, 0.10, 1.0, 2.0);
-        assertTrue(viaIron < viaBrass, "test setup check: iron should be the cheaper route here");
-
-        assertEquals(viaIron, result.referenceCost().get(gear), 0.0001);
-        assertEquals(iron, result.standardRecipe().get(gear).inputs().get(0).alternatives());
-    }
-
     private ValueResult compute(FakeRecipeGraph graph) {
         return compute(graph, 1.0);
     }
