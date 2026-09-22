@@ -62,7 +62,7 @@ public class EconomyCommands {
         EconomySavedData data = EconomySavedData.get(source.getServer());
         Economy economy = data.getEconomy();
 
-        source.sendSuccess(() -> Component.literal("Current cycle: " + economy.currentPhase() + "."), false);
+        source.sendSuccess(() -> Component.literal("Current cycle: " + economy.currentPhase() + ", policy rate: " + String.format(java.util.Locale.ROOT, "%.3f %%", economy.policyRate() * 100.0) + "."), false);
         return 1;
     }
 

@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RawMaterialCharts {
+public final class RawMaterialCharts {
 
     public static ChartSpec full(ResourceLocation material, List<RawMaterialHistoryEntry> entries) {
         int count = entries.size();

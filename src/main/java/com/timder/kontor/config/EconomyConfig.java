@@ -1,6 +1,7 @@
 package com.timder.kontor.config;
 
 import com.timder.kontor.core.macro.MacroParams;
+import com.timder.kontor.core.macro.PolicyRateParams;
 import com.timder.kontor.core.macro.ProgressParams;
 import com.timder.kontor.core.raw.PriceProcessParams;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -17,6 +18,16 @@ public class EconomyConfig {
     public static final ModConfigSpec.DoubleValue MIN_INDEX;
     public static final ModConfigSpec.DoubleValue MAX_INDEX;
     public static final ModConfigSpec.DoubleValue TREND_PER_DAY;
+
+    public static final ModConfigSpec.DoubleValue POLICY_BASE_RATE;
+    public static final ModConfigSpec.DoubleValue POLICY_MIN_RATE;
+    public static final ModConfigSpec.DoubleValue POLICY_MAX_RATE;
+    public static final ModConfigSpec.IntValue POLICY_DECISION_INTERVAL_DAYS;
+    public static final ModConfigSpec.DoubleValue POLICY_TARGET_SENSITIVITY;
+    public static final ModConfigSpec.DoubleValue POLICY_SMALL_STEP;
+    public static final ModConfigSpec.DoubleValue POLICY_LARGE_STEP;
+    public static final ModConfigSpec.DoubleValue POLICY_SMALL_THRESHOLD;
+    public static final ModConfigSpec.DoubleValue POLICY_LARGE_THRESHOLD;
 
     public static final ModConfigSpec.DoubleValue DAILY_DECAY;
     public static final ModConfigSpec.DoubleValue PROGRESS_FLOOR;
@@ -54,6 +65,27 @@ public class EconomyConfig {
                 .defineInRange("trendPerDay", 0.0015, 0, Double.MAX_VALUE);
         builder.pop();
 
+        builder.comment("Policy rate as a fraction per day, e.g. 0.0020 is 0.20 %").push("policyRate");
+        POLICY_BASE_RATE = builder.comment("Start rate and rate of a normal economy (difficulty: 0.0010 easy, 0.0020 standard, 0.0030 realistic)")
+                .defineInRange("baseRate", 0.0020, 1.0E-6, 1.0);
+        POLICY_MIN_RATE = builder.comment("Lowest rate the process aims for")
+                .defineInRange("minRate", 0.0005, 1.0E-6, 1.0);
+        POLICY_MAX_RATE = builder.comment("Highest rate the process aims for")
+                .defineInRange("maxRate", 0.0050, 1.0E-6, 1.0);
+        POLICY_DECISION_INTERVAL_DAYS = builder.comment("A decision is made every this many days")
+                .defineInRange("decisionIntervalDays", 7, 1, Integer.MAX_VALUE);
+        POLICY_TARGET_SENSITIVITY = builder.comment("How strongly the target rate reacts to the cycle index")
+                .defineInRange("targetSensitivity", 2.0, 0.0, Double.MAX_VALUE);
+        POLICY_SMALL_STEP = builder.comment("Step when the target is further away than smallThreshold")
+                .defineInRange("smallStep", 0.0005, 1.0E-6, 1.0);
+        POLICY_LARGE_STEP = builder.comment("Step when the target is further away than largeThreshold")
+                .defineInRange("largeStep", 0.0010, 1.0E-6, 1.0);
+        POLICY_SMALL_THRESHOLD = builder.comment("The rate stays if the target is at most this far away")
+                .defineInRange("smallThreshold", 0.00025, 1.0E-6, 1.0);
+        POLICY_LARGE_THRESHOLD = builder.comment("Large step if the target is further away than this")
+                .defineInRange("largeThreshold", 0.0015, 1.0E-6, 1.0);
+        builder.pop();
+
         builder.comment("Technical Progress").push("progress");
         DAILY_DECAY = builder.comment("How much processing costs sink every day (for competitors)")
                 .defineInRange("dailyDecay", 0.002, 0.0, 0.999999);
@@ -88,11 +120,29 @@ public class EconomyConfig {
 
     public static MacroParams toMacroParams() {
         return new MacroParams(
-                MIN_CYCLE_LENGTH.get(), MAX_CYCLE_LENGTH.get(),
-                MIN_AMPLITUDE.get(), MAX_AMPLITUDE.get(),
-                NOISE_DECAY.get(), NOISE_SCALE.get(),
-                MIN_INDEX.get(), MAX_INDEX.get(),
-                TREND_PER_DAY.get());
+                MIN_CYCLE_LENGTH.get(),
+                MAX_CYCLE_LENGTH.get(),
+                MIN_AMPLITUDE.get(),
+                MAX_AMPLITUDE.get(),
+                NOISE_DECAY.get(),
+                NOISE_SCALE.get(),
+                MIN_INDEX.get(),
+                MAX_INDEX.get(),
+                TREND_PER_DAY.get(),
+                toPolicyRateParams());
+    }
+
+    public static PolicyRateParams toPolicyRateParams() {
+        return new PolicyRateParams(
+                POLICY_BASE_RATE.get(),
+                POLICY_MIN_RATE.get(),
+                POLICY_MAX_RATE.get(),
+                POLICY_DECISION_INTERVAL_DAYS.get(),
+                POLICY_TARGET_SENSITIVITY.get(),
+                POLICY_SMALL_STEP.get(),
+                POLICY_LARGE_STEP.get(),
+                POLICY_SMALL_THRESHOLD.get(),
+                POLICY_LARGE_THRESHOLD.get());
     }
 
     public static ProgressParams toProgressParams() {

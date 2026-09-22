@@ -1,5 +1,7 @@
 package com.timder.kontor.core.macro;
 
+import java.util.Objects;
+
 /**
  * Immutable parameters for the cycle.
  *
@@ -12,6 +14,7 @@ package com.timder.kontor.core.macro;
  * @param minIndex Min cycle index
  * @param maxIndex Max cycle index
  * @param trendPerDay Long term growth of demand per day
+ * @param policyRateParams The immutable parameters of the policy rate
  */
 public record MacroParams(
         int minCycleLength,
@@ -22,7 +25,8 @@ public record MacroParams(
         double noiseScale,
         double minIndex,
         double maxIndex,
-        double trendPerDay
+        double trendPerDay,
+        PolicyRateParams policyRateParams
 ) {
 
     public MacroParams {
@@ -33,10 +37,11 @@ public record MacroParams(
         if (noiseDecay < 0 || noiseDecay >= 1) throw new IllegalArgumentException("noiseDecay must be within [0, 1).");
         if (minIndex <= 0) throw new IllegalArgumentException("minIndex must be positive.");
         if (maxIndex <= minIndex) throw new IllegalArgumentException("maxIndex must be larger than minIndex.");
+        Objects.requireNonNull(policyRateParams, "policyRate must not be null.");
     }
 
     // AI Generated values
     public static MacroParams standard() {
-        return new MacroParams(40, 80, 0.08, 0.18, 0.8, 0.01, 0.70, 1.30, 0.0015);
+        return new MacroParams(40, 80, 0.08, 0.18, 0.8, 0.01, 0.70, 1.30, 0.0015, PolicyRateParams.standard());
     }
 }

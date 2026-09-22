@@ -384,7 +384,7 @@ public final class Economy {
     }
 
     private void recordMacroHistory() {
-        macroHistory.addLast(new MacroHistoryEntry(macro.getDay(), macro.getIndex()));
+        macroHistory.addLast(new MacroHistoryEntry(macro.getDay(), macro.getIndex(), macro.getPolicyRate()));
         if (macroHistory.size() > HISTORY_LENGTH_DAYS) {
             macroHistory.removeFirst();
         }
@@ -480,6 +480,10 @@ public final class Economy {
 
     public Phase currentPhase() {
         return MacroRules.phase(macro);
+    }
+
+    public double policyRate() {
+        return macro.getPolicyRate();
     }
 
     @Override

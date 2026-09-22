@@ -36,7 +36,12 @@ public final class MacroState {
 
     private double noise;
 
-    private MacroState(long day, double index, long cycleStart, int cycleLength, double cycleAmplitude, double noise) {
+    /**
+     * The policy rate as a fraction per day (e.g. 0.20% = 0.0020)
+     */
+    private double policyRate;
+
+    private MacroState(long day, double index, long cycleStart, int cycleLength, double cycleAmplitude, double noise, double policyRate) {
         this.day = day;
         this.index = index;
         this.previousIndex = index;
@@ -44,6 +49,7 @@ public final class MacroState {
         this.cycleLength = cycleLength;
         this.cycleAmplitude = cycleAmplitude;
         this.noise = noise;
+        this.policyRate = policyRate;
     }
 
     /**
@@ -57,7 +63,7 @@ public final class MacroState {
         int length = rng.nextInt(params.minCycleLength(), params.maxCycleLength());
         double amplitude = rng.nextDouble(params.minAmplitude(), params.maxAmplitude());
         long start = -rng.nextInt(0, length - 1);
-        return new MacroState(0, 1.0, start, length, amplitude, 0.0);
+        return new MacroState(0, 1.0, start, length, amplitude, 0.0, params.policyRateParams().baseRate());
     }
 
     public long getDay() {
@@ -88,6 +94,10 @@ public final class MacroState {
         return noise;
     }
 
+    public double getPolicyRate() {
+        return policyRate;
+    }
+
     /**
      * Progress of the current cycle.
      * @return Progress of the current cycle from 0 to 1
@@ -109,6 +119,10 @@ public final class MacroState {
         this.noise = value;
     }
 
+    void setPolicyRate(double value) {
+        this.policyRate = value;
+    }
+
     void startNewCycle(long start, int length, double amplitude) {
         this.cycleStart = start;
         this.cycleLength = length;
@@ -117,17 +131,17 @@ public final class MacroState {
 
     @Override
     public String toString() {
-        return "MacroState[day=%d, index=%.4f, cycle=%d/%d, amplitude=%.3f]".formatted(day, index, day - cycleStart, cycleLength, cycleAmplitude);
+        return "MacroState[day=%d, index=%.4f, cycle=%d/%d, amplitude=%.3f, policyRate=%.4f%%]".formatted(day, index, day - cycleStart, cycleLength, cycleAmplitude, policyRate * 100.0);
     }
 
-    public record SaveState(long day, double index, double previousIndex, long cycleStart, int cycleLength, double cycleAmplitude, double noise) {}
+    public record SaveState(long day, double index, double previousIndex, long cycleStart, int cycleLength, double cycleAmplitude, double noise, double policyRate) {}
 
     public SaveState getSaveState() {
-        return new SaveState(day, index, previousIndex, cycleStart, cycleLength, cycleAmplitude, noise);
+        return new SaveState(day, index, previousIndex, cycleStart, cycleLength, cycleAmplitude, noise, policyRate);
     }
 
     public static MacroState restore(SaveState saveState) {
-        MacroState state = new MacroState(saveState.day(), saveState.index(), saveState.cycleStart(), saveState.cycleLength(), saveState.cycleAmplitude(), saveState.noise());
+        MacroState state = new MacroState(saveState.day(), saveState.index(), saveState.cycleStart(), saveState.cycleLength(), saveState.cycleAmplitude(), saveState.noise(), saveState.policyRate());
         state.previousIndex = saveState.previousIndex();
         return state;
     }

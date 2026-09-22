@@ -81,7 +81,6 @@ config="${mod_id}.mixins.json"
 [[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"
-    # This version range declares a minimum of the current minecraft version up to but not including the next major version
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
@@ -90,6 +89,13 @@ config="${mod_id}.mixins.json"
     modId="create"
     type="required"
     versionRange="[6.0.10,6.1.0)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="ldlib2"
+    type="required"
+    versionRange="2.2.40"
     ordering="NONE"
     side="BOTH"
 
