@@ -305,7 +305,7 @@ public final class Economy {
     }
 
     /**
-     * The expected delivery from registered companies in this trading tick.
+     * The expected delivery from registered competitors in this trading tick.
      * @param market The market
      * @param state The current state of the market
      * @param marketParams The parameters of the market
@@ -418,7 +418,7 @@ public final class Economy {
                 state.getPriceLevel(),
                 state.getDeviation(),
                 state.getDisplayedPrice(),
-                state.getCompanies(),
+                state.getCompetitors(),
                 delivered
         ));
         if (history.size() > HISTORY_LENGTH_TICKS) {
@@ -553,7 +553,7 @@ public final class Economy {
                 state.getPriceLevel(),
                 state.getDeviation(),
                 state.getDisplayedPrice(),
-                state.getCompanies(),
+                state.getCompetitors(),
                 state.getVisibleCompanies(),
                 marketParams.referenceCost(),
                 currentDemand.getOrDefault(market, Double.NaN),

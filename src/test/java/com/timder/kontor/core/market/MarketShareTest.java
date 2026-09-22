@@ -43,7 +43,7 @@ public class MarketShareTest {
     }
 
     @Test
-    @DisplayName("Three stars at market price against three companies gives a quarter")
+    @DisplayName("Three stars at market price against three competitors gives a quarter")
     void neutralSupplierGetsAQuarter() {
         MarketState state = MarketState.fresh(IRON_SHEET);
         double share = MarketRules.share(state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET);
@@ -83,7 +83,7 @@ public class MarketShareTest {
             tradeOneDay(state, 0.90, NEUTRAL);
         }
 
-        assertTrue(state.getCompanies() < 1.5, "expected the competition to shrink, but it is " + state.getCompanies());
+        assertTrue(state.getCompetitors() < 1.5, "expected the competition to shrink, but it is " + state.getCompetitors());
         assertTrue(MarketRules.share(0.90 * state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET) > 0.50, "expected the supplier to hold more than half the market");
     }
 }

@@ -11,9 +11,9 @@ public final class MarketState {
     private double priceLevel;
 
     /**
-     * Amount of companies.
+     * Amount of competitors.
      */
-    private double companies;
+    private double competitors;
 
     /**
      * Reputation of the competitors. Normally neutral, but events might change it.
@@ -22,18 +22,18 @@ public final class MarketState {
 
     /**
      * The trading deviation caused by real-time purchases / deliveries.
-     * Fast overlay on top of the daily updated {@link priceLevel}.
+     * Fast overlay on top of the daily updated price level.
      * Zero means no deviation at this moment.
      */
     private double deviation;
 
     /**
-     * How much product companies delivered today. Is cleared when a new day starts.
+     * How much product competitors delivered today. Is cleared when a new day starts.
      */
     private double deliveredToday;
 
     /**
-     * How much product companies delivered this trading tick.
+     * How much product competitors delivered this trading tick.
      * A trading tick is NOT a normal minecraft tick.
      * See {@link MarketRules}.
      */
@@ -42,11 +42,11 @@ public final class MarketState {
     /**
      * Creates a new market state representing the changeable state of a market.
      * @param priceLevel The structural price level
-     * @param companies Amount of companies
+     * @param competitors Amount of competitors
      */
-    public MarketState(double priceLevel, double companies) {
+    public MarketState(double priceLevel, double competitors) {
         this.priceLevel = priceLevel;
-        this.companies = companies;
+        this.competitors = competitors;
         this.competitorReputation = MarketParams.NEUTRAL_REPUTATION;
         this.deviation = 0.0;
         this.deliveredToday = 0.0;
@@ -54,7 +54,7 @@ public final class MarketState {
     }
 
     /**
-     * Creates a fresh market with the equilibrium price and 3 companies.
+     * Creates a fresh market with the equilibrium price and 3 competitors.
      * @param params The parameters of the market
      * @return The fresh market
      */
@@ -66,8 +66,8 @@ public final class MarketState {
         return priceLevel;
     }
 
-    public double getCompanies() {
-        return companies;
+    public double getCompetitors() {
+        return competitors;
     }
 
     public double getCompetitorReputation() {
@@ -100,15 +100,15 @@ public final class MarketState {
      * @return The total capacity of all competitors
      */
     public double getCapacity(MarketParams params) {
-        return companies * params.plantSize();
+        return competitors * params.plantSize();
     }
 
     /**
-     * Visible amount of companies.
-     * @return The rounded number of companies
+     * Visible amount of competitors.
+     * @return The rounded number of competitors
      */
     public int getVisibleCompanies() {
-        return (int) Math.round(companies);
+        return (int) Math.round(competitors);
     }
 
     /**
@@ -134,8 +134,8 @@ public final class MarketState {
         this.priceLevel = value;
     }
 
-    void setCompanies(double value) {
-        this.companies = value;
+    void setCompetitors(double value) {
+        this.competitors = value;
     }
 
     void setDeviation(double deviation) {
@@ -152,17 +152,17 @@ public final class MarketState {
 
     @Override
     public String toString() {
-        return "MarketState[price=%.2f, companies=%.2f, deliveredToday=%.0f]".formatted(priceLevel, companies, deliveredToday);
+        return "MarketState[price=%.2f, competitors=%.2f, deliveredToday=%.0f]".formatted(priceLevel, competitors, deliveredToday);
     }
 
-    public record SaveState(double priceLevel, double companies, double competitorReputation, double deviation, double deliveredToday, double deliveredThisTick) {}
+    public record SaveState(double priceLevel, double competitors, double competitorReputation, double deviation, double deliveredToday, double deliveredThisTick) {}
 
     public SaveState getSaveState() {
-        return new SaveState(priceLevel, companies, competitorReputation, deviation, deliveredToday, deliveredThisTick);
+        return new SaveState(priceLevel, competitors, competitorReputation, deviation, deliveredToday, deliveredThisTick);
     }
 
     public static MarketState restore(SaveState snapshot) {
-        MarketState state = new MarketState(snapshot.priceLevel(), snapshot.companies());
+        MarketState state = new MarketState(snapshot.priceLevel(), snapshot.competitors());
         state.competitorReputation = snapshot.competitorReputation();
         state.deviation = snapshot.deviation();
         state.deliveredToday = snapshot.deliveredToday();
