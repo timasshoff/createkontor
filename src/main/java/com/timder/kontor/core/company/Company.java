@@ -186,6 +186,9 @@ public final class Company {
      */
     public boolean canSpend(Money cost, CompanyParams params) {
         Objects.requireNonNull(params, "params must not be null.");
+        if (!cost.isPositive()) {
+            return false;
+        }
         boolean affordable = account.canAfford(cost, overdraftLimit(params));
         return affordable && isOperational();
     }

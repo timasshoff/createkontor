@@ -13,7 +13,7 @@ public final class Loan {
     }
 
     public record Installment(Money interest, Money repayment) {
-        public static Installment NONE = new Installment(Money.ZERO, Money.ZERO);
+        public static final Installment NONE = new Installment(Money.ZERO, Money.ZERO);
 
         public Installment {
             Objects.requireNonNull(interest, "interest must not be null.");
@@ -42,7 +42,7 @@ public final class Loan {
         Objects.requireNonNull(repayment, "repayment must not be null.");
         if (!principal.isPositive()) throw new IllegalArgumentException("principal must be positive.");
         if (outstanding.isNegative() || outstanding.compareTo(principal) > 0) throw new IllegalArgumentException("outstanding must be between zero and the principal.");
-        if (!(rate >= 0.0)) throw new IllegalArgumentException("rate must not be negative.");
+        if (!Double.isFinite(rate) || rate < 0.0) throw new IllegalArgumentException("rate must be finite and not negative.");
         if (termDays < 1) throw new IllegalArgumentException("termDays must be at least 1.");
         if (freeDays < 0) throw new IllegalArgumentException("freeDays must not be negative.");
         if (!repayment.isPositive()) throw new IllegalArgumentException("repayment must be positive.");
