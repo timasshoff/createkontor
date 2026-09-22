@@ -23,6 +23,8 @@ public final class Company {
     private Liquidity liquidity = Liquidity.NORMAL;
     private int daysInTrouble = 0;
 
+    private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
+
     private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account) {
         this.id = id;
         this.name = name;
@@ -166,6 +168,34 @@ public final class Company {
      */
     public int daysInTrouble() {
         return daysInTrouble;
+    }
+
+    public boolean isInsolvent(CompanyParams params) {
+        return params.insolvencyEnabled() && daysInTrouble >= params.insolvencyDays();
+    }
+
+    public List<CompanyHistoryEntry> history() {
+        return List.copyOf(history);
+    }
+
+    void setLiquidity(Liquidity liquidity) {
+        this.liquidity = Objects.requireNonNull(liquidity, "liquidity must not be null.");
+    }
+
+    void setDaysInTrouble(int daysInTrouble) {
+        if (daysInTrouble < 0) throw new IllegalArgumentException("daysInTrouble must not be negative.");
+        this.daysInTrouble = daysInTrouble;
+    }
+
+    void removeLoan(Loan loan) {
+        loans.remove(loan);
+    }
+
+    void appendHistory(CompanyHistoryEntry entry, int maxLength) {
+        history.addLast(entry);
+        if (history.size() > maxLength) {
+            history.removeFirst();
+        }
     }
 
     @Override
