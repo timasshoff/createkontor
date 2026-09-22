@@ -1,5 +1,7 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.financial.Money;
+
 import java.util.Objects;
 
 /**

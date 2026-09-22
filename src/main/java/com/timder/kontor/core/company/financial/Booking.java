@@ -1,4 +1,4 @@
-package com.timder.kontor.core.company;
+package com.timder.kontor.core.company.financial;
 
 import java.util.Objects;
 

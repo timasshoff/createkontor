@@ -1,4 +1,4 @@
-package com.timder.kontor.core.company;
+package com.timder.kontor.core.company.financial;
 
 /**
  * How a booking result counts in day results, statistics etc.

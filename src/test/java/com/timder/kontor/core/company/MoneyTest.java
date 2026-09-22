@@ -1,5 +1,6 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.financial.Money;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
