@@ -153,4 +153,8 @@ public final class MarketRules {
     public static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
     }
+
+    public static double starsFromReputation(double reputation) {
+        return 1.0 + 4.0 * reputation / 100.0;
+    }
 }
