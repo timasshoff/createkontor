@@ -73,7 +73,7 @@ public class EconomyConfig {
         POLICY_MAX_RATE = builder.comment("Highest rate the process aims for")
                 .defineInRange("maxRate", 0.0050, 1.0E-6, 1.0);
         POLICY_DECISION_INTERVAL_DAYS = builder.comment("A decision is made every this many days")
-                .defineInRange("decisionIntervalDays", 14, 1, Integer.MAX_VALUE);
+                .defineInRange("decisionIntervalDays", 7, 1, Integer.MAX_VALUE);
         POLICY_TARGET_SENSITIVITY = builder.comment("How strongly the target rate reacts to the cycle index")
                 .defineInRange("targetSensitivity", 2.0, 0.0, Double.MAX_VALUE);
         POLICY_SMALL_STEP = builder.comment("Step when the target is further away than smallThreshold")
@@ -120,20 +120,29 @@ public class EconomyConfig {
 
     public static MacroParams toMacroParams() {
         return new MacroParams(
-                MIN_CYCLE_LENGTH.get(), MAX_CYCLE_LENGTH.get(),
-                MIN_AMPLITUDE.get(), MAX_AMPLITUDE.get(),
-                NOISE_DECAY.get(), NOISE_SCALE.get(),
-                MIN_INDEX.get(), MAX_INDEX.get(),
+                MIN_CYCLE_LENGTH.get(),
+                MAX_CYCLE_LENGTH.get(),
+                MIN_AMPLITUDE.get(),
+                MAX_AMPLITUDE.get(),
+                NOISE_DECAY.get(),
+                NOISE_SCALE.get(),
+                MIN_INDEX.get(),
+                MAX_INDEX.get(),
                 TREND_PER_DAY.get(),
                 toPolicyRateParams());
     }
 
     public static PolicyRateParams toPolicyRateParams() {
         return new PolicyRateParams(
-                POLICY_BASE_RATE.get(), POLICY_MIN_RATE.get(), POLICY_MAX_RATE.get(),
-                POLICY_DECISION_INTERVAL_DAYS.get(), POLICY_TARGET_SENSITIVITY.get(),
-                POLICY_SMALL_STEP.get(), POLICY_LARGE_STEP.get(),
-                POLICY_SMALL_THRESHOLD.get(), POLICY_LARGE_THRESHOLD.get());
+                POLICY_BASE_RATE.get(),
+                POLICY_MIN_RATE.get(),
+                POLICY_MAX_RATE.get(),
+                POLICY_DECISION_INTERVAL_DAYS.get(),
+                POLICY_TARGET_SENSITIVITY.get(),
+                POLICY_SMALL_STEP.get(),
+                POLICY_LARGE_STEP.get(),
+                POLICY_SMALL_THRESHOLD.get(),
+                POLICY_LARGE_THRESHOLD.get());
     }
 
     public static ProgressParams toProgressParams() {

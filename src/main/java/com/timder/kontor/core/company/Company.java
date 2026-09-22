@@ -236,4 +236,65 @@ public final class Company {
     public String toString() {
         return "Company[%s, \"%s\", level %d, balance=%s, status=%s]".formatted(id, name, legalLevel, account.getBalance(), liquidity);
     }
+
+    public record SaveState(
+            CompanyId id,
+            String name,
+            long foundingDay,
+            UUID owner,
+            Set<UUID> managers,
+            int legalLevel,
+            Account.SaveState account,
+            List<Loan.SaveState> loans,
+            Liquidity liquidity,
+            int daysInTrouble,
+            List<CompanyHistoryEntry> history
+    ) {
+        public SaveState {
+            Objects.requireNonNull(id, "id must not be null.");
+            Objects.requireNonNull(name, "name must not be null.");
+            Objects.requireNonNull(owner, "owner must not be null.");
+            Objects.requireNonNull(account, "account must not be null.");
+            Objects.requireNonNull(liquidity, "liquidity must not be null.");
+            if (foundingDay < 0) throw new IllegalArgumentException("foundingDay must not be negative.");
+            if (legalLevel < 1) throw new IllegalArgumentException("legalLevel must be at least 1.");
+            if (daysInTrouble < 0) throw new IllegalArgumentException("daysInTrouble must not be negative.");
+            managers = Set.copyOf(managers);
+            if (managers.contains(owner)) throw new IllegalArgumentException("owner must not be a manager.");
+            loans = List.copyOf(loans);
+            history = List.copyOf(history);
+        }
+    }
+
+    public SaveState getSaveState() {
+        List<Loan.SaveState> loanStates = new ArrayList<>(loans.size());
+        for (Loan loan : loans) {
+            loanStates.add(loan.getSaveState());
+        }
+        return new SaveState(
+                id,
+                name,
+                foundingDay,
+                owner,
+                managers,
+                legalLevel,
+                account.getSaveState(),
+                loanStates,
+                liquidity,
+                daysInTrouble,
+                List.copyOf(history));
+    }
+
+    public static Company restore(SaveState saveState) {
+        Company company = new Company(saveState.id(), saveState.name(), saveState.foundingDay(), saveState.owner(), Account.restore(saveState.account()));
+        company.managers.addAll(saveState.managers());
+        company.legalLevel = saveState.legalLevel();
+        for (Loan.SaveState loanState : saveState.loans()) {
+            company.loans.add(Loan.restore(loanState));
+        }
+        company.liquidity = saveState.liquidity();
+        company.daysInTrouble = saveState.daysInTrouble();
+        company.history.addAll(saveState.history());
+        return company;
+    }
 }
