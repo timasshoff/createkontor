@@ -23,6 +23,7 @@ public final class CompanyRules {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(otherCosts, "otherCosts must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
+        validateOtherCosts(otherCosts);
 
         Account account = company.account();
 

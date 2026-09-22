@@ -174,6 +174,40 @@ public final class Company {
         return params.insolvencyEnabled() && daysInTrouble >= params.insolvencyDays();
     }
 
+    public boolean isOperational() {
+        return liquidity == Liquidity.NORMAL;
+    }
+
+    /**
+     * Whether the company could spend an amount right now (both affordable and company is operational).
+     * @param cost The amount
+     * @param params The company parameters
+     * @return True if a matching call to {@link #trySpend} would succeed.
+     */
+    public boolean canSpend(Money cost, CompanyParams params) {
+        Objects.requireNonNull(params, "params must not be null.");
+        boolean affordable = account.canAfford(cost, overdraftLimit(params));
+        return affordable && isOperational();
+    }
+
+    /**
+     * Spends money a company chooses to spend on its own initiativ (e.g. a purchase).
+     * Pays and books a cost, if the company is able to spend it.
+     * @param day
+     * @param kind
+     * @param cost
+     * @param reference
+     * @param params
+     * @return
+     */
+    public boolean trySpend(long day, BookingKind kind, Money cost, String reference, CompanyParams params) {
+        Objects.requireNonNull(params, "params must not be null.");
+        if (!canSpend(cost, params)) {
+            return false;
+        }
+        return account.tryDebit(day, kind, cost, reference, overdraftLimit(params));
+    }
+
     public List<CompanyHistoryEntry> history() {
         return List.copyOf(history);
     }
