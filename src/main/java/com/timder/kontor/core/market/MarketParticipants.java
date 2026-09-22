@@ -2,10 +2,7 @@ package com.timder.kontor.core.market;
 
 import com.timder.kontor.core.company.CompanyId;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class MarketParticipants {
 
@@ -74,7 +71,7 @@ public final class MarketParticipants {
 
     public record SaveState(Map<CompanyId, MarketParticipant> participants) {
         public SaveState {
-            participants = Map.copyOf(participants);
+            participants = Collections.unmodifiableMap(new LinkedHashMap<>(participants));
         }
     }
 

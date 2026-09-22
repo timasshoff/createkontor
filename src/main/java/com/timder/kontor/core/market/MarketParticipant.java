@@ -9,7 +9,8 @@ public record MarketParticipant(
 ) {
     public MarketParticipant {
         if (companyId == null) throw new IllegalArgumentException("companyId must not be null.");
-        if (listPrice <= 0) throw new IllegalArgumentException("listPrice must be positive.");
+        if (!Double.isFinite(listPrice) || listPrice <= 0) throw new IllegalArgumentException("listPrice must be finite and positive.");
+        if (!Double.isFinite(reputation)) throw new IllegalArgumentException("reputation must be finite.");
         reputation = MarketRules.clamp(reputation, 0.0, 100.0);
     }
 
