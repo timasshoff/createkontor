@@ -208,14 +208,23 @@ public class EconomySavedData extends SavedData {
         tag.putInt("CycleLength", saveState.cycleLength());
         tag.putDouble("CycleAmplitude", saveState.cycleAmplitude());
         tag.putDouble("Noise", saveState.noise());
+        tag.putDouble("PolicyRate", saveState.policyRate());
         return tag;
     }
 
     private static MacroState.SaveState readMacro(CompoundTag tag) {
+        double policyRate = tag.contains("PolicyRate", Tag.TAG_DOUBLE)
+                ? tag.getDouble("PolicyRate")
+                : EconomyConfig.toMacroParams().policyRateParams().baseRate();
         return new MacroState.SaveState(
-                tag.getLong("Day"), tag.getDouble("Index"), tag.getDouble("PreviousIndex"),
-                tag.getLong("CycleStart"), tag.getInt("CycleLength"),
-                tag.getDouble("CycleAmplitude"), tag.getDouble("Noise"));
+                tag.getLong("Day"),
+                tag.getDouble("Index"),
+                tag.getDouble("PreviousIndex"),
+                tag.getLong("CycleStart"),
+                tag.getInt("CycleLength"),
+                tag.getDouble("CycleAmplitude"),
+                tag.getDouble("Noise"),
+                policyRate);
     }
 
     private static List<RawMaterialHistoryEntry> readRawMaterialHistory(ItemId id, ListTag historyTag) {
@@ -268,10 +277,12 @@ public class EconomySavedData extends SavedData {
     }
 
     private static List<MacroHistoryEntry> readMacroHistory(ListTag historyTag) {
+        double fallback = EconomyConfig.toMacroParams().policyRateParams().baseRate();
         List<MacroHistoryEntry> history = new ArrayList<>();
         for (Tag t : historyTag) {
             CompoundTag entryTag = (CompoundTag) t;
-            history.add(new MacroHistoryEntry(entryTag.getLong("Day"), entryTag.getDouble("Index")));
+            double policyRate = entryTag.contains("PolicyRate", Tag.TAG_DOUBLE) ? entryTag.getDouble("PolicyRate") : fallback;
+            history.add(new MacroHistoryEntry(entryTag.getLong("Day"), entryTag.getDouble("Index"), policyRate));
         }
         return history;
     }
@@ -282,6 +293,7 @@ public class EconomySavedData extends SavedData {
             CompoundTag entryTag = new CompoundTag();
             entryTag.putLong("Day", entry.day());
             entryTag.putDouble("Index", entry.index());
+            entryTag.putDouble("PolicyRate", entry.policyRate());
             historyTag.add(entryTag);
         }
         return historyTag;
