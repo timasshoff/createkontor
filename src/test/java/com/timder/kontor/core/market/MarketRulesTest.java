@@ -34,16 +34,16 @@ public class MarketRulesTest {
     }
 
     @Test
-    @DisplayName("Amount of companies adapts to demand")
+    @DisplayName("Amount of competitors adapts to demand")
     void companiesAreStable() {
         MarketState state = runDays(IRON_SHEET, DEMAND, 60);
 
         double expected = IRON_SHEET.equilibriumCompanies(DEMAND);
-        assertEquals(expected, state.getCompanies(), expected * 0.05);
+        assertEquals(expected, state.getCompetitors(), expected * 0.05);
     }
 
     @Test
-    @DisplayName("Deliveries by companies hurt competitors")
+    @DisplayName("Deliveries by competitors hurt competitors")
     void deliveriesHurtCompetitors() {
         MarketState state = MarketState.fresh(IRON_SHEET);
         state.recordDelivery(500);

@@ -50,7 +50,7 @@ public final class MarketRules {
     /**
      * The attractiveness of the whole competition.
      * The competition always asks for the exact market price (price factor = 1).
-     * What remains is the number of companies, weighted by their reputation.
+     * What remains is the number of competitors, weighted by their reputation.
      * Every competing company therefore counts as much as one average supplier.
      *
      * @param state The current state of the market
@@ -59,13 +59,13 @@ public final class MarketRules {
      */
     public static double competitorAttractiveness(MarketState state, MarketParams params) {
         double reputationFactor = Math.pow(state.getCompetitorReputation() / MarketParams.NEUTRAL_REPUTATION, params.reputationWeight());
-        return state.getCompanies() * reputationFactor;
+        return state.getCompetitors() * reputationFactor;
     }
 
     /**
      * The share the competition keeps for itself.
      *
-     * @param companiesAttractiveness Sum over all player companies in this market
+     * @param companiesAttractiveness Sum over all player competitors in this market
      * @param state The current state of the market
      * @param params The parameters of the market
      * @return The share of the daily demand the competition receives
@@ -77,10 +77,10 @@ public final class MarketRules {
     }
 
     /**
-     * Splits the demand between one supplier and the rest (competition + other companies).
+     * Splits the demand between one supplier and the rest (competition + other competitors).
      *
      * @param ownAttractiveness Attractiveness of the supplier
-     * @param otherCompaniesAttractiveness Attractiveness of other player companies (singleplayer = 0)
+     * @param otherCompaniesAttractiveness Attractiveness of other player competitors (singleplayer = 0)
      * @param state The current state of the market
      * @param params The parameters of the market
      * @return The share of the daily demand this supplier receives
@@ -98,7 +98,7 @@ public final class MarketRules {
      * Advanced the trading tick forward. Moves the trading deviation.
      * @param state The market state
      * @param actualDelivered The amount of actually delivered product across the market
-     * @param expectedDelivered The expected amount of delivered product by all companies and concurrence, based on their market shared
+     * @param expectedDelivered The expected amount of delivered product by all competitors and concurrence, based on their market shared
      * @param demandThisTick The demand for this tick (usually daily demand divided by amount of trading ticks per day)
      */
     public static void advanceTradingTick(MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
@@ -113,7 +113,7 @@ public final class MarketRules {
 
     public static DayResult advanceDay(MarketState state, MarketParams params, double demand) {
         double priceBefore = state.getPriceLevel();
-        double companiesBefore = state.getCompanies();
+        double competitorsBefore = state.getCompetitors();
 
         // The capacity of the competitors
         double capacity = state.getCapacity(params);
@@ -140,17 +140,21 @@ public final class MarketRules {
         double target = params.targetProfitability();
         double relative = clamp((profitability - target) / target, -1.0, 1.0);
 
-        // Adapt amount of companies
-        double companies = clamp(companiesBefore * (1.0 + params.capacityResponse() * relative), MIN_COMPANIES, MAX_COMPANIES);
-        state.setCompanies(companies);
+        // Adapt amount of competitors
+        double competitors = clamp(competitorsBefore * (1.0 + params.capacityResponse() * relative), MIN_COMPANIES, MAX_COMPANIES);
+        state.setCompetitors(competitors);
 
         // Clearing counter
         state.clearDeliveredToday();
 
-        return new DayResult(demand, soldByCompanies, soldByCompetitors, overflow, utilisation, priceBefore, price, companiesBefore, companies);
+        return new DayResult(demand, soldByCompanies, soldByCompetitors, overflow, utilisation, priceBefore, price, competitorsBefore, competitors);
     }
 
     public static double clamp(double value, double min, double max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    public static double starsFromReputation(double reputation) {
+        return 1.0 + 4.0 * reputation / 100.0;
     }
 }

@@ -1,5 +1,6 @@
 package com.timder.kontor.core.economy;
 
+import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.economy.event.CompetitorEnteredEvent;
 import com.timder.kontor.core.economy.event.CompetitorExitedEvent;
 import com.timder.kontor.core.economy.event.EconomyEvent;
@@ -47,10 +48,10 @@ public final class Economy {
 
     private final Map<ItemId, RawMaterialState> rawMaterialStates = new LinkedHashMap<>();
     private final Map<ItemId, MarketState> marketStates = new LinkedHashMap<>();
+    private final Map<ItemId, MarketParticipants> marketParticipants = new LinkedHashMap<>();
     private final Map<ItemId, MarketParams> marketParamsMap = new LinkedHashMap<>();
     private final Map<ItemId, Double> currentDemand = new LinkedHashMap<>();
     private final Map<ItemId, DayResult> lastDayResults = new LinkedHashMap<>();
-    private final Map<ItemId, Double> lastTickDelivered = new LinkedHashMap<>();
 
     /**
      * Every item reachable from the configured markets.
@@ -69,10 +70,10 @@ public final class Economy {
             MacroState.SaveState macro,
             Map<ItemId, RawMaterialState.SaveState> rawMaterialStates,
             Map<ItemId, MarketState.SaveState> marketStates,
+            Map<ItemId, MarketParticipants.SaveState> marketParticipants,
             Map<ItemId, MarketParams> marketParams,
             Map<ItemId, Double> currentDemand,
             Map<ItemId, DayResult> lastDayResults,
-            Map<ItemId, Double> lastTickDelivered,
             Map<ItemId, List<MarketHistoryEntry>> marketHistory,
             Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistory,
             List<MacroHistoryEntry> macroHistory
@@ -80,10 +81,10 @@ public final class Economy {
         public SaveState {
             rawMaterialStates = Map.copyOf(rawMaterialStates);
             marketStates = Map.copyOf(marketStates);
+            marketParticipants = Map.copyOf(marketParticipants);
             marketParams = Map.copyOf(marketParams);
             currentDemand = Map.copyOf(currentDemand);
             lastDayResults = Map.copyOf(lastDayResults);
-            lastTickDelivered = Map.copyOf(lastTickDelivered);
             marketHistory = Map.copyOf(marketHistory);
             rawMaterialHistory = Map.copyOf(rawMaterialHistory);
         }
@@ -104,14 +105,19 @@ public final class Economy {
             marketSaveStates.put(entry.getKey(), entry.getValue().getSaveState());
         }
 
-        Map<ItemId, List<MarketHistoryEntry>> marketHistorySave = new LinkedHashMap<>();
-        for (Map.Entry<ItemId, Deque<MarketHistoryEntry>> entry : marketHistory.entrySet()) {
-            marketHistorySave.put(entry.getKey(), List.copyOf(entry.getValue()));
+        Map<ItemId, MarketParticipants.SaveState> marketParticipantsSaveStates = new LinkedHashMap<>();
+        for (Map.Entry<ItemId, MarketParticipants> entry : marketParticipants.entrySet()) {
+            marketParticipantsSaveStates.put(entry.getKey(), entry.getValue().getSaveState());
         }
 
-        Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistorySave = new LinkedHashMap<>();
+        Map<ItemId, List<MarketHistoryEntry>> marketHistorySaveStates = new LinkedHashMap<>();
+        for (Map.Entry<ItemId, Deque<MarketHistoryEntry>> entry : marketHistory.entrySet()) {
+            marketHistorySaveStates.put(entry.getKey(), List.copyOf(entry.getValue()));
+        }
+
+        Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistorySaveStates = new LinkedHashMap<>();
         for (Map.Entry<ItemId, Deque<RawMaterialHistoryEntry>> entry : rawMaterialHistory.entrySet()) {
-            rawMaterialHistorySave.put(entry.getKey(), List.copyOf(entry.getValue()));
+            rawMaterialHistorySaveStates.put(entry.getKey(), List.copyOf(entry.getValue()));
         }
 
         List<MacroHistoryEntry> macroHistorySave = new LinkedList<>(macroHistory);
@@ -121,12 +127,12 @@ public final class Economy {
                 macro.getSaveState(),
                 rawSaveStates,
                 marketSaveStates,
+                marketParticipantsSaveStates,
                 marketParamsMap,
                 currentDemand,
                 lastDayResults,
-                lastTickDelivered,
-                marketHistorySave,
-                rawMaterialHistorySave,
+                marketHistorySaveStates,
+                rawMaterialHistorySaveStates,
                 macroHistorySave);
     }
 
@@ -180,8 +186,12 @@ public final class Economy {
                     ? MarketState.restore(saved)
                     : MarketState.fresh(def.params()));
 
+            MarketParticipants.SaveState savedParticipants = saveState.marketParticipants().get(def.id());
+            marketParticipants.put(def.id(), savedParticipants != null
+                    ? MarketParticipants.restore(savedParticipants)
+                    : MarketParticipants.empty());
+
             marketParamsMap.put(def.id(), saveState.marketParams().getOrDefault(def.id(), def.params()));
-            lastTickDelivered.put(def.id(), saveState.lastTickDelivered().getOrDefault(def.id(), 0.0));
             List<MarketHistoryEntry> savedHistory = saveState.marketHistory().getOrDefault(def.id(), List.of());
             marketHistory.put(def.id(), new ArrayDeque<>(savedHistory));
         }
@@ -227,8 +237,8 @@ public final class Economy {
 
         for (MarketDefinition def : this.marketDefinitions) {
             marketStates.put(def.id(), MarketState.fresh(def.params()));
+            marketParticipants.put(def.id(), MarketParticipants.empty());
             marketParamsMap.put(def.id(), def.params());
-            lastTickDelivered.put(def.id(), 0.0);
             marketHistory.put(def.id(), new ArrayDeque<>());
         }
 
@@ -282,16 +292,49 @@ public final class Economy {
     private void runTradingTick() {
         for (MarketDefinition def : marketDefinitions) {
             MarketState state = marketStates.get(def.id());
+            MarketParams params = marketParamsMap.get(def.id());
             double demandPerTick = currentDemand.get(def.id()) / MarketRules.TRADING_TICKS_PER_DAY;
 
             double actual = state.getDeliveredThisTick();
-            double expected = lastTickDelivered.getOrDefault(def.id(), 0.0);
+            double expected = expectedTickDelivery(def.id(), state, params);
 
             MarketRules.advanceTradingTick(state, actual, expected, demandPerTick);
-            lastTickDelivered.put(def.id(), actual);
 
             recordMarketHistory(def.id(), state, actual);
         }
+    }
+
+    /**
+     * The expected delivery from registered competitors in this trading tick.
+     * @param market The market
+     * @param state The current state of the market
+     * @param marketParams The parameters of the market
+     * @return The expected delivery for this one trading tick
+     */
+    private double expectedTickDelivery(ItemId market, MarketState state, MarketParams marketParams) {
+        Collection<MarketParticipant> participants = participantsOf(market).all();
+        if (participants.isEmpty()) {
+            return 0.0;
+        }
+
+        Map<CompanyId, Double> attractivenessByCompany = new LinkedHashMap<>();
+        double totalAttractiveness = 0.0;
+        for (MarketParticipant participant : participants) {
+            double attractiveness = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+            attractivenessByCompany.put(participant.companyId(), attractiveness);
+            totalAttractiveness += attractiveness;
+        }
+
+        double demand = currentDemand.get(market);
+        double expectedDaily = 0.0;
+        for (MarketParticipant participant : participants) {
+            double ownAttractiveness = attractivenessByCompany.get(participant.companyId());
+            double otherAttractiveness = totalAttractiveness - ownAttractiveness;
+            double share = MarketRules.shareFrom(ownAttractiveness, otherAttractiveness, state, marketParams);
+            expectedDaily += share * demand;
+        }
+
+        return expectedDaily / MarketRules.TRADING_TICKS_PER_DAY;
     }
 
     private List<EconomyEvent> closeDay() {
@@ -375,7 +418,7 @@ public final class Economy {
                 state.getPriceLevel(),
                 state.getDeviation(),
                 state.getDisplayedPrice(),
-                state.getCompanies(),
+                state.getCompetitors(),
                 delivered
         ));
         if (history.size() > HISTORY_LENGTH_TICKS) {
@@ -407,6 +450,24 @@ public final class Economy {
         stateOf(market).recordDelivery(quantity);
     }
 
+    /**
+     * Records a delivery attributed to one of the market's registered participants.
+     * @param market The market that received the delivery
+     * @param company The delivering company, must be registered on this market
+     * @param quantity The amount of product delivered
+     */
+    public void recordDelivery(ItemId market, CompanyId company, double quantity) {
+        if (!participantsOf(market).isRegistered(company)) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
+        stateOf(market).recordDelivery(quantity);
+    }
+
+    /**
+     * Records a purchase of a raw material.
+     * @param material The raw material
+     * @param quantity The quantity purchased
+     */
     public void recordPurchase(ItemId material, double quantity) {
         RawMaterialState state = rawMaterialStates.get(material);
         if (state == null) {
@@ -414,6 +475,73 @@ public final class Economy {
         }
 
         state.recordPurchase(quantity);
+    }
+
+    private MarketParticipants participantsOf(ItemId market) {
+        MarketParticipants participants = marketParticipants.get(market);
+        if (participants == null) {
+            throw new IllegalArgumentException("No such market: " + market);
+        }
+        return participants;
+    }
+
+    /**
+     * Registers a company as a new participant of a market.
+     * @param market The market
+     * @param company The company
+     * @param listPrice The starting list price
+     * @param reputation The starting reputation
+     */
+    public void registerParticipant(ItemId market, CompanyId company, double listPrice, double reputation) {
+        participantsOf(market).register(company, listPrice, reputation);
+    }
+
+    /**
+     * Changes the list price of a company already registered on a market
+     * @param market The market
+     * @param company The company
+     * @param listPrice The new listing price
+     */
+    public void updateListPrice(ItemId market, CompanyId company, double listPrice) {
+        participantsOf(market).updateListPrice(company, listPrice);
+    }
+
+    /**
+     * Changes the reputation of a company in one market
+     * @param market The market
+     * @param company The company
+     * @param reputation The new reputation (0 to 100)
+     */
+    public void updateReputation(ItemId market, CompanyId company, double reputation) {
+        participantsOf(market).updateReputation(company, reputation);
+    }
+
+    /**
+     * Removes a participant from the market
+     * @param market The market
+     * @param company The company to remove
+     */
+    public void withdrawParticipant(ItemId market, CompanyId company) {
+        participantsOf(market).withdraw(company);
+    }
+
+    /**
+     * Whether a company currently takes part in a market
+     * @param market The market
+     * @param company The company
+     * @return True, if the company is registered in the market
+     */
+    public boolean isParticipant(ItemId market, CompanyId company) {
+        return participantsOf(market).isRegistered(company);
+    }
+
+    /**
+     * Every company currently taking part in a market.
+     * @param market The market
+     * @return An immutable view, in registration order. Empty if nobody is registered.
+     */
+    public Collection<MarketParticipant> participants(ItemId market) {
+        return participantsOf(market).all();
     }
 
     public MarketSnapshot marketSnapshot(ItemId market) {
@@ -425,7 +553,7 @@ public final class Economy {
                 state.getPriceLevel(),
                 state.getDeviation(),
                 state.getDisplayedPrice(),
-                state.getCompanies(),
+                state.getCompetitors(),
                 state.getVisibleCompanies(),
                 marketParams.referenceCost(),
                 currentDemand.getOrDefault(market, Double.NaN),
@@ -500,7 +628,6 @@ public final class Economy {
                 ", marketParamsMap=" + marketParamsMap +
                 ", currentDemand=" + currentDemand +
                 ", lastDayResults=" + lastDayResults +
-                ", lastTickDelivered=" + lastTickDelivered +
                 ", discoveredScope=" + discoveredScope +
                 ", macro=" + macro +
                 ", ticksElapsed=" + ticksElapsed +

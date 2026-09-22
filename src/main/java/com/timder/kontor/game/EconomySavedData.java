@@ -1,6 +1,7 @@
 package com.timder.kontor.game;
 
 import com.timder.kontor.config.EconomyConfig;
+import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.economy.EconomyParams;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
@@ -129,7 +130,7 @@ public class EconomySavedData extends SavedData {
             CompoundTag entryTag = new CompoundTag();
             entryTag.putString("Id", id.value());
             entryTag.putDouble("PriceLevel", s.priceLevel());
-            entryTag.putDouble("Companies", s.companies());
+            entryTag.putDouble("Competitors", s.competitors());
             entryTag.putDouble("CompetitorReputation", s.competitorReputation());
             entryTag.putDouble("Deviation", s.deviation());
             entryTag.putDouble("DeliveredToday", s.deliveredToday());
@@ -137,7 +138,7 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("ReferenceCost", params.referenceCost());
             entryTag.putDouble("PlantSize", params.plantSize());
             entryTag.putDouble("Demand", saveState.currentDemand().getOrDefault(id, 0.0));
-            entryTag.putDouble("LastTickDelivered", saveState.lastTickDelivered().getOrDefault(id, 0.0));
+            entryTag.put("Participants", writeParticipants(saveState.marketParticipants().get(id)));
             entryTag.put("History", writeMarketHistory(saveState.marketHistory().getOrDefault(id, List.of())));
             markets.add(entryTag);
         }
@@ -164,9 +165,9 @@ public class EconomySavedData extends SavedData {
         }
 
         Map<ItemId, MarketState.SaveState> marketStates = new LinkedHashMap<>();
+        Map<ItemId, MarketParticipants.SaveState> marketParticipants = new LinkedHashMap<>();
         Map<ItemId, MarketParams> marketParams = new LinkedHashMap<>();
         Map<ItemId, Double> currentDemand = new LinkedHashMap<>();
-        Map<ItemId, Double> lastTickDelivered = new LinkedHashMap<>();
         Map<ItemId, List<MarketHistoryEntry>> marketHistory = new LinkedHashMap<>();
 
         for (Tag t : tag.getList("Markets", Tag.TAG_COMPOUND)) {
@@ -175,7 +176,7 @@ public class EconomySavedData extends SavedData {
 
             marketStates.put(id, new MarketState.SaveState(
                     entryTag.getDouble("PriceLevel"),
-                    entryTag.getDouble("Companies"),
+                    entryTag.getDouble("Competitors"),
                     entryTag.getDouble("CompetitorReputation"),
                     entryTag.getDouble("Deviation"),
                     entryTag.getDouble("DeliveredToday"),
@@ -189,14 +190,14 @@ public class EconomySavedData extends SavedData {
                     def != null ? def.params().group() : GroupDef.metal()));
 
             currentDemand.put(id, entryTag.getDouble("Demand"));
-            lastTickDelivered.put(id, entryTag.getDouble("LastTickDelivered"));
+            marketParticipants.put(id, readParticipants(entryTag.getList("Participants", Tag.TAG_COMPOUND)));
             marketHistory.put(id, readMarketHistory(id, entryTag.getList("History", Tag.TAG_COMPOUND)));
         }
 
         List<MacroHistoryEntry> macroHistory = readMacroHistory(tag.getList("MacroHistory", Tag.TAG_COMPOUND));
 
         return new Economy.SaveState(tag.getLong("TicksElapsed"), macro, rawMaterialStates, marketStates,
-                marketParams, currentDemand, Map.of(), lastTickDelivered, marketHistory, rawMaterialHistory, macroHistory);
+                marketParticipants, marketParams, currentDemand, Map.of(), marketHistory, rawMaterialHistory, macroHistory);
     }
 
     private static CompoundTag writeMacro(MacroState.SaveState saveState) {
@@ -252,9 +253,12 @@ public class EconomySavedData extends SavedData {
         for (Tag t : historyTag) {
             CompoundTag entryTag = (CompoundTag) t;
             history.add(new MarketHistoryEntry(id,
-                    entryTag.getLong("Tick"), entryTag.getLong("Day"),
-                    entryTag.getDouble("PriceLevel"), entryTag.getDouble("Deviation"),
-                    entryTag.getDouble("DisplayedPrice"), entryTag.getDouble("Companies"),
+                    entryTag.getLong("Tick"),
+                    entryTag.getLong("Day"),
+                    entryTag.getDouble("PriceLevel"),
+                    entryTag.getDouble("Deviation"),
+                    entryTag.getDouble("DisplayedPrice"),
+                    entryTag.getDouble("Competitors"),
                     entryTag.getDouble("DeliveredThisTick")));
         }
         return history;
@@ -269,7 +273,7 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("PriceLevel", entry.priceLevel());
             entryTag.putDouble("Deviation", entry.deviation());
             entryTag.putDouble("DisplayedPrice", entry.displayedPrice());
-            entryTag.putDouble("Companies", entry.companies());
+            entryTag.putDouble("Competitors", entry.competitors());
             entryTag.putDouble("DeliveredThisTick", entry.deliveredThisTick());
             historyTag.add(entryTag);
         }
@@ -297,5 +301,31 @@ public class EconomySavedData extends SavedData {
             historyTag.add(entryTag);
         }
         return historyTag;
+    }
+
+    private static MarketParticipants.SaveState readParticipants(ListTag participantsTag) {
+        Map<CompanyId, MarketParticipant> participants = new LinkedHashMap<>();
+        for (Tag t : participantsTag) {
+            CompoundTag entryTag = (CompoundTag) t;
+            CompanyId companyId = new CompanyId(entryTag.getInt("CompanyId"));
+            participants.put(companyId, new MarketParticipant(companyId, entryTag.getDouble("ListPrice"), entryTag.getDouble("Reputation")));
+        }
+        return new MarketParticipants.SaveState(participants);
+    }
+
+    private static ListTag writeParticipants(MarketParticipants.SaveState saveState) {
+        ListTag participantsTag = new ListTag();
+        if (saveState == null) {
+            return participantsTag;
+        }
+        for (Map.Entry<CompanyId, MarketParticipant> entry : saveState.participants().entrySet()) {
+            MarketParticipant participant = entry.getValue();
+            CompoundTag entryTag = new CompoundTag();
+            entryTag.putInt("CompanyId", participant.companyId().value());
+            entryTag.putDouble("ListPrice", participant.listPrice());
+            entryTag.putDouble("Reputation", participant.reputation());
+            participantsTag.add(entryTag);
+        }
+        return participantsTag;
     }
 }

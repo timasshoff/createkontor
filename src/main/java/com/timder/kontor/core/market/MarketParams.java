@@ -60,7 +60,7 @@ public record MarketParams (
     }
 
     /**
-     * Amount of companies the market will settle on with the given demand.
+     * Amount of competitors the market will settle on with the given demand.
      * @param demand The demand
      * @return The equilibrium demand
      */

@@ -2,7 +2,6 @@ package com.timder.kontor.chart;
 
 import com.timder.kontor.core.market.MarketHistoryEntry;
 import com.timder.kontor.core.market.MarketRules;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public final class MarketCharts {
             MarketHistoryEntry entry = entries.get(i);
             x[i] = -(double) (count - 1 - i) / MarketRules.TRADING_TICKS_PER_DAY;
             price[i] = entry.displayedPrice();
-            competitors[i] = entry.companies();
+            competitors[i] = entry.competitors();
             pointLabels.add("Day " + entry.day());
         }
 

@@ -12,6 +12,6 @@ public record MarketHistoryEntry(
         double priceLevel,
         double deviation,
         double displayedPrice,
-        double companies,
+        double competitors,
         double deliveredThisTick
 ) { }
