@@ -242,6 +242,7 @@ public final class Economy {
 
         for (MarketDefinition def : this.marketDefinitions) {
             marketStates.put(def.id(), MarketState.fresh(def.params()));
+            marketParticipants.put(def.id(), MarketParticipants.empty());
             marketParamsMap.put(def.id(), def.params());
             lastTickDelivered.put(def.id(), 0.0);
             marketHistory.put(def.id(), new ArrayDeque<>());
@@ -419,6 +420,19 @@ public final class Economy {
      * @param quantity The amount of product delivered
      */
     public void recordDelivery(ItemId market, double quantity) {
+        stateOf(market).recordDelivery(quantity);
+    }
+
+    /**
+     * Records a delivery attributed to one of the market's registered participants.
+     * @param market The market that received the delivery
+     * @param company The delivering company, must be registered on this market
+     * @param quantity The amount of product delivered
+     */
+    public void recordDelivery(ItemId market, CompanyId company, double quantity) {
+        if (!participantsOf(market).isRegistered(company)) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
         stateOf(market).recordDelivery(quantity);
     }
 
