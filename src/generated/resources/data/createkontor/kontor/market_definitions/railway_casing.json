@@ -2,5 +2,6 @@
   "base_demand": 750.0,
   "group": "mechanical",
   "item": "create:railway_casing",
+  "package_size": 8,
   "target_utilisation": 0.7
 }

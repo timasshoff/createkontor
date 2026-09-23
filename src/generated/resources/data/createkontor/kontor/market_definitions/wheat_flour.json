@@ -2,5 +2,6 @@
   "base_demand": 3000.0,
   "group": "food",
   "item": "create:wheat_flour",
+  "package_size": 48,
   "target_utilisation": 0.8
 }

@@ -7,17 +7,20 @@ import com.timder.kontor.core.value.ItemId;
  * @param id Identity of the product this market trades
  * @param params Parameters of this market
  * @param baseDemand Base demand before macroeconomic cycle and trend
+ * @param packageSize The base size of an order of this product. The final quantity is a multiple of this.
  */
 public record MarketDefinition(
         ItemId id,
         MarketParams params,
-        double baseDemand
+        double baseDemand,
+        int packageSize
 ) {
 
     public MarketDefinition {
         if (id == null) throw new IllegalArgumentException("id must not be null.");
         if (params == null) throw new IllegalArgumentException("params must not be null.");
         if (baseDemand <= 0) throw new IllegalArgumentException("baseDemand must be positive.");
+        if (packageSize <= 0) throw new IllegalArgumentException("packageSize must be positive.");
     }
 
 }

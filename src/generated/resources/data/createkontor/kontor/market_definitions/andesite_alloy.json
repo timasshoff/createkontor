@@ -2,5 +2,6 @@
   "base_demand": 2500.0,
   "group": "metal",
   "item": "create:andesite_alloy",
+  "package_size": 32,
   "target_utilisation": 0.85
 }

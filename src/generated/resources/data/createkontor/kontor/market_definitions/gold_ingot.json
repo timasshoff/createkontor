@@ -2,5 +2,6 @@
   "base_demand": 700.0,
   "group": "metal",
   "item": "minecraft:gold_ingot",
+  "package_size": 32,
   "target_utilisation": 0.75
 }

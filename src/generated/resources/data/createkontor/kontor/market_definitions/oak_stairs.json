@@ -2,5 +2,6 @@
   "base_demand": 1800.0,
   "group": "building",
   "item": "minecraft:oak_stairs",
+  "package_size": 64,
   "target_utilisation": 0.8
 }

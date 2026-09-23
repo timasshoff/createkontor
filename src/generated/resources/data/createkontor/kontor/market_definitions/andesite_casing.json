@@ -2,5 +2,6 @@
   "base_demand": 1900.0,
   "group": "mechanical",
   "item": "create:andesite_casing",
+  "package_size": 32,
   "target_utilisation": 0.75
 }
