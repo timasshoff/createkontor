@@ -2,5 +2,6 @@
   "base_demand": 300.0,
   "group": "mechanical",
   "item": "create:factory_gauge",
+  "package_size": 8,
   "target_utilisation": 0.75
 }

@@ -67,11 +67,12 @@ public class MarketDefinitionDataLoader extends SimpleJsonResourceReloadListener
 
         double baseDemand = GsonHelper.getAsDouble(object, "base_demand");
         double targetUtilisation = GsonHelper.getAsDouble(object, "target_utilisation", 0.8); // TODO Check if this is okay
+        int packageSize = GsonHelper.getAsInt(object, "package_size");
 
         double plantSize = 0.4 * baseDemand;
         MarketParams params = new MarketParams(PLACEHOLDER_REFERENCE_COST, plantSize, targetUtilisation, group);
 
         ItemId itemId = new ItemId(location.toString());
-        return new MarketDefinition(itemId, params, baseDemand);
+        return new MarketDefinition(itemId, params, baseDemand, packageSize);
     }
 }

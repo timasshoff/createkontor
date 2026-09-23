@@ -2,5 +2,6 @@
   "base_demand": 1200.0,
   "group": "mechanical",
   "item": "create:large_cogwheel",
+  "package_size": 16,
   "target_utilisation": 0.85
 }

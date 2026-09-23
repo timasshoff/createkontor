@@ -3,7 +3,7 @@
   "cycle_sensitivity": 0.8,
   "id": "metal",
   "price_response": 0.1,
-  "price_sensitivity": 3.5,
+  "price_sensitivity": 3.0,
   "reputation_weight": 0.5,
   "target_margin": 0.12
 }

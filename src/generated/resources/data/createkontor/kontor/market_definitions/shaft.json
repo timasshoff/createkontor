@@ -2,5 +2,6 @@
   "base_demand": 2500.0,
   "group": "mechanical",
   "item": "create:shaft",
+  "package_size": 32,
   "target_utilisation": 0.9
 }

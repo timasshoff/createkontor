@@ -2,5 +2,6 @@
   "base_demand": 2000.0,
   "group": "mechanical",
   "item": "create:gearbox",
+  "package_size": 16,
   "target_utilisation": 0.85
 }

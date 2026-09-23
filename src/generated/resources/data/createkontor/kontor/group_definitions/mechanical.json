@@ -2,8 +2,8 @@
   "capacity_response": 0.04,
   "cycle_sensitivity": 1.0,
   "id": "mechanical",
-  "price_response": 0.8,
-  "price_sensitivity": 2.5,
+  "price_response": 0.2,
+  "price_sensitivity": 2.0,
   "reputation_weight": 1.0,
   "target_margin": 0.15
 }

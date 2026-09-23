@@ -1,6 +1,13 @@
 package com.timder.kontor.core.company;
 
 import com.timder.kontor.core.company.financial.*;
+import com.timder.kontor.core.company.order.Order;
+import com.timder.kontor.core.company.order.OrderBook;
+import com.timder.kontor.core.company.order.RequestOrigin;
+import com.timder.kontor.core.company.request.Request;
+import com.timder.kontor.core.company.request.RequestBoard;
+import com.timder.kontor.core.company.request.RequestParams;
+import com.timder.kontor.core.company.request.RequestRules;
 
 import java.util.*;
 
@@ -19,19 +26,25 @@ public final class Company {
 
     private int legalLevel;
     private final Account account;
+    private final RequestBoard requestBoard;
+    private final OrderBook orderBook;
     private final List<Loan> loans = new ArrayList<>();
     private Liquidity liquidity = Liquidity.NORMAL;
     private int daysInTrouble = 0;
 
+    private long nextOrderNumber = 1;
+
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
-    private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account) {
+    private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account, RequestBoard requestBoard, OrderBook orderBook) {
         this.id = id;
         this.name = name;
         this.foundingDay = foundingDay;
         this.owner = owner;
         this.account = account;
         this.legalLevel = 1;
+        this.requestBoard = requestBoard;
+        this.orderBook = orderBook;
     }
 
     public static Company found(CompanyId id, String name, long day, UUID owner, boolean takeFounderLoan, double policyRate, CompanyParams params) {
@@ -42,7 +55,7 @@ public final class Company {
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
         if (takeFounderLoan && !params.founderLoan().isPositive()) throw new IllegalArgumentException("The settings do not offer a founder loan.");
 
-        Company company = new Company(id, validName, day, owner, Account.empty());
+        Company company = new Company(id, validName, day, owner, Account.empty(), new RequestBoard(), new OrderBook());
 
         if (params.startDeposit().isPositive()) {
             company.account.book(day, BookingKind.DEPOSIT, params.startDeposit(), "");
@@ -137,6 +150,36 @@ public final class Company {
 
     public Account account() {
         return account;
+    }
+
+    public RequestBoard requestBoard() {
+        return requestBoard;
+    }
+
+    public OrderBook orderBook() {
+        return orderBook;
+    }
+
+    /**
+     * Accepts an open request and turns it into an order.
+     * The order is automatically added to the order book.
+     * @param requestNumber The number of the request to accept
+     * @param companyParams The company parameters
+     * @param requestParams The request parameters
+     * @return The accepted newly created order
+     */
+    public Order acceptRequest(long requestNumber, CompanyParams companyParams, RequestParams requestParams) {
+        LegalFormDef legalForm = legalForm(companyParams);
+        if (!orderBook.hasRoom(legalForm)) {
+            throw new IllegalStateException("The order book has no room.");
+        }
+
+        Request request = requestBoard.accept(requestNumber);
+        long gracePeriodTicks = RequestRules.gracePeriodTicks(request.getDeadlineTicks(), requestParams);
+        Order order = Order.fromRequest(nextOrderNumber, request, gracePeriodTicks, new RequestOrigin(request.getNumber()));
+        nextOrderNumber++;
+        orderBook.add(order, legalForm);
+        return order;
     }
 
     /**
@@ -251,7 +294,10 @@ public final class Company {
             List<Loan.SaveState> loans,
             Liquidity liquidity,
             int daysInTrouble,
-            List<CompanyHistoryEntry> history
+            long nextOrderNumber,
+            List<CompanyHistoryEntry> history,
+            RequestBoard.SaveState requestBoard,
+            OrderBook.SaveState orderBook
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -259,6 +305,8 @@ public final class Company {
             Objects.requireNonNull(owner, "owner must not be null.");
             Objects.requireNonNull(account, "account must not be null.");
             Objects.requireNonNull(liquidity, "liquidity must not be null.");
+            Objects.requireNonNull(requestBoard, "requestBoard must not be null.");
+            Objects.requireNonNull(orderBook, "orderBook must not be null.");
             if (foundingDay < 0) throw new IllegalArgumentException("foundingDay must not be negative.");
             if (legalLevel < 1) throw new IllegalArgumentException("legalLevel must be at least 1.");
             if (daysInTrouble < 0) throw new IllegalArgumentException("daysInTrouble must not be negative.");
@@ -285,11 +333,21 @@ public final class Company {
                 loanStates,
                 liquidity,
                 daysInTrouble,
-                List.copyOf(history));
+                nextOrderNumber,
+                List.copyOf(history),
+                requestBoard.getSaveState(),
+                orderBook.getSaveState());
     }
 
     public static Company restore(SaveState saveState) {
-        Company company = new Company(saveState.id(), saveState.name(), saveState.foundingDay(), saveState.owner(), Account.restore(saveState.account()));
+        Company company = new Company(
+                saveState.id(),
+                saveState.name(),
+                saveState.foundingDay(),
+                saveState.owner(),
+                Account.restore(saveState.account()),
+                RequestBoard.restore(saveState.requestBoard()),
+                OrderBook.restore(saveState.orderBook()));
         company.managers.addAll(saveState.managers());
         company.legalLevel = saveState.legalLevel();
         for (Loan.SaveState loanState : saveState.loans()) {
@@ -297,6 +355,7 @@ public final class Company {
         }
         company.liquidity = saveState.liquidity();
         company.daysInTrouble = saveState.daysInTrouble();
+        company.nextOrderNumber = saveState.nextOrderNumber();
         company.history.addAll(saveState.history());
         return company;
     }

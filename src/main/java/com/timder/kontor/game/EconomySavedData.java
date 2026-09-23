@@ -16,16 +16,14 @@ import com.timder.kontor.core.value.ProcessCosts;
 import com.timder.kontor.data.KontorData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EconomySavedData extends SavedData {
 
@@ -73,6 +71,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toPriceProcessParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
+                EconomyConfig.toReputationParams(),
                 FullRecipeGraph.createRecipeGraph(server),
                 rng,
                 saveState);
@@ -97,6 +96,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toPriceProcessParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
+                EconomyConfig.toReputationParams(),
                 FullRecipeGraph.createRecipeGraph(server),
                 rng);
     }
@@ -137,7 +137,13 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("DeliveredThisTick", s.deliveredThisTick());
             entryTag.putDouble("ReferenceCost", params.referenceCost());
             entryTag.putDouble("PlantSize", params.plantSize());
+            entryTag.putInt("Depth", saveState.manufacturingDepths().getOrDefault(id, 0));
             entryTag.putDouble("Demand", saveState.currentDemand().getOrDefault(id, 0.0));
+            ListTag fulfilledCompanies = new ListTag();
+            for (CompanyId companyId : saveState.fulfilledToday().getOrDefault(id, Set.of())) {
+                fulfilledCompanies.add(IntTag.valueOf(companyId.value()));
+            }
+            entryTag.put("FulfilledToday", fulfilledCompanies);
             entryTag.put("Participants", writeParticipants(saveState.marketParticipants().get(id)));
             entryTag.put("History", writeMarketHistory(saveState.marketHistory().getOrDefault(id, List.of())));
             markets.add(entryTag);
@@ -167,6 +173,8 @@ public class EconomySavedData extends SavedData {
         Map<ItemId, MarketState.SaveState> marketStates = new LinkedHashMap<>();
         Map<ItemId, MarketParticipants.SaveState> marketParticipants = new LinkedHashMap<>();
         Map<ItemId, MarketParams> marketParams = new LinkedHashMap<>();
+        Map<ItemId, Integer> manufacturingDepths = new LinkedHashMap<>();
+        Map<ItemId, Set<CompanyId>> fulfilledToday = new LinkedHashMap<>();
         Map<ItemId, Double> currentDemand = new LinkedHashMap<>();
         Map<ItemId, List<MarketHistoryEntry>> marketHistory = new LinkedHashMap<>();
 
@@ -189,6 +197,14 @@ public class EconomySavedData extends SavedData {
                     def != null ? def.params().targetUtilisation() : 0.80,
                     def != null ? def.params().group() : GroupDef.metal()));
 
+            manufacturingDepths.put(id, entryTag.getInt("Depth"));
+
+            Set<CompanyId> fulfilledCompanies = new LinkedHashSet<>();
+            for (Tag ct : entryTag.getList("FulfilledToday", Tag.TAG_INT)) {
+                fulfilledCompanies.add(new CompanyId(((IntTag) ct).getAsInt()));
+            }
+            fulfilledToday.put(id, fulfilledCompanies);
+
             currentDemand.put(id, entryTag.getDouble("Demand"));
             marketParticipants.put(id, readParticipants(entryTag.getList("Participants", Tag.TAG_COMPOUND)));
             marketHistory.put(id, readMarketHistory(id, entryTag.getList("History", Tag.TAG_COMPOUND)));
@@ -196,8 +212,21 @@ public class EconomySavedData extends SavedData {
 
         List<MacroHistoryEntry> macroHistory = readMacroHistory(tag.getList("MacroHistory", Tag.TAG_COMPOUND));
 
-        return new Economy.SaveState(tag.getLong("TicksElapsed"), macro, rawMaterialStates, marketStates,
-                marketParticipants, marketParams, currentDemand, Map.of(), marketHistory, rawMaterialHistory, macroHistory);
+        return new Economy.SaveState(
+                tag.getLong("TicksElapsed"),
+                macro,
+                rawMaterialStates,
+                marketStates,
+                marketParticipants,
+                marketParams,
+                manufacturingDepths,
+                fulfilledToday,
+                currentDemand,
+                Map.of(),
+                marketHistory,
+                rawMaterialHistory,
+                macroHistory
+        );
     }
 
     private static CompoundTag writeMacro(MacroState.SaveState saveState) {

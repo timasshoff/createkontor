@@ -1,5 +1,6 @@
 package com.timder.kontor.config;
 
+import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.macro.MacroParams;
 import com.timder.kontor.core.macro.PolicyRateParams;
 import com.timder.kontor.core.macro.ProgressParams;
@@ -28,6 +29,13 @@ public class EconomyConfig {
     public static final ModConfigSpec.DoubleValue POLICY_LARGE_STEP;
     public static final ModConfigSpec.DoubleValue POLICY_SMALL_THRESHOLD;
     public static final ModConfigSpec.DoubleValue POLICY_LARGE_THRESHOLD;
+
+    public static final ModConfigSpec.DoubleValue REPUTATION_ON_TIME_GAIN;
+    public static final ModConfigSpec.DoubleValue REPUTATION_ON_TIME_URGENCY_FACTOR;
+    public static final ModConfigSpec.DoubleValue REPUTATION_LATE_LOSS;
+    public static final ModConfigSpec.DoubleValue REPUTATION_FAILURE_LOSS;
+    public static final ModConfigSpec.DoubleValue REPUTATION_FOUNDER_PROTECTION_FACTOR;
+    public static final ModConfigSpec.DoubleValue REPUTATION_DRIFT_PER_DAY;
 
     public static final ModConfigSpec.DoubleValue DAILY_DECAY;
     public static final ModConfigSpec.DoubleValue PROGRESS_FLOOR;
@@ -84,6 +92,21 @@ public class EconomyConfig {
                 .defineInRange("smallThreshold", 0.00025, 1.0E-6, 1.0);
         POLICY_LARGE_THRESHOLD = builder.comment("Large step if the target is further away than this")
                 .defineInRange("largeThreshold", 0.0015, 1.0E-6, 1.0);
+        builder.pop();
+
+        builder.comment("Reputation changes from settled orders").push("reputation");
+        REPUTATION_ON_TIME_GAIN = builder.comment("Base reputation gain for an on-time order, before weighting")
+                .defineInRange("onTimeGain", 1.5, 0.0, Double.MAX_VALUE);
+        REPUTATION_ON_TIME_URGENCY_FACTOR = builder.comment("Extra gain for urgent orders, as the '1 + x*delta' factor")
+                .defineInRange("onTimeUrgencyFactor", 0.5, 0.0, Double.MAX_VALUE);
+        REPUTATION_LATE_LOSS = builder.comment("Base reputation loss for a late (grace period) order, before weighting")
+                .defineInRange("lateLoss", 1.0, 0.0, Double.MAX_VALUE);
+        REPUTATION_FAILURE_LOSS = builder.comment("Base reputation loss for a burst or cancelled order, before weighting")
+                .defineInRange("failureLoss", 4.0, 0.0, Double.MAX_VALUE);
+        REPUTATION_FOUNDER_PROTECTION_FACTOR = builder.comment("Dampening of the failure loss in legal form stage 1")
+                .defineInRange("founderProtectionFactor", 0.5, 0.0, 1.0);
+        REPUTATION_DRIFT_PER_DAY = builder.comment("Daily movement of an untouched product's reputation back toward 50")
+                .defineInRange("driftPerDay", 0.5, 0.0, 100.0);
         builder.pop();
 
         builder.comment("Technical Progress").push("progress");
@@ -143,6 +166,16 @@ public class EconomyConfig {
                 POLICY_LARGE_STEP.get(),
                 POLICY_SMALL_THRESHOLD.get(),
                 POLICY_LARGE_THRESHOLD.get());
+    }
+
+    public static ReputationParams toReputationParams() {
+        return new ReputationParams(
+                REPUTATION_ON_TIME_GAIN.get(),
+                REPUTATION_ON_TIME_URGENCY_FACTOR.get(),
+                REPUTATION_LATE_LOSS.get(),
+                REPUTATION_FAILURE_LOSS.get(),
+                REPUTATION_FOUNDER_PROTECTION_FACTOR.get(),
+                REPUTATION_DRIFT_PER_DAY.get());
     }
 
     public static ProgressParams toProgressParams() {
