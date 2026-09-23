@@ -4,7 +4,8 @@ import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.data.*;
 import com.timder.kontor.game.EconomySavedData;
-import com.timder.kontor.game.EconomyTickHandler;
+import com.timder.kontor.game.KontorTickHandler;
+import com.timder.kontor.game.command.CompanyCommands;
 import com.timder.kontor.game.command.EconomyCommands;
 import com.timder.kontor.game.command.MarketCommands;
 import com.timder.kontor.game.command.RawMaterialCommands;
@@ -38,7 +39,7 @@ public class CreateKontor {
         modEventBus.addListener(KontorNetwork::registerPayloads);
 
         NeoForge.EVENT_BUS.register(this);
-        NeoForge.EVENT_BUS.register(EconomyTickHandler.class);
+        NeoForge.EVENT_BUS.register(KontorTickHandler.class);
 
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
             event.addListener(new RawMaterialDataLoader());
@@ -81,6 +82,7 @@ public class CreateKontor {
         MarketCommands.register(event.getDispatcher());
         RawMaterialCommands.register(event.getDispatcher());
         EconomyCommands.register(event.getDispatcher());
+        CompanyCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

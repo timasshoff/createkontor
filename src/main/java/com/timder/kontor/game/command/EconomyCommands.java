@@ -30,7 +30,7 @@ public class EconomyCommands {
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.literal("economy")
                                 .then(Commands.literal("advance")
-                                        .then(Commands.argument("days", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("days", IntegerArgumentType.integer(1, 359))
                                                 .executes(EconomyCommands::advance)))
                                 .then(Commands.literal("cycle")
                                     .executes(EconomyCommands::cycle))
