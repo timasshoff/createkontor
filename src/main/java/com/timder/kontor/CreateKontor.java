@@ -44,6 +44,7 @@ public class CreateKontor {
             event.addListener(new GroupDefDataLoader());
             event.addListener(new MarketDefinitionDataLoader());
             event.addListener(new ProcessCostDataLoader());
+            event.addListener(new LegalFormDefDataLoader());
         });
 
         NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
@@ -69,6 +70,9 @@ public class CreateKontor {
         event.getGenerator().addProvider(
                 event.includeServer(),
                 new ProcessCostDataProvider(generator.getPackOutput()));
+        event.getGenerator().addProvider(
+                event.includeServer(),
+                new LegalFormDefDataProvider(generator.getPackOutput()));
     }
 
     public static void onRegisterCommands(RegisterCommandsEvent event) {

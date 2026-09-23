@@ -1,0 +1,20 @@
+{
+  "auto_accept_requests": true,
+  "bankloan_limit_in_dollars": 20000,
+  "deadline_factor": 1.2,
+  "feed_in_license_tier": 1,
+  "founder_protection": false,
+  "free_storage_value_in_dollars": 0,
+  "id": "partnership",
+  "level": 2,
+  "logistics_network": false,
+  "max_employees": 4,
+  "max_grid_connection": 4096,
+  "max_open_contracts": 0,
+  "max_open_orders": 10,
+  "max_open_requests_per_product": 3,
+  "max_open_requests_total": 12,
+  "max_order_quantity": 256,
+  "max_product_licenses": 6,
+  "overdraft_limit_in_dollars": 5000
+}

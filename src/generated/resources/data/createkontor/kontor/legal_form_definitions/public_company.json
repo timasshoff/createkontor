@@ -1,0 +1,20 @@
+{
+  "auto_accept_requests": true,
+  "bankloan_limit_in_dollars": 500000,
+  "deadline_factor": 1.0,
+  "feed_in_license_tier": 3,
+  "founder_protection": false,
+  "free_storage_value_in_dollars": 40000,
+  "id": "public_company",
+  "level": 4,
+  "logistics_network": true,
+  "max_employees": 10,
+  "max_grid_connection": 65536,
+  "max_open_contracts": 20,
+  "max_open_orders": 150,
+  "max_open_requests_per_product": 8,
+  "max_open_requests_total": 80,
+  "max_order_quantity": 4096,
+  "max_product_licenses": 2048,
+  "overdraft_limit_in_dollars": 100000
+}

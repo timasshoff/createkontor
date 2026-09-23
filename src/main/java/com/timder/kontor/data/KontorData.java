@@ -1,5 +1,6 @@
 package com.timder.kontor.data;
 
+import com.timder.kontor.core.company.LegalFormDef;
 import com.timder.kontor.core.market.GroupDef;
 import com.timder.kontor.core.market.MarketDefinition;
 import com.timder.kontor.core.raw.RawMaterialDefinition;
@@ -13,6 +14,7 @@ public class KontorData {
     private static volatile Map<String, GroupDef> groupDefinitions = Map.of();
     private static volatile List<MarketDefinition> marketDefinitions = List.of();
     private static volatile Map<String, Double> processCosts = Map.of();
+    private static volatile List<LegalFormDef> legalFormDefinitions = List.of();
 
     public static List<RawMaterialDefinition> getRawMaterials() {
         return rawMaterials;
@@ -44,5 +46,13 @@ public class KontorData {
 
     static void setProcessCosts(Map<String, Double> value) {
         processCosts = Map.copyOf(value);
+    }
+
+    public static List<LegalFormDef> getLegalFormDefinitions() {
+        return legalFormDefinitions;
+    }
+
+    static void setLegalFormDefinitions(List<LegalFormDef> value) {
+        legalFormDefinitions = List.copyOf(value);
     }
 }
