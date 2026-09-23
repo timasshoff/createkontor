@@ -1,7 +1,5 @@
 package com.timder.kontor.core.company.order;
 
-import com.timder.kontor.core.company.request.RequestOrigin;
-
 public sealed interface OrderOrigin permits RequestOrigin {
 
     /**

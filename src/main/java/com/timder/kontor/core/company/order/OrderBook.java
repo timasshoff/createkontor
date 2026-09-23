@@ -93,7 +93,7 @@ public final class OrderBook {
 
             long remaining = order.remainingDeadlineTicks();
             if (ticks < remaining) {
-                order.reduceRemainingGracePeriodTicks(ticks);
+                order.reduceRemainingDeadlineTicks(ticks);
             } else {
                 long overflow = ticks - remaining;
                 order.reduceRemainingDeadlineTicks(remaining);

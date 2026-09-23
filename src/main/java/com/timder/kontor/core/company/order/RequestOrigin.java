@@ -1,6 +1,4 @@
-package com.timder.kontor.core.company.request;
-
-import com.timder.kontor.core.company.order.OrderOrigin;
+package com.timder.kontor.core.company.order;
 
 /**
  * An order that came from an accepted request
