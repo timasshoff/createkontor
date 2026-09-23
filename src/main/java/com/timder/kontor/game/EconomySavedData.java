@@ -73,6 +73,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toPriceProcessParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
+                EconomyConfig.toReputationParams(),
                 FullRecipeGraph.createRecipeGraph(server),
                 rng,
                 saveState);
@@ -97,6 +98,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toPriceProcessParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
+                EconomyConfig.toReputationParams(),
                 FullRecipeGraph.createRecipeGraph(server),
                 rng);
     }
@@ -137,6 +139,7 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("DeliveredThisTick", s.deliveredThisTick());
             entryTag.putDouble("ReferenceCost", params.referenceCost());
             entryTag.putDouble("PlantSize", params.plantSize());
+            entryTag.putInt("Depth", saveState.manufacturingDepths().getOrDefault(id, 0));
             entryTag.putDouble("Demand", saveState.currentDemand().getOrDefault(id, 0.0));
             entryTag.put("Participants", writeParticipants(saveState.marketParticipants().get(id)));
             entryTag.put("History", writeMarketHistory(saveState.marketHistory().getOrDefault(id, List.of())));
@@ -167,6 +170,7 @@ public class EconomySavedData extends SavedData {
         Map<ItemId, MarketState.SaveState> marketStates = new LinkedHashMap<>();
         Map<ItemId, MarketParticipants.SaveState> marketParticipants = new LinkedHashMap<>();
         Map<ItemId, MarketParams> marketParams = new LinkedHashMap<>();
+        Map<ItemId, Integer> manufacturingDepths = new LinkedHashMap<>();
         Map<ItemId, Double> currentDemand = new LinkedHashMap<>();
         Map<ItemId, List<MarketHistoryEntry>> marketHistory = new LinkedHashMap<>();
 
@@ -189,6 +193,7 @@ public class EconomySavedData extends SavedData {
                     def != null ? def.params().targetUtilisation() : 0.80,
                     def != null ? def.params().group() : GroupDef.metal()));
 
+            manufacturingDepths.put(id, entryTag.getInt("Depth"));
             currentDemand.put(id, entryTag.getDouble("Demand"));
             marketParticipants.put(id, readParticipants(entryTag.getList("Participants", Tag.TAG_COMPOUND)));
             marketHistory.put(id, readMarketHistory(id, entryTag.getList("History", Tag.TAG_COMPOUND)));
@@ -196,8 +201,20 @@ public class EconomySavedData extends SavedData {
 
         List<MacroHistoryEntry> macroHistory = readMacroHistory(tag.getList("MacroHistory", Tag.TAG_COMPOUND));
 
-        return new Economy.SaveState(tag.getLong("TicksElapsed"), macro, rawMaterialStates, marketStates,
-                marketParticipants, marketParams, currentDemand, Map.of(), marketHistory, rawMaterialHistory, macroHistory);
+        return new Economy.SaveState(
+                tag.getLong("TicksElapsed"),
+                macro,
+                rawMaterialStates,
+                marketStates,
+                marketParticipants,
+                marketParams,
+                manufacturingDepths,
+                currentDemand,
+                Map.of(),
+                marketHistory,
+                rawMaterialHistory,
+                macroHistory
+        );
     }
 
     private static CompoundTag writeMacro(MacroState.SaveState saveState) {

@@ -86,4 +86,36 @@ public final class Request {
         if (ticks < 0) throw new IllegalArgumentException("ticks must not be negative.");
         remainingOfferTicks = Math.max(0, remainingOfferTicks - ticks);
     }
+
+    public record SaveState(
+            long number,
+            ItemId product,
+            int quantity,
+            int quantityFactor,
+            double urgency,
+            double unitPrice,
+            long deadlineTicks,
+            long remainingOfferTicks
+    ) {
+        public SaveState {
+            Objects.requireNonNull(product, "product must not be null.");
+        }
+    }
+
+    public SaveState getSaveState() {
+        return new SaveState(number, product, quantity, quantityFactor, urgency, unitPrice, deadlineTicks, remainingOfferTicks);
+    }
+
+    public static Request restore(SaveState saveState) {
+        return new Request(
+                saveState.number(),
+                saveState.product(),
+                saveState.quantity(),
+                saveState.quantityFactor(),
+                saveState.urgency(),
+                saveState.unitPrice(),
+                saveState.deadlineTicks(),
+                saveState.remainingOfferTicks()
+        );
+    }
 }

@@ -115,4 +115,26 @@ public final class OrderBook {
         }
         throw new NoSuchElementException("No open order with number " + orderNumber + ".");
     }
+
+    public record SaveState(List<Order.SaveState> orders) {
+        public SaveState {
+            orders = List.copyOf(orders);
+        }
+    }
+
+    public SaveState getSaveState() {
+        List<Order.SaveState> orderStates = new ArrayList<>();
+        for (Order order : orders) {
+            orderStates.add(order.getSaveState());
+        }
+        return new SaveState(orderStates);
+    }
+
+    public static OrderBook restore(SaveState saveState) {
+        OrderBook book = new OrderBook();
+        for (Order.SaveState orderState : saveState.orders()) {
+            book.orders.add(Order.restore(orderState));
+        }
+        return book;
+    }
 }

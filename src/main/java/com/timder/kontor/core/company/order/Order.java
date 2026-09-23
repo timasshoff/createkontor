@@ -45,6 +45,32 @@ public final class Order {
         this.phase = OrderPhase.OPEN;
     }
 
+    private Order(long number,
+                  ItemId product,
+                  int quantity,
+                  double unitPrice,
+                  double urgency,
+                  long deadlineTicks,
+                  long gracePeriodTicks,
+                  OrderOrigin origin,
+                  int deliveredQuantity,
+                  long remainingDeadlineTicks,
+                  long remainingGracePeriodTicks,
+                  OrderPhase phase) {
+        this.number = number;
+        this.product = product;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+        this.urgency = urgency;
+        this.deadlineTicks = deadlineTicks;
+        this.gracePeriodTicks = gracePeriodTicks;
+        this.origin = origin;
+        this.deliveredQuantity = deliveredQuantity;
+        this.remainingDeadlineTicks = remainingDeadlineTicks;
+        this.remainingGracePeriodTicks = remainingGracePeriodTicks;
+        this.phase = phase;
+    }
+
     public static Order fromRequest(long number, Request request, long gracePeriodTicks, OrderOrigin origin) {
         Objects.requireNonNull(request, "request must not be null.");
         return new Order(number,
@@ -132,5 +158,48 @@ public final class Order {
     void enterGracePeriod() {
         if (phase != OrderPhase.OPEN) throw new IllegalStateException("Order is not open.");
         phase = OrderPhase.GRACE_PERIOD;
+    }
+
+    public record SaveState(
+            long number,
+            ItemId product,
+            int quantity,
+            double unitPrice,
+            double urgency,
+            long deadlineTicks,
+            long gracePeriodTicks,
+            OrderOrigin origin,
+            int deliveredQuantity,
+            long remainingDeadlineTicks,
+            long remainingGracePeriodTicks,
+            OrderPhase phase
+    ) {
+        public SaveState {
+            Objects.requireNonNull(product, "product must not be null.");
+            Objects.requireNonNull(origin, "origin must not be null.");
+            Objects.requireNonNull(phase, "phase must not be null.");
+        }
+    }
+
+    public SaveState getSaveState() {
+        return new SaveState(number, product, quantity, unitPrice, urgency, deadlineTicks, gracePeriodTicks, origin,
+                deliveredQuantity, remainingDeadlineTicks, remainingGracePeriodTicks, phase);
+    }
+
+    public static Order restore(SaveState saveState) {
+        return new Order(
+                saveState.number(),
+                saveState.product(),
+                saveState.quantity(),
+                saveState.unitPrice(),
+                saveState.urgency(),
+                saveState.deadlineTicks(),
+                saveState.gracePeriodTicks(),
+                saveState.origin(),
+                saveState.deliveredQuantity(),
+                saveState.remainingDeadlineTicks(),
+                saveState.remainingGracePeriodTicks(),
+                saveState.phase()
+        );
     }
 }

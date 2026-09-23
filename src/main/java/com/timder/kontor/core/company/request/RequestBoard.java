@@ -132,4 +132,34 @@ public final class RequestBoard {
         }
         return expired;
     }
+
+    public record SaveState(
+            List<Request.SaveState> requests,
+            Map<ItemId, Integer> lostToday
+    ) {
+        public SaveState {
+            requests = List.copyOf(requests);
+            lostToday = Map.copyOf(lostToday);
+        }
+    }
+
+    public SaveState getSaveState() {
+        List<Request.SaveState> requestStates = new ArrayList<>();
+        for (List<Request> requests : requestsByProduct.values()) {
+            for (Request request : requests) {
+                requestStates.add(request.getSaveState());
+            }
+        }
+        return new SaveState(requestStates, lostToday);
+    }
+
+    public static RequestBoard restore(SaveState saveState) {
+        RequestBoard board = new RequestBoard();
+        for (Request.SaveState requestState : saveState.requests()) {
+            Request request = Request.restore(requestState);
+            board.requestsByProduct.computeIfAbsent(request.getProduct(), p -> new ArrayList<>()).add(request);
+        }
+        board.lostToday.putAll(saveState.lostToday());
+        return board;
+    }
 }

@@ -1,6 +1,8 @@
 package com.timder.kontor.core.economy;
 
 import com.timder.kontor.core.company.CompanyId;
+import com.timder.kontor.core.company.request.ReputationParams;
+import com.timder.kontor.core.company.request.ReputationRules;
 import com.timder.kontor.core.economy.event.CompetitorEnteredEvent;
 import com.timder.kontor.core.economy.event.CompetitorExitedEvent;
 import com.timder.kontor.core.economy.event.EconomyEvent;
@@ -46,12 +48,16 @@ public final class Economy {
     private final List<MarketDefinition> marketDefinitions;
     private final Map<ItemId, Double> valueOverrides;
 
+    private final ReputationParams reputationParams;
+    private final Map<ItemId, Set<CompanyId>> fulfilledToday = new LinkedHashMap<>();
+
     private final Map<ItemId, RawMaterialState> rawMaterialStates = new LinkedHashMap<>();
     private final Map<ItemId, MarketState> marketStates = new LinkedHashMap<>();
     private final Map<ItemId, MarketParticipants> marketParticipants = new LinkedHashMap<>();
     private final Map<ItemId, MarketParams> marketParamsMap = new LinkedHashMap<>();
     private final Map<ItemId, Double> currentDemand = new LinkedHashMap<>();
     private final Map<ItemId, DayResult> lastDayResults = new LinkedHashMap<>();
+    private final Map<ItemId, Integer> manufacturingDepths = new LinkedHashMap<>();
 
     /**
      * Every item reachable from the configured markets.
@@ -72,6 +78,7 @@ public final class Economy {
             Map<ItemId, MarketState.SaveState> marketStates,
             Map<ItemId, MarketParticipants.SaveState> marketParticipants,
             Map<ItemId, MarketParams> marketParams,
+            Map<ItemId, Integer> manufacturingDepths,
             Map<ItemId, Double> currentDemand,
             Map<ItemId, DayResult> lastDayResults,
             Map<ItemId, List<MarketHistoryEntry>> marketHistory,
@@ -82,6 +89,7 @@ public final class Economy {
             rawMaterialStates = Map.copyOf(rawMaterialStates);
             marketStates = Map.copyOf(marketStates);
             marketParticipants = Map.copyOf(marketParticipants);
+            manufacturingDepths = Map.copyOf(manufacturingDepths);
             marketParams = Map.copyOf(marketParams);
             currentDemand = Map.copyOf(currentDemand);
             lastDayResults = Map.copyOf(lastDayResults);
@@ -129,12 +137,15 @@ public final class Economy {
                 marketSaveStates,
                 marketParticipantsSaveStates,
                 marketParamsMap,
+                Map.copyOf(manufacturingDepths),
                 currentDemand,
                 lastDayResults,
                 marketHistorySaveStates,
                 rawMaterialHistorySaveStates,
                 macroHistorySave);
     }
+
+    private record Attractiveness(Map<CompanyId, Double> byCompany, double total) {}
 
     /**
      * Restores the economy from a previously saves save-state.
@@ -151,16 +162,18 @@ public final class Economy {
                                   List<MarketDefinition> marketDefinitions,
                                   Map<ItemId, Double> valueOverrides,
                                   EconomyParams params,
+                                  ReputationParams reputationParams,
                                   RecipeGraph graph,
                                   Rng rng,
                                   SaveState saveState) {
-        return new Economy(rawMaterialDefinitions, marketDefinitions, valueOverrides, params, graph, rng, saveState);
+        return new Economy(rawMaterialDefinitions, marketDefinitions, valueOverrides, params, reputationParams, graph, rng, saveState);
     }
 
     private Economy(List<RawMaterialDefinition> rawMaterialDefinitions,
                     List<MarketDefinition> marketDefinitions,
                     Map<ItemId, Double> valueOverrides,
                     EconomyParams params,
+                    ReputationParams reputationParams,
                     RecipeGraph graph,
                     Rng rng,
                     SaveState saveState) {
@@ -170,6 +183,7 @@ public final class Economy {
         this.params = Objects.requireNonNull(params, "params must not be null.");
         this.graph = Objects.requireNonNull(graph, "graph must not be null.");
         this.rng = Objects.requireNonNull(rng, "rng must not be null.");
+        this.reputationParams = Objects.requireNonNull(reputationParams, "reputationParams must not be null.");
 
         for (RawMaterialDefinition def : this.rawMaterialDefinitions) {
             RawMaterialState.SaveState saved = saveState.rawMaterialStates().get(def.id());
@@ -200,6 +214,7 @@ public final class Economy {
 
         currentDemand.putAll(saveState.currentDemand());
         lastDayResults.putAll(saveState.lastDayResults());
+        manufacturingDepths.putAll(saveState.manufacturingDepths());
 
         List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
         this.discoveredScope = ValueRules.discover(roots, graph);
@@ -221,6 +236,7 @@ public final class Economy {
                    List<MarketDefinition> marketDefinitions,
                    Map<ItemId, Double> valueOverrides,
                    EconomyParams params,
+                   ReputationParams reputationParams,
                    RecipeGraph graph,
                    Rng rng) {
         this.rawMaterialDefinitions = List.copyOf(rawMaterialDefinitions);
@@ -229,6 +245,7 @@ public final class Economy {
         this.params = Objects.requireNonNull(params, "params must not be null.");
         this.graph = Objects.requireNonNull(graph, "graph must not be null.");
         this.rng = Objects.requireNonNull(rng, "rng must not be null.");
+        this.reputationParams = Objects.requireNonNull(reputationParams, "reputationParams must not be null.");
 
         for (RawMaterialDefinition def : this.rawMaterialDefinitions) {
             rawMaterialStates.put(def.id(), RawMaterialState.fresh(def.params()));
@@ -312,29 +329,72 @@ public final class Economy {
      * @return The expected delivery for this one trading tick
      */
     private double expectedTickDelivery(ItemId market, MarketState state, MarketParams marketParams) {
-        Collection<MarketParticipant> participants = participantsOf(market).all();
-        if (participants.isEmpty()) {
+        Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
+        if (attractiveness.byCompany().isEmpty()) {
             return 0.0;
-        }
-
-        Map<CompanyId, Double> attractivenessByCompany = new LinkedHashMap<>();
-        double totalAttractiveness = 0.0;
-        for (MarketParticipant participant : participants) {
-            double attractiveness = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
-            attractivenessByCompany.put(participant.companyId(), attractiveness);
-            totalAttractiveness += attractiveness;
         }
 
         double demand = currentDemand.get(market);
         double expectedDaily = 0.0;
-        for (MarketParticipant participant : participants) {
-            double ownAttractiveness = attractivenessByCompany.get(participant.companyId());
-            double otherAttractiveness = totalAttractiveness - ownAttractiveness;
-            double share = MarketRules.shareFrom(ownAttractiveness, otherAttractiveness, state, marketParams);
+        for (Map.Entry<CompanyId, Double> entry : attractiveness.byCompany().entrySet()) {
+            double own = entry.getValue();
+            double other = attractiveness.total() - own;
+            double share = MarketRules.shareFrom(own, other, state, marketParams);
             expectedDaily += share * demand;
         }
 
         return expectedDaily / MarketRules.TRADING_TICKS_PER_DAY;
+    }
+
+    public double expectedDailyQuantity(ItemId market, CompanyId company) {
+        MarketState state = stateOf(market);
+        MarketParams marketParams = marketParamsMap.get(market);
+        Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
+
+        Double own = attractiveness.byCompany().get(company);
+        if (own == null) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
+        double other = attractiveness.total() - own;
+        double share = MarketRules.shareFrom(own, other, state, marketParams);
+        return share * currentDemand.get(market);
+    }
+
+    private Attractiveness attractivenessOf(ItemId market, MarketState state, MarketParams marketParams) {
+        Map<CompanyId, Double> byCompany = new LinkedHashMap<>();
+        double total = 0.0;
+        for (MarketParticipant participant : participantsOf(market).all()) {
+            double a = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+            byCompany.put(participant.companyId(), a);
+            total += a;
+        }
+        return new Attractiveness(byCompany, total);
+    }
+
+    /**
+     * The company's share of yesterdays market overflow.
+     * @param market The market
+     * @param company The company (must be registered on this market)
+     * @return The overflow share
+     */
+    public double overflowShare(ItemId market, CompanyId company) {
+        DayResult lastResult = lastDayResults.get(market);
+        if (lastResult == null || lastResult.overflow() <= 0) {
+            return 0.0;
+        }
+
+        MarketState state = stateOf(market);
+        MarketParams marketParams = marketParamsMap.get(market);
+        Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
+
+        Double own = attractiveness.byCompany().get(company);
+        if (own == null) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
+        if (attractiveness.total() <= 0) {
+            return 0.0;
+        }
+        return lastResult.overflow() * (own / attractiveness.total());
     }
 
     private List<EconomyEvent> closeDay() {
@@ -357,6 +417,8 @@ public final class Economy {
             } else if (result.competitorOpened()) {
                 events.add(new CompetitorEnteredEvent(def.id()));
             }
+
+            applyReputationDrift(def.id());
         }
 
         recordMacroHistory();
@@ -396,8 +458,24 @@ public final class Economy {
             MarketParams updated = new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
             marketParamsMap.put(def.id(), updated);
 
+            Integer depth = result.depth().get(def.id());
+            if (depth != null) {
+                manufacturingDepths.put(def.id(), depth);
+            }
+
             double demand = MacroRules.demand(def.baseDemand(), macro, params.macro(), updated.cycleSensitivity());
             currentDemand.put(def.id(), demand);
+        }
+    }
+
+    private void applyReputationDrift(ItemId market) {
+        Set<CompanyId> fulfilled = fulfilledToday.getOrDefault(market, Set.of());
+        for (MarketParticipant participant : participantsOf(market).all()) {
+            boolean hasFulfilled = fulfilled.contains(participant.companyId());
+            double newReputation = ReputationRules.drift(participant.reputation(), hasFulfilled, reputationParams);
+            if (newReputation != participant.reputation()) {
+                updateReputation(market, participant.companyId(), newReputation);
+            }
         }
     }
 
@@ -461,6 +539,17 @@ public final class Economy {
             throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
         }
         stateOf(market).recordDelivery(quantity);
+    }
+
+    /**
+     * Marks that a company fulfilled at least one order for this product today (on time or late).
+     * @param market The product
+     * @param company The company
+     */
+    public void recordFulfillment(ItemId market, CompanyId company) {
+        Objects.requireNonNull(market, "market must not be null.");
+        Objects.requireNonNull(company, "company must not be null.");
+        fulfilledToday.computeIfAbsent(market, m -> new LinkedHashSet<>()).add(company);
     }
 
     /**
@@ -542,6 +631,10 @@ public final class Economy {
      */
     public Collection<MarketParticipant> participants(ItemId market) {
         return participantsOf(market).all();
+    }
+
+    public int manufacturingDepth(ItemId market) {
+        return manufacturingDepths.getOrDefault(market, 0);
     }
 
     public MarketSnapshot marketSnapshot(ItemId market) {
