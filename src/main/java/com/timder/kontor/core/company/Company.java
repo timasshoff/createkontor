@@ -162,7 +162,7 @@ public final class Company {
 
     /**
      * Accepts an open request and turns it into an order.
-     * The order is automatically added to the request board.
+     * The order is automatically added to the order book.
      * @param requestNumber The number of the request to accept
      * @param companyParams The company parameters
      * @param requestParams The request parameters

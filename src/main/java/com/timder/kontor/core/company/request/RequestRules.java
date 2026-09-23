@@ -16,7 +16,7 @@ public final class RequestRules {
 
         double sum = 0.0;
         for (QuantityStep step : params.quantitySteps()) {
-            sum += step.probability() * Math.min((double) step.k() * packageSize, maxQuantity);
+            sum += step.probability() * quantity(step.k(), packageSize, maxQuantity);
         }
         return sum;
     }

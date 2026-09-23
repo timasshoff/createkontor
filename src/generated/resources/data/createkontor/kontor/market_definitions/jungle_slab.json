@@ -1,0 +1,7 @@
+{
+  "base_demand": 1800.0,
+  "group": "building",
+  "item": "minecraft:jungle_slab",
+  "package_size": 64,
+  "target_utilisation": 0.8
+}

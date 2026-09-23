@@ -35,6 +35,9 @@ public final class RequestBoard {
     public void add(Request request, LegalFormDef legalForm) {
         Objects.requireNonNull(request, "request must not be null.");
 
+        if (request.getQuantity() > legalForm.maxOrderQuantity()) {
+            throw new IllegalStateException("The request quantity exceeds the legal form limit.");
+        }
         if (!hasRoom(request.getProduct(), legalForm)) {
             throw new IllegalStateException("The board has no room for " + request.getProduct());
         }
