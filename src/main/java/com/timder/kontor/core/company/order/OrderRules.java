@@ -38,7 +38,7 @@ public final class OrderRules {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(order, "order must not be null.");
         if (!order.isFullyDelivered()) throw new IllegalStateException("Order is not fully delivered.");
-        if (order.getPhase() != OrderPhase.GRACE_PERIOD) throw new IllegalStateException("Order is not within its grace period.");
+        if (order.getPhase() != OrderPhase.GRACE_PERIOD || order.remainingGracePeriodTicks() <= 0) throw new IllegalStateException("Order is not within its grace period.");
 
         Money revenue = fullValue(order).scaled(0.7); // TODO make this configurable
         bookIfPositive(company, day, BookingKind.ORDER_REVENUE, revenue, order);

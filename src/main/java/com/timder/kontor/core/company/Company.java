@@ -1,8 +1,13 @@
 package com.timder.kontor.core.company;
 
 import com.timder.kontor.core.company.financial.*;
+import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
+import com.timder.kontor.core.company.order.RequestOrigin;
+import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.company.request.RequestBoard;
+import com.timder.kontor.core.company.request.RequestParams;
+import com.timder.kontor.core.company.request.RequestRules;
 
 import java.util.*;
 
@@ -26,6 +31,8 @@ public final class Company {
     private final List<Loan> loans = new ArrayList<>();
     private Liquidity liquidity = Liquidity.NORMAL;
     private int daysInTrouble = 0;
+
+    private long nextOrderNumber = 1;
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
@@ -154,6 +161,28 @@ public final class Company {
     }
 
     /**
+     * Accepts an open request and turns it into an order.
+     * The order is automatically added to the request board.
+     * @param requestNumber The number of the request to accept
+     * @param companyParams The company parameters
+     * @param requestParams The request parameters
+     * @return The accepted newly created order
+     */
+    public Order acceptRequest(long requestNumber, CompanyParams companyParams, RequestParams requestParams) {
+        LegalFormDef legalForm = legalForm(companyParams);
+        if (!orderBook.hasRoom(legalForm)) {
+            throw new IllegalStateException("The order book has no room.");
+        }
+
+        Request request = requestBoard.accept(requestNumber);
+        long gracePeriodTicks = RequestRules.gracePeriodTicks(request.getDeadlineTicks(), requestParams);
+        Order order = Order.fromRequest(nextOrderNumber, request, gracePeriodTicks, new RequestOrigin(request.getNumber()));
+        nextOrderNumber++;
+        orderBook.add(order, legalForm);
+        return order;
+    }
+
+    /**
      * @return A copy of the loans that are not repaid yet
      */
     public List<Loan> loans() {
@@ -265,6 +294,7 @@ public final class Company {
             List<Loan.SaveState> loans,
             Liquidity liquidity,
             int daysInTrouble,
+            long nextOrderNumber,
             List<CompanyHistoryEntry> history,
             RequestBoard.SaveState requestBoard,
             OrderBook.SaveState orderBook
@@ -293,8 +323,18 @@ public final class Company {
             loanStates.add(loan.getSaveState());
         }
         return new SaveState(
-                id, name, foundingDay, owner, managers, legalLevel,
-                account.getSaveState(), loanStates, liquidity, daysInTrouble, List.copyOf(history),
+                id,
+                name,
+                foundingDay,
+                owner,
+                managers,
+                legalLevel,
+                account.getSaveState(),
+                loanStates,
+                liquidity,
+                daysInTrouble,
+                nextOrderNumber,
+                List.copyOf(history),
                 requestBoard.getSaveState(),
                 orderBook.getSaveState());
     }
@@ -315,6 +355,7 @@ public final class Company {
         }
         company.liquidity = saveState.liquidity();
         company.daysInTrouble = saveState.daysInTrouble();
+        company.nextOrderNumber = saveState.nextOrderNumber();
         company.history.addAll(saveState.history());
         return company;
     }

@@ -47,7 +47,7 @@ public class MarketDefinitionDataProvider implements DataProvider {
 
         futures.add(save(cache, "jungle_planks", "minecraft:jungle_planks", "building", 2800, 0.85, 64));
         futures.add(save(cache, "jungle_stairs", "minecraft:jungle_stairs", "building", 1800, 0.80, 64));
-        futures.add(save(cache, "birch_slab", "minecraft:birch_slab", "building", 1800, 0.80, 64));
+        futures.add(save(cache, "jungle_slab", "minecraft:jungle_slab", "building", 1800, 0.80, 64));
 
         futures.add(save(cache, "acacia_planks", "minecraft:acacia_planks", "building", 2800, 0.85, 64));
         futures.add(save(cache, "acacia_stairs", "minecraft:acacia_stairs", "building", 1800, 0.80, 64));

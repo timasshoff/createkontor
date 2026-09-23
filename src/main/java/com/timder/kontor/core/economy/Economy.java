@@ -79,6 +79,7 @@ public final class Economy {
             Map<ItemId, MarketParticipants.SaveState> marketParticipants,
             Map<ItemId, MarketParams> marketParams,
             Map<ItemId, Integer> manufacturingDepths,
+            Map<ItemId, Set<CompanyId>> fulfilledToday,
             Map<ItemId, Double> currentDemand,
             Map<ItemId, DayResult> lastDayResults,
             Map<ItemId, List<MarketHistoryEntry>> marketHistory,
@@ -91,10 +92,19 @@ public final class Economy {
             marketParticipants = Map.copyOf(marketParticipants);
             manufacturingDepths = Map.copyOf(manufacturingDepths);
             marketParams = Map.copyOf(marketParams);
+            fulfilledToday = immutableCopy(fulfilledToday);
             currentDemand = Map.copyOf(currentDemand);
             lastDayResults = Map.copyOf(lastDayResults);
             marketHistory = Map.copyOf(marketHistory);
             rawMaterialHistory = Map.copyOf(rawMaterialHistory);
+        }
+
+        private static Map<ItemId, Set<CompanyId>> immutableCopy(Map<ItemId, Set<CompanyId>> source) {
+            Map<ItemId, Set<CompanyId>> copy = new LinkedHashMap<>();
+            for (Map.Entry<ItemId, Set<CompanyId>> entry : source.entrySet()) {
+                copy.put(entry.getKey(), Set.copyOf(entry.getValue()));
+            }
+            return Map.copyOf(copy);
         }
     }
 
@@ -138,6 +148,7 @@ public final class Economy {
                 marketParticipantsSaveStates,
                 marketParamsMap,
                 Map.copyOf(manufacturingDepths),
+                fulfilledToday,
                 currentDemand,
                 lastDayResults,
                 marketHistorySaveStates,
@@ -215,6 +226,10 @@ public final class Economy {
         currentDemand.putAll(saveState.currentDemand());
         lastDayResults.putAll(saveState.lastDayResults());
         manufacturingDepths.putAll(saveState.manufacturingDepths());
+
+        for (Map.Entry<ItemId, Set<CompanyId>> entry : saveState.fulfilledToday().entrySet()) {
+            fulfilledToday.put(entry.getKey(), new LinkedHashSet<>(entry.getValue()));
+        }
 
         List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
         this.discoveredScope = ValueRules.discover(roots, graph);
@@ -477,6 +492,7 @@ public final class Economy {
                 updateReputation(market, participant.companyId(), newReputation);
             }
         }
+        fulfilledToday.remove(market);
     }
 
     private void recordRawMaterialHistory(ItemId id, long day) {

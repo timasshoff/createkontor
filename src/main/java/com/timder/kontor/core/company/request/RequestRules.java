@@ -95,9 +95,12 @@ public final class RequestRules {
         if (quantityFactor <= 0) throw new IllegalArgumentException("quantityFactor must be positive.");
         if (packageSize <= 0) throw new IllegalArgumentException("packageSize must be positive.");
         if (maxQuantity <= 0) throw new IllegalArgumentException("maxQuantity must be positive.");
+        if (maxQuantity < packageSize) throw new IllegalArgumentException("maxQuantity must be at least packageSize.");
 
         long raw = (long) quantityFactor * packageSize;
-        return (int) Math.min(raw, maxQuantity);
+        long maxPackageQuantity = (long) (maxQuantity / packageSize) * packageSize;
+        return (int) Math.min(raw, maxPackageQuantity);
+
     }
 
     /**
@@ -172,5 +175,16 @@ public final class RequestRules {
 
         double raw = params.offerDurationBaseTicks() * (1 - params.offerDurationUrgencyFactor() * urgency) * salesRepFactor;
         return Math.round(raw);
+    }
+
+    /**
+     * The grace period a fresh order gets
+     * @param deadlineTicks The orders deadline
+     * @param params The request parameters
+     * @return The grace period in ticks
+     */
+    public static long gracePeriodTicks(long deadlineTicks, RequestParams params) {
+        if (deadlineTicks <= 0) throw new IllegalArgumentException("deadlineTicks must be positive.");
+        return Math.round(deadlineTicks * params.gracePeriodPortion());
     }
 }
