@@ -1,4 +1,4 @@
-package com.timder.kontor.core.company.request;
+package com.timder.kontor.core.company.order;
 
 import com.timder.kontor.core.company.LegalFormDef;
 
@@ -58,6 +58,18 @@ public final class OrderBook {
             throw new IllegalStateException("The order book has no room.");
         }
         orders.add(order);
+    }
+
+    /**
+     * Removes an order from the book after it has been settled (K 12.7)
+     * @param orderNumber The order's number
+     * @return The removed order
+     * @throws NoSuchElementException If no open order with this number exists
+     */
+    public Order remove(long orderNumber) {
+        Order order = find(orderNumber);
+        orders.remove(order);
+        return order;
     }
 
     /**

@@ -1,5 +1,6 @@
-package com.timder.kontor.core.company.request;
+package com.timder.kontor.core.company.order;
 
+import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.value.ItemId;
 
 import java.util.Objects;

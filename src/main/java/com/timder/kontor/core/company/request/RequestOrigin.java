@@ -1,5 +1,7 @@
 package com.timder.kontor.core.company.request;
 
+import com.timder.kontor.core.company.order.OrderOrigin;
+
 /**
  * An order that came from an accepted request
  * @param requestNumber The number of the request this order comes from

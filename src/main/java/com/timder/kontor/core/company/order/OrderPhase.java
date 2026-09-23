@@ -1,4 +1,4 @@
-package com.timder.kontor.core.company.request;
+package com.timder.kontor.core.company.order;
 
 public enum OrderPhase {
     OPEN,
