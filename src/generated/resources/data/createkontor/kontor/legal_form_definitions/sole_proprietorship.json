@@ -1,0 +1,20 @@
+{
+  "auto_accept_requests": false,
+  "bankloan_limit_in_dollars": 0,
+  "deadline_factor": 1.5,
+  "feed_in_license_tier": 0,
+  "founder_protection": true,
+  "free_storage_value_in_dollars": 0,
+  "id": "sole_proprietorship",
+  "level": 1,
+  "logistics_network": false,
+  "max_employees": 2,
+  "max_grid_connection": 1024,
+  "max_open_contracts": 0,
+  "max_open_orders": 3,
+  "max_open_requests_per_product": 2,
+  "max_open_requests_total": 5,
+  "max_order_quantity": 64,
+  "max_product_licenses": 2,
+  "overdraft_limit_in_dollars": 1000
+}

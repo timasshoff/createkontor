@@ -1,9 +1,11 @@
 package com.timder.kontor;
 
+import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.data.*;
 import com.timder.kontor.game.EconomySavedData;
-import com.timder.kontor.game.EconomyTickHandler;
+import com.timder.kontor.game.KontorTickHandler;
+import com.timder.kontor.game.command.CompanyCommands;
 import com.timder.kontor.game.command.EconomyCommands;
 import com.timder.kontor.game.command.MarketCommands;
 import com.timder.kontor.game.command.RawMaterialCommands;
@@ -37,18 +39,20 @@ public class CreateKontor {
         modEventBus.addListener(KontorNetwork::registerPayloads);
 
         NeoForge.EVENT_BUS.register(this);
-        NeoForge.EVENT_BUS.register(EconomyTickHandler.class);
+        NeoForge.EVENT_BUS.register(KontorTickHandler.class);
 
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
             event.addListener(new RawMaterialDataLoader());
             event.addListener(new GroupDefDataLoader());
             event.addListener(new MarketDefinitionDataLoader());
             event.addListener(new ProcessCostDataLoader());
+            event.addListener(new LegalFormDefDataLoader());
         });
 
         NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
 
-        modContainer.registerConfig(ModConfig.Type.SERVER, EconomyConfig.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, EconomyConfig.SPEC, "createkontor-server-economy.toml");
+        modContainer.registerConfig(ModConfig.Type.SERVER, CompanyConfig.SPEC, "createkontor-server-company.toml");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -69,12 +73,16 @@ public class CreateKontor {
         event.getGenerator().addProvider(
                 event.includeServer(),
                 new ProcessCostDataProvider(generator.getPackOutput()));
+        event.getGenerator().addProvider(
+                event.includeServer(),
+                new LegalFormDefDataProvider(generator.getPackOutput()));
     }
 
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         MarketCommands.register(event.getDispatcher());
         RawMaterialCommands.register(event.getDispatcher());
         EconomyCommands.register(event.getDispatcher());
+        CompanyCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

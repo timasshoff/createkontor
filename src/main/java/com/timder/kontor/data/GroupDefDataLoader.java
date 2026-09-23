@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.market.GroupDef;
-import com.timder.kontor.core.raw.RawMaterialDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -13,7 +12,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GroupDefDataLoader extends SimpleJsonResourceReloadListener {

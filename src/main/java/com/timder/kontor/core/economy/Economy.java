@@ -699,6 +699,14 @@ public final class Economy {
         return List.copyOf(macroHistory);
     }
 
+    /**
+     * @param day Only entries strictly after this day
+     * @return The macro history entries recorded after the given day, in order
+     */
+    public List<MacroHistoryEntry> macroHistorySince(long day) {
+        return macroHistory.stream().filter(entry -> entry.day() > day).toList();
+    }
+
     public List<ItemId> marketIds() {
         return marketDefinitions.stream().map(MarketDefinition::id).toList();
     }
