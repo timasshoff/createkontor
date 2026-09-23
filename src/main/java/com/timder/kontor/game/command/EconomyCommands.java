@@ -54,7 +54,7 @@ public class EconomyCommands {
         int days = IntegerArgumentType.getInteger(context, "days");
         long lastHistoryDayBefore = KontorTickHandler.lastHistoryDay(economy);
 
-        economy.advanceTo(days * Economy.DAY_LENGTH);
+        economy.advanceTo(economy.ticksElapsed() + (long) days * Economy.DAY_LENGTH);
         economyData.setDirty();
         KontorTickHandler.settleCompanies(companyData, economy, lastHistoryDayBefore);
 
