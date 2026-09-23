@@ -52,7 +52,7 @@ public class CompanyCommands {
 
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null) {
-            context.getSource().sendFailure(Component.literal("Only a player can open the graph."));
+            context.getSource().sendFailure(Component.literal("Only a player can found a company."));
             return 0;
         }
 

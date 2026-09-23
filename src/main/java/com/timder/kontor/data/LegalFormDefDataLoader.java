@@ -44,7 +44,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
     }
 
     private static LegalFormDef parse(JsonElement json) {
-        JsonObject object = GsonHelper.convertToJsonObject(json, "product");
+        JsonObject object = GsonHelper.convertToJsonObject(json, "legal form definition");
 
         int level = GsonHelper.getAsInt(object, "level");
         String id = GsonHelper.getAsString(object, "id");

@@ -20,7 +20,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 
