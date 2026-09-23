@@ -58,6 +58,29 @@ public final class ReputationRules {
         return clamp(currentReputation + delta);
     }
 
+    /**
+     * Drifts the reputation towards 50 unless an order was full-filled today.
+     * @param currentReputation The product's current reputation
+     * @param hasFulfilledOrderToday True, if at least one order was fulfilled today
+     * @param params Reputation parameters
+     * @return The new reputation after the drift
+     */
+    public static double drift(double currentReputation, boolean hasFulfilledOrderToday, ReputationParams params) {
+        if (currentReputation < 0 || currentReputation > 100) {
+            throw new IllegalArgumentException("currentReputation must be between 0 and 100.");
+        }
+        Objects.requireNonNull(params, "params must not be null");
+
+        if (hasFulfilledOrderToday || currentReputation == 50.0) {
+            return currentReputation;
+        }
+        if (currentReputation > 50.0) {
+            return Math.max(50.0, currentReputation - params.driftPerDay());
+        }
+
+        return Math.min(50.0, currentReputation + params.driftPerDay());
+    }
+
     private static double weight(Order order, int packageSize, double structuralMarketPrice) {
         if (packageSize <= 0) throw new IllegalArgumentException("packageSize must be positive.");
         if (structuralMarketPrice <= 0) throw new IllegalArgumentException("structuralMarketPrice must be positive.");
