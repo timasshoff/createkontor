@@ -6,9 +6,6 @@ import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.LegalFormDef;
 import com.timder.kontor.core.company.financial.Money;
-import com.timder.kontor.core.market.GroupDef;
-import com.timder.kontor.core.market.MarketDefinition;
-import com.timder.kontor.core.value.ItemId;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -18,6 +15,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
 
@@ -27,7 +25,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> resourceList, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        Map<Integer, LegalFormDef> byLevel = new LinkedHashMap<>();
+        Map<Integer, LegalFormDef> byLevel = new TreeMap<>();
         for (Map.Entry<ResourceLocation, JsonElement> entry : resourceList.entrySet()) {
             ResourceLocation file = entry.getKey();
             try {

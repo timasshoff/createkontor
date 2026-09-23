@@ -2,6 +2,8 @@ package com.timder.kontor.data;
 
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
+import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.LegalForms;
 import com.timder.kontor.core.company.financial.Money;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -27,7 +29,7 @@ public class LegalFormDefDataProvider implements DataProvider {
         futures.add(save(cache, "sole_proprietorship", 1, "sole_proprietorship", 2, 2, 2, 5, 3, 0, 64, 1.5, 1024, 0, Money.ofDollars(1000), Money.ZERO, false, false, Money.ZERO, true));
         futures.add(save(cache, "partnership", 2, "partnership", 4, 6, 3, 12, 10, 0, 256, 1.2, 4096, 1, Money.ofDollars(5000), Money.ofDollars(20000), true, false, Money.ZERO, false));
         futures.add(save(cache, "limited_company", 3, "limited_company", 6, 15, 5, 30, 40, 6, 1024, 1.0, 16384, 2, Money.ofDollars(20000), Money.ofDollars(100000), true, true, Money.ofDollars(20000), false));
-        futures.add(save(cache, "public_company", 4, "public_company", 10, 2048, 8, 80, 150, 20, 4096, 1.0, 65536, 3, Money.ofDollars(100000), Money.ofDollars(500000), true, true, Money.ofDollars(40000), false));
+        futures.add(save(cache, "public_company", 4, "public_company", 10, LegalFormDef.UNLIMITED, 8, 80, 150, 20, 4096, 1.0, 65536, 3, Money.ofDollars(100000), Money.ofDollars(500000), true, true, Money.ofDollars(40000), false));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }

@@ -1,5 +1,6 @@
 package com.timder.kontor;
 
+import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.data.*;
 import com.timder.kontor.game.EconomySavedData;
@@ -49,7 +50,8 @@ public class CreateKontor {
 
         NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
 
-        modContainer.registerConfig(ModConfig.Type.SERVER, EconomyConfig.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, EconomyConfig.SPEC, "createkontor-server-economy.toml");
+        modContainer.registerConfig(ModConfig.Type.SERVER, CompanyConfig.SPEC, "createkontor-server-company.toml");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
