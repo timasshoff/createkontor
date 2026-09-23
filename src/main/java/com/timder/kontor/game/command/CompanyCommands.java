@@ -39,7 +39,7 @@ public class CompanyCommands {
                                 .then(Commands.literal("info")
                                         .then(Commands.argument("name", StringArgumentType.string())
                                                 .executes(CompanyCommands::info)))
-                                .then(Commands.literal("balance")
+                                .then(Commands.literal("book")
                                         .then(Commands.argument("name", StringArgumentType.string())
                                                 .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                         .executes(CompanyCommands::balance))))));
