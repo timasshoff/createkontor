@@ -2,6 +2,7 @@ package com.timder.kontor.game;
 
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.CompanyParams;
+import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.LegalForms;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
@@ -20,31 +21,42 @@ public class KontorTickHandler {
 
         EconomySavedData economyData = EconomySavedData.get(server);
         Economy economy = economyData.getEconomy();
+        CompanySavedData companyData = CompanySavedData.get(server);
+        CompanyRegistry registry = companyData.getRegistry();
 
         long ticksBefore = economy.ticksElapsed();
         long dayBefore = economy.currentDay();
+        long lastHistoryDayBefore = lastHistoryDay(economy);
 
         economy.advanceTo(server.overworld().getGameTime());
+        boolean tradingTickPassed = economy.ticksElapsed() != ticksBefore;
 
-        if (economy.ticksElapsed() != ticksBefore) {
-            // Only write to disk if the economy actually advanced
+        if (tradingTickPassed) {
             economyData.setDirty();
         }
 
+        boolean orderBurstOccurred = false; // = an order has failed
+        if (registry.size() > 0) {
+            orderBurstOccurred = !registry.advance(1, economy.currentDay()).isEmpty();
+            // TODO once Economy.registerParticipant has a caller: apply ReputationRules.changeFailed for each burst.
+            // TODO once notifications exist: tell the company's members an order burst.
+        }
+
+        if (orderBurstOccurred || (tradingTickPassed && registry.size() > 0)) {
+            companyData.setDirty();
+        }
+
         if (economy.currentDay() != dayBefore) {
-            settleCompanies(server, economy, dayBefore);
+            settleCompanies(companyData, economy, lastHistoryDayBefore);
         }
     }
 
-    private static void settleCompanies(MinecraftServer server, Economy economy, long dayBefore) {
-        CompanySavedData companyData = CompanySavedData.get(server);
+    public static void settleCompanies(CompanySavedData companyData, Economy economy, long lastHistoryDayBefore) {
         if (companyData.getRegistry().size() == 0) {
-            return; // No companies to settle
+            return;
         }
 
-        List<MacroHistoryEntry> newDays = economy.macroHistory().stream() // In case we advanced multiple days
-                .filter(entry -> entry.day() > dayBefore)
-                .toList();
+        List<MacroHistoryEntry> newDays = economy.macroHistorySince(lastHistoryDayBefore);
         if (newDays.isEmpty()) {
             return;
         }
@@ -54,5 +66,10 @@ public class KontorTickHandler {
             companyData.getRegistry().settleDay(entry.day(), entry.policyRate(), params);
         }
         companyData.setDirty();
+    }
+
+    public static long lastHistoryDay(Economy economy) {
+        List<MacroHistoryEntry> history = economy.macroHistory();
+        return history.isEmpty() ? -1 : history.get(history.size() - 1).day();
     }
 }

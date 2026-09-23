@@ -1,5 +1,10 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.order.Order;
+import com.timder.kontor.core.company.order.OrderPhase;
+import com.timder.kontor.core.company.order.OrderRules;
+import com.timder.kontor.core.company.order.OrderSettlementResult;
+
 import java.util.*;
 
 public final class CompanyRegistry {
@@ -34,6 +39,11 @@ public final class CompanyRegistry {
         companies.put(id, company);
         nextId++;
         return company;
+    }
+
+    public Optional<Company> delete(CompanyId id) {
+        Objects.requireNonNull(id, "id must not be null.");
+        return Optional.ofNullable(companies.remove(id));
     }
 
     /**
@@ -84,6 +94,17 @@ public final class CompanyRegistry {
         return companies.size();
     }
 
+    public List<Company> insolventCompanies(CompanyParams params) {
+        Objects.requireNonNull(params, "params must not be null.");
+        List<Company> insolvent = new ArrayList<>();
+        for (Company company : companies.values()) {
+            if (company.isInsolvent(params)) {
+                insolvent.add(company);
+            }
+        }
+        return insolvent;
+    }
+
     public Map<CompanyId, CompanyHistoryEntry> settleDay(long day, double policyRate, CompanyParams params) {
         Objects.requireNonNull(params, "params must not be null.");
         Map<CompanyId, CompanyHistoryEntry> entries = new LinkedHashMap<>();
@@ -91,6 +112,31 @@ public final class CompanyRegistry {
             entries.put(company.id(), CompanyRules.settleDay(company, day, policyRate, Map.of(), params));
         }
         return entries;
+    }
+
+    public List<BurstOrder> advance(long ticks, long day) {
+        List<BurstOrder> burst = new ArrayList<>();
+        for (Company company : companies.values()) {
+            company.requestBoard().advance(ticks);
+            company.orderBook().advance(ticks);
+
+            for (Order order : company.orderBook().allOrders()) {
+                if (order.getPhase() == OrderPhase.GRACE_PERIOD && order.remainingGracePeriodTicks() <= 0) {
+                    OrderSettlementResult settlement = OrderRules.settleFailed(company, day, order);
+                    company.orderBook().remove(order.getNumber());
+                    burst.add(new BurstOrder(company.id(), order, settlement));
+                }
+            }
+        }
+        return burst;
+    }
+
+    public record BurstOrder(CompanyId companyId, Order order, OrderSettlementResult settlement) {
+        public BurstOrder {
+            Objects.requireNonNull(companyId, "companyId must not be null.");
+            Objects.requireNonNull(order, "order must not be null.");
+            Objects.requireNonNull(settlement, "settlement must not be null.");
+        }
     }
 
     public record SaveState(

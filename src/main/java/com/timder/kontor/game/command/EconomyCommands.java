@@ -10,7 +10,9 @@ import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.core.raw.RawMaterialHistoryEntry;
 import com.timder.kontor.core.value.ItemId;
+import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.KontorTickHandler;
 import com.timder.kontor.game.network.ChartPayload;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -45,14 +47,18 @@ public class EconomyCommands {
 
     private static int advance(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        EconomySavedData data = EconomySavedData.get(source.getServer());
-        Economy economy = data.getEconomy();
+        EconomySavedData economyData = EconomySavedData.get(source.getServer());
+        CompanySavedData companyData = CompanySavedData.get(source.getServer());
+        Economy economy = economyData.getEconomy();
 
         int days = IntegerArgumentType.getInteger(context, "days");
-        economy.advanceTicksQuietly(days * Economy.DAY_LENGTH);
-        data.setDirty();
+        long lastHistoryDayBefore = KontorTickHandler.lastHistoryDay(economy);
 
-        source.sendSuccess(() -> Component.literal("Advanced the economy by " + days + " days."), false);
+        economy.advanceTicksQuietly(days * Economy.DAY_LENGTH);
+        economyData.setDirty();
+        KontorTickHandler.settleCompanies(companyData, economy, lastHistoryDayBefore);
+
+        source.sendSuccess(() -> Component.literal("Advanced the entire economy simulation by " + days + " days."), false);
 
         return 1;
     }

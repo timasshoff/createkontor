@@ -22,10 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CompanyCommands {
@@ -113,7 +110,7 @@ public class CompanyCommands {
         List<CompanyHistoryEntry> history = company.history();
         String lastResult = history.isEmpty()
                 ? "No settled days yet."
-                : "Last day result (Day " + history.get(history.size() - 1).day() + "): " + history.get(history.size() - 1).result();
+                : formatHistoryEntry(company, history.get(history.size() - 1));
 
         String text = String.format(Locale.ROOT,
                 "=== %s (ID %d, %s) ===\n" +
@@ -146,7 +143,8 @@ public class CompanyCommands {
         MinecraftServer server = source.getServer();
         String name = StringArgumentType.getString(context, "name");
 
-        var registry = CompanySavedData.get(server).getRegistry();
+        CompanySavedData data = CompanySavedData.get(server);
+        var registry = data.getRegistry();
         Optional<Company> found = registry.findByName(name);
         if (found.isEmpty()) {
             source.sendFailure(Component.literal("No company named \"" + name + "\"."));
@@ -156,8 +154,41 @@ public class CompanyCommands {
         Economy economy = EconomySavedData.get(context.getSource().getServer()).getEconomy();
 
         company.account().book(economy.currentDay(), BookingKind.DEPOSIT, Money.fromDollar(DoubleArgumentType.getDouble(context, "amount")), "fraud");
+        data.setDirty();
+
         source.sendSuccess(() -> Component.literal("Successfully booked."), false);
         return 1;
+    }
+
+    private static String formatHistoryEntry(Company company, CompanyHistoryEntry entry) {
+        Map<BookingKind, Money> sums = company.account().sumsByKind(entry.day());
+
+        StringBuilder text = new StringBuilder();
+        text.append("Last day result (Day ").append(entry.day()).append("): ").append(entry.result())
+                .append("\n  Revenue: ").append(entry.revenue());
+
+        sums.entrySet().stream()
+                .filter(e -> e.getKey().isCost())
+                .sorted(Comparator.comparingInt(e -> e.getKey().ordinal()))
+                .forEach(e -> text.append("\n  ").append(formatBookingKind(e.getKey())).append(": ").append(e.getValue()));
+
+        List<Map.Entry<BookingKind, Money>> financing = sums.entrySet().stream()
+                .filter(e -> e.getKey().isFinancing())
+                .sorted(Comparator.comparingInt(e -> e.getKey().ordinal()))
+                .toList();
+        if (!financing.isEmpty()) {
+            text.append("\nFinancing today (not part of the result above):");
+            for (Map.Entry<BookingKind, Money> e : financing) {
+                text.append("\n  ").append(formatBookingKind(e.getKey())).append(": ").append(e.getValue());
+            }
+        }
+
+        return text.toString();
+    }
+
+    private static String formatBookingKind(BookingKind kind) {
+        String name = kind.name().replace('_', ' ').toLowerCase(Locale.ROOT);
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 
     private static String playerName(MinecraftServer server, UUID id) {
