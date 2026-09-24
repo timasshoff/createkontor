@@ -6,10 +6,7 @@ import com.timder.kontor.data.*;
 import com.timder.kontor.datagen.KontorDataGen;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.KontorTickHandler;
-import com.timder.kontor.game.command.CompanyCommands;
-import com.timder.kontor.game.command.EconomyCommands;
-import com.timder.kontor.game.command.MarketCommands;
-import com.timder.kontor.game.command.RawMaterialCommands;
+import com.timder.kontor.game.command.*;
 import com.timder.kontor.game.network.KontorNetwork;
 import com.timder.kontor.registry.KontorRegistries;
 import net.minecraft.data.DataGenerator;
@@ -89,6 +86,8 @@ public class CreateKontor {
         RawMaterialCommands.register(event.getDispatcher());
         EconomyCommands.register(event.getDispatcher());
         CompanyCommands.register(event.getDispatcher());
+        RequestCommands.register(event.getDispatcher());
+        OrderCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

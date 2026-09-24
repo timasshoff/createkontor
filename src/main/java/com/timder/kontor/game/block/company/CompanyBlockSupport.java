@@ -4,6 +4,7 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -62,7 +63,7 @@ public final class CompanyBlockSupport {
 
         if (player != null) {
             if (company != null) {
-                message(player, MESSAGE_BOUND, Component.literal(company.name()).withStyle(ChatFormatting.GOLD));
+                message(player, MESSAGE_BOUND, ComponentFormatting.highlightDefaultComponent(company.name()));
             } else {
                 message(player, MESSAGE_NOT_IN_COMPANY);
             }

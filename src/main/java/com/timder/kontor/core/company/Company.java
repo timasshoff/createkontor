@@ -169,6 +169,8 @@ public final class Company {
      * @return The accepted newly created order
      */
     public Order acceptRequest(long requestNumber, CompanyParams companyParams, RequestParams requestParams) {
+        requestBoard.get(requestNumber);
+
         LegalFormDef legalForm = legalForm(companyParams);
         if (!orderBook.hasRoom(legalForm)) {
             throw new IllegalStateException("The order book has no room.");
