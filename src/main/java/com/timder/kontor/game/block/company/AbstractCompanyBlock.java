@@ -1,7 +1,9 @@
 package com.timder.kontor.game.block.company;
 
 import com.timder.kontor.core.company.Company;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -52,6 +54,6 @@ public abstract class AbstractCompanyBlock extends Block implements EntityBlock 
      * @param company The company of the block
      */
     protected void onMemberUse(ServerPlayer player, ServerLevel level, BlockPos pos, Company company) {
-        CompanyBlockSupport.message(player, CompanyBlockSupport.MESSAGE_STATUS, company.name());
+        CompanyBlockSupport.message(player, CompanyBlockSupport.MESSAGE_STATUS, Component.literal(company.name()).withStyle(ChatFormatting.GOLD));
     }
 }

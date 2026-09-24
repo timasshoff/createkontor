@@ -15,6 +15,6 @@
   "max_open_requests_per_product": 8,
   "max_open_requests_total": 80,
   "max_order_quantity": 4096,
-  "max_product_licenses": 2048,
+  "max_product_licenses": 2147483647,
   "overdraft_limit_in_dollars": 100000
 }

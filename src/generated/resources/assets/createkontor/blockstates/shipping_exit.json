@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "createkontor:block/shipping_exit"
+    }
+  }
+}
