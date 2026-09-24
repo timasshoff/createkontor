@@ -52,6 +52,7 @@ public class EconomyConfig {
     public static final ModConfigSpec.DoubleValue REQUEST_QUANTITY_DISCOUNT_FLOOR;
     public static final ModConfigSpec.DoubleValue REQUEST_QUANTITY_DISCOUNT_PER_STEP;
     public static final ModConfigSpec.DoubleValue REQUEST_WALK_IN_PRICE_THRESHOLD;
+    public static final ModConfigSpec.DoubleValue REQUEST_WALK_IN_REQUESTS_PER_DAY;
 
     public static final ModConfigSpec.DoubleValue DAILY_DECAY;
     public static final ModConfigSpec.DoubleValue PROGRESS_FLOOR;
@@ -154,6 +155,8 @@ public class EconomyConfig {
                 .defineInRange("quantityDiscountPerStep", requestDefaults.quantityDiscountPerStep(), 0.0, 1.0);
         REQUEST_WALK_IN_PRICE_THRESHOLD = builder.comment("List price relative to the market price up to which at least one request per day is guaranteed")
                 .defineInRange("walkInPriceThreshold", requestDefaults.walkInPriceThreshold(), 1.0001, Double.MAX_VALUE);
+        REQUEST_WALK_IN_REQUESTS_PER_DAY = builder.comment("Minimum number of requests per day guaranteed while the walk-in price threshold applies")
+                .defineInRange("walkInRequestsPerDay", requestDefaults.walkInRequestsPerDay(), 1.0E-6, Double.MAX_VALUE);
         builder.pop();
 
         builder.comment("Technical Progress").push("progress");
@@ -246,6 +249,7 @@ public class EconomyConfig {
                 REQUEST_GRACE_PERIOD_PORTION.get(),
                 REQUEST_QUANTITY_DISCOUNT_FLOOR.get(),
                 REQUEST_QUANTITY_DISCOUNT_PER_STEP.get(),
+                REQUEST_WALK_IN_PRICE_THRESHOLD.get(),
                 REQUEST_WALK_IN_PRICE_THRESHOLD.get());
     }
 }

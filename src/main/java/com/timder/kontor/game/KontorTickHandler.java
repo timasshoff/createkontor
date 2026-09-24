@@ -42,10 +42,11 @@ public class KontorTickHandler {
         boolean orderBurstOccurred = false; // = an order has failed
         boolean requestArrived = false;
         if (registry.size() > 0) {
+            CompanyParams companyParams = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
             List<CompanyRegistry.BurstOrder> bursts = registry.advance(1, economy.currentDay());
             orderBurstOccurred = !bursts.isEmpty();
             if (orderBurstOccurred) {
-                applyBurstReputation(bursts, registry, economy);
+                registry.applyBurstReputation(bursts, economy, companyParams);
                 economyData.setDirty();
                 // TODO once notifications exist: tell the company's members an order burst.
             }
@@ -59,14 +60,6 @@ public class KontorTickHandler {
 
         if (economy.currentDay() != dayBefore) {
             settleCompanies(companyData, economy, lastHistoryDayBefore);
-        }
-    }
-
-    private static void applyBurstReputation(List<CompanyRegistry.BurstOrder> bursts, CompanyRegistry registry, Economy economy) {
-        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
-        for (CompanyRegistry.BurstOrder burst : bursts) {
-            Company company = registry.get(burst.companyId()).orElseThrow();
-            economy.recordOrderFailed(burst.order().getProduct(), burst.companyId(), burst.order(), company.legalForm(params));
         }
     }
 

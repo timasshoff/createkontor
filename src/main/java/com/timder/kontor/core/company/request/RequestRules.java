@@ -47,7 +47,7 @@ public final class RequestRules {
         double rate = (effectiveQuantity + overflowShare) / (averageRequestSize * TICKS_PER_DAY);
 
         if (listPrice <= params.walkInPriceThreshold() * displayedMarketPrice) {
-            rate = Math.max(rate, 1.0 / TICKS_PER_DAY);
+            rate = Math.max(rate, params.walkInRequestsPerDay() / TICKS_PER_DAY); // TODO make this configurable
         }
 
         return rate;
