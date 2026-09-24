@@ -16,7 +16,7 @@ public final class KontorCreativeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN = CREATIVE_TABS.register("main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.createkontor"))
-                    .icon(() -> new ItemStack(KontorBlocks.WAREHOUSE_EXIT.get()))
+                    .icon(() -> new ItemStack(KontorBlocks.SHIPPING_EXIT.get()))
                     .displayItems((parameters, output) ->
                             KontorItems.ITEMS.getEntries().forEach(item -> output.accept(item.get())))
                     .build());
