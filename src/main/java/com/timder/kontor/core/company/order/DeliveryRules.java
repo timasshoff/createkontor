@@ -68,6 +68,7 @@ public final class DeliveryRules {
 
         economy.recordDelivery(product, company.id(), quantity);
         economy.recordFulfillment(product, company.id());
+        economy.recordOrderCompleted(product, company.id(), order, late);
         return result;
     }
 

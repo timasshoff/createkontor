@@ -32,6 +32,7 @@ public final class Company {
     private Liquidity liquidity = Liquidity.NORMAL;
     private int daysInTrouble = 0;
 
+    private long nextRequestNumber = 1;
     private long nextOrderNumber = 1;
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
@@ -154,6 +155,10 @@ public final class Company {
 
     public RequestBoard requestBoard() {
         return requestBoard;
+    }
+
+    public long issueRequestNumber() {
+        return nextRequestNumber++;
     }
 
     public OrderBook orderBook() {
@@ -280,6 +285,22 @@ public final class Company {
         }
     }
 
+    /**
+     * @return The highest request number that is still in use
+     */
+    private long highestRequestNumber() {
+        long highest = 0;
+        for (Request request : requestBoard.allOpenRequests()) {
+            highest = Math.max(highest, request.getNumber());
+        }
+        for (Order order : orderBook.allOrders()) {
+            if (order.getOrigin() instanceof RequestOrigin origin) {
+                highest = Math.max(highest, origin.requestNumber());
+            }
+        }
+        return highest;
+    }
+
     @Override
     public String toString() {
         return "Company[%s, \"%s\", level %d, balance=%s, status=%s]".formatted(id, name, legalLevel, account.getBalance(), liquidity);
@@ -296,6 +317,7 @@ public final class Company {
             List<Loan.SaveState> loans,
             Liquidity liquidity,
             int daysInTrouble,
+            long nextRequestNumber,
             long nextOrderNumber,
             List<CompanyHistoryEntry> history,
             RequestBoard.SaveState requestBoard,
@@ -335,6 +357,7 @@ public final class Company {
                 loanStates,
                 liquidity,
                 daysInTrouble,
+                nextRequestNumber,
                 nextOrderNumber,
                 List.copyOf(history),
                 requestBoard.getSaveState(),
@@ -357,6 +380,7 @@ public final class Company {
         }
         company.liquidity = saveState.liquidity();
         company.daysInTrouble = saveState.daysInTrouble();
+        company.nextRequestNumber = saveState.nextRequestNumber();
         company.nextOrderNumber = saveState.nextOrderNumber();
         company.history.addAll(saveState.history());
         return company;

@@ -12,10 +12,7 @@ import com.timder.kontor.core.company.LegalFormDef;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.RequestOrigin;
-import com.timder.kontor.core.company.request.Request;
-import com.timder.kontor.core.company.request.RequestBoard;
-import com.timder.kontor.core.company.request.RequestParams;
-import com.timder.kontor.core.company.request.RequestRules;
+import com.timder.kontor.core.company.request.*;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketDefinition;
 import com.timder.kontor.core.market.MarketParticipant;
@@ -32,10 +29,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 public class RequestCommands {
 
@@ -99,26 +93,13 @@ public class RequestCommands {
         if (requestParams == null) {
             return 0;
         }
-        CompanySavedData companyData = CompanySavedData.get(server);
-        RequestBoard board = company.requestBoard();
 
-        if (!board.hasRoom(product, legalForm)) {
-            board.recordLostRequest(product);
-            companyData.setDirty();
-            source.sendSuccess(() -> Component.literal("The board of " + company.name() + " is full (per product "
-                    + legalForm.maxOpenRequestsPerProduct() + ", total " + legalForm.maxOpenRequestsTotal()
-                    + "). The request for " + location + " is lost, " + board.lostRequestsToday(product)
-                    + " lost today."), false);
+        int packageSize = economy.packageSize(product);
+        if (packageSize > legalForm.maxOrderQuantity()) {
+            source.sendFailure(Component.literal(legalForm.id() + " allows orders of at most " + legalForm.maxOrderQuantity()
+                    + ", but a package of " + location + " has " + packageSize + "."));
             return 0;
         }
-
-        Optional<MarketDefinition> definition = KontorData.getMarketDefinitions().stream()
-                .filter(market -> market.id().equals(product)).findFirst();
-        if (definition.isEmpty()) {
-            source.sendFailure(Component.literal("No market definition (package size) loaded for " + location + "."));
-            return 0;
-        }
-        int packageSize = definition.get().packageSize();
 
         Rng rng = SeededRng.forName(server.overworld().getSeed(), "request_spawn:" + server.overworld().getGameTime());
         int factor;
@@ -134,33 +115,26 @@ public class RequestCommands {
         }
         double delta = urgency == null ? RequestRules.drawUrgency(requestParams, rng) : urgency;
 
-        int quantity;
-        try {
-            quantity = RequestRules.quantity(factor, packageSize, legalForm.maxOrderQuantity());
-        } catch (IllegalArgumentException e) {
-            source.sendFailure(Component.literal(legalForm.id() + " allows orders of at most " + legalForm.maxOrderQuantity()
-                    + ", but a package of " + location + " has " + packageSize + "."));
+        RequestArrivals.Arrival arrival = RequestArrivals.arrive(company, economy, product, legalForm, requestParams, factor, delta);
+        CompanySavedData.get(server).setDirty();
+
+        if (arrival.lost()) {
+            RequestBoard board = company.requestBoard();
+            source.sendSuccess(() -> Component.literal("The board of " + company.name() + " is full (per product "
+                    + legalForm.maxOpenRequestsPerProduct() + ", total " + legalForm.maxOpenRequestsTotal()
+                    + "). The request for " + location + " is lost, " + board.lostRequestsToday(product)
+                    + " lost today."), false);
             return 0;
         }
 
-        int depth = economy.manufacturingDepth(product);
-        double ticksPerUnit = RequestRules.manufacturingTicksPerUnit(depth);
-        long deadline = RequestRules.deadlineTicks(quantity, delta, ticksPerUnit, legalForm.deadlineFactor(), requestParams);
-        double listPrice = listPriceOf(economy, product, company);
-        double unitPrice = RequestRules.unitPrice(listPrice, delta, factor, requestParams);
-        long offerDuration = RequestRules.offerDurationTicks(delta, SALES_REP_FACTOR, requestParams);
-
-        long number = nextRequestNumber(company);
-        board.add(new Request(number, product, quantity, factor, delta, unitPrice, deadline, offerDuration), legalForm);
-        companyData.setDirty();
-
+        Request request = arrival.request();
         source.sendSuccess(() -> Component.literal(String.format(Locale.ROOT,
                 "Request #%d for %s: %d x %.2f (quantity factor %d, urgency %.2f)\n" +
                         "Deadline %s at manufacturing depth %d, offer open for %s.\n" +
                         "Accept it with /kontor request accept \"%s\" %d",
-                number, location, quantity, unitPrice, factor, delta,
-                CommandSupport.formatTicks(deadline), depth, CommandSupport.formatTicks(offerDuration),
-                company.name(), number)), false);
+                request.getNumber(), location, request.getQuantity(), request.getUnitPrice(), factor, delta,
+                CommandSupport.formatTicks(request.getDeadlineTicks()), economy.manufacturingDepth(product),
+                CommandSupport.formatTicks(request.remainingOfferTicks()), company.name(), request.getNumber())), false);
         return 1;
     }
 
@@ -216,6 +190,27 @@ public class RequestCommands {
             text.append(String.format(Locale.ROOT, "\n  #%d %s: %d x %.2f, deadline %s, offer left %s",
                     request.getNumber(), request.getProduct(), request.getQuantity(), request.getUnitPrice(),
                     CommandSupport.formatTicks(request.getDeadlineTicks()), CommandSupport.formatTicks(request.remainingOfferTicks())));
+        }
+
+        Map<ItemId, Integer> lost = company.requestBoard().lostRequestsToday();
+        if (!lost.isEmpty()) {
+            text.append("\nLost today because the board was full:");
+            lost.forEach((product, count) -> text.append("\n  ").append(product).append(": ").append(count));
+        }
+
+        MinecraftServer server = source.getServer();
+        Economy economy = EconomySavedData.get(server).getEconomy();
+        RequestArrivals arrivals = CompanySavedData.get(server).getArrivals(server);
+        StringBuilder countdowns = new StringBuilder();
+        for (ItemId market : economy.marketIds()) {
+            if (economy.isParticipant(market, company.id())) {
+                OptionalLong ticks = arrivals.ticksUntilNextRequest(company.id(), market);
+                countdowns.append("\n  ").append(market).append(": ")
+                        .append(ticks.isPresent() ? "next request in " + CommandSupport.formatTicks(ticks.getAsLong()) : "no request expected");
+            }
+        }
+        if (!countdowns.isEmpty()) {
+            text.append("\nNext arrival:").append(countdowns);
         }
 
         source.sendSuccess(() -> Component.literal(text.toString()), false);

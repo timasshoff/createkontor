@@ -1,6 +1,8 @@
 package com.timder.kontor.core.economy;
 
 import com.timder.kontor.core.company.CompanyId;
+import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.ReputationRules;
 import com.timder.kontor.core.economy.event.CompetitorEnteredEvent;
@@ -569,6 +571,47 @@ public final class Economy {
     }
 
     /**
+     * Applies the reputation change of a completed order
+     * @param market The product of the order
+     * @param company The company
+     * @param order The completed order
+     * @param late True, if the order was completed in its grace period
+     */
+    public void recordOrderCompleted(ItemId market, CompanyId company, Order order, boolean late) {
+        Objects.requireNonNull(order, "order must not be null.");
+        MarketParticipant participant = participantsOf(market).get(company);
+        double structuralPrice = stateOf(market).getPriceLevel();
+        double newReputation = late
+                ? ReputationRules.changeLate(participant.reputation(), order, packageSize(market), structuralPrice, reputationParams)
+                : ReputationRules.changeOnTime(participant.reputation(), order, packageSize(market), structuralPrice, reputationParams);
+        updateReputation(market, company, newReputation);
+    }
+
+    /**
+     * Applies the reputation change of a failed order
+     * @param market The product of the order
+     * @param company The company
+     * @param order The completed order
+     * @param legalForm The legal form of the company
+     */
+    public void recordOrderFailed(ItemId market, CompanyId company, Order order, LegalFormDef legalForm) {
+        Objects.requireNonNull(order, "order must not be null.");
+        Objects.requireNonNull(legalForm, "legalForm must not be null.");
+        if (!participantsOf(market).isRegistered(company)) {
+            return;
+        }
+        MarketParticipant participant = participantsOf(market).get(company);
+        double newReputation = ReputationRules.changeFailed(
+                participant.reputation(),
+                order,
+                legalForm,
+                packageSize(market),
+                stateOf(market).getPriceLevel(),
+                reputationParams);
+        updateReputation(market, company, newReputation);
+    }
+
+    /**
      * Records a purchase of a raw material.
      * @param material The raw material
      * @param quantity The quantity purchased
@@ -647,6 +690,20 @@ public final class Economy {
      */
     public Collection<MarketParticipant> participants(ItemId market) {
         return participantsOf(market).all();
+    }
+
+    /**
+     * @param market The market
+     * @return How many pieces one package of the product holds
+     * @throws IllegalArgumentException If there is no such market
+     */
+    public int packageSize(ItemId market) {
+        for (MarketDefinition definition : marketDefinitions) {
+            if (definition.id().equals(market)) {
+                return definition.packageSize();
+            }
+        }
+        throw new IllegalArgumentException("No such market: " + market);
     }
 
     public int manufacturingDepth(ItemId market) {

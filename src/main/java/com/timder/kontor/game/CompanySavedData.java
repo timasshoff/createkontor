@@ -10,7 +10,9 @@ import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.RequestOrigin;
 import com.timder.kontor.core.company.request.Request;
+import com.timder.kontor.core.company.request.RequestArrivals;
 import com.timder.kontor.core.company.request.RequestBoard;
+import com.timder.kontor.core.port.SeededRng;
 import com.timder.kontor.core.value.ItemId;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -27,6 +29,7 @@ public class CompanySavedData extends SavedData {
 
     private static final String NAME = "kontor_companies";
     private final CompanyRegistry registry;
+    private RequestArrivals arrivals;
 
     private CompanySavedData(CompanyRegistry registry) {
         this.registry = registry;
@@ -43,6 +46,18 @@ public class CompanySavedData extends SavedData {
                 (tag, registries) -> load(tag)
         );
         return overworld.getDataStorage().computeIfAbsent(factory, NAME);
+    }
+
+    /**
+     * @param server The server
+     * @return The countdowns of the requests of all companies
+     */
+    public RequestArrivals getArrivals(MinecraftServer server) {
+        if (arrivals == null) {
+            ServerLevel overworld = server.overworld();
+            arrivals = new RequestArrivals(SeededRng.forName(overworld.getSeed(), "request_arrivals:" + overworld.getGameTime()));
+        }
+        return arrivals;
     }
 
     private static CompanySavedData create() {
@@ -106,6 +121,7 @@ public class CompanySavedData extends SavedData {
 
         tag.putString("Liquidity", state.liquidity().name());
         tag.putInt("DaysInTrouble", state.daysInTrouble());
+        tag.putLong("NextRequestNumber", state.nextRequestNumber());
         tag.putLong("NextOrderNumber", state.nextOrderNumber());
 
         ListTag history = new ListTag();
@@ -141,6 +157,7 @@ public class CompanySavedData extends SavedData {
 
         Liquidity liquidity = Liquidity.valueOf(tag.getString("Liquidity"));
         int daysInTrouble = tag.getInt("DaysInTrouble");
+        long nextRequestNumber = tag.getLong("NextRequestNumber");
         long nextOrderNumber = tag.getLong("NextOrderNumber");
 
         List<CompanyHistoryEntry> history = new ArrayList<>();
@@ -162,6 +179,7 @@ public class CompanySavedData extends SavedData {
                 loans,
                 liquidity,
                 daysInTrouble,
+                nextRequestNumber,
                 nextOrderNumber,
                 history,
                 requestBoard,

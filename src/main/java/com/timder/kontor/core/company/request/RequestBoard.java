@@ -62,6 +62,13 @@ public final class RequestBoard {
     }
 
     /**
+     * @return How many requests were lost today per product, only products with at least one lost request
+     */
+    public Map<ItemId, Integer> lostRequestsToday() {
+        return Map.copyOf(lostToday);
+    }
+
+    /**
      * Resets every product's lost-request counter.
      */
     public void resetLostRequestsToday() {

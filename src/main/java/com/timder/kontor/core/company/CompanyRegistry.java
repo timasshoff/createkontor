@@ -110,6 +110,8 @@ public final class CompanyRegistry {
         Map<CompanyId, CompanyHistoryEntry> entries = new LinkedHashMap<>();
         for (Company company : companies.values()) {
             entries.put(company.id(), CompanyRules.settleDay(company, day, policyRate, Map.of(), params));
+            // TODO Maybe notify company members of lost requests.
+            company.requestBoard().resetLostRequestsToday();
         }
         return entries;
     }
