@@ -41,6 +41,17 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
     }
 
     @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        return getBlockEntityOptional(level, pos).map(pbe -> pbe.hasDeliveredThisTick() ? 15 : 0)
+                .orElse(0);
+    }
+
+    @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
         if (level.isClientSide()) {

@@ -36,6 +36,8 @@ import java.util.function.Predicate;
 
 public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
+    private boolean hasDeliveredThisTick = false;
+
     public ShippingExitBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
     }
@@ -44,6 +46,20 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         if (level instanceof ServerLevel serverLevel) {
             checkDeliveries(serverLevel, getBlockPos());
         }
+    }
+
+    @Override
+    public void tick() {
+        if (!level.isClientSide()) {
+            if (hasDeliveredThisTick) {
+                hasDeliveredThisTick = false;
+            }
+        }
+        super.tick();
+    }
+
+    public boolean hasDeliveredThisTick() {
+        return hasDeliveredThisTick;
     }
 
     private void checkDeliveries(ServerLevel level, BlockPos pos) {
@@ -82,6 +98,7 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
         if (anyDelivered) {
             level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.25f, 0.75f);
+            hasDeliveredThisTick = true;
             companyData.setDirty();
             economyData.setDirty();
         }
