@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 public final class CompanyBlockSupport {
 
     public static final String TAG_COMPANY_ID = "CompanyId";
+    public static final String TAG_COMPANY_NAME = "CompanyName";
 
     public static final String MESSAGE_BOUND = "message.createkontor.company_block.bound";
     public static final String MESSAGE_NOT_IN_COMPANY = "message.createkontor.company_block.not_in_company";
@@ -36,6 +37,14 @@ public final class CompanyBlockSupport {
     public static CompanyId readCompanyId(CompoundTag tag) {
         int raw = tag.getInt(TAG_COMPANY_ID);
         return raw > 0 ? new CompanyId(raw) : null;
+    }
+
+    public static void writeCompanyName(String companyName, CompoundTag tag) {
+        tag.putString(TAG_COMPANY_NAME, companyName);
+    }
+
+    public static String readCompanyName(CompoundTag tag) {
+        return tag.getString(TAG_COMPANY_NAME);
     }
 
     public static void afterCompanyIdChanged(BlockEntity blockEntity) {

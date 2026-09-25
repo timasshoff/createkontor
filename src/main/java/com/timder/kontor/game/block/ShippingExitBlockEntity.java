@@ -58,9 +58,9 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
     @Override
     public void tick() {
-        if (!level.isClientSide() && deliverySignalTicksRemaining > 0) {
+        if (deliverySignalTicksRemaining > 0) {
             deliverySignalTicksRemaining--;
-            if (deliverySignalTicksRemaining == 0) {
+            if (deliverySignalTicksRemaining == 0 && !level.isClientSide()) {
                 level.updateNeighbourForOutputSignal(getBlockPos(), getBlockState().getBlock());
             }
         }
