@@ -1,38 +1,39 @@
 package com.timder.kontor.registry;
 
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.game.block.ShippingExitBlock;
-import net.minecraft.world.level.block.Block;
+import com.tterrag.registrate.util.entry.BlockEntry;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
-import java.util.function.Function;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
 public final class KontorBlocks {
 
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CreateKontor.MODID);
+    public static final BlockEntry<ShippingExitBlock> SHIPPING_EXIT = REGISTRATE
+            .block("shipping_exit", ShippingExitBlock::new)
+            .properties(p -> p
+                    .mapColor(MapColor.STONE)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.STONE))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
+            .loot((loot, block) -> loot.add(block, LootTable.lootTable().withPool(LootPool.lootPool()
+                    .setRolls(ConstantValue.exactly(1))
+                    .add(LootItem.lootTableItem(block))
+                    .when(ExplosionCondition.survivesExplosion()))))
+            .lang("Shipping Exit")
+            .simpleItem()
+            .register();
 
-    public static final DeferredBlock<ShippingExitBlock> SHIPPING_EXIT =
-            registerWithItem("shipping_exit", ShippingExitBlock::new, basicProperties());
 
-    private static <B extends Block> DeferredBlock<B> registerWithItem(String name,
-                                                                       Function<BlockBehaviour.Properties, B> factory,
-                                                                       BlockBehaviour.Properties properties) {
-        DeferredBlock<B> block = BLOCKS.registerBlock(name, factory, properties);
-        KontorItems.ITEMS.registerSimpleBlockItem(name, block);
-        return block;
+    static void touch() {
     }
 
-    /**
-     * Properties for the andesite tier blocks. Recipes come later.
-     */
-    private static BlockBehaviour.Properties basicProperties() {
-        return BlockBehaviour.Properties.of()
-                .mapColor(MapColor.STONE)
-                .strength(2.0F, 6.0F)
-                .sound(SoundType.STONE);
+    private KontorBlocks() {
     }
 }

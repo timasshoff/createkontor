@@ -1,5 +1,6 @@
 package com.timder.kontor.game.block;
 
+import com.simibubi.create.foundation.block.IBE;
 import com.timder.kontor.game.block.company.AbstractCompanyBlock;
 import com.timder.kontor.registry.KontorBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -14,7 +15,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.jetbrains.annotations.Nullable;
 
-public class ShippingExitBlock extends AbstractCompanyBlock {
+public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<ShippingExitBlockEntity> {
 
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
@@ -30,8 +31,13 @@ public class ShippingExitBlock extends AbstractCompanyBlock {
     }
 
     @Override
-    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new ShippingExitBlockEntity(blockPos, blockState);
+    public Class<ShippingExitBlockEntity> getBlockEntityClass() {
+        return ShippingExitBlockEntity.class;
+    }
+
+    @Override
+    public BlockEntityType<? extends ShippingExitBlockEntity> getBlockEntityType() {
+        return KontorBlockEntities.SHIPPING_EXIT.get();
     }
 
     @Override

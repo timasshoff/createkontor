@@ -17,7 +17,9 @@ public final class KontorCreativeTabs {
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.createkontor"))
                     .icon(() -> new ItemStack(KontorBlocks.SHIPPING_EXIT.get()))
-                    .displayItems((parameters, output) ->
-                            KontorItems.ITEMS.getEntries().forEach(item -> output.accept(item.get())))
+                    .displayItems((parameters, output) -> output.accept(KontorBlocks.SHIPPING_EXIT.get()))
                     .build());
+
+    private KontorCreativeTabs() {
+    }
 }

@@ -1,0 +1,11 @@
+{
+  "block.createkontor.shipping_exit": "ʇıxƎ buıddıɥS",
+  "createkontor.configuration.title": "sbıɟuoƆ ɹoʇuoʞ :ǝʇɐǝɹƆ",
+  "itemGroup.createkontor": "ɹoʇuoʞ :ǝʇɐǝɹƆ",
+  "message.createkontor.company_block.bound": "%s oʇ pǝʇɔǝuuoƆㄥ§",
+  "message.createkontor.company_block.company_gone": "˙sʇsıxǝ ɹǝbuoן ou ʞɔoןq sıɥʇ ɟo ʎuɐdɯoɔ ǝɥ⟘ɔ§",
+  "message.createkontor.company_block.not_in_company": "˙pǝʇɔǝuuoɔun sʎɐʇs ʞɔoןq ǝɥ⟘ ˙ʎuɐdɯoɔ ʎuɐ ɟo ɹǝqɯǝɯ ɐ ʇou ǝɹɐ noʎɔ§",
+  "message.createkontor.company_block.not_member": "˙ʎuɐdɯoɔ ɹǝɥʇouɐ oʇ sbuoןǝq ʞɔoןq sıɥ⟘ɔ§",
+  "message.createkontor.company_block.status": "%s :ʎuɐdɯoƆㄥ§",
+  "message.createkontor.company_block.unbound": "˙ʎuɐdɯoɔ ɐ oʇ pǝʇɔǝuuoɔ ʇou sı ʞɔoןq ǝɥ⟘ɔ§"
+}

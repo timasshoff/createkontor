@@ -15,35 +15,35 @@ public final class ComponentFormatting {
     public static final ChatFormatting MONEY_NEUTRAL = ChatFormatting.GRAY;
     public static final ChatFormatting MONEY_NEGATIVE = ChatFormatting.RED;
 
-    public static Component defaultComponentTranslatable(String translationKey) {
+    public static Component standardTranslatable(String translationKey) {
         return Component.translatable(translationKey).withStyle(DEFAULT);
     }
 
-    public static Component defaultComponent(String text) {
+    public static Component standard(String text) {
         return Component.literal(text).withStyle(DEFAULT);
     }
 
-    public static Component highlightDefaultComponentTranslatable(String translationKey) {
+    public static Component highlightStandardTranslatable(String translationKey) {
         return Component.translatable(translationKey).withStyle(DEFAULT_HIGHLIGHTED);
     }
 
-    public static Component highlightDefaultComponent(String text) {
+    public static Component highlightStandard(String text) {
         return Component.literal(text).withStyle(DEFAULT_HIGHLIGHTED);
     }
 
-    public static Component errorComponentTranslatable(String translationKey) {
+    public static Component errorTranslatable(String translationKey) {
         return Component.translatable(translationKey).withStyle(ERROR);
     }
 
-    public static Component errorComponent(String text) {
+    public static Component error(String text) {
         return Component.literal(text).withStyle(ERROR);
     }
 
-    public static Component highlightErrorComponentTranslatable(String translationKey) {
+    public static Component highlightErrorTranslatable(String translationKey) {
         return Component.translatable(translationKey).withStyle(ERROR_HIGHLIGHTED);
     }
 
-    public static Component highlightErrorComponent(String text) {
+    public static Component highlightError(String text) {
         return Component.literal(text).withStyle(ERROR_HIGHLIGHTED);
     }
 

@@ -1,13 +1,11 @@
 {
+  "block.createkontor.shipping_exit": "Shipping Exit",
   "createkontor.configuration.title": "Create: Kontor Configs",
   "itemGroup.createkontor": "Create: Kontor",
-
-  "block.createkontor.shipping_exit": "Shipping Exit",
-
   "message.createkontor.company_block.bound": "§7Connected to %s",
-  "message.createkontor.company_block.not_in_company": "§cYou are not a member of any company. The block stays unconnected.",
-  "message.createkontor.company_block.unbound": "§cThe block is not connected to a company.",
   "message.createkontor.company_block.company_gone": "§cThe company of this block no longer exists.",
+  "message.createkontor.company_block.not_in_company": "§cYou are not a member of any company. The block stays unconnected.",
   "message.createkontor.company_block.not_member": "§cThis block belongs to another company.",
-  "message.createkontor.company_block.status": "§7Company: %s"
+  "message.createkontor.company_block.status": "§7Company: %s",
+  "message.createkontor.company_block.unbound": "§cThe block is not connected to a company."
 }

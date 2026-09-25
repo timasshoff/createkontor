@@ -22,7 +22,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -36,8 +36,8 @@ import java.util.function.Predicate;
 
 public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
-    public ShippingExitBlockEntity(BlockPos pos, BlockState blockState) {
-        super(KontorBlockEntities.SHIPPING_EXIT.get(), pos, blockState);
+    public ShippingExitBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+        super(type, pos, blockState);
     }
 
     void onRedstonePulse() {
@@ -77,7 +77,7 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
         boolean anyDelivered = false;
         for (ItemId product : products) {
-            anyDelivered |= fullfillAsManyAsPossible(company, economy, day, product, handlers);
+            anyDelivered |= fulfillAsManyAsPossible(company, economy, day, product, handlers);
         }
 
         if (anyDelivered) {
@@ -87,7 +87,7 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         }
     }
 
-    private boolean fullfillAsManyAsPossible(Company company, Economy economy, long day, ItemId product, List<IItemHandler> handlers) {
+    private boolean fulfillAsManyAsPossible(Company company, Economy economy, long day, ItemId product, List<IItemHandler> handlers) {
         Item item = itemOf(product);
         if (item == null) {
             return false;
