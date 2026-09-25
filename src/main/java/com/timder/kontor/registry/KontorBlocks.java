@@ -1,5 +1,6 @@
 package com.timder.kontor.registry;
 
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.game.block.ShippingExitBlock;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.tags.BlockTags;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+
 import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
 public final class KontorBlocks {
@@ -27,9 +29,8 @@ public final class KontorBlocks {
                     .add(LootItem.lootTableItem(block))
                     .when(ExplosionCondition.survivesExplosion()))))
             .lang("Shipping Exit")
-            .item().tab(KontorCreativeTabs.MAIN_KEY).build()
+            .simpleItem()
             .register();
-
 
     static void touch() {
     }
