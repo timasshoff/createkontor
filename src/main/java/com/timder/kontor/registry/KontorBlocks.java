@@ -27,7 +27,7 @@ public final class KontorBlocks {
                     .add(LootItem.lootTableItem(block))
                     .when(ExplosionCondition.survivesExplosion()))))
             .lang("Shipping Exit")
-            .simpleItem()
+            .item().tab(KontorCreativeTabs.MAIN_KEY).build()
             .register();
 
 
