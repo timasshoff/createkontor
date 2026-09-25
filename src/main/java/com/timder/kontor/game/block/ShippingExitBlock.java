@@ -47,7 +47,7 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        return getBlockEntityOptional(level, pos).map(pbe -> pbe.hasDeliveredThisTick() ? 15 : 0)
+        return getBlockEntityOptional(level, pos).map(pbe -> pbe.isSignallingDelivery() ? 15 : 0)
                 .orElse(0);
     }
 

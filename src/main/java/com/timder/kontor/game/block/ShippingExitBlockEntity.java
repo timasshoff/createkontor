@@ -1,5 +1,7 @@
 package com.timder.kontor.game.block;
 
+import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
@@ -10,10 +12,12 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
-import com.timder.kontor.registry.KontorBlockEntities;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -36,7 +41,10 @@ import java.util.function.Predicate;
 
 public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
-    private boolean hasDeliveredThisTick = false;
+    private static final String TAG_SIGNAL_TICKS = "SignalTicksRemaining";
+    private static final int SIGNAL_HOLD_TICKS = 6;
+
+    private int deliverySignalTicksRemaining = 0;
 
     public ShippingExitBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -50,16 +58,36 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
     @Override
     public void tick() {
-        if (!level.isClientSide()) {
-            if (hasDeliveredThisTick) {
-                hasDeliveredThisTick = false;
+        if (!level.isClientSide() && deliverySignalTicksRemaining > 0) {
+            deliverySignalTicksRemaining--;
+            if (deliverySignalTicksRemaining == 0) {
+                level.updateNeighbourForOutputSignal(getBlockPos(), getBlockState().getBlock());
             }
         }
         super.tick();
     }
 
-    public boolean hasDeliveredThisTick() {
-        return hasDeliveredThisTick;
+    @Override
+    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
+        tag.putInt(TAG_SIGNAL_TICKS, deliverySignalTicksRemaining);
+    }
+
+    @Override
+    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
+        int syncedTicks = tag.getInt(TAG_SIGNAL_TICKS);
+
+        if (clientPacket && syncedTicks > deliverySignalTicksRemaining && level instanceof ClientLevel clientLevel) {
+            Vec3 center = Vec3.atCenterOf(getBlockPos()).add(0, 0.4, 0);
+            clientLevel.addParticle(new WiFiParticle.Data(), center.x, center.y, center.z, 0, 1, 0);
+        }
+
+        deliverySignalTicksRemaining = syncedTicks;
+    }
+
+    public boolean isSignallingDelivery() {
+        return deliverySignalTicksRemaining > 0;
     }
 
     private void checkDeliveries(ServerLevel level, BlockPos pos) {
@@ -97,8 +125,15 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         }
 
         if (anyDelivered) {
+            boolean wasAlreadySignalling = deliverySignalTicksRemaining > 0;
+            deliverySignalTicksRemaining = SIGNAL_HOLD_TICKS;
+            if (!wasAlreadySignalling) {
+                level.updateNeighbourForOutputSignal(pos, getBlockState().getBlock());
+            }
+
             level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.25f, 0.75f);
-            hasDeliveredThisTick = true;
+            level.playSound(null, pos, AllSoundEvents.STOCK_LINK.getMainEvent(), SoundSource.BLOCKS, 0.75f, 1.25f);
+
             companyData.setDirty();
             economyData.setDirty();
         }
