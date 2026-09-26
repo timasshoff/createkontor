@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -35,12 +36,19 @@ public abstract class AbstractUIBlock<BE extends BlockEntity> extends Block impl
                 .orElseGet(() -> createFallbackUI(holder));
     }
 
+    protected boolean canOpenUI(ServerPlayer player, ServerLevel level, BlockPos pos) {
+        return true;
+    }
+
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
-        if (player instanceof ServerPlayer serverPlayer) {
+        if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
+            if (!canOpenUI(serverPlayer, serverLevel, pos)) {
+                return InteractionResult.CONSUME;
+            }
             BlockUIMenuType.openUI(serverPlayer, pos);
             return InteractionResult.CONSUME;
         }

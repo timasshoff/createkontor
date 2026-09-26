@@ -5,11 +5,18 @@
   "goggle.createkontor.company_block": "ʎuɐdɯoƆ",
   "goggle.createkontor.company_block.unbound": "˙ʎuɐdɯoɔ ʎuɐ oʇ punoq ʇoN",
   "itemGroup.createkontor": "ɹoʇuoʞ :ǝʇɐǝɹƆ",
+  "message.createkontor.already_member": "˙ʎuɐdɯoɔ ɐ ɟo ɹǝqɯǝɯ ɐ ʎpɐǝɹןɐ ǝɹɐ noʎɔ§",
   "message.createkontor.company_block.bound": "%s oʇ pǝʇɔǝuuoƆㄥ§",
   "message.createkontor.company_block.company_gone": "˙sʇsıxǝ ɹǝbuoן ou ʞɔoןq sıɥʇ ɟo ʎuɐdɯoɔ ǝɥ⟘ɔ§",
   "message.createkontor.company_block.not_in_company": "˙pǝʇɔǝuuoɔun sʎɐʇs ʞɔoןq ǝɥ⟘ ˙ʎuɐdɯoɔ ʎuɐ ɟo ɹǝqɯǝɯ ɐ ʇou ǝɹɐ noʎɔ§",
   "message.createkontor.company_block.not_member": "˙ʎuɐdɯoɔ ɹǝɥʇouɐ oʇ sbuoןǝq ʞɔoןq sıɥ⟘ɔ§",
   "message.createkontor.company_block.status": "%s :ʎuɐdɯoƆㄥ§",
   "message.createkontor.company_block.unbound": "˙ʎuɐdɯoɔ ɐ oʇ pǝʇɔǝuuoɔ ʇou sı ʞɔoןq ǝɥ⟘ɔ§",
-  "message.createkontor.shipping_exit.limit": "˙sʇıxǝ buıddıɥs punoqɔ§ %s ʇsoɯ ʇɐ sʍoןןɐ ɯɹoɟ ןɐbǝꞀ :pǝɥɔɐǝɹ ʇıɯıꞀɔ§"
+  "message.createkontor.kontor_desk.limit": "˙ʞsǝᗡ ɹoʇuoʞ ɐ sɐɥ ʎpɐǝɹןɐ ʎuɐdɯoɔ sıɥ⟘ɔ§",
+  "message.createkontor.shipping_exit.limit": "˙sʇıxǝ buıddıɥs punoqɔ§ %s ʇsoɯ ʇɐ sʍoןןɐ ɯɹoɟ ןɐbǝꞀ :pǝɥɔɐǝɹ ʇıɯıꞀɔ§",
+  "ui.createkontor.kontor_desk.company_name": "ǝɯɐN ʎuɐdɯoƆ",
+  "ui.createkontor.kontor_desk.deposit.info": "˙ʞɔɐq pǝʎɐd ǝq oʇ pǝǝu ʇou sǝop ʇɐɥʇ %s ɟo ʇısodǝp ǝǝɹɟ ɐ sǝʌıǝɔǝɹ ʎuɐdɯoɔ ʎɹǝʌƎㄥ§",
+  "ui.createkontor.kontor_desk.founders_loan.info": "˙ʇı ʎɐdǝɹ oʇ pǝǝu noʎ ǝɹoɟǝq sʎɐp ǝǝɹɟ %s ɥʇıʍ %s ɟo uɐoן sɹǝpunoɟ ɐ ǝʞɐʇ uɐɔ noʎ 'ʎןןɐuoıʇıppⱯㄥ§",
+  "ui.createkontor.kontor_desk.founding": "ʎuɐdɯoɔ punoℲ",
+  "ui.createkontor.kontor_desk.founding_title": "ʎuɐdɯoɔ ʍǝu ɐ punoℲ"
 }

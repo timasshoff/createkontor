@@ -5,11 +5,18 @@
   "goggle.createkontor.company_block": "Company",
   "goggle.createkontor.company_block.unbound": "Not bound to any company.",
   "itemGroup.createkontor": "Create: Kontor",
+  "message.createkontor.already_member": "§cYou are already a member of a company.",
   "message.createkontor.company_block.bound": "§7Connected to %s",
   "message.createkontor.company_block.company_gone": "§cThe company of this block no longer exists.",
   "message.createkontor.company_block.not_in_company": "§cYou are not a member of any company. The block stays unconnected.",
   "message.createkontor.company_block.not_member": "§cThis block belongs to another company.",
   "message.createkontor.company_block.status": "§7Company: %s",
   "message.createkontor.company_block.unbound": "§cThe block is not connected to a company.",
-  "message.createkontor.shipping_exit.limit": "§cLimit reached: Legal form allows at most %s §cbound shipping exits."
+  "message.createkontor.kontor_desk.limit": "§cThis company already has a Kontor Desk.",
+  "message.createkontor.shipping_exit.limit": "§cLimit reached: Legal form allows at most %s §cbound shipping exits.",
+  "ui.createkontor.kontor_desk.company_name": "Company Name",
+  "ui.createkontor.kontor_desk.deposit.info": "§7Every company receives a free deposit of %s that does not need to be payed back.",
+  "ui.createkontor.kontor_desk.founders_loan.info": "§7Additionally, you can take a founders loan of %s with %s free days before you need to repay it.",
+  "ui.createkontor.kontor_desk.founding": "Found company",
+  "ui.createkontor.kontor_desk.founding_title": "Found a new company"
 }
