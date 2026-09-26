@@ -4,6 +4,7 @@ import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.OrderRules;
 import com.timder.kontor.core.company.order.OrderSettlementResult;
+import com.timder.kontor.core.economy.Economy;
 
 import java.util.*;
 
@@ -110,6 +111,8 @@ public final class CompanyRegistry {
         Map<CompanyId, CompanyHistoryEntry> entries = new LinkedHashMap<>();
         for (Company company : companies.values()) {
             entries.put(company.id(), CompanyRules.settleDay(company, day, policyRate, Map.of(), params));
+            // TODO Maybe notify company members of lost requests.
+            company.requestBoard().resetLostRequestsToday();
         }
         return entries;
     }
@@ -129,6 +132,22 @@ public final class CompanyRegistry {
             }
         }
         return burst;
+    }
+
+    /**
+     * Applies the reputation loss of every burst order to its market
+     * @param bursts The burst orders
+     * @param economy The economy
+     * @param params The company parameters
+     */
+    public void applyBurstReputation(List<BurstOrder> bursts, Economy economy, CompanyParams params) {
+        Objects.requireNonNull(bursts, "bursts must not be null.");
+        Objects.requireNonNull(economy, "economy must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+        for (BurstOrder burst : bursts) {
+            Company company = get(burst.companyId()).orElseThrow();
+            economy.recordOrderFailed(burst.order().getProduct(), burst.companyId(), burst.order(), company.legalForm(params));
+        }
     }
 
     public record BurstOrder(CompanyId companyId, Order order, OrderSettlementResult settlement) {

@@ -30,7 +30,8 @@ public record RequestParams(
         double gracePeriodPortion,
         double quantityDiscountFloor,
         double quantityDiscountPerStep,
-        double walkInPriceThreshold
+        double walkInPriceThreshold,
+        double walkInRequestsPerDay
 ) {
     public RequestParams {
         Objects.requireNonNull(quantitySteps, "quantitySteps must not be null.");
@@ -53,6 +54,7 @@ public record RequestParams(
         if (quantityDiscountFloor <= 0 || quantityDiscountFloor > 1) throw new IllegalArgumentException("quantityDiscountFloor must be between 0 (exclusive) and 1.");
         if (quantityDiscountPerStep < 0) throw new IllegalArgumentException("quantityDiscountPerStep must not be negative.");
         if (walkInPriceThreshold <= 1.0) throw new IllegalArgumentException("walkInPriceThreshold must be greater than 1.0.");
+        if (walkInRequestsPerDay <= 0) throw new IllegalArgumentException("walkInRequestsPerDay must be positive.");
     }
 
     /*
@@ -81,7 +83,8 @@ public record RequestParams(
                 0.25,   // grace period portion
                 0.95,   // quantity discount floor
                 0.005,  // quantity discount per step
-                1.2     // walk-in price threshold
+                1.2,     // walk-in price threshold
+                1
         );
     }
 }

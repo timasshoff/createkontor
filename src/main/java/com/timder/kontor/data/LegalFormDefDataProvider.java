@@ -26,10 +26,10 @@ public class LegalFormDefDataProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         List<CompletableFuture<?>> futures = new ArrayList<>();
 
-        futures.add(save(cache, "sole_proprietorship", 1, "sole_proprietorship", 2, 2, 2, 5, 3, 0, 64, 1.5, 1024, 0, Money.ofDollars(1000), Money.ZERO, false, false, Money.ZERO, true));
-        futures.add(save(cache, "partnership", 2, "partnership", 4, 6, 3, 12, 10, 0, 256, 1.2, 4096, 1, Money.ofDollars(5000), Money.ofDollars(20000), true, false, Money.ZERO, false));
-        futures.add(save(cache, "limited_company", 3, "limited_company", 6, 15, 5, 30, 40, 6, 1024, 1.0, 16384, 2, Money.ofDollars(20000), Money.ofDollars(100000), true, true, Money.ofDollars(20000), false));
-        futures.add(save(cache, "public_company", 4, "public_company", 10, LegalFormDef.UNLIMITED, 8, 80, 150, 20, 4096, 1.0, 65536, 3, Money.ofDollars(100000), Money.ofDollars(500000), true, true, Money.ofDollars(40000), false));
+        futures.add(save(cache, "sole_proprietorship", 1, "sole_proprietorship", 2, 2, 2, 5, 3, 0, 64, 1.5, 1024, 0, Money.ofDollars(1000), Money.ZERO, false, false, Money.ZERO, true, 1));
+        futures.add(save(cache, "partnership", 2, "partnership", 4, 6, 3, 12, 10, 0, 256, 1.2, 4096, 1, Money.ofDollars(5000), Money.ofDollars(20000), true, false, Money.ZERO, false, 2));
+        futures.add(save(cache, "limited_company", 3, "limited_company", 6, 15, 5, 30, 40, 6, 1024, 1.0, 16384, 2, Money.ofDollars(20000), Money.ofDollars(100000), true, true, Money.ofDollars(20000), false,3));
+        futures.add(save(cache, "public_company", 4, "public_company", 10, LegalFormDef.UNLIMITED, 8, 80, 150, 20, 4096, 1.0, 65536, 3, Money.ofDollars(100000), Money.ofDollars(500000), true, true, Money.ofDollars(40000), false, 6));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
@@ -53,7 +53,8 @@ public class LegalFormDefDataProvider implements DataProvider {
                                       boolean autoAcceptRequests,
                                       boolean logisticsNetwork,
                                       Money freeStorage,
-                                      boolean founderProtection
+                                      boolean founderProtection,
+                                      int maxShippingExits
     ) {
         JsonObject json = new JsonObject();
         json.addProperty("level", level);
@@ -74,6 +75,7 @@ public class LegalFormDefDataProvider implements DataProvider {
         json.addProperty("logistics_network", logisticsNetwork);
         json.addProperty("free_storage_value_in_dollars", Math.round(freeStorage.toDollars()));
         json.addProperty("founder_protection", founderProtection);
+        json.addProperty("max_shipping_exits", maxShippingExits);
 
         ResourceLocation fileId = ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, fileName);
         return DataProvider.saveStable(cache, json, pathProvider.json(fileId));

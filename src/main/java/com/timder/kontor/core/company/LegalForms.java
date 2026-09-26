@@ -66,7 +66,7 @@ public record LegalForms(List<LegalFormDef> forms) {
         return level >= 1 && level < forms.size();
     }
 
-    /*
+/*
     The following code is AI generated.
      */
 
@@ -89,22 +89,26 @@ public record LegalForms(List<LegalFormDef> forms) {
                         false,               // automatic acceptance
                         false,               // company network, dispatch, framework contracts
                         Money.ZERO,          // free storage
-                        true),               // founder protection
+                        true,                // founder protection
+                        1),                  // max shipping exits - see NOTE below
                 new LegalFormDef(
                         2, "partnership",
                         4, 6, 3, 12, 10, 0, 256, 1.2, 4_096, 1,
                         Money.ofDollars(5_000), Money.ofDollars(20_000),
-                        true, false, Money.ZERO, false),
+                        true, false, Money.ZERO, false,
+                        2),
                 new LegalFormDef(
                         3, "limited_company",
                         6, 15, 5, 30, 40, 6, 1_024, 1.0, 16_384, 2,
                         Money.ofDollars(20_000), Money.ofDollars(100_000),
-                        true, true, Money.ofDollars(20_000), false),
+                        true, true, Money.ofDollars(20_000), false,
+                        4),
                 new LegalFormDef(
                         4, "public_company",
                         10, UNLIMITED, 8, 80, 150, 20, 4_096, 1.0, 65_536, 3,
                         Money.ofDollars(100_000), Money.ofDollars(500_000),
-                        true, true, Money.ofDollars(100_000), false)
+                        true, true, Money.ofDollars(100_000), false,
+                        8)
         ));
     }
 }

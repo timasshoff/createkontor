@@ -62,6 +62,13 @@ public final class RequestBoard {
     }
 
     /**
+     * @return How many requests were lost today per product, only products with at least one lost request
+     */
+    public Map<ItemId, Integer> lostRequestsToday() {
+        return Map.copyOf(lostToday);
+    }
+
+    /**
      * Resets every product's lost-request counter.
      */
     public void resetLostRequestsToday() {
@@ -96,9 +103,12 @@ public final class RequestBoard {
      * Removes a request from the board so it can be turned into an order
      * @param requestNumber The number of the request to accept
      * @return The accepted request
+     * @throws NoSuchElementException If no open request with this number exists
      */
     public Request accept(long requestNumber) {
-        return remove(requestNumber);
+        Request request = get(requestNumber);
+        requestsByProduct.get(request.getProduct()).remove(request);
+        return request;
     }
 
     private Request remove(long requestNumber) {
@@ -108,6 +118,17 @@ public final class RequestBoard {
                 Request request = it.next();
                 if (request.getNumber() == requestNumber) {
                     it.remove();
+                    return request;
+                }
+            }
+        }
+        throw new NoSuchElementException("No open request with number " + requestNumber + ".");
+    }
+
+    public Request get(long requestNumber) {
+        for (List<Request> requests : requestsByProduct.values()) {
+            for (Request request : requests) {
+                if (request.getNumber() == requestNumber) {
                     return request;
                 }
             }

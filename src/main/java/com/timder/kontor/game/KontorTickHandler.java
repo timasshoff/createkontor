@@ -1,9 +1,13 @@
 package com.timder.kontor.game;
 
 import com.timder.kontor.config.CompanyConfig;
+import com.timder.kontor.config.EconomyConfig;
+import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.LegalForms;
+import com.timder.kontor.core.company.request.RequestArrivals;
+import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.data.KontorData;
@@ -36,19 +40,35 @@ public class KontorTickHandler {
         }
 
         boolean orderBurstOccurred = false; // = an order has failed
+        boolean requestArrived = false;
         if (registry.size() > 0) {
-            orderBurstOccurred = !registry.advance(1, economy.currentDay()).isEmpty();
-            // TODO once Economy.registerParticipant has a caller: apply ReputationRules.changeFailed for each burst.
-            // TODO once notifications exist: tell the company's members an order burst.
+            CompanyParams companyParams = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+            List<CompanyRegistry.BurstOrder> bursts = registry.advance(1, economy.currentDay());
+            orderBurstOccurred = !bursts.isEmpty();
+            if (orderBurstOccurred) {
+                registry.applyBurstReputation(bursts, economy, companyParams);
+                economyData.setDirty();
+                // TODO once notifications exist: tell the company's members an order burst.
+            }
+
+            requestArrived = letRequestsArrive(server, companyData, economy, tradingTickPassed);
         }
 
-        if (orderBurstOccurred || (tradingTickPassed && registry.size() > 0)) {
+        if (orderBurstOccurred || requestArrived || (tradingTickPassed && registry.size() > 0)) {
             companyData.setDirty();
         }
 
         if (economy.currentDay() != dayBefore) {
             settleCompanies(companyData, economy, lastHistoryDayBefore);
         }
+    }
+
+    private static boolean letRequestsArrive(MinecraftServer server, CompanySavedData companyData, Economy economy, boolean tradingTickPassed) {
+        CompanyParams companyParams = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        RequestParams requestParams = EconomyConfig.toRequestParams();
+
+        List<RequestArrivals.Arrival> arrivals = companyData.getArrivals(server).advance(companyData.getRegistry(), economy, companyParams, requestParams, 1, tradingTickPassed);
+        return !arrivals.isEmpty();
     }
 
     public static void settleCompanies(CompanySavedData companyData, Economy economy, long lastHistoryDayBefore) {

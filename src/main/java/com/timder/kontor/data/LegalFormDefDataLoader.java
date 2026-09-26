@@ -64,6 +64,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
         boolean logisticsNetwork = GsonHelper.getAsBoolean(object, "logistics_network");
         Money freeStorage = Money.ofDollars(GsonHelper.getAsLong(object, "free_storage_value_in_dollars"));
         boolean founderProtection = GsonHelper.getAsBoolean(object, "founder_protection");
+        int maxShippingExits = GsonHelper.getAsInt(object, "max_shipping_exits");
 
         return new LegalFormDef(
                 level,
@@ -83,7 +84,8 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
                 autoAcceptRequests,
                 logisticsNetwork,
                 freeStorage,
-                founderProtection
+                founderProtection,
+                maxShippingExits
         );
     }
 }

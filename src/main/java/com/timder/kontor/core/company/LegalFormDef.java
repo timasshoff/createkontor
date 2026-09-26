@@ -45,7 +45,8 @@ public record LegalFormDef(
         boolean autoAcceptRequests,
         boolean logisticsNetwork, // Unused for now (no logistics integration)
         Money freeStorage,
-        boolean founderProtection
+        boolean founderProtection,
+        int maxShippingExits
 ) {
 
     public static final int UNLIMITED = Integer.MAX_VALUE;
@@ -73,5 +74,9 @@ public record LegalFormDef(
 
     public boolean bankLoanAllowed() {
         return bankLoanLimit.isPositive();
+    }
+
+    public boolean allowsMoreShippingExits(int currentCount) {
+        return currentCount < maxShippingExits;
     }
 }
