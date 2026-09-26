@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "createkontor:kontor_desk"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "createkontor:blocks/kontor_desk"
+}
