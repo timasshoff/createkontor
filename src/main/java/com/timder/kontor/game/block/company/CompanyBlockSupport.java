@@ -28,6 +28,8 @@ public final class CompanyBlockSupport {
     public static final String MESSAGE_COMPANY_GONE = "message.createkontor.company_block.company_gone";
     public static final String MESSAGE_NOT_MEMBER = "message.createkontor.company_block.not_member";
     public static final String MESSAGE_STATUS = "message.createkontor.company_block.status";
+    public static final String GOGGLE_COMPANY_BLOCK = "goggle.createkontor.company_block";
+    public static final String GOGGLE_COMPANY_BLOCK_UNBOUND = "goggle.createkontor.company_block.unbound";
 
     public static void writeCompanyId(@Nullable CompanyId companyId, CompoundTag tag) {
         tag.putInt(TAG_COMPANY_ID, companyId == null ? 0 : companyId.value());
@@ -55,6 +57,10 @@ public final class CompanyBlockSupport {
     }
 
     public static void bindOnPlacement(Level level, BlockPos pos, @Nullable LivingEntity placer) {
+        bindOnPlacement(level, pos, placer, CompanyBindGate.ALWAYS_ALLOWED);
+    }
+
+    public static void bindOnPlacement(Level level, BlockPos pos, @Nullable LivingEntity placer, CompanyBindGate gate) {
         if (level.isClientSide() || !(level.getBlockEntity(pos) instanceof CompanyBound bound)) {
             return;
         }
@@ -65,6 +71,15 @@ public final class CompanyBlockSupport {
         Company company = null;
         if (player != null && server != null) {
             company = registry(server).companyOf(player.getUUID()).orElse(null);
+        }
+
+        if (company != null) {
+            Component rejection = gate.checkBind(company);
+            if (rejection != null) {
+                bound.setCompanyId(null);
+                player.displayClientMessage(rejection, true);
+                return;
+            }
         }
 
         bound.setCompanyId(company == null ? null : company.id());

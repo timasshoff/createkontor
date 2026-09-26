@@ -133,6 +133,15 @@ public class CompanySavedData extends SavedData {
         tag.put("RequestBoard", writeRequestBoard(state.requestBoard()));
         tag.put("OrderBook", writeOrderBook(state.orderBook()));
 
+        ListTag boundResources = new ListTag();
+        for (Map.Entry<String, Integer> entry : state.boundResourceCounts().entrySet()) {
+            CompoundTag boundTag = new CompoundTag();
+            boundTag.putString("Key", entry.getKey());
+            boundTag.putInt("Count", entry.getValue());
+            boundResources.add(boundTag);
+        }
+        tag.put("BoundResourceCounts", boundResources);
+
         return tag;
     }
 
@@ -168,6 +177,12 @@ public class CompanySavedData extends SavedData {
         RequestBoard.SaveState requestBoard = readRequestBoard(tag.getCompound("RequestBoard"));
         OrderBook.SaveState orderBook = readOrderBook(tag.getCompound("OrderBook"));
 
+        Map<String, Integer> boundResourceCounts = new LinkedHashMap<>();
+        for (Tag t : tag.getList("BoundResourceCounts", Tag.TAG_COMPOUND)) {
+            CompoundTag boundTag = (CompoundTag) t;
+            boundResourceCounts.put(boundTag.getString("Key"), boundTag.getInt("Count"));
+        }
+
         return new Company.SaveState(
                 id,
                 name,
@@ -183,7 +198,8 @@ public class CompanySavedData extends SavedData {
                 nextOrderNumber,
                 history,
                 requestBoard,
-                orderBook
+                orderBook,
+                boundResourceCounts
         );
     }
 

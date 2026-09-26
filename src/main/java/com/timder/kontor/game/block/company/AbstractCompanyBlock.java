@@ -25,7 +25,11 @@ public abstract class AbstractCompanyBlock extends Block implements EntityBlock 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        CompanyBlockSupport.bindOnPlacement(level, pos, placer);
+        CompanyBlockSupport.bindOnPlacement(level, pos, placer, bindGate());
+    }
+
+    protected CompanyBindGate bindGate() {
+        return CompanyBindGate.ALWAYS_ALLOWED;
     }
 
     @Override

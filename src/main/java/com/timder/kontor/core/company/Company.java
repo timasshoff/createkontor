@@ -37,6 +37,8 @@ public final class Company {
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
+    private final Map<String, Integer> boundResourceCounts = new LinkedHashMap<>();
+
     private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account, RequestBoard requestBoard, OrderBook orderBook) {
         this.id = id;
         this.name = name;
@@ -265,6 +267,33 @@ public final class Company {
         return List.copyOf(history);
     }
 
+    /**
+     * @param resourceKey Key identifying the bound resource
+     * @return How many of that resource this company currently has bound
+     */
+    public int boundResourceCount(String resourceKey) {
+        Objects.requireNonNull(resourceKey, "resourceKey must not be null.");
+        return boundResourceCounts.getOrDefault(resourceKey, 0);
+    }
+
+    /**
+     * Records one more of a counted resource bound to this company.
+     * @param resourceKey The key identifying the counted resource
+     */
+    public void bindResource(String resourceKey) {
+        Objects.requireNonNull(resourceKey, "resourceKey must not be null.");
+        boundResourceCounts.merge(resourceKey, 1, Integer::sum);
+    }
+
+    /**
+     * Records one less of a counted resource bound to this company.
+     * @param resourceKey The key identifying the counted resource
+     */
+    public void unbindResource(String resourceKey) {
+        Objects.requireNonNull(resourceKey, "resourceKey must not be null.");
+        boundResourceCounts.computeIfPresent(resourceKey, (key, count) -> count <= 1 ? null : count - 1);
+    }
+
     void setLiquidity(Liquidity liquidity) {
         this.liquidity = Objects.requireNonNull(liquidity, "liquidity must not be null.");
     }
@@ -305,7 +334,8 @@ public final class Company {
             long nextOrderNumber,
             List<CompanyHistoryEntry> history,
             RequestBoard.SaveState requestBoard,
-            OrderBook.SaveState orderBook
+            OrderBook.SaveState orderBook,
+            Map<String, Integer> boundResourceCounts
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -322,6 +352,7 @@ public final class Company {
             if (managers.contains(owner)) throw new IllegalArgumentException("owner must not be a manager.");
             loans = List.copyOf(loans);
             history = List.copyOf(history);
+            boundResourceCounts = boundResourceCounts == null ? Map.of() : Map.copyOf(boundResourceCounts);
         }
     }
 
@@ -345,7 +376,8 @@ public final class Company {
                 nextOrderNumber,
                 List.copyOf(history),
                 requestBoard.getSaveState(),
-                orderBook.getSaveState());
+                orderBook.getSaveState(),
+                boundResourceCounts);
     }
 
     public static Company restore(SaveState saveState) {
@@ -367,6 +399,7 @@ public final class Company {
         company.nextRequestNumber = saveState.nextRequestNumber();
         company.nextOrderNumber = saveState.nextOrderNumber();
         company.history.addAll(saveState.history());
+        company.boundResourceCounts.putAll(saveState.boundResourceCounts());
         return company;
     }
 }

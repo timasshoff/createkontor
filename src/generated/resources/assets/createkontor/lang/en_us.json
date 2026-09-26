@@ -1,11 +1,14 @@
 {
   "block.createkontor.shipping_exit": "Shipping Exit",
   "createkontor.configuration.title": "Create: Kontor Configs",
+  "goggle.createkontor.company_block": "Company",
+  "goggle.createkontor.company_block.unbound": "Not bound to any company.",
   "itemGroup.createkontor": "Create: Kontor",
   "message.createkontor.company_block.bound": "§7Connected to %s",
   "message.createkontor.company_block.company_gone": "§cThe company of this block no longer exists.",
   "message.createkontor.company_block.not_in_company": "§cYou are not a member of any company. The block stays unconnected.",
   "message.createkontor.company_block.not_member": "§cThis block belongs to another company.",
   "message.createkontor.company_block.status": "§7Company: %s",
-  "message.createkontor.company_block.unbound": "§cThe block is not connected to a company."
+  "message.createkontor.company_block.unbound": "§cThe block is not connected to a company.",
+  "message.createkontor.shipping_exit.limit": "§cLimit reached: Legal form allows at most %s §cbound shipping exits."
 }

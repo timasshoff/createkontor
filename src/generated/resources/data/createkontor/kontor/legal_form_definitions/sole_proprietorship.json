@@ -16,5 +16,6 @@
   "max_open_requests_total": 5,
   "max_order_quantity": 64,
   "max_product_licenses": 2,
+  "max_shipping_exits": 1,
   "overdraft_limit_in_dollars": 1000
 }

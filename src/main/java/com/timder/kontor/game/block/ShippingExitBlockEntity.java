@@ -57,6 +57,11 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
     }
 
     @Override
+    protected @Nullable String boundResourceKey() {
+        return ShippingExitBlock.RESOURCE_KEY;
+    }
+
+    @Override
     public void tick() {
         if (deliverySignalTicksRemaining > 0) {
             deliverySignalTicksRemaining--;

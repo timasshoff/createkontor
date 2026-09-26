@@ -4,8 +4,10 @@ import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
+import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
@@ -50,9 +52,50 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         if (Objects.equals(companyId, id)) {
             return;
         }
+        updateBoundResourceCount(companyId, id);
         companyId = id;
         companyName = resolveCompanyName();
         CompanyBlockSupport.afterCompanyIdChanged(this);
+    }
+
+    @Nullable
+    protected String boundResourceKey() {
+        return null;
+    }
+
+    private void updateBoundResourceCount(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
+        String resourceKey = boundResourceKey();
+        if (resourceKey == null || !(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        CompanySavedData data = CompanySavedData.get(serverLevel.getServer());
+        CompanyRegistry registry = data.getRegistry();
+        boolean changedAny = false;
+        if (oldId != null) {
+            Company old = registry.get(oldId).orElse(null);
+            if (old != null) {
+                old.unbindResource(resourceKey);
+                changedAny = true;
+            }
+        }
+        if (newId != null) {
+            Company next = registry.get(newId).orElse(null);
+            if (next != null) {
+                next.bindResource(resourceKey);
+                changedAny = true;
+            }
+        }
+        if (changedAny) {
+            data.setDirty();
+        }
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        if (boundResourceKey() != null) {
+            setCompanyId(null);
+        }
     }
 
     @Override
@@ -79,11 +122,20 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if (companyId == null || companyName.isEmpty()) {
-            tooltip.add(Component.translatable(CompanyBlockSupport.MESSAGE_UNBOUND));
+            CreateLang.builder(CreateKontor.MODID)
+                    .add(ComponentFormatting.errorTranslatable(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND))
+                    .forGoggles(tooltip, 1);
             return true;
         }
-        Component c = Component.translatable(CompanyBlockSupport.MESSAGE_STATUS, ComponentFormatting.highlightStandard(companyName));
-        CreateLang.builder().add(c).forGoggles(tooltip, 1);
+
+        CreateLang.builder()
+                .add(ComponentFormatting.standardTranslatable(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK))
+                .forGoggles(tooltip, 1);
+
+        CreateLang.builder()
+                .add(ComponentFormatting.highlightStandard(companyName))
+                .forGoggles(tooltip, 2);
+
         return true;
     }
 
