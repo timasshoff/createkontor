@@ -44,6 +44,7 @@ public class CompanyCharts {
                 .includeZero(true)
                 .xAxis("d", "Today")
                 .pointLabels(pointLabels)
+                .xRangeOptions(List.of(5, 10, 30, 100, 360), 30)
                 .build();
     }
 }

@@ -2,11 +2,14 @@ package com.timder.kontor.client.ui.element;
 
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Selector;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
+import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.timder.kontor.game.ui.chart.ChartReferenceLine;
 import com.timder.kontor.game.ui.chart.ChartSeries;
 import com.timder.kontor.game.ui.chart.ChartSpec;
+import dev.vfyjxf.taffy.style.TaffyPosition;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -86,6 +89,11 @@ public class ChartElement extends UIElement {
     @Nullable
     private IntFunction<String> tooltipHeader;
 
+    private List<ChartSeries> fullSeries = List.of();
+    @Nullable
+    private Selector<Integer> rangeSelector;
+    private int visibleRange = 0;
+
     public ChartElement() {
         style(s -> s.overflowVisible(false)); // Prevent overflow
     }
@@ -119,6 +127,10 @@ public class ChartElement extends UIElement {
         if (!pointLabels.isEmpty()) {
             chart.setTooltipHeader(index -> index < pointLabels.size() ? pointLabels.get(index) : "");
         }
+
+        if (!spec.timeRangeOptionsDays().isEmpty()) {
+            chart.enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays());
+        }
         return chart;
     }
 
@@ -133,7 +145,8 @@ public class ChartElement extends UIElement {
      * @return This chart element
      */
     public ChartElement setSeries(List<ChartSeries> series) {
-        this.series = List.copyOf(series);
+        this.fullSeries = List.copyOf(series);
+        applyXRangeFilter();
         return this;
     }
 
@@ -177,6 +190,69 @@ public class ChartElement extends UIElement {
         return this;
     }
 
+    public ChartElement enableRangeFilter(List<Integer> options, int defaultRange) {
+        if (options.isEmpty()) {
+            throw new IllegalArgumentException("options must not be empty.");
+        }
+        if (!options.contains(defaultRange)) {
+            throw new IllegalArgumentException("defaultRange must be one of options.");
+        }
+        if (rangeSelector != null) {
+            removeChild(rangeSelector);
+        }
+
+        Selector<Integer> selector = new Selector<>();
+        selector.setCandidateUIProvider(UIElementProvider.text(value ->
+                value == null ? Component.literal("—") : Component.literal(xFormatter.format(value, 0))));
+        selector.setCandidates(options);
+        selector.setOnValueChanged(value -> {
+            visibleRange = value;
+            applyXRangeFilter();
+        });
+        selector.setSelected(defaultRange, false);
+        selector.layout(layout -> layout
+                .positionType(TaffyPosition.ABSOLUTE)
+                .top(PAD)
+                .right(PAD)
+                .width(64));
+
+        addChild(selector);
+        rangeSelector = selector;
+        visibleRange = defaultRange;
+        applyXRangeFilter();
+        return this;
+    }
+
+    private void applyXRangeFilter() {
+        if (visibleRange <= 0) {
+            this.series = fullSeries;
+        } else {
+            List<ChartSeries> filtered = new ArrayList<>(fullSeries.size());
+            for (ChartSeries s : fullSeries) {
+                filtered.add(lastPoints(s, visibleRange));
+            }
+            this.series = filtered;
+        }
+        if (rangeSelector != null) {
+            rangeSelector.setDisplay(dataRange() != null);
+        }
+    }
+
+    private static ChartSeries lastPoints(ChartSeries s, int count) {
+        int size = s.size();
+        if (size <= count) {
+            return s;
+        }
+        int from = size - count;
+        double[] x = new double[count];
+        double[] y = new double[count];
+        for (int i = 0; i < count; i++) {
+            x[i] = s.x(from + i);
+            y[i] = s.y(from + i);
+        }
+        return new ChartSeries(s.label(), s.color(), x, y);
+    }
+
     @Override
     public void drawBackgroundAdditional(GUIContext ctx) {
         super.drawBackgroundAdditional(ctx);
@@ -193,7 +269,12 @@ public class ChartElement extends UIElement {
 
         double[] range = dataRange();
         if (range == null) {
-            String text = "No data";
+            String text;
+            if (title != null) {
+                text = Component.translatable("ui.createkontor.chart.no_data.detailed", title).getString();
+            } else {
+                text = Component.translatable("ui.createkontor.chart.no_data.short").getString();
+            }
             drawText(g, font, text, left + (width - font.width(text)) / 2f, top + (height - lineHeight) / 2f, TEXT_DIM);
             return;
         }

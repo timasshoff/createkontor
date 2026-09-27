@@ -16,12 +16,15 @@ public record ChartSpec(
         String xZeroLabel,
         String yUnit,
         int tooltipDecimals,
-        List<String> pointLabels
+        List<String> pointLabels,
+        List<Integer> timeRangeOptionsDays,
+        int defaultTimeRangeDays
 ) {
     public static final int MAX_SERIES = 6;
     public static final int MAX_POINTS = 5000;
     public static final int MAX_REFERENCE_LINES = 8;
     public static final int MAX_TOOLTIP_DECIMALS = 6;
+    public static final int MAX_TIME_RANGE_OPTIONS = 8;
 
     public static final int MAX_TITLE_LENGTH = 128;
     public static final int MAX_UNIT_LENGTH = 16;
@@ -36,6 +39,7 @@ public record ChartSpec(
         series = List.copyOf(series);
         referenceLines = List.copyOf(referenceLines);
         pointLabels = List.copyOf(pointLabels);
+        timeRangeOptionsDays = List.copyOf(timeRangeOptionsDays);
 
         limit(title, MAX_TITLE_LENGTH, "title");
         limit(xUnit, MAX_UNIT_LENGTH, "xUnit");
@@ -72,6 +76,19 @@ public record ChartSpec(
                 limit(label, MAX_POINT_LABEL_LENGTH, "point label");
             }
         }
+
+        if (timeRangeOptionsDays.size() > MAX_TIME_RANGE_OPTIONS) {
+            throw new IllegalArgumentException("too many time range options: " + timeRangeOptionsDays.size()
+                    + " (max " + MAX_TIME_RANGE_OPTIONS + ")");
+        }
+        for (int days : timeRangeOptionsDays) {
+            if (days <= 0) {
+                throw new IllegalArgumentException("time range option must be positive: " + days);
+            }
+        }
+        if (!timeRangeOptionsDays.isEmpty() && !timeRangeOptionsDays.contains(defaultTimeRangeDays)) {
+            throw new IllegalArgumentException("defaultTimeRangeDays must be one of timeRangeOptionsDays.");
+        }
     }
 
     public static Builder builder(String title) {
@@ -94,6 +111,8 @@ public record ChartSpec(
         private String yUnit = "";
         private int tooltipDecimals = 2;
         private List<String> pointLabels = List.of();
+        private List<Integer> xRangeOptions = List.of();
+        private int defaultXRange = 0;
 
         private Builder(String title) {
             this.title = title;
@@ -135,8 +154,21 @@ public record ChartSpec(
             return this;
         }
 
+        /**
+         * Turns on the time-range dropdown for this chart
+         *
+         * @param options the selectable windows, each a count of the most recent points to show, e.g. [5, 10, 30, 100, 360]
+         * @param defaultRange which of options is preselected
+         */
+        public Builder xRangeOptions(List<Integer> options, int defaultRange) {
+            this.xRangeOptions = options;
+            this.defaultXRange = defaultRange;
+            return this;
+        }
+
         public ChartSpec build() {
-            return new ChartSpec(title, series, referenceLines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals, pointLabels);
+            return new ChartSpec(title, series, referenceLines, includeZero, xUnit, xZeroLabel, yUnit,
+                    tooltipDecimals, pointLabels, xRangeOptions, defaultXRange);
         }
     }
 }

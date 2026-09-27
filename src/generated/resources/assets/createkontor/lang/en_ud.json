@@ -21,6 +21,8 @@
   "message.createkontor.company_block.unbound": "˙ʎuɐdɯoɔ ɐ oʇ pǝʇɔǝuuoɔ ʇou sı ʞɔoןq ǝɥ⟘ɔ§",
   "message.createkontor.kontor_desk.limit": "˙ʞsǝᗡ ɹoʇuoʞ ɐ sɐɥ ʎpɐǝɹןɐ ʎuɐdɯoɔ sıɥ⟘ɔ§",
   "message.createkontor.shipping_exit.limit": "˙sʇıxǝ buıddıɥs punoqɔ§ %s ʇsoɯ ʇɐ sʍoןןɐ ɯɹoɟ ןɐbǝꞀ :pǝɥɔɐǝɹ ʇıɯıꞀɔ§",
+  "ui.createkontor.chart.no_data.detailed": "˙ɹǝʇɐן uıɐbɐ ʎɹʇ uɐɔ noʎ ˙ʇǝʎ \"%s\" ʇɹɐɥɔ ǝɥʇ ɹoɟ ɐʇɐp ou sı ǝɹǝɥ⟘",
+  "ui.createkontor.chart.no_data.short": "˙ɹǝʇɐן uıɐbɐ ʎɹʇ uɐɔ noʎ ˙ʇǝʎ ʇɹɐɥɔ sıɥʇ ɹoɟ ɐʇɐp ou sı ǝɹǝɥ⟘",
   "ui.createkontor.kontor_desk.business_fee.info": "˙ʇunoɔɔɐ ʞuɐq s,ʎuɐdɯoɔ ǝɥʇ ɯoɹɟ pǝʇıqǝp puɐ ʎɐp ʎɹǝʌǝ pǝbɹɐɥɔ sı %s ɟo ǝǝɟ ssǝuısnq Ɐㄥ§",
   "ui.createkontor.kontor_desk.company_name": "ǝɯɐN ʎuɐdɯoƆ",
   "ui.createkontor.kontor_desk.deposit.info": "˙ʞɔɐq pǝʎɐd ǝq oʇ pǝǝu ʇou sǝop ʇɐɥʇ %s ɟo ʇısodǝp ǝǝɹɟ ɐ sǝʌıǝɔǝɹ ʎuɐdɯoɔ ʎɹǝʌƎㄥ§",

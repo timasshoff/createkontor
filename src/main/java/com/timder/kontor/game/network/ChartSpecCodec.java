@@ -45,6 +45,12 @@ final class ChartSpecCodec {
         for (String label : spec.pointLabels()) {
             buf.writeUtf(label, ChartSpec.MAX_POINT_LABEL_LENGTH);
         }
+
+        buf.writeVarInt(spec.timeRangeOptionsDays().size());
+        for (int days : spec.timeRangeOptionsDays()) {
+            buf.writeVarInt(days);
+        }
+        buf.writeVarInt(spec.defaultTimeRangeDays());
     }
 
     static ChartSpec read(FriendlyByteBuf buf) {
@@ -84,7 +90,15 @@ final class ChartSpecCodec {
             pointLabels.add(buf.readUtf(ChartSpec.MAX_POINT_LABEL_LENGTH));
         }
 
-        return new ChartSpec(title, series, lines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals, pointLabels);
+        int timeRangeCount = readCount(buf, ChartSpec.MAX_TIME_RANGE_OPTIONS, "time range options");
+        List<Integer> timeRangeOptionsDays = new ArrayList<>(timeRangeCount);
+        for (int i = 0; i < timeRangeCount; i++) {
+            timeRangeOptionsDays.add(buf.readVarInt());
+        }
+        int defaultTimeRangeDays = buf.readVarInt();
+
+        return new ChartSpec(title, series, lines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals,
+                pointLabels, timeRangeOptionsDays, defaultTimeRangeDays);
     }
 
     private static int readCount(FriendlyByteBuf buf, int max, String what) {

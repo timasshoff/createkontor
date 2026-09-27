@@ -21,6 +21,8 @@
   "message.createkontor.company_block.unbound": "§cThe block is not connected to a company.",
   "message.createkontor.kontor_desk.limit": "§cThis company already has a Kontor Desk.",
   "message.createkontor.shipping_exit.limit": "§cLimit reached: Legal form allows at most %s §cbound shipping exits.",
+  "ui.createkontor.chart.no_data.detailed": "There is no data for the chart \"%s\" yet. You can try again later.",
+  "ui.createkontor.chart.no_data.short": "There is no data for this chart yet. You can try again later.",
   "ui.createkontor.kontor_desk.business_fee.info": "§7A business fee of %s is charged every day and debited from the company's bank account.",
   "ui.createkontor.kontor_desk.company_name": "Company Name",
   "ui.createkontor.kontor_desk.deposit.info": "§7Every company receives a free deposit of %s that does not need to be payed back.",
