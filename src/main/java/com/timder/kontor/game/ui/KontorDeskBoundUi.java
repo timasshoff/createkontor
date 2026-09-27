@@ -47,6 +47,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class KontorDeskBoundUi {
@@ -320,17 +321,38 @@ public class KontorDeskBoundUi {
 
     public static UIElement requests(Company company, KontorDeskBlockEntity be) {
         ScrollerView content = (ScrollerView) UiContainer.tabScroller().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
-        content.addScrollViewChildren(UiLabels.h2(Component.literal("Requests"), Horizontal.CENTER));
 
         ObservableList<Request> requests = new ObservableList<>();
         SimpleBinding<Tag> requestsBinding = DataBindingBuilder.tagS2C(() -> requestsToTag(company.requestBoard().allOpenRequests()))
                 .onRemoteSyncReceived(tag -> requests.set(tagToRequests(tag)))
                 .build();
 
+        ObservableValue<Integer> requestsLimit = new ObservableValue<>(0);
+        SimpleBinding<Integer> requestsLimitBinding = DataBindingBuilder.intValS2C(() -> company.legalForm(CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()))).maxOpenRequestsTotal())
+                .onRemoteSyncReceived(requestsLimit::set)
+                .build();
+
+        Label title = UiLabels.h2(Component.translatable("ui.createkontor.kontor_desk.requests"), Horizontal.LEFT);
+        requests.addListener(() -> title.setText(Component.translatable(
+                "ui.createkontor.kontor_desk.requests_count",
+                requests.get().size(),
+                requestsLimit.get())
+        ));
+        requestsLimit.addListener(() -> title.setText(Component.translatable(
+                "ui.createkontor.kontor_desk.requests_count",
+                requests.get().size(),
+                requestsLimit.get())
+        ));
+        title.addSyncValue(requestsBinding.getSyncValue());
+        title.addSyncValue(requestsLimitBinding.getSyncValue());
+        content.addScrollViewChildren(title);
+
         UIElement requestsBox = new UIElement().addSyncValue(requestsBinding.getSyncValue());
         requests.addListener(() -> {
             requestsBox.clearAllChildren();
-            for (Request request : requests.get()) {
+            List<Request> sorted = new ArrayList<>(List.copyOf(requests.get()));
+            sorted.sort(Comparator.comparing(Request::remainingOfferTicks));
+            for (Request request : sorted) {
                 if (request.hasExpired())
                     continue;
 
@@ -355,6 +377,11 @@ public class KontorDeskBoundUi {
                         Component.literal(String.valueOf(request.getNumber())).withStyle(ChatFormatting.DARK_GRAY)
                 ), Horizontal.LEFT).textStyle(style -> style.textAlignVertical(Vertical.CENTER)));
                 requestElement.addChild(titleRow);
+
+                requestElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
+                        "ui.createkontor.kontor_desk.request.unit_price",
+                        ComponentFormatting.moneyColored(Money.fromDollar(request.getUnitPrice()))
+                ), Horizontal.LEFT));
 
                 requestElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
                         "ui.createkontor.kontor_desk.request.offer_time",

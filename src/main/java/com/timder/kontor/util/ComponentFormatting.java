@@ -75,7 +75,7 @@ public final class ComponentFormatting {
         long minutes = (totalSeconds % 3600) / 60;
         long seconds = totalSeconds % 60;
 
-        String s = String.format("%d:%02d", minutes, seconds);
+        String s = String.format("%d:%02d", minutes, seconds) + " Min";
         return Component.literal(s);
     }
 

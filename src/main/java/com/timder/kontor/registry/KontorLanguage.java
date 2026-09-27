@@ -48,7 +48,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.repayment", "Daily Repayment: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.term_days", "Term Days: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.free_days", "Free Days: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.requests", "Requests");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.requests_count", "Requests (%s/%s)");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.title", "%s for %s §8(#%s§8)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.unit_price", "Unit price: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.offer_time", "Offer stands for %s.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.deadline", "Time to deliver after accepting: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.accept", "Accept request");
