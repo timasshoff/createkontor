@@ -237,7 +237,7 @@ public class CompanySavedData extends SavedData {
         return new Account.SaveState(balance, bookings);
     }
 
-    private static CompoundTag writeLoan(Loan.SaveState state) {
+    public static CompoundTag writeLoan(Loan.SaveState state) {
         CompoundTag tag = new CompoundTag();
         tag.putString("Kind", state.kind().name());
         tag.putLong("Principal", state.principal().cents());
@@ -250,7 +250,7 @@ public class CompanySavedData extends SavedData {
         return tag;
     }
 
-    private static Loan.SaveState readLoan(CompoundTag tag) {
+    public static Loan.SaveState readLoan(CompoundTag tag) {
         return new Loan.SaveState(
                 Loan.Kind.valueOf(tag.getString("Kind")),
                 Money.ofCents(tag.getLong("Principal")),
@@ -267,6 +267,7 @@ public class CompanySavedData extends SavedData {
         tag.putLong("Day", entry.day());
         tag.putLong("Result", entry.result().cents());
         tag.putLong("Revenue", entry.revenue().cents());
+        tag.putLong("Balance", entry.balance().cents());
 
         ListTag costs = new ListTag();
         for (Map.Entry<BookingKind, Money> cost : entry.costsByKind().entrySet()) {
@@ -289,6 +290,7 @@ public class CompanySavedData extends SavedData {
                 tag.getLong("Day"),
                 Money.ofCents(tag.getLong("Result")),
                 Money.ofCents(tag.getLong("Revenue")),
+                Money.ofCents(tag.getLong("Balance")),
                 costsByKind);
     }
 

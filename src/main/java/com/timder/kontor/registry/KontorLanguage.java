@@ -32,10 +32,48 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founding", "Found company");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founding_title", "Found a new company");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.company_name", "Company Name");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.overview", "Overview");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.requests_orders", "Requests & Orders");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.account", "Bank Account");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bookings", "Bookings");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.open_loans", "Open Loans");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.open_orders", "Open Orders: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.total_bookings_visible", "Visible Bookings: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.current_overdraft_limit", "Overdraft Limit: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.bookings_count", "Bookings (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loans_count", "Open Loans (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.principal", "%s: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.outstanding", "Outstanding: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.rate", "Daily Interest Rate: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.repayment", "Daily Repayment: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.term_days", "Term Days: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.free_days", "Free Days: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.title", "%s for %s §8(#%s§8)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.offer_time", "Offer stands for %s.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.deadline", "Time to deliver after accepting: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.accept", "Accept request");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
+
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.business_license", "Business License");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.flat_license", "Flat Product License");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.turnover_license", "Turnover Product License");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.application_fee", "Application Fee");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.feed_in_license", "SU Feed-in License");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.salary", "Salary");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.power", "Power");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.storage", "Storage");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.purchase", "Purchase");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.interest", "Interest");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.contract_penalty", "Contract Penalty");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.upgrade_fee", "Legal form Upgrade Eee");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.order_revenue", "Order Revenue");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.partial_payment", "Partial Order Revenue");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.feed_in_revenue", "SU Feed-in Revenue");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.deposit", "Deposit");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.loan_payout", "Loan Payout");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.loan_repayment", "Loan Repayment");
 
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
@@ -43,6 +81,23 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("legal_forms.createkontor.public_company", "§6Public Company");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
+
+        REGISTRATE.addRawLang("loan.createkontor.bank", "Bank Loan");
+        REGISTRATE.addRawLang("loan.createkontor.founder", "Founder Loan");
+        REGISTRATE.addRawLang("loan.createkontor.principal", "Principal: %s");
+
+        REGISTRATE.addRawLang("chart.createkontor.d", "d");
+        REGISTRATE.addRawLang("chart.createkontor.day", "Day ");
+        REGISTRATE.addRawLang("chart.createkontor.today", "Today");
+
+        REGISTRATE.addRawLang("chart.createkontor.balance.title", "Balance");
+        REGISTRATE.addRawLang("chart.createkontor.balance.series.balance", "Balance");
+        REGISTRATE.addRawLang("chart.createkontor.balance.reference.overdraft", "Overdraft Limit");
+        REGISTRATE.addRawLang("chart.createkontor.balance.bookings", " Bookings");
+
+        REGISTRATE.addRawLang("chart.createkontor.revenue_result.title", "Daily Revenue & Daily Result");
+        REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.revenue", "Revenue");
+        REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.result", "Result");
     }
 
     static void touch() {

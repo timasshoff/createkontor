@@ -13,6 +13,7 @@ import dev.vfyjxf.taffy.style.TaffyPosition;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import org.joml.Vector2f;
 
 import javax.annotation.Nullable;
@@ -90,6 +91,8 @@ public class ChartElement extends UIElement {
     private IntFunction<String> tooltipHeader;
 
     private List<ChartSeries> fullSeries = List.of();
+    private List<String> fullPointLabels = List.of();
+    private List<String> pointLabels = List.of();
     @Nullable
     private Selector<Integer> rangeSelector;
     private int visibleRange = 0;
@@ -123,13 +126,13 @@ public class ChartElement extends UIElement {
         chart.setYFormatter((value, decimals) -> NiceScale.format(value, decimals) + yUnit);
         chart.setTooltipValueFormatter(value -> String.format(Locale.ROOT, tooltipFormat, value) + yUnit);
 
-        List<String> pointLabels = spec.pointLabels();
-        if (!pointLabels.isEmpty()) {
-            chart.setTooltipHeader(index -> index < pointLabels.size() ? pointLabels.get(index) : "");
+        if (!spec.pointLabels().isEmpty()) {
+            chart.setPointLabels(spec.pointLabels());
+            chart.setTooltipHeader(chart::pointLabelAt);
         }
 
         if (!spec.timeRangeOptionsDays().isEmpty()) {
-            chart.enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays());
+            chart.enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays(), spec.xRangeUnit());
         }
         return chart;
     }
@@ -146,6 +149,12 @@ public class ChartElement extends UIElement {
      */
     public ChartElement setSeries(List<ChartSeries> series) {
         this.fullSeries = List.copyOf(series);
+        applyXRangeFilter();
+        return this;
+    }
+
+    public ChartElement setPointLabels(List<String> pointLabels) {
+        this.fullPointLabels = List.copyOf(pointLabels);
         applyXRangeFilter();
         return this;
     }
@@ -191,6 +200,10 @@ public class ChartElement extends UIElement {
     }
 
     public ChartElement enableRangeFilter(List<Integer> options, int defaultRange) {
+        return enableRangeFilter(options, defaultRange, null);
+    }
+
+    public ChartElement enableRangeFilter(List<Integer> options, int defaultRange, @Nullable String labelUnit) {
         if (options.isEmpty()) {
             throw new IllegalArgumentException("options must not be empty.");
         }
@@ -201,9 +214,24 @@ public class ChartElement extends UIElement {
             removeChild(rangeSelector);
         }
 
+        Font font = LDLibFonts.font();
+        int maxTextWidth = 0;
+        for (Integer option : options) {
+            String text = labelUnit != null ? NiceScale.format(option, 0) + labelUnit : xFormatter.format(option, 0);
+            maxTextWidth = Math.max(maxTextWidth, font.width(text));
+        }
+        int selectorWidth = maxTextWidth + 30;
+
         Selector<Integer> selector = new Selector<>();
-        selector.setCandidateUIProvider(UIElementProvider.text(value ->
-                value == null ? Component.literal("—") : Component.literal(xFormatter.format(value, 0))));
+        selector.setCandidateUIProvider(UIElementProvider.text(value -> {
+            if (value == null) {
+                return Component.literal("—");
+            }
+            String text = labelUnit != null
+                    ? NiceScale.format(value, 0) + labelUnit
+                    : xFormatter.format(value, 0);
+            return Component.literal(text);
+        }));
         selector.setCandidates(options);
         selector.setOnValueChanged(value -> {
             visibleRange = value;
@@ -214,7 +242,7 @@ public class ChartElement extends UIElement {
                 .positionType(TaffyPosition.ABSOLUTE)
                 .top(PAD)
                 .right(PAD)
-                .width(64));
+                .width(selectorWidth));
 
         addChild(selector);
         rangeSelector = selector;
@@ -226,12 +254,14 @@ public class ChartElement extends UIElement {
     private void applyXRangeFilter() {
         if (visibleRange <= 0) {
             this.series = fullSeries;
+            this.pointLabels = fullPointLabels;
         } else {
             List<ChartSeries> filtered = new ArrayList<>(fullSeries.size());
             for (ChartSeries s : fullSeries) {
                 filtered.add(lastPoints(s, visibleRange));
             }
             this.series = filtered;
+            this.pointLabels = lastPoints(fullPointLabels, visibleRange);
         }
         if (rangeSelector != null) {
             rangeSelector.setDisplay(dataRange() != null);
@@ -253,6 +283,18 @@ public class ChartElement extends UIElement {
         return new ChartSeries(s.label(), s.color(), x, y);
     }
 
+    private static List<String> lastPoints(List<String> labels, int count) {
+        int size = labels.size();
+        if (size <= count) {
+            return labels;
+        }
+        return labels.subList(size - count, size);
+    }
+
+    private String pointLabelAt(int index) {
+        return index >= 0 && index < pointLabels.size() ? pointLabels.get(index) : "";
+    }
+
     @Override
     public void drawBackgroundAdditional(GUIContext ctx) {
         super.drawBackgroundAdditional(ctx);
@@ -269,13 +311,16 @@ public class ChartElement extends UIElement {
 
         double[] range = dataRange();
         if (range == null) {
-            String text;
-            if (title != null) {
-                text = Component.translatable("ui.createkontor.chart.no_data.detailed", title).getString();
-            } else {
-                text = Component.translatable("ui.createkontor.chart.no_data.short").getString();
+            Component message = title != null
+                    ? Component.translatable("ui.createkontor.chart.no_data.detailed", title)
+                    : Component.translatable("ui.createkontor.chart.no_data.short");
+            List<FormattedCharSequence> lines = font.split(message, Math.round(width - 2f * PAD));
+            float textY = top + (height - lines.size() * lineHeight) / 2f;
+            for (FormattedCharSequence line : lines) {
+                float textX = left + (width - font.width(line)) / 2f;
+                LDLibFonts.drawText(g, font, line, textX, textY, TEXT_DIM, false);
+                textY += lineHeight;
             }
-            drawText(g, font, text, left + (width - font.width(text)) / 2f, top + (height - lineHeight) / 2f, TEXT_DIM);
             return;
         }
 

@@ -143,7 +143,7 @@ public final class Company {
 
     public void addManager(UUID player) {
         Objects.requireNonNull(player, "player must not be null.");
-        if (isOwner(player)) throw new IllegalArgumentException("The owner is no manager.");
+        if (isMember(player)) throw new IllegalArgumentException("Player is already a member.");
         managers.add(player);
     }
 

@@ -18,7 +18,8 @@ public record ChartSpec(
         int tooltipDecimals,
         List<String> pointLabels,
         List<Integer> timeRangeOptionsDays,
-        int defaultTimeRangeDays
+        int defaultTimeRangeDays,
+        String xRangeUnit
 ) {
     public static final int MAX_SERIES = 6;
     public static final int MAX_POINTS = 5000;
@@ -36,6 +37,7 @@ public record ChartSpec(
         Objects.requireNonNull(xUnit, "xUnit must not be null.");
         Objects.requireNonNull(xZeroLabel, "xZeroLabel must not be null.");
         Objects.requireNonNull(yUnit, "yUnit must not be null.");
+        Objects.requireNonNull(xRangeUnit, "xRangeUnit must not be null.");
         series = List.copyOf(series);
         referenceLines = List.copyOf(referenceLines);
         pointLabels = List.copyOf(pointLabels);
@@ -45,6 +47,7 @@ public record ChartSpec(
         limit(xUnit, MAX_UNIT_LENGTH, "xUnit");
         limit(xZeroLabel, MAX_UNIT_LENGTH, "xZeroLabel");
         limit(yUnit, MAX_UNIT_LENGTH, "yUnit");
+        limit(xRangeUnit, MAX_UNIT_LENGTH, "xRangeUnit");
 
         if (series.size() > MAX_SERIES) {
             throw new IllegalArgumentException("too many series: " + series.size() + " (max " + MAX_SERIES + ")");
@@ -113,6 +116,7 @@ public record ChartSpec(
         private List<String> pointLabels = List.of();
         private List<Integer> xRangeOptions = List.of();
         private int defaultXRange = 0;
+        private String xRangeUnit;
 
         private Builder(String title) {
             this.title = title;
@@ -166,9 +170,15 @@ public record ChartSpec(
             return this;
         }
 
+        public Builder xRangeUnit(String unit) {
+            this.xRangeUnit = unit;
+            return this;
+        }
+
         public ChartSpec build() {
+            String resolvedRangeUnit = xRangeUnit != null ? xRangeUnit : xUnit;
             return new ChartSpec(title, series, referenceLines, includeZero, xUnit, xZeroLabel, yUnit,
-                    tooltipDecimals, pointLabels, xRangeOptions, defaultXRange);
+                    tooltipDecimals, pointLabels, xRangeOptions, defaultXRange, resolvedRangeUnit);
         }
     }
 }

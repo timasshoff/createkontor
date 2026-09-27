@@ -39,6 +39,10 @@ public class CompanyCommands {
                                 .then(Commands.literal("info")
                                         .then(Commands.argument("name", StringArgumentType.string())
                                                 .executes(CompanyCommands::info)))
+                                .then(Commands.literal("manager")
+                                        .then(Commands.argument("name", StringArgumentType.string())
+                                                .then(Commands.argument("player", StringArgumentType.string())
+                                                        .executes(CompanyCommands::manager))))
                                 .then(Commands.literal("book")
                                         .then(Commands.argument("name", StringArgumentType.string())
                                                 .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
@@ -135,6 +139,33 @@ public class CompanyCommands {
                 lastResult);
 
         source.sendSuccess(() -> Component.literal(text), false);
+        return 1;
+    }
+
+    private static int manager(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
+        String companyName = StringArgumentType.getString(context, "name");
+        String name = StringArgumentType.getString(context, "player");
+
+        CompanySavedData data = CompanySavedData.get(server);
+        var registry = data.getRegistry();
+        Optional<Company> found = registry.findByName(companyName);
+        if (found.isEmpty()) {
+            source.sendFailure(Component.literal("No company named \"" + companyName + "\"."));
+            return 0;
+        }
+
+        Company company = found.get();
+        try {
+            company.addManager(server.getPlayerList().getPlayerByName(name).getUUID());
+            data.setDirty();
+        } catch (IllegalArgumentException e) {
+            source.sendFailure(Component.literal("Player is already a member."));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.literal("Successfully booked."), false);
         return 1;
     }
 

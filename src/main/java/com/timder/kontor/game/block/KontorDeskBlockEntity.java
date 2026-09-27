@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextField;
 import com.timder.kontor.config.CompanyConfig;
+import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
@@ -79,6 +81,26 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         setCompanyId(company.id());
         CompanyBlockSupport.message(player, CompanyBlockSupport.MESSAGE_BOUND, ComponentFormatting.highlightStandard(company.name()));
         player.closeContainer();
+        return Component.empty();
+    }
+
+    public Component acceptRequest(long number) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return Component.empty();
+        }
+        MinecraftServer server = serverLevel.getServer();
+        var data = CompanySavedData.get(server);
+        CompanyRegistry registry = data.getRegistry();
+        Company company = registry.get(getCompanyId()).orElse(null);
+        if (company == null) {
+            return Component.empty();
+        }
+
+        try {
+            company.acceptRequest(number, CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())), EconomyConfig.toRequestParams());
+        } catch (IllegalStateException e) {
+            return Component.empty();
+        }
         return Component.empty();
     }
 }

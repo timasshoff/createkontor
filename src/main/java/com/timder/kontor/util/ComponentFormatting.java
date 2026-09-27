@@ -3,6 +3,7 @@ package com.timder.kontor.util;
 import com.timder.kontor.core.company.financial.Money;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public final class ComponentFormatting {
 
@@ -67,6 +68,15 @@ public final class ComponentFormatting {
 
     public static Component day(long day) {
         return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)).withStyle(ChatFormatting.GOLD));
+    }
+
+    public static MutableComponent ticks(long ticks) {
+        long totalSeconds = ticks / 20;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+
+        String s = String.format("%d:%02d", minutes, seconds);
+        return Component.literal(s);
     }
 
 }

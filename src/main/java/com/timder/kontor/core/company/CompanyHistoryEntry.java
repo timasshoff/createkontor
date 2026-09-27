@@ -10,6 +10,7 @@ public record CompanyHistoryEntry(
         long day,
         Money result,
         Money revenue,
+        Money balance,
         Map<BookingKind, Money> costsByKind
 ) {
 
@@ -17,6 +18,7 @@ public record CompanyHistoryEntry(
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
         Objects.requireNonNull(result, "result must not be null.");
         Objects.requireNonNull(revenue, "revenue must not be null.");
+        Objects.requireNonNull(balance, "balance must not be null.");
         if (revenue.isNegative()) throw new IllegalArgumentException("revenue must not be negative.");
         costsByKind = Map.copyOf(costsByKind);
     }
