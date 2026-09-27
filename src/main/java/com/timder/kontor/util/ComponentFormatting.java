@@ -57,4 +57,16 @@ public final class ComponentFormatting {
         return Component.literal(money.toString()).withStyle(MONEY_NEGATIVE);
     }
 
+    public static Component moneyPositive(Money money) {
+        return Component.literal(money.toString()).withStyle(MONEY_POSITIVE);
+    }
+
+    public static Component moneyNegative(Money money) {
+        return Component.literal(money.toString()).withStyle(MONEY_NEGATIVE);
+    }
+
+    public static Component day(long day) {
+        return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)).withStyle(ChatFormatting.GOLD));
+    }
+
 }

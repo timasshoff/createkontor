@@ -777,7 +777,7 @@ public final class Economy {
     }
 
     public long currentDay() {
-        return ticksElapsed / DAY_LENGTH;
+        return macro.getDay();
     }
 
     public Phase currentPhase() {

@@ -1,4 +1,4 @@
-package com.timder.kontor.chart;
+package com.timder.kontor.game.ui.chart;
 
 public final class ChartColors {
     public static final int BLUE = 0xFF2A78D6;

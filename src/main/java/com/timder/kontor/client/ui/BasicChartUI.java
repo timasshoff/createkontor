@@ -6,7 +6,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.client.ui.element.ChartElement;
-import com.timder.kontor.chart.ChartSpec;
+import com.timder.kontor.game.ui.chart.ChartSpec;
 
 public final class BasicChartUI {
     public static ModularUI create(ChartSpec spec) {

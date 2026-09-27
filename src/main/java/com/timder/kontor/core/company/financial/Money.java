@@ -2,6 +2,8 @@ package com.timder.kontor.core.company.financial;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * An amount of money in whole hundredths of a dollar (cents).
@@ -112,6 +114,8 @@ public record Money(long cents) implements Comparable<Money> {
 
     @Override
     public String toString() {
-        return BigDecimal.valueOf(cents, 2).toPlainString() + "$";
+        BigDecimal value = BigDecimal.valueOf(cents, 2);
+        NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
+        return nf.format(value.doubleValue());
     }
 }

@@ -1,4 +1,4 @@
-package com.timder.kontor.game.ui.elements;
+package com.timder.kontor.game.ui.element;
 
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import net.minecraft.network.chat.Component;

@@ -1,4 +1,4 @@
-package com.timder.kontor.chart;
+package com.timder.kontor.game.ui.chart;
 
 import java.util.ArrayList;
 import java.util.List;

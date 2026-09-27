@@ -23,11 +23,23 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
 
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.business_fee.info", "§7A business fee of %s is charged every day and debited from the company's bank account.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.deposit.info", "§7Every company receives a free deposit of %s that does not need to be payed back.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founders_loan.info", "§7Additionally, you can take a founders loan of %s with %s free days before you need to repay it.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founding", "Found company");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founding_title", "Found a new company");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.company_name", "Company Name");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.open_orders", "Open Orders: %s");
+
+        REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
+        REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
+
+        REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
+        REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
+        REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
+        REGISTRATE.addRawLang("legal_forms.createkontor.public_company", "§6Public Company");
+
+        REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
     }
 
     static void touch() {

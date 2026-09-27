@@ -4,7 +4,6 @@ import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
-import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
@@ -12,9 +11,9 @@ import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.game.block.KontorDeskBlockEntity;
-import com.timder.kontor.game.ui.elements.UiButtons;
-import com.timder.kontor.game.ui.elements.UiContainer;
-import com.timder.kontor.game.ui.elements.UiLabels;
+import com.timder.kontor.game.ui.element.UiButtons;
+import com.timder.kontor.game.ui.element.UiContainer;
+import com.timder.kontor.game.ui.element.UiLabels;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,16 +51,21 @@ public final class KontorDeskUnboundUi {
         nameField.addSyncValue(nameBinding.getSyncValue());
         root.addScrollViewChildren(nameField);
 
-        root.addScrollViewChildren(UiLabels.secondary(Component.translatable(
-                "ui.createkontor.kontor_desk.deposit.info",
-                ComponentFormatting.moneyColored(Money.ofDollars(CompanyConfig.START_DEPOSIT_IN_DOLLARS.get()))),
-                Horizontal.LEFT));
+        root.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable(
+                "ui.createkontor.kontor_desk.business_fee.info",
+                ComponentFormatting.moneyNegative(Money.ofDollars(CompanyConfig.BUSINESS_LICENSE_FEE_IN_DOLLARS.get()))
+        ), Horizontal.LEFT));
 
-        root.addScrollViewChildren(UiLabels.secondary(Component.translatable(
+        root.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable(
+                "ui.createkontor.kontor_desk.deposit.info",
+                ComponentFormatting.moneyColored(Money.ofDollars(CompanyConfig.START_DEPOSIT_IN_DOLLARS.get()))
+        ), Horizontal.LEFT));
+
+        root.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable(
                         "ui.createkontor.kontor_desk.founders_loan.info",
                         ComponentFormatting.moneyColored(Money.ofDollars(CompanyConfig.FOUNDER_LOAN_IN_DOLLARS.get())),
-                        ComponentFormatting.highlightStandard(CompanyConfig.FOUNDER_LOAN_FREE_DAYS.get().toString())),
-                Horizontal.LEFT));
+                        ComponentFormatting.highlightStandard(CompanyConfig.FOUNDER_LOAN_FREE_DAYS.get().toString())
+        ), Horizontal.LEFT));
 
         Toggle loanToggle = new Toggle();
         loanToggle.toggleLabel.setText(Component.literal("Take founders loan"));

@@ -1,8 +1,8 @@
 package com.timder.kontor.game.network;
 
-import com.timder.kontor.chart.ChartReferenceLine;
-import com.timder.kontor.chart.ChartSeries;
-import com.timder.kontor.chart.ChartSpec;
+import com.timder.kontor.game.ui.chart.ChartReferenceLine;
+import com.timder.kontor.game.ui.chart.ChartSeries;
+import com.timder.kontor.game.ui.chart.ChartSpec;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;

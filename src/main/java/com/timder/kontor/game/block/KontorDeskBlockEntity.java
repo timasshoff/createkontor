@@ -13,6 +13,7 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.LegalForms;
+import com.timder.kontor.core.company.financial.Booking;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
@@ -45,8 +46,16 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
     public ModularUI createUI(BlockUIMenuType.BlockUIHolder holder) {
         if (getCompanyId() != null) {
-            return KontorDeskBoundUi.create(holder, this);
+            Company company = holder.player.level() instanceof ServerLevel serverLevel
+                    ? CompanyBlockSupport.requireMember(serverLevel, holder.pos, (ServerPlayer) holder.player)
+                    : null;
+            Economy economy = holder.player.level() instanceof ServerLevel serverLevel
+                    ? EconomySavedData.get(serverLevel.getServer()).getEconomy()
+                    : null;
+
+            return KontorDeskBoundUi.create(holder, this, company, economy);
         }
+
         return KontorDeskUnboundUi.create(holder,this);
     }
 
