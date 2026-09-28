@@ -2,48 +2,38 @@ package com.timder.kontor.game.ui.chart;
 
 import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.financial.Booking;
+import com.timder.kontor.core.company.financial.BookingKind;
+import com.timder.kontor.core.company.financial.Money;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public class CompanyCharts {
 
-    public static Tag historyToTag(List<CompanyHistoryEntry> history) {
-        ListTag list = new ListTag();
-        for (CompanyHistoryEntry entry : history) {
-            CompoundTag e = new CompoundTag();
-            e.putLong("day", entry.day());
-            e.putLong("resultCents", entry.result().cents());
-            e.putLong("revenueCents", entry.revenue().cents());
-            e.putLong("balanceCents", entry.balance().cents());
-            list.add(e);
-        }
-        return list;
-    }
-
-    public static ChartSpec revenueResultSpecFromHistoryTag(Tag tag) {
-        ListTag list = (ListTag) tag;
-        int count = list.size();
+    public static ChartSpec revenueResultSpecFromHistory(List<CompanyHistoryEntry> history) {
+        int count = history.size();
         double[] x = new double[count];
         double[] result = new double[count];
         double[] revenue = new double[count];
         List<String> pointLabels = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            CompoundTag e = list.getCompound(i);
+            CompanyHistoryEntry entry = history.get(i);
             x[i] = -(double) (count - 1 - i);
-            result[i] = e.getLong("resultCents") / 100.0;
-            revenue[i] = e.getLong("revenueCents") / 100.0;
-            pointLabels.add(Component.translatable("chart.createkontor.day").getString() + e.getLong("day"));
+            result[i] = entry.result().cents() / 100.0;
+            revenue[i] = entry.revenue().cents() / 100.0;
+            pointLabels.add(Component.translatable("chart.createkontor.day").getString() + entry.day());
         }
 
         return ChartSpec.builder(Component.translatable("chart.createkontor.revenue_result.title").getString())
-                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.revenue").getString(), ChartColors.BLUE, x, result))
-                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.result").getString(), ChartColors.TEAL, x, revenue))
+                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.revenue").getString(), ChartColors.BLUE, x, revenue))
+                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.result").getString(), ChartColors.TEAL, x, result))
                 .includeZero(true)
                 .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
                 .pointLabels(pointLabels)
@@ -85,6 +75,64 @@ public class CompanyCharts {
                 .xRangeOptions(List.of(10, 25, 50, 100, 250), 25)
                 .xRangeUnit(Component.translatable("chart.createkontor.balance.bookings").getString())
                 .build();
+    }
+
+    public static ChartSpec costStructureFromHistory(List<CompanyHistoryEntry> history) {
+        int count = history.size();
+        double[] x = new double[count];
+        List<String> pointLabels = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            x[i] = -(double) (count - 1 - i);
+            pointLabels.add(Component.translatable("chart.createkontor.day").getString() + history.get(i).day());
+        }
+
+        Map<BookingKind, Long> totalCentsByKind = new EnumMap<>(BookingKind.class);
+        for (CompanyHistoryEntry entry : history) {
+            for (Map.Entry<BookingKind, Money> cost : entry.costsByKind().entrySet()) {
+                totalCentsByKind.merge(cost.getKey(), cost.getValue().cents(), Long::sum);
+            }
+        }
+
+        List<BookingKind> byTotalDesc = new ArrayList<>(totalCentsByKind.keySet());
+        byTotalDesc.sort((a, b) -> Long.compare(totalCentsByKind.get(a), totalCentsByKind.get(b)));
+
+        int namedCount = byTotalDesc.size() <= ChartSpec.MAX_SERIES
+                ? byTotalDesc.size()
+                : ChartSpec.MAX_SERIES - 1;
+        List<BookingKind> namedKinds = byTotalDesc.subList(0, namedCount);
+
+        ChartSpec.Builder builder = ChartSpec.builder("Cost Structure")
+                .kind(ChartKind.STACKED_BAR)
+                .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
+                .pointLabels(pointLabels)
+                .xRangeOptions(List.of(7, 14, 30, 100, 360), 30);
+
+        for (int k = 0; k < namedKinds.size(); k++) {
+            BookingKind kind = namedKinds.get(k);
+            double[] y = new double[count];
+            for (int i = 0; i < count; i++) {
+                y[i] = history.get(i).costsByKind().getOrDefault(kind, Money.ZERO).negate().cents() / 100.0;
+            }
+            String label = Component.translatable("enum.createkontor.booking_kind." + kind.toString().toLowerCase()).getString();
+            builder.series(new ChartSeries(label, ChartColors.STACK[k], x, y));
+        }
+
+        if (namedKinds.size() < byTotalDesc.size()) {
+            double[] y = new double[count];
+            for (int i = 0; i < count; i++) {
+                double sum = 0.0;
+                for (Map.Entry<BookingKind, Money> cost : history.get(i).costsByKind().entrySet()) {
+                    if (!namedKinds.contains(cost.getKey())) {
+                        sum += cost.getValue().negate().cents() / 100.0;
+                    }
+                }
+                y[i] = sum;
+            }
+            String otherLabel = "Other";
+            builder.series(new ChartSeries(otherLabel, ChartColors.STACK[namedKinds.size()], x, y));
+        }
+
+        return builder.build();
     }
 
 }

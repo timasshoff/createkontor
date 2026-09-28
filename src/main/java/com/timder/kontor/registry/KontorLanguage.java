@@ -36,6 +36,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.overview", "Overview");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.requests_orders", "Requests & Orders");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.account", "Bank Account");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.balance", "Balance");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.cost_structure", "Cost Structure");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bookings", "Bookings");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.open_loans", "Open Loans");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.open_orders", "Open Orders: %s");
@@ -51,6 +53,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.free_days", "Free Days: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.requests", "Requests");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.requests_count", "Requests (%s/%s)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.requests.empty", "Incoming requests will be visible here. To receive requests for a products you need to own a license for that product and participate in the products market.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.title", "%s for %s §8(#%s§8)");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.unit_price", "Unit price: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.offer_time", "Offer stands for %s.");
@@ -58,8 +61,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.accept", "Accept request");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.orders", "Order Book");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.orders_count", "Order Book (%s/%s)");
-        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.delivery_time", "Remaining time to deliver: %s.");
-        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.grace_period", "Deadline reached! Fulfill this order now to receive a partial payout!");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.orders.empty", "Accepted requests will be visible here.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.order.delivery_time", "Remaining time to deliver: %s.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.order.grace_period", "Deadline reached! Fulfill this order now to receive a partial payout!");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");

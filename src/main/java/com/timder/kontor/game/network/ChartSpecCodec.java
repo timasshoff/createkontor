@@ -1,5 +1,6 @@
 package com.timder.kontor.game.network;
 
+import com.timder.kontor.game.ui.chart.ChartKind;
 import com.timder.kontor.game.ui.chart.ChartReferenceLine;
 import com.timder.kontor.game.ui.chart.ChartSeries;
 import com.timder.kontor.game.ui.chart.ChartSpec;
@@ -15,6 +16,7 @@ final class ChartSpecCodec {
 
     static void write(FriendlyByteBuf buf, ChartSpec spec) {
         buf.writeUtf(spec.title(), ChartSpec.MAX_TITLE_LENGTH);
+        buf.writeEnum(spec.kind());
         buf.writeBoolean(spec.includeZero());
         buf.writeUtf(spec.xUnit(), ChartSpec.MAX_UNIT_LENGTH);
         buf.writeUtf(spec.xZeroLabel(), ChartSpec.MAX_UNIT_LENGTH);
@@ -56,6 +58,7 @@ final class ChartSpecCodec {
 
     static ChartSpec read(FriendlyByteBuf buf) {
         String title = buf.readUtf(ChartSpec.MAX_TITLE_LENGTH);
+        ChartKind kind = buf.readEnum(ChartKind.class);
         boolean includeZero = buf.readBoolean();
         String xUnit = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
         String xZeroLabel = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
@@ -99,7 +102,7 @@ final class ChartSpecCodec {
         int defaultTimeRangeDays = buf.readVarInt();
         String xRangeUnit = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
 
-        return new ChartSpec(title, series, lines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals,
+        return new ChartSpec(title, kind, series, lines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals,
                 pointLabels, timeRangeOptionsDays, defaultTimeRangeDays, xRangeUnit);
     }
 

@@ -414,6 +414,41 @@ public final class Economy {
         return lastResult.overflow() * (own / attractiveness.total());
     }
 
+    /**
+     * A company's reputation across every market it partcipates in.
+     * @param company The company
+     * @return The reputation (0 to 100)
+     */
+    public double overallReputation(CompanyId company) {
+        List<ItemId> participatedMarkets = marketIds().stream()
+                .filter(market -> isParticipant(market, company))
+                .toList();
+        if (participatedMarkets.isEmpty()) {
+            return 50.0;
+        }
+
+        double weightedSum = 0.0;
+        double totalWeight = 0.0;
+        for (ItemId market : participatedMarkets) {
+            double weight = expectedDailyQuantity(market, company);
+            weightedSum += participantsOf(market).get(company).reputation() * weight;
+            totalWeight += weight;
+        }
+
+        if (totalWeight <= 0) {
+            return participatedMarkets.stream()
+                    .mapToDouble(market -> participantsOf(market).get(company).reputation())
+                    .average()
+                    .orElseThrow();
+        }
+
+        return weightedSum / totalWeight;
+    }
+
+    public double overallReputationInStars(CompanyId company) {
+        return MarketRules.starsFromReputation(overallReputation(company));
+    }
+
     private List<EconomyEvent> closeDay() {
         List<EconomyEvent> events = new ArrayList<>();
         long day = macro.getDay();

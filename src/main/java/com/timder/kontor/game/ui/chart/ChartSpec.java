@@ -9,6 +9,7 @@ import java.util.Objects;
  */
 public record ChartSpec(
         String title,
+        ChartKind kind,
         List<ChartSeries> series,
         List<ChartReferenceLine> referenceLines,
         boolean includeZero,
@@ -34,6 +35,7 @@ public record ChartSpec(
 
     public ChartSpec {
         Objects.requireNonNull(title, "title must not be null.");
+        Objects.requireNonNull(kind, "kind must not be null.");
         Objects.requireNonNull(xUnit, "xUnit must not be null.");
         Objects.requireNonNull(xZeroLabel, "xZeroLabel must not be null.");
         Objects.requireNonNull(yUnit, "yUnit must not be null.");
@@ -58,6 +60,10 @@ public record ChartSpec(
                 throw new IllegalArgumentException("series '" + s.label() + "' has too many points: "
                         + s.size() + " (max " + MAX_POINTS + ")");
             }
+        }
+
+        if (kind == ChartKind.STACKED_BAR) {
+            validateStackedBarSeries(series);
         }
 
         if (referenceLines.size() > MAX_REFERENCE_LINES) {
@@ -104,8 +110,40 @@ public record ChartSpec(
         }
     }
 
+    private static void validateStackedBarSeries(List<ChartSeries> series) {
+        if (series.isEmpty()) {
+            return;
+        }
+        int size = series.get(0).size();
+        for (ChartSeries s : series) {
+            if (s.size() != size) {
+                throw new IllegalArgumentException("stacked bar series must share the same x grid: '"
+                        + s.label() + "' has " + s.size() + " points, expected " + size);
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            double x0 = series.get(0).x(i);
+            for (ChartSeries s : series) {
+                if (Math.abs(s.x(i) - x0) > 1e-9) {
+                    throw new IllegalArgumentException("stacked bar series must share the same x grid: "
+                            + "mismatch at index " + i + " in '" + s.label() + "' (" + s.x(i) + " vs " + x0 + ")");
+                }
+            }
+        }
+        for (ChartSeries s : series) {
+            for (int i = 0; i < s.size(); i++) {
+                double v = s.y(i);
+                if (!Double.isNaN(v) && v < 0) {
+                    throw new IllegalArgumentException("stacked bar values must be >= 0 or NaN, got "
+                            + v + " in '" + s.label() + "' at index " + i);
+                }
+            }
+        }
+    }
+
     public static final class Builder {
         private final String title;
+        private ChartKind kind = ChartKind.LINE;
         private final List<ChartSeries> series = new ArrayList<>();
         private final List<ChartReferenceLine> referenceLines = new ArrayList<>();
         private boolean includeZero = false;
@@ -120,6 +158,11 @@ public record ChartSpec(
 
         private Builder(String title) {
             this.title = title;
+        }
+
+        public Builder kind(ChartKind kind) {
+            this.kind = kind;
+            return this;
         }
 
         public Builder series(ChartSeries series) {
@@ -177,7 +220,7 @@ public record ChartSpec(
 
         public ChartSpec build() {
             String resolvedRangeUnit = xRangeUnit != null ? xRangeUnit : xUnit;
-            return new ChartSpec(title, series, referenceLines, includeZero, xUnit, xZeroLabel, yUnit,
+            return new ChartSpec(title, kind, series, referenceLines, includeZero, xUnit, xZeroLabel, yUnit,
                     tooltipDecimals, pointLabels, xRangeOptions, defaultXRange, resolvedRangeUnit);
         }
     }

@@ -9,8 +9,10 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.financial.Booking;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Loan;
@@ -22,9 +24,8 @@ import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.CompanySavedData;
-import com.timder.kontor.game.ui.chart.ChartSpec;
 import com.timder.kontor.game.ui.chart.CompanyCharts;
-import com.timder.kontor.client.ui.element.ChartElement;
+import com.timder.kontor.game.ui.chart.ChartElement;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.LegalForms;
@@ -41,6 +42,7 @@ import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -49,15 +51,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class KontorDeskBoundUi {
     public static ModularUI create(BlockUIMenuType.BlockUIHolder holder, KontorDeskBlockEntity be, Company company, Economy economy) {
+
+        ObservableList<CompanyHistoryEntry> companyHistory = new ObservableList<>();
+        SimpleBinding<Tag> companyHistoryBinding = DataBindingBuilder.tagS2C(() -> historyToTag(company.history()))
+                .onRemoteSyncReceived(tag -> companyHistory.set(tagToHistory(tag)))
+                .build();
+
         var tabView = UiContainer.largeTabView();
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.overview")), overviewTab(company, economy));
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")), accountTab(company));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.overview")), overviewTab(company, economy, companyHistory, companyHistoryBinding));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")), accountTab(company, companyHistory, companyHistoryBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.requests_orders")), requestsOrdersTab(company, be));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(company, economy));
@@ -65,7 +71,7 @@ public class KontorDeskBoundUi {
         return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
     }
 
-    public static UIElement overviewTab(Company company, Economy economy) {
+    public static UIElement overviewTab(Company company, Economy economy, ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding) {
         ScrollerView overviewContent = UiContainer.tabScroller();
 
         Label title = (Label) UiLabels.h1(Component.empty(), Horizontal.CENTER).layout(layout -> layout.alignSelf(AlignItems.CENTER));
@@ -122,23 +128,19 @@ public class KontorDeskBoundUi {
 
         UIElement dayResultChartBox = new UIElement();
         dayResultChartBox.layout(layout -> layout.widthPercent(100).height(200));
-        dayResultChartBox.addSyncValue(
-                DataBindingBuilder.tagS2C(() -> CompanyCharts.historyToTag(company.history()))
-                        .onRemoteSyncReceived(tag -> {
-                            ChartElement newChart = ChartElement.from(CompanyCharts.revenueResultSpecFromHistoryTag(tag));
-                            newChart.layout(layout -> layout.widthPercent(100).flex(1));
-                            dayResultChartBox.clearAllChildren();
-                            dayResultChartBox.addChild(newChart);
-                        })
-                        .build()
-                        .getSyncValue()
-        );
+        companyHistory.addListener(() -> {
+            ChartElement newChart = ChartElement.from(CompanyCharts.revenueResultSpecFromHistory(companyHistory.get()));
+            newChart.layout(layout -> layout.widthPercent(100).flex(1));
+            dayResultChartBox.clearAllChildren();
+            dayResultChartBox.addChild(newChart);
+        });
+        dayResultChartBox.addSyncValue(companyHistoryBinding.getSyncValue());
         overviewContent.addScrollViewChildren(dayResultChartBox);
 
         return overviewContent;
     }
 
-    public static UIElement accountTab(Company company) {
+    public static UIElement accountTab(Company company, ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding) {
         UIElement content = new UIElement()
                 .layout(layout -> layout
                         .widthPercent(100)
@@ -158,7 +160,7 @@ public class KontorDeskBoundUi {
                 .onRemoteSyncReceived(overdraftLimitCents::set)
                 .build();
 
-        Label balance = UiLabels.h1(Component.empty(), Horizontal.CENTER);
+        Label balance = UiLabels.h2(Component.empty(), Horizontal.CENTER);
         balance.addSyncValue(DataBindingBuilder.componentS2C(() -> ComponentFormatting.moneyColored(company.account().getBalance()))
                 .onRemoteSyncReceived(balance::setText)
                 .build().getSyncValue()
@@ -183,7 +185,8 @@ public class KontorDeskBoundUi {
                 .widthPercent(100)
                 .flexGrow(1)
                 .flexBasis(0));
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.overview")), accountTabOverview(bookingHistory, bookingsBinding, overdraftLimitCents, overdraftLimitBinding));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.balance")), accountTabOverview(bookingHistory, bookingsBinding, overdraftLimitCents, overdraftLimitBinding));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.cost_structure")), accountTabCostStructure(companyHistory, companyHistoryBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.bookings")), accountTabBookings(bookingHistory, bookingsBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.open_loans")), accountTabLoans(company));
         content.addChild(tabView);
@@ -209,6 +212,27 @@ public class KontorDeskBoundUi {
         balanceChartBox.addSyncValue(overdraftLimitBinding.getSyncValue());
 
         content.addChild(balanceChartBox);
+        return content;
+    }
+    public static UIElement accountTabCostStructure(ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding) {
+        UIElement content = new UIElement()
+                .layout(layout -> layout
+                        .widthPercent(100)
+                        .heightPercent(100)
+                        .flexDirection(FlexDirection.COLUMN)
+                        .gapAll(4));
+
+        UIElement costStructureChartBox = new UIElement();
+        costStructureChartBox.layout(layout -> layout.widthPercent(100).heightPercent(100));
+        companyHistory.addListener(() -> {
+            ChartElement newChart = ChartElement.from(CompanyCharts.costStructureFromHistory(companyHistory.get()));
+            newChart.layout(layout -> layout.widthPercent(100).flex(1));
+            costStructureChartBox.clearAllChildren();
+            costStructureChartBox.addChild(newChart);
+        });
+        costStructureChartBox.addSyncValue(companyHistoryBinding.getSyncValue());
+
+        content.addChild(costStructureChartBox);
         return content;
     }
 
@@ -317,7 +341,7 @@ public class KontorDeskBoundUi {
         split.setMaxPercentage(70);
 
         split.left(requests(company, be));
-        split.right(orders(company));
+        split.right(orders(company, be));
 
         return split;
     }
@@ -326,7 +350,7 @@ public class KontorDeskBoundUi {
         ScrollerView content = (ScrollerView) UiContainer.tabScroller().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
 
         ObservableList<Request> requests = new ObservableList<>();
-        SimpleBinding<Tag> requestsBinding = DataBindingBuilder.tagS2C(() -> requestsToTag(company.requestBoard().allOpenRequests()))
+        SimpleBinding<Tag> requestsBinding = DataBindingBuilder.tagS2C(() -> requestsToTag(company.requestBoard().allOpenRequests(), currentTick(be)))
                 .onRemoteSyncReceived(tag -> requests.set(tagToRequests(tag)))
                 .build();
 
@@ -363,6 +387,12 @@ public class KontorDeskBoundUi {
 
         requests.addListener(() -> { // This does not exist on the server
             requestsBox.clearAllChildren();
+
+            if (requests.get().isEmpty()) {
+                requestsBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.kontor_desk.requests.empty"), Horizontal.LEFT));
+                return;
+            }
+
             List<Request> sorted = new ArrayList<>(List.copyOf(requests.get()));
             sorted.sort(Comparator.comparing(Request::remainingOfferTicks));
             for (Request request : sorted) {
@@ -388,7 +418,12 @@ public class KontorDeskBoundUi {
                         ComponentFormatting.highlightStandard(request.getQuantity() + " " + BuiltInRegistries.ITEM.get(ResourceLocation.parse(request.getProduct().value())).asItem().getDescription().getString()),
                         ComponentFormatting.moneyColored(Money.fromDollar(request.getUnitPrice() * request.getQuantity())),
                         Component.literal(String.valueOf(request.getNumber())).withStyle(ChatFormatting.DARK_GRAY)
-                ), Horizontal.LEFT).textStyle(style -> style.textAlignVertical(Vertical.CENTER).adaptiveWidth(true)));
+                        ), Horizontal.LEFT)
+                        .textStyle(style -> style.textAlignVertical(Vertical.CENTER))
+                        .layout(layout -> layout
+                                .widthAuto()
+                                .flexBasis(0)
+                                .flexGrow(1)));
                 requestElement.addChild(titleRow);
 
                 requestElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
@@ -396,10 +431,16 @@ public class KontorDeskBoundUi {
                         ComponentFormatting.moneyColored(Money.fromDollar(request.getUnitPrice()))
                 ), Horizontal.LEFT));
 
-                requestElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
+                long expiresOfferAtTick = clientTick() + request.remainingOfferTicks();
+                Label offerTimeLabel = UiLabels.paragraphSecondary(Component.translatable(
                         "ui.createkontor.kontor_desk.request.offer_time",
                         ComponentFormatting.ticks(request.remainingOfferTicks()).withStyle(ChatFormatting.GOLD)
-                ), Horizontal.LEFT));
+                ), Horizontal.LEFT);
+                offerTimeLabel.addEventListener(UIEvents.TICK, event -> offerTimeLabel.setText(Component.translatable(
+                        "ui.createkontor.kontor_desk.request.offer_time",
+                        ComponentFormatting.ticks(Math.max(0, expiresOfferAtTick - clientTick())).withStyle(ChatFormatting.GOLD)
+                )));
+                requestElement.addChild(offerTimeLabel);
 
                 requestElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
                         "ui.createkontor.kontor_desk.request.deadline",
@@ -422,11 +463,11 @@ public class KontorDeskBoundUi {
         return content;
     }
 
-    public static UIElement orders(Company company) {
+    public static UIElement orders(Company company, KontorDeskBlockEntity be) {
         ScrollerView content = (ScrollerView) UiContainer.tabScroller().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
 
         ObservableList<Order> orders = new ObservableList<>();
-        SimpleBinding<Tag> ordersBinding = DataBindingBuilder.tagS2C(() -> ordersToTag(company.orderBook().allOrders()))
+        SimpleBinding<Tag> ordersBinding = DataBindingBuilder.tagS2C(() -> ordersToTag(company.orderBook().allOrders(), currentTick(be)))
                 .onRemoteSyncReceived(tag -> orders.set(tagToOrders(tag)))
                 .build();
 
@@ -455,6 +496,12 @@ public class KontorDeskBoundUi {
         UIElement ordersBox = new UIElement().layout(layout -> layout.gapColumn(4)).addSyncValue(ordersBinding.getSyncValue());
         orders.addListener(() -> { // This does not exist on the server
             ordersBox.clearAllChildren();
+
+            if (orders.get().isEmpty()) {
+                ordersBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.kontor_desk.orders.empty"), Horizontal.LEFT));
+                return;
+            }
+
             List<Order> sorted = new ArrayList<>(List.copyOf(orders.get()));
             sorted.sort(Comparator.comparing(Order::remainingDeadlineTicks));
             for (Order order : sorted) {
@@ -476,20 +523,31 @@ public class KontorDeskBoundUi {
                                 .widthPercent(100));
                 titleRow.addChild(new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(order.getProduct().value())), order.getQuantity())));
                 titleRow.addChild(UiLabels.paragraphPrimary(Component.translatable(
-                        "ui.createkontor.kontor_desk.request.title",
-                        ComponentFormatting.highlightStandard(order.getQuantity() + " " + BuiltInRegistries.ITEM.get(ResourceLocation.parse(order.getProduct().value())).asItem().getDescription().getString()),
-                        ComponentFormatting.moneyColored(Money.fromDollar(order.getUnitPrice() * order.getQuantity())),
-                        Component.literal(String.valueOf(order.getNumber())).withStyle(ChatFormatting.DARK_GRAY)
-                ), Horizontal.LEFT).textStyle(style -> style.textAlignVertical(Vertical.CENTER).adaptiveWidth(true)));
+                                "ui.createkontor.kontor_desk.request.title",
+                                ComponentFormatting.highlightStandard(order.getQuantity() + " " + BuiltInRegistries.ITEM.get(ResourceLocation.parse(order.getProduct().value())).asItem().getDescription().getString()),
+                                ComponentFormatting.moneyColored(Money.fromDollar(order.getUnitPrice() * order.getQuantity())),
+                                Component.literal(String.valueOf(order.getNumber())).withStyle(ChatFormatting.DARK_GRAY)
+                        ), Horizontal.LEFT)
+                                .textStyle(style -> style.textAlignVertical(Vertical.CENTER))
+                                .layout(layout -> layout
+                                .widthAuto()
+                                .flexBasis(0)
+                                .flexGrow(1)));
                 orderElement.addChild(titleRow);
 
                 if (order.getPhase() == OrderPhase.OPEN) {
-                    orderElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
-                            "ui.createkontor.kontor_desk.delivery_time",
+                    long expiresDeadlineAtTick = clientTick() + order.remainingDeadlineTicks();
+                    Label orderDeadlineLabel = UiLabels.paragraphSecondary(Component.translatable(
+                            "ui.createkontor.kontor_desk.order.delivery_time",
                             ComponentFormatting.ticks(order.remainingDeadlineTicks()).withStyle(ChatFormatting.GOLD)
-                    ), Horizontal.LEFT));
+                    ), Horizontal.LEFT);
+                    orderDeadlineLabel.addEventListener(UIEvents.TICK, event -> orderDeadlineLabel.setText(Component.translatable(
+                            "ui.createkontor.kontor_desk.order.delivery_time",
+                            ComponentFormatting.ticks(Math.max(0, expiresDeadlineAtTick - clientTick())).withStyle(ChatFormatting.GOLD)
+                    )));
+                    orderElement.addChild(orderDeadlineLabel);
                 } else {
-                    orderElement.addChild(UiLabels.paragraphError(Component.translatable("ui.createkontor.kontor_desk.grace_period"), Horizontal.LEFT));
+                    orderElement.addChild(UiLabels.paragraphError(Component.translatable("ui.createkontor.kontor_desk.order.grace_period"), Horizontal.LEFT));
                 }
 
                 ordersBox.addChild(orderElement);
@@ -536,6 +594,57 @@ public class KontorDeskBoundUi {
         parent.addChild(newChart);
     }
 
+    private static void buildCostStructureChart(List<CompanyHistoryEntry> history, UIElement parent) {
+        ChartElement newChart = ChartElement.from(CompanyCharts.costStructureFromHistory(history));
+        newChart.layout(layout -> layout.widthPercent(100).flex(1));
+        parent.clearAllChildren();
+        parent.addChild(newChart);
+    }
+
+    public static Tag historyToTag(List<CompanyHistoryEntry> history) {
+        ListTag list = new ListTag();
+        for (CompanyHistoryEntry entry : history) {
+            CompoundTag e = new CompoundTag();
+            e.putLong("day", entry.day());
+            e.putLong("resultCents", entry.result().cents());
+            e.putLong("revenueCents", entry.revenue().cents());
+            e.putLong("balanceCents", entry.balance().cents());
+            ListTag costs = new ListTag();
+            for (Map.Entry<BookingKind, Money> cost : entry.costsByKind().entrySet()) {
+                CompoundTag costTag = new CompoundTag();
+                costTag.putString("kind", cost.getKey().name());
+                costTag.putLong("amountCents", cost.getValue().cents());
+                costs.add(costTag);
+            }
+            e.put("costs", costs);
+            list.add(e);
+        }
+        return list;
+    }
+
+    public static List<CompanyHistoryEntry> tagToHistory(Tag tag) {
+        ListTag list = (ListTag) tag;
+        List<CompanyHistoryEntry> history = new ArrayList<>(list.size());
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag e = list.getCompound(i);
+
+            Map<BookingKind, Money> costsByKind = new EnumMap<>(BookingKind.class);
+            for (Tag t : e.getList("costs", Tag.TAG_COMPOUND)) {
+                CompoundTag costTag = (CompoundTag) t;
+                costsByKind.put(BookingKind.valueOf(costTag.getString("kind")), Money.ofCents(costTag.getLong("amountCents")));
+            }
+
+            history.add(new CompanyHistoryEntry(
+                    e.getLong("day"),
+                    Money.ofCents(e.getLong("resultCents")),
+                    Money.ofCents(e.getLong("revenueCents")),
+                    Money.ofCents(e.getLong("balanceCents")),
+                    costsByKind
+            ));
+        }
+        return history;
+    }
+
     private static List<Loan> tagToLoans(Tag tag) {
         ListTag list = (ListTag) tag;
         List<Loan> loans = new ArrayList<>();
@@ -556,8 +665,10 @@ public class KontorDeskBoundUi {
     private static List<Request> tagToRequests(Tag tag) {
         List<Request> requests = new ArrayList<>();
         ListTag list = (ListTag) tag;
+        long currentTick = clientTick();
         for (Tag t : list) {
             CompoundTag requestTag = (CompoundTag) t;
+            long remainingOfferTicks = Math.max(1, requestTag.getLong("ExpiresOfferAtTick") - currentTick);
             requests.add(new Request(
                     requestTag.getLong("Number"),
                     new ItemId(requestTag.getString("Product")),
@@ -566,12 +677,12 @@ public class KontorDeskBoundUi {
                     requestTag.getDouble("Urgency"),
                     requestTag.getDouble("UnitPrice"),
                     requestTag.getLong("DeadlineTicks"),
-                    requestTag.getLong("RemainingOfferTicks")));
+                    remainingOfferTicks));
         }
         return requests;
     }
 
-    private static Tag requestsToTag(List<Request> requests) {
+    private static Tag requestsToTag(List<Request> requests, long currentTick) {
         ListTag tag = new ListTag();
         for (Request request : requests) {
             CompoundTag requestTag = new CompoundTag();
@@ -582,7 +693,7 @@ public class KontorDeskBoundUi {
             requestTag.putDouble("Urgency", request.getUrgency());
             requestTag.putDouble("UnitPrice", request.getUnitPrice());
             requestTag.putLong("DeadlineTicks", request.getDeadlineTicks());
-            requestTag.putLong("RemainingOfferTicks", request.remainingOfferTicks());
+            requestTag.putLong("ExpiresOfferAtTick", currentTick + request.remainingOfferTicks());
             tag.add(requestTag);
         }
         return tag;
@@ -591,8 +702,10 @@ public class KontorDeskBoundUi {
     private static List<Order> tagToOrders(Tag tag) {
         List<Order> orders = new ArrayList<>();
         ListTag list = (ListTag) tag;
+        long currentTick = clientTick();
         for (Tag t : list) {
             CompoundTag orderTag = (CompoundTag) t;
+            long remainingDeadlineTicks = Math.max(1, orderTag.getLong("DeadlineAtTick") - currentTick);
             orders.add(new Order(
                     orderTag.getLong("Number"),
                     new ItemId(orderTag.getString("Product")),
@@ -603,14 +716,14 @@ public class KontorDeskBoundUi {
                     orderTag.getLong("GracePeriodTicks"),
                     new RequestOrigin(orderTag.getLong("OriginRequestNumber")), // TODO needs changing when more order origins get added
                     orderTag.getInt("DeliveredQuantity"),
-                    orderTag.getLong("RemainingDeadlineTicks"),
-                    orderTag.getLong("RemainingGracePeriodTicks"),
+                    remainingDeadlineTicks,
+                    0,
                     OrderPhase.valueOf(orderTag.getString("Phase"))));
         }
         return orders;
     }
 
-    private static Tag ordersToTag(List<Order> orders) {
+    private static Tag ordersToTag(List<Order> orders, long currentTick) {
         ListTag tag = new ListTag();
         for (Order order : orders) {
             CompoundTag orderTag = new CompoundTag();
@@ -623,11 +736,20 @@ public class KontorDeskBoundUi {
             orderTag.putLong("GracePeriodTicks", order.getGracePeriodTicks());
             orderTag.putLong("OriginRequestNumber", ((RequestOrigin) order.getOrigin()).requestNumber());
             orderTag.putInt("DeliveredQuantity", order.getDeliveredQuantity());
-            orderTag.putLong("RemainingDeadlineTicks", order.remainingDeadlineTicks());
-            orderTag.putLong("RemainingGracePeriodTicks", order.remainingGracePeriodTicks());
+            orderTag.putLong("DeadlineAtTick", currentTick + order.remainingDeadlineTicks());
             orderTag.putString("Phase", order.getPhase().name());
             tag.add(orderTag);
         }
         return tag;
     }
+
+    private static long currentTick(KontorDeskBlockEntity be) {
+        return be.getLevel() != null ? be.getLevel().getGameTime() : 0L;
+    }
+
+    private static long clientTick() {
+        var level = Minecraft.getInstance().level;
+        return level != null ? level.getGameTime() : 0L;
+    }
+
 }

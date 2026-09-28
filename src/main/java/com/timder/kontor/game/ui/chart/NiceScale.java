@@ -1,4 +1,4 @@
-package com.timder.kontor.client.ui.element;
+package com.timder.kontor.game.ui.chart;
 
 import java.util.Locale;
 
