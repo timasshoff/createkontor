@@ -77,7 +77,7 @@ public final class KontorDeskUnboundUi {
 
         root.addScrollViewChildren(button);
 
-        Label errorLabel = UiLabels.secondary(Component.empty(), Horizontal.LEFT);
+        Label errorLabel = UiLabels.error(Component.empty(), Horizontal.LEFT);
         var errorBinding = DataBindingBuilder.componentS2C(() -> error[0]) // Sync server error components array to client label
                 .onRemoteSyncReceived(errorLabel::setText)
                 .build();

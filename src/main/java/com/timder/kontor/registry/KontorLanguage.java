@@ -19,6 +19,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.already_member", "§cYou are already a member of a company.");
         REGISTRATE.addRawLang("message.createkontor.shipping_exit.limit", "§cLimit reached: Legal form allows at most %s §cbound shipping exits.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.limit", "§cThis company already has a Kontor Desk.");
+        REGISTRATE.addRawLang("message.createkontor.kontor_desk.request_accepting_failed", "§cAccepting request %s §cfailed: %s");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -55,6 +56,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.offer_time", "Offer stands for %s.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.deadline", "Time to deliver after accepting: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.request.accept", "Accept request");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.orders", "Order Book");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.orders_count", "Order Book (%s/%s)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.delivery_time", "Remaining time to deliver: %s.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.grace_period", "Deadline reached! Fulfill this order now to receive a partial payout!");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");

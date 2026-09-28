@@ -77,6 +77,19 @@ public final class UiLabels {
                         .marginAll(2));
     }
 
+    public static Label error(Component text, Horizontal horizontalAlignment) {
+        return (Label) new Label()
+                .setText(text)
+                .textStyle(style -> style
+                        .textColor(0xFF5555)
+                        .textAlignHorizontal(horizontalAlignment)
+                        .textWrap(TextWrap.WRAP)
+                        .adaptiveHeight(true)
+                        .adaptiveWidth(true))
+                .layout(layout -> layout
+                        .marginAll(2));
+    }
+
     public static Label paragraphPrimary(Component text, Horizontal horizontalAlignment) {
         return (Label) new Label()
                 .setText(text)
@@ -95,6 +108,20 @@ public final class UiLabels {
                 .setText(text)
                 .textStyle(style -> style
                         .textColor(0xAAAAAA)
+                        .textAlignHorizontal(horizontalAlignment)
+                        .textWrap(TextWrap.WRAP)
+                        .adaptiveHeight(true)
+                        .adaptiveWidth(false))
+                .layout(layout -> layout
+                        .marginAll(2)
+                        .widthPercent(100));
+    }
+
+    public static Label paragraphError(Component text, Horizontal horizontalAlignment) {
+        return (Label) new Label()
+                .setText(text)
+                .textStyle(style -> style
+                        .textColor(0xFF5555)
                         .textAlignHorizontal(horizontalAlignment)
                         .textWrap(TextWrap.WRAP)
                         .adaptiveHeight(true)

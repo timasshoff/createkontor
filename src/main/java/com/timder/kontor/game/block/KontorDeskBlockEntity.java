@@ -93,13 +93,17 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanyRegistry registry = data.getRegistry();
         Company company = registry.get(getCompanyId()).orElse(null);
         if (company == null) {
-            return Component.empty();
+            return ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE);
         }
 
         try {
             company.acceptRequest(number, CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())), EconomyConfig.toRequestParams());
         } catch (IllegalStateException e) {
-            return Component.empty();
+            return Component.translatable(
+                    "message.createkontor.kontor_desk.request_accepting_failed",
+                    ComponentFormatting.highlightError("#" + number),
+                    ComponentFormatting.error(e.getMessage())
+            );
         }
         return Component.empty();
     }

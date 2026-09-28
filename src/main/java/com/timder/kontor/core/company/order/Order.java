@@ -45,7 +45,7 @@ public final class Order {
         this.phase = OrderPhase.OPEN;
     }
 
-    private Order(long number,
+    public Order(long number,
                   ItemId product,
                   int quantity,
                   double unitPrice,

@@ -15,6 +15,9 @@ import com.timder.kontor.core.company.financial.Booking;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Loan;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.order.Order;
+import com.timder.kontor.core.company.order.OrderPhase;
+import com.timder.kontor.core.company.order.RequestOrigin;
 import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
@@ -155,7 +158,7 @@ public class KontorDeskBoundUi {
                 .onRemoteSyncReceived(overdraftLimitCents::set)
                 .build();
 
-        Label balance = UiLabels.primary(Component.empty(), Horizontal.CENTER);
+        Label balance = UiLabels.h1(Component.empty(), Horizontal.CENTER);
         balance.addSyncValue(DataBindingBuilder.componentS2C(() -> ComponentFormatting.moneyColored(company.account().getBalance()))
                 .onRemoteSyncReceived(balance::setText)
                 .build().getSyncValue()
@@ -172,8 +175,8 @@ public class KontorDeskBoundUi {
         overdraftLimitLabel.addSyncValue(overdraftLimitBinding.getSyncValue());
 
         content.addChild(UiContainer.headerWithSubtitle(
-                UiLabels.h1(Component.translatable("ui.createkontor.kontor_desk.tab.account"), Horizontal.CENTER),
-                UiLabels.seperatedLabelRow(List.of(balance, liquidity, overdraftLimitLabel))
+                balance,
+                UiLabels.seperatedLabelRow(List.of(liquidity, overdraftLimitLabel))
         ));
 
         TabView tabView = (TabView) UiContainer.largeTabView().layout(layout -> layout
@@ -310,11 +313,11 @@ public class KontorDeskBoundUi {
     public static UIElement requestsOrdersTab(Company company, KontorDeskBlockEntity be) {
         SplitView.Horizontal split = new SplitView.Horizontal();
         split.layout(layout -> layout.widthPercent(100).heightPercent(100));
-        split.setMinPercentage(50);
-        split.setMaxPercentage(50);
+        split.setMinPercentage(30);
+        split.setMaxPercentage(70);
 
         split.left(requests(company, be));
-        split.right(orders());
+        split.right(orders(company));
 
         return split;
     }
@@ -347,8 +350,18 @@ public class KontorDeskBoundUi {
         title.addSyncValue(requestsLimitBinding.getSyncValue());
         content.addScrollViewChildren(title);
 
-        UIElement requestsBox = new UIElement().addSyncValue(requestsBinding.getSyncValue());
-        requests.addListener(() -> {
+        Component[] error = { Component.empty() };
+        UIElement requestsBox = new UIElement().layout(layout -> layout.gapColumn(4)).addSyncValue(requestsBinding.getSyncValue());
+        requestsBox.onMessage("c2s_accept_request", tag -> error[0] = be.acceptRequest(tag.getLong("Number")));
+
+        Label errorLabel = UiLabels.paragraphError(Component.empty(), Horizontal.LEFT);
+        var errorBinding = DataBindingBuilder.componentS2C(() -> error[0])
+                .onRemoteSyncReceived(errorLabel::setText)
+                .build();
+        errorLabel.addSyncValue(errorBinding.getSyncValue());
+        content.addScrollViewChildren(errorLabel);
+
+        requests.addListener(() -> { // This does not exist on the server
             requestsBox.clearAllChildren();
             List<Request> sorted = new ArrayList<>(List.copyOf(requests.get()));
             sorted.sort(Comparator.comparing(Request::remainingOfferTicks));
@@ -370,12 +383,12 @@ public class KontorDeskBoundUi {
                                 .marginBottom(4)
                                 .widthPercent(100));
                 titleRow.addChild(new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(request.getProduct().value())), request.getQuantity())));
-                titleRow.addChild(UiLabels.primary(Component.translatable(
+                titleRow.addChild(UiLabels.paragraphPrimary(Component.translatable(
                     "ui.createkontor.kontor_desk.request.title",
                         ComponentFormatting.highlightStandard(request.getQuantity() + " " + BuiltInRegistries.ITEM.get(ResourceLocation.parse(request.getProduct().value())).asItem().getDescription().getString()),
                         ComponentFormatting.moneyColored(Money.fromDollar(request.getUnitPrice() * request.getQuantity())),
                         Component.literal(String.valueOf(request.getNumber())).withStyle(ChatFormatting.DARK_GRAY)
-                ), Horizontal.LEFT).textStyle(style -> style.textAlignVertical(Vertical.CENTER)));
+                ), Horizontal.LEFT).textStyle(style -> style.textAlignVertical(Vertical.CENTER).adaptiveWidth(true)));
                 requestElement.addChild(titleRow);
 
                 requestElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
@@ -394,8 +407,10 @@ public class KontorDeskBoundUi {
                 ), Horizontal.LEFT));
 
                 requestElement.addChild(UiButtons.primary(Component.translatable("ui.createkontor.kontor_desk.request.accept"))
-                        .setOnServerClick((e) -> {
-                            be.acceptRequest(request.getNumber());
+                        .setOnClick((e) -> {
+                            CompoundTag tag = new CompoundTag();
+                            tag.putLong("Number", request.getNumber());
+                            requestsBox.sendMessage("c2s_accept_request", tag); // Send accept message to request box (exists on client AND server)
                         })
                         .layout(layout -> layout.marginTop(4)));
 
@@ -407,9 +422,81 @@ public class KontorDeskBoundUi {
         return content;
     }
 
-    public static UIElement orders() {
+    public static UIElement orders(Company company) {
         ScrollerView content = (ScrollerView) UiContainer.tabScroller().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
-        content.addScrollViewChildren(UiLabels.h2(Component.literal("Orders"), Horizontal.CENTER));
+
+        ObservableList<Order> orders = new ObservableList<>();
+        SimpleBinding<Tag> ordersBinding = DataBindingBuilder.tagS2C(() -> ordersToTag(company.orderBook().allOrders()))
+                .onRemoteSyncReceived(tag -> orders.set(tagToOrders(tag)))
+                .build();
+
+        ObservableValue<Integer> ordersLimit = new ObservableValue<>(0);
+        SimpleBinding<Integer> ordersLimitBinding = DataBindingBuilder.intValS2C(() -> company.legalForm(CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()))).maxOpenOrders())
+                .onRemoteSyncReceived(ordersLimit::set)
+                .build();
+
+        Label title = UiLabels.h2(Component.translatable("ui.createkontor.kontor_desk.orders"), Horizontal.LEFT);
+        orders.addListener(() -> title.setText(Component.translatable(
+                "ui.createkontor.kontor_desk.orders_count",
+                orders.get().size(),
+                ordersLimit.get())
+        ));
+        ordersLimit.addListener(() -> title.setText(Component.translatable(
+                "ui.createkontor.kontor_desk.orders_count",
+                orders.get().size(),
+                ordersLimit.get())
+        ));
+        title.addSyncValue(ordersBinding.getSyncValue());
+        title.addSyncValue(ordersLimitBinding.getSyncValue());
+        content.addScrollViewChildren(title);
+
+        content.addScrollViewChildren(UiLabels.paragraphError(Component.empty(), Horizontal.LEFT)); // Placeholder so that the orders start on the same height as the requests
+
+        UIElement ordersBox = new UIElement().layout(layout -> layout.gapColumn(4)).addSyncValue(ordersBinding.getSyncValue());
+        orders.addListener(() -> { // This does not exist on the server
+            ordersBox.clearAllChildren();
+            List<Order> sorted = new ArrayList<>(List.copyOf(orders.get()));
+            sorted.sort(Comparator.comparing(Order::remainingDeadlineTicks));
+            for (Order order : sorted) {
+                if (order.isFullyDelivered())
+                    continue;
+
+                UIElement orderElement = new UIElement()
+                        .style(style -> style.background(Sprites.BORDER_DARK))
+                        .layout(layout -> layout.paddingAll(8));
+
+                UIElement titleRow = new UIElement()
+                        .layout(layout -> layout
+                                .flexDirection(FlexDirection.ROW)
+                                .flexWrap(FlexWrap.WRAP)
+                                .justifyContent(AlignContent.FLEX_START)
+                                .alignItems(AlignItems.CENTER)
+                                .gapAll(4)
+                                .marginBottom(4)
+                                .widthPercent(100));
+                titleRow.addChild(new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(order.getProduct().value())), order.getQuantity())));
+                titleRow.addChild(UiLabels.paragraphPrimary(Component.translatable(
+                        "ui.createkontor.kontor_desk.request.title",
+                        ComponentFormatting.highlightStandard(order.getQuantity() + " " + BuiltInRegistries.ITEM.get(ResourceLocation.parse(order.getProduct().value())).asItem().getDescription().getString()),
+                        ComponentFormatting.moneyColored(Money.fromDollar(order.getUnitPrice() * order.getQuantity())),
+                        Component.literal(String.valueOf(order.getNumber())).withStyle(ChatFormatting.DARK_GRAY)
+                ), Horizontal.LEFT).textStyle(style -> style.textAlignVertical(Vertical.CENTER).adaptiveWidth(true)));
+                orderElement.addChild(titleRow);
+
+                if (order.getPhase() == OrderPhase.OPEN) {
+                    orderElement.addChild(UiLabels.paragraphSecondary(Component.translatable(
+                            "ui.createkontor.kontor_desk.delivery_time",
+                            ComponentFormatting.ticks(order.remainingDeadlineTicks()).withStyle(ChatFormatting.GOLD)
+                    ), Horizontal.LEFT));
+                } else {
+                    orderElement.addChild(UiLabels.paragraphError(Component.translatable("ui.createkontor.kontor_desk.grace_period"), Horizontal.LEFT));
+                }
+
+                ordersBox.addChild(orderElement);
+            }
+        });
+        content.addScrollViewChildren(ordersBox);
+
         return content;
     }
 
@@ -497,6 +584,49 @@ public class KontorDeskBoundUi {
             requestTag.putLong("DeadlineTicks", request.getDeadlineTicks());
             requestTag.putLong("RemainingOfferTicks", request.remainingOfferTicks());
             tag.add(requestTag);
+        }
+        return tag;
+    }
+
+    private static List<Order> tagToOrders(Tag tag) {
+        List<Order> orders = new ArrayList<>();
+        ListTag list = (ListTag) tag;
+        for (Tag t : list) {
+            CompoundTag orderTag = (CompoundTag) t;
+            orders.add(new Order(
+                    orderTag.getLong("Number"),
+                    new ItemId(orderTag.getString("Product")),
+                    orderTag.getInt("Quantity"),
+                    orderTag.getDouble("UnitPrice"),
+                    orderTag.getDouble("Urgency"),
+                    orderTag.getLong("DeadlineTicks"),
+                    orderTag.getLong("GracePeriodTicks"),
+                    new RequestOrigin(orderTag.getLong("OriginRequestNumber")), // TODO needs changing when more order origins get added
+                    orderTag.getInt("DeliveredQuantity"),
+                    orderTag.getLong("RemainingDeadlineTicks"),
+                    orderTag.getLong("RemainingGracePeriodTicks"),
+                    OrderPhase.valueOf(orderTag.getString("Phase"))));
+        }
+        return orders;
+    }
+
+    private static Tag ordersToTag(List<Order> orders) {
+        ListTag tag = new ListTag();
+        for (Order order : orders) {
+            CompoundTag orderTag = new CompoundTag();
+            orderTag.putLong("Number", order.getNumber());
+            orderTag.putString("Product", order.getProduct().value());
+            orderTag.putInt("Quantity", order.getQuantity());
+            orderTag.putDouble("UnitPrice", order.getUnitPrice());
+            orderTag.putDouble("Urgency", order.getUrgency());
+            orderTag.putLong("DeadlineTicks", order.getDeadlineTicks());
+            orderTag.putLong("GracePeriodTicks", order.getGracePeriodTicks());
+            orderTag.putLong("OriginRequestNumber", ((RequestOrigin) order.getOrigin()).requestNumber());
+            orderTag.putInt("DeliveredQuantity", order.getDeliveredQuantity());
+            orderTag.putLong("RemainingDeadlineTicks", order.remainingDeadlineTicks());
+            orderTag.putLong("RemainingGracePeriodTicks", order.remainingGracePeriodTicks());
+            orderTag.putString("Phase", order.getPhase().name());
+            tag.add(orderTag);
         }
         return tag;
     }
