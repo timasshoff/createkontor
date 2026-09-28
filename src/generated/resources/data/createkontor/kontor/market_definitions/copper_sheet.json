@@ -1,5 +1,5 @@
 {
-  "base_demand": 900.0,
+  "base_demand": 2600.0,
   "group": "metal",
   "item": "create:copper_sheet",
   "package_size": 16,

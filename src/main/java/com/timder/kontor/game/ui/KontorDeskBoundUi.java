@@ -214,6 +214,7 @@ public class KontorDeskBoundUi {
         content.addChild(balanceChartBox);
         return content;
     }
+
     public static UIElement accountTabCostStructure(ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding) {
         UIElement content = new UIElement()
                 .layout(layout -> layout
@@ -270,7 +271,12 @@ public class KontorDeskBoundUi {
                         (Label) UiLabels.primary(ComponentFormatting.moneyColored(booking.amount()), Horizontal.LEFT)
                                 .textStyle(style -> style.adaptiveWidth(false))
                                 .layout(layout -> layout.width(70)),
-                        UiLabels.secondary(Component.translatable("enum.createkontor.booking_kind." + booking.kind().toString().toLowerCase()), Horizontal.LEFT)
+                        UiLabels.secondary(
+                                Component.translatable("enum.createkontor.booking_kind." + booking.kind().toString().toLowerCase())
+                                        .append(" (")
+                                        .append(Component.translatable("enum.createkontor.booking_category." + booking.kind().category().toString().toLowerCase()))
+                                        .append(")"),
+                                Horizontal.LEFT)
                 ));
                 if (!booking.reference().isBlank()) {
                     labels.add(UiLabels.tertiary(Component.literal(booking.reference()), Horizontal.LEFT));

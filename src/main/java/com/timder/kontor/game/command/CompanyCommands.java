@@ -12,6 +12,8 @@ import com.timder.kontor.core.company.*;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.core.market.MarketParticipant;
+import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
@@ -43,6 +45,13 @@ public class CompanyCommands {
                                         .then(Commands.argument("name", StringArgumentType.string())
                                                 .then(Commands.argument("player", StringArgumentType.string())
                                                         .executes(CompanyCommands::manager))))
+                                .then(Commands.literal("legallevel")
+                                        .then(Commands.argument("name", StringArgumentType.string())
+                                                .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                                        .executes(CompanyCommands::legalLevel))))
+                                .then(Commands.literal("reputation")
+                                        .then(Commands.argument("name", StringArgumentType.string())
+                                                .executes(CompanyCommands::reputation)))
                                 .then(Commands.literal("book")
                                         .then(Commands.argument("name", StringArgumentType.string())
                                                 .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
@@ -166,6 +175,73 @@ public class CompanyCommands {
         }
 
         source.sendSuccess(() -> Component.literal("Successfully booked."), false);
+        return 1;
+    }
+
+    private static int legalLevel(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
+        String name = StringArgumentType.getString(context, "name");
+        int level = IntegerArgumentType.getInteger(context, "level");
+
+        CompanySavedData data = CompanySavedData.get(server);
+        var registry = data.getRegistry();
+        Optional<Company> found = registry.findByName(name);
+        if (found.isEmpty()) {
+            source.sendFailure(Component.literal("No company named \"" + name + "\"."));
+            return 0;
+        }
+        Company company = found.get();
+
+        LegalForms legalForms = new LegalForms(KontorData.getLegalFormDefinitions());
+        try {
+            company.setLegalLevel(level, legalForms);
+            data.setDirty();
+        } catch (IllegalArgumentException e) {
+            source.sendFailure(Component.literal("Invalid legal level: " + e.getMessage()));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.literal(company.name() + " is now legal level " + level + " (" + legalForms.get(level).id() + ")."), false);
+        return 1;
+    }
+
+    private static int reputation(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        String name = StringArgumentType.getString(context, "name");
+
+        var registry = CompanySavedData.get(source.getServer()).getRegistry();
+        Optional<Company> found = registry.findByName(name);
+        if (found.isEmpty()) {
+            source.sendFailure(Component.literal("No company named \"" + name + "\"."));
+            return 0;
+        }
+        Company company = found.get();
+        Economy economy = EconomySavedData.get(source.getServer()).getEconomy();
+
+        List<ItemId> markets = economy.marketIds().stream()
+                .filter(market -> economy.isParticipant(market, company.id()))
+                .toList();
+
+        StringBuilder text = new StringBuilder();
+        text.append("=== Reputation: ").append(company.name()).append(" ===\n");
+
+        if (markets.isEmpty()) {
+            text.append("Not registered in any market.");
+        } else {
+            for (ItemId market : markets) {
+                MarketParticipant participant = economy.participants(market).stream()
+                        .filter(p -> p.companyId().equals(company.id()))
+                        .findFirst()
+                        .orElseThrow();
+                text.append(String.format(Locale.ROOT, "%-15s %5.1f  (%.1f stars)%n",
+                        market.value() + ":", participant.reputation(), participant.reputationInStars()));
+            }
+            text.append(String.format(Locale.ROOT, "%nOverall: %.1f (%.1f stars)",
+                    economy.overallReputation(company.id()), economy.overallReputationInStars(company.id())));
+        }
+
+        source.sendSuccess(() -> Component.literal(text.toString()), false);
         return 1;
     }
 

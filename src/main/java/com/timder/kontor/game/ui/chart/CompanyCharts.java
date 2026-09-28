@@ -9,10 +9,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CompanyCharts {
 
@@ -32,8 +29,9 @@ public class CompanyCharts {
         }
 
         return ChartSpec.builder(Component.translatable("chart.createkontor.revenue_result.title").getString())
-                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.revenue").getString(), ChartColors.BLUE, x, revenue))
-                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.result").getString(), ChartColors.TEAL, x, result))
+                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.revenue").getString(), ChartColors.GREEN, x, revenue))
+                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.result").getString(), ChartColors.BLUE, x, result))
+                .referenceLine("0", 0, ChartColors.WHITE)
                 .includeZero(true)
                 .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
                 .pointLabels(pointLabels)
@@ -94,18 +92,18 @@ public class CompanyCharts {
         }
 
         List<BookingKind> byTotalDesc = new ArrayList<>(totalCentsByKind.keySet());
-        byTotalDesc.sort((a, b) -> Long.compare(totalCentsByKind.get(a), totalCentsByKind.get(b)));
+        byTotalDesc.sort(Comparator.comparingLong(totalCentsByKind::get));
 
         int namedCount = byTotalDesc.size() <= ChartSpec.MAX_SERIES
                 ? byTotalDesc.size()
                 : ChartSpec.MAX_SERIES - 1;
         List<BookingKind> namedKinds = byTotalDesc.subList(0, namedCount);
 
-        ChartSpec.Builder builder = ChartSpec.builder("Cost Structure")
+        ChartSpec.Builder builder = ChartSpec.builder(Component.translatable("chart.createkontor.cost_structure.title").getString())
                 .kind(ChartKind.STACKED_BAR)
                 .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
                 .pointLabels(pointLabels)
-                .xRangeOptions(List.of(7, 14, 30, 100, 360), 30);
+                .xRangeOptions(List.of(5, 10, 30, 100, 360), 30);
 
         for (int k = 0; k < namedKinds.size(); k++) {
             BookingKind kind = namedKinds.get(k);
@@ -128,8 +126,7 @@ public class CompanyCharts {
                 }
                 y[i] = sum;
             }
-            String otherLabel = "Other";
-            builder.series(new ChartSeries(otherLabel, ChartColors.STACK[namedKinds.size()], x, y));
+            builder.series(new ChartSeries(Component.translatable("chart.createkontor.other").getString(), ChartColors.STACK[namedKinds.size()], x, y));
         }
 
         return builder.build();

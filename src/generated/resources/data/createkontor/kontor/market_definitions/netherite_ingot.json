@@ -1,5 +1,5 @@
 {
-  "base_demand": 100.0,
+  "base_demand": 1000.0,
   "group": "metal",
   "item": "minecraft:netherite_ingot",
   "package_size": 2,

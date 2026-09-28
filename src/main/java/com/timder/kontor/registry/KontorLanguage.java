@@ -87,6 +87,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.loan_payout", "Loan Payout");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.loan_repayment", "Loan Repayment");
 
+        REGISTRATE.addRawLang("enum.createkontor.booking_category.cost", "Cost");
+        REGISTRATE.addRawLang("enum.createkontor.booking_category.revenue", "Revenue");
+        REGISTRATE.addRawLang("enum.createkontor.booking_category.financing", "Financing");
+
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
@@ -95,12 +99,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
 
         REGISTRATE.addRawLang("loan.createkontor.bank", "Bank Loan");
-        REGISTRATE.addRawLang("loan.createkontor.founder", "Founder Loan");
+        REGISTRATE.addRawLang("loan.createkontor.founder", "Founder's Loan");
         REGISTRATE.addRawLang("loan.createkontor.principal", "Principal: %s");
 
         REGISTRATE.addRawLang("chart.createkontor.d", "d");
         REGISTRATE.addRawLang("chart.createkontor.day", "Day ");
         REGISTRATE.addRawLang("chart.createkontor.today", "Today");
+        REGISTRATE.addRawLang("chart.createkontor.other", "Other");
 
         REGISTRATE.addRawLang("chart.createkontor.balance.title", "Balance");
         REGISTRATE.addRawLang("chart.createkontor.balance.series.balance", "Balance");
@@ -110,6 +115,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.title", "Daily Revenue & Daily Result");
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.revenue", "Revenue");
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.result", "Result");
+
+        REGISTRATE.addRawLang("chart.createkontor.cost_structure.title", "Cost Structure");
     }
 
     static void touch() {

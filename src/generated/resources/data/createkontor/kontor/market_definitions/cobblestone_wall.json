@@ -1,5 +1,5 @@
 {
-  "base_demand": 800.0,
+  "base_demand": 2000.0,
   "group": "building",
   "item": "minecraft:cobblestone_stairs",
   "package_size": 64,

@@ -27,8 +27,8 @@ public final class UiContainer {
         UIElement hud = new UIElement()
                 .layout(layout -> layout
                         .positionType(TaffyPosition.ABSOLUTE)
-                        .top(3)
-                        .right(3)
+                        .top(2)
+                        .right(2)
                         .flexDirection(FlexDirection.ROW)
                         .paddingAll(3)
                         .gapAll(4)
@@ -85,13 +85,13 @@ public final class UiContainer {
 
     public static UIElement large() {
         return new UIElement()
-                .layout(layout -> layout.widthPercent(95).heightPercent(92).paddingAll(8).gapAll(4))
+                .layout(layout -> layout.widthPercent(95).heightPercent(95).paddingAll(8).gapAll(4))
                 .style(style -> style.background(Sprites.BORDER_DARK));
     }
 
     public static ScrollerView largeScroller() {
         ScrollerView scroller = new ScrollerView();
-        scroller.layout(layout -> layout.widthPercent(95).heightPercent(92).paddingAll(8));
+        scroller.layout(layout -> layout.widthPercent(95).heightPercent(95).paddingAll(8));
         scroller.style(style -> style.background(Sprites.BORDER_DARK));
 
         return scroller
@@ -105,7 +105,7 @@ public final class UiContainer {
 
     public static TabView largeTabView() {
         TabView tabView = new TabView();
-        tabView.layout(layout -> layout.widthPercent(95).heightPercent(92));
+        tabView.layout(layout -> layout.widthPercent(95).heightPercent(95));
         tabView.tabScroller(scroller -> {
             Runnable updateOverlap = () -> {
                 boolean overflowing = scroller.getContainerWidth() > scroller.viewPort.getContentWidth();

@@ -1,5 +1,5 @@
 {
-  "base_demand": 700.0,
+  "base_demand": 2250.0,
   "group": "metal",
   "item": "create:brass_sheet",
   "package_size": 16,

@@ -1,5 +1,5 @@
 {
-  "base_demand": 900.0,
+  "base_demand": 1800.0,
   "group": "metal",
   "item": "create:sturdy_sheet",
   "package_size": 4,

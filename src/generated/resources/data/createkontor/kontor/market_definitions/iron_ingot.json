@@ -1,5 +1,5 @@
 {
-  "base_demand": 2200.0,
+  "base_demand": 3000.0,
   "group": "metal",
   "item": "minecraft:iron_ingot",
   "package_size": 32,

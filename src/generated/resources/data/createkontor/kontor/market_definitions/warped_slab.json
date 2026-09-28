@@ -1,5 +1,5 @@
 {
-  "base_demand": 1800.0,
+  "base_demand": 2900.0,
   "group": "building",
   "item": "minecraft:warped_slab",
   "package_size": 64,

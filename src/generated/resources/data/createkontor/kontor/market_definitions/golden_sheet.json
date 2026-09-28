@@ -1,5 +1,5 @@
 {
-  "base_demand": 500.0,
+  "base_demand": 2000.0,
   "group": "metal",
   "item": "create:golden_sheet",
   "package_size": 16,

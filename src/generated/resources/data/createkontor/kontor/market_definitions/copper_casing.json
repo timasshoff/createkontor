@@ -1,5 +1,5 @@
 {
-  "base_demand": 1400.0,
+  "base_demand": 2400.0,
   "group": "mechanical",
   "item": "create:copper_casing",
   "package_size": 16,

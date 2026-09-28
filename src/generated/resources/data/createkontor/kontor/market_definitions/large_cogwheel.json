@@ -1,5 +1,5 @@
 {
-  "base_demand": 1200.0,
+  "base_demand": 2000.0,
   "group": "mechanical",
   "item": "create:large_cogwheel",
   "package_size": 16,
