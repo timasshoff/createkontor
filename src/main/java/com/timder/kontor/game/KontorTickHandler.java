@@ -35,8 +35,10 @@ public class KontorTickHandler {
         long currentGameTime = server.overworld().getGameTime();
         long deltaTicks = currentGameTime - economyData.getLastSyncedGameTime();
         if (deltaTicks > 0) {
+            long before = economy.ticksElapsed();
             economy.advanceTicks(deltaTicks);
-            economyData.setLastSyncedGameTime(currentGameTime);
+            long actuallyAdvanced = economy.ticksElapsed() - before;
+            economyData.setLastSyncedGameTime(economyData.getLastSyncedGameTime() + actuallyAdvanced);
         }
         boolean tradingTickPassed = economy.ticksElapsed() != ticksBefore;
 
