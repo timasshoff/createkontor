@@ -17,6 +17,6 @@ public final class KontorNetwork {
         registrar.playToClient(
                 ChartPayload.TYPE,
                 ChartPayload.STREAM_CODEC,
-                ClientPayloadHandler::handleChart);
+                (payload, context) -> ClientPayloadHandler.handleChart(payload, context));
     }
 }

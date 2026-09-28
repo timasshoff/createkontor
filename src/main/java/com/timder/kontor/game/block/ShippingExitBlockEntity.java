@@ -200,14 +200,39 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
     private static int drainAcrossHandlers(List<IItemHandler> handlers, Item item, int needed, boolean simulate) {
         Predicate<ItemStack> matches = stack -> stack.getItem() == item && stack.getComponentsPatch().isEmpty();
+        if (simulate) {
+            return countAcrossHandlers(handlers, matches, needed);
+        }
+
         int collected = 0;
         for (IItemHandler handler : handlers) {
+            while (collected < needed) {
+                ItemStack extracted = ItemHelper.extract(handler, matches, ItemHelper.ExtractionCountMode.UPTO, needed - collected, false);
+                if (extracted.isEmpty()) {
+                    break;
+                }
+                collected += extracted.getCount();
+            }
             if (collected >= needed) {
                 break;
             }
-            ItemStack extracted = ItemHelper.extract(handler, matches, ItemHelper.ExtractionCountMode.UPTO, needed - collected, simulate);
-            collected += extracted.getCount();
         }
         return collected;
+    }
+
+    private static int countAcrossHandlers(List<IItemHandler> handlers, Predicate<ItemStack> matches, int needed) {
+        int total = 0;
+        for (IItemHandler handler : handlers) {
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                ItemStack stack = handler.getStackInSlot(slot);
+                if (!stack.isEmpty() && matches.test(stack)) {
+                    total += stack.getCount();
+                    if (total >= needed) {
+                        return total;
+                    }
+                }
+            }
+        }
+        return total;
     }
 }
