@@ -3,6 +3,8 @@ package com.timder.kontor.config;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.license.LicenseParams;
+import com.timder.kontor.data.KontorData;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class CompanyConfig {
@@ -18,6 +20,8 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue INSOLVENCY_DAYS;
     public static final ModConfigSpec.IntValue BOOKING_RETENTION_DAYS;
     public static final ModConfigSpec.IntValue HISTORY_LENGTH_DAYS;
+    public static final ModConfigSpec.DoubleValue LICENSE_REFERENCE_FEE_RATE;
+    public static final ModConfigSpec.IntValue LICENSE_APPLICATION_FEE_MULTIPLIER;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -47,12 +51,26 @@ public class CompanyConfig {
 
         builder.pop();
 
+        builder.comment("License fees").push("licenses");
+
+        LICENSE_REFERENCE_FEE_RATE = builder.comment("Reference fee rate: The daily reference fee of a market is this rate times its base demand times its reference cost")
+                .defineInRange("referenceFeeRate", 0.009, 0.000001, 1.0);
+        LICENSE_APPLICATION_FEE_MULTIPLIER = builder.comment("The application fee of a license is this many times its reference fee")
+                .defineInRange("applicationFeeMultiplier", 3, 1, 1_000);
+
+        builder.pop();
+
         SPEC = builder.build();
     }
 
     public static CompanyParams toCompanyParams(LegalForms legalForms) {
+        LicenseParams licenseParams = new LicenseParams(
+                LICENSE_REFERENCE_FEE_RATE.get(),
+                LICENSE_APPLICATION_FEE_MULTIPLIER.get()
+        );
         return new CompanyParams(
                 legalForms,
+                KontorData.getLicenseCatalog(legalForms, licenseParams),
                 Money.ofDollars(START_DEPOSIT_IN_DOLLARS.get()),
                 Money.ofDollars(FOUNDER_LOAN_IN_DOLLARS.get()),
                 FOUNDER_LOAN_FREE_DAYS.get(),

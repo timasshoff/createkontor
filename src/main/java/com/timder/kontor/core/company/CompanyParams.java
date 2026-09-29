@@ -2,6 +2,8 @@ package com.timder.kontor.core.company;
 
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.license.LicenseCatalog;
+import com.timder.kontor.core.company.license.LicenseParams;
 
 import java.util.Objects;
 
@@ -9,6 +11,7 @@ import java.util.Objects;
  * Immutable settings for every company.
  *
  * @param legalForms Every available legal form
+ * @param licenses Every available license
  * @param startDeposit The initial deposit on an account when a company is created
  * @param founderLoan The amount of optional founder loan
  * @param founderLoanFreeDays Days without interest and repayment after taking the founder loan
@@ -22,6 +25,7 @@ import java.util.Objects;
  */
 public record CompanyParams(
         LegalForms legalForms,
+        LicenseCatalog licenses,
         Money startDeposit,
         Money founderLoan,
         int founderLoanFreeDays,
@@ -36,6 +40,7 @@ public record CompanyParams(
 
     public CompanyParams {
         Objects.requireNonNull(legalForms, "legalForms must not be null.");
+        Objects.requireNonNull(licenses, "licenses must not be null.");
         Objects.requireNonNull(startDeposit, "startDeposit must not be null.");
         Objects.requireNonNull(founderLoan, "founderLoan must not be null.");
         Objects.requireNonNull(businessLicenseFee, "businessLicenseFee must not be null.");
@@ -62,6 +67,7 @@ public record CompanyParams(
     public static CompanyParams standard() {
         return new CompanyParams(
                 LegalForms.standard(),
+                LicenseCatalog.empty(LicenseParams.standard()),
                 Money.ofDollars(1_000),
                 Money.ofDollars(5_000),
                 7,
