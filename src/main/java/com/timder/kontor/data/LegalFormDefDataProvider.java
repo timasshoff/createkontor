@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.LegalFormDef;
 import com.timder.kontor.core.company.LegalForms;
+import com.timder.kontor.core.company.UpgradeRequirements;
 import com.timder.kontor.core.company.financial.Money;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -26,10 +27,114 @@ public class LegalFormDefDataProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         List<CompletableFuture<?>> futures = new ArrayList<>();
 
-        futures.add(save(cache, "sole_proprietorship", 1, "sole_proprietorship", 2, 2, 2, 5, 3, 0, 64, 1.5, 1024, 0, Money.ofDollars(1000), Money.ZERO, false, false, Money.ZERO, true, 1));
-        futures.add(save(cache, "partnership", 2, "partnership", 4, 6, 3, 12, 10, 0, 256, 1.2, 4096, 1, Money.ofDollars(5000), Money.ofDollars(20000), true, false, Money.ZERO, false, 2));
-        futures.add(save(cache, "limited_company", 3, "limited_company", 6, 15, 5, 30, 40, 6, 1024, 1.0, 16384, 2, Money.ofDollars(20000), Money.ofDollars(100000), true, true, Money.ofDollars(20000), false,3));
-        futures.add(save(cache, "public_company", 4, "public_company", 10, LegalFormDef.UNLIMITED, 8, 80, 150, 20, 4096, 1.0, 65536, 3, Money.ofDollars(100000), Money.ofDollars(500000), true, true, Money.ofDollars(40000), false, 6));
+        futures.add(save(cache, "sole_proprietorship",
+                1,
+                "sole_proprietorship",
+                2,
+                2,
+                2,
+                5,
+                3,
+                0,
+                64,
+                1.5,
+                1024,
+                0,
+                Money.ofDollars(1000), // Overdraft limit
+                Money.ZERO, // Bank loan limit
+                false,
+                false,
+                Money.ZERO, // Free storage
+                true,
+                1,
+                null));
+
+        futures.add(save(cache, "partnership",
+                2,
+                "partnership",
+                4,
+                6,
+                3,
+                12,
+                10,
+                0,
+                256,
+                1.2,
+                4096,
+                1,
+                Money.ofDollars(5000), // Overdraft limit
+                Money.ofDollars(20000), // Bank loan limit
+                true,
+                false,
+                Money.ZERO, // Free storage
+                false,
+                2,
+                new UpgradeRequirements(
+                        Money.ofDollars(10_000), // Fee
+                        Money.ofDollars(5000), // Net worth
+                        30,
+                        3,
+                        24000,
+                        7
+                )));
+
+        futures.add(save(cache, "limited_company",
+                3,
+                "limited_company",
+                6,
+                15,
+                5,
+                30,
+                40,
+                6,
+                1024,
+                1.0,
+                16384,
+                2,
+                Money.ofDollars(20000),  // Overdraft limit
+                Money.ofDollars(100000), // Bank loan limit
+                true,
+                true,
+                Money.ofDollars(20000), // Free storage
+                false,
+                3,
+                new UpgradeRequirements(
+                        Money.ofDollars(25_000), // Fee
+                        Money.ofDollars(20_000), // Net worth
+                        75,
+                        3.5,
+                        24000,
+                        7
+                )));
+
+        futures.add(save(cache, "public_company",
+                4,
+                "public_company",
+                10,
+                LegalFormDef.UNLIMITED,
+                8,
+                80,
+                150,
+                20,
+                4096,
+                1.0,
+                65536,
+                3,
+                Money.ofDollars(100000),  // Overdraft limit
+                Money.ofDollars(500000), // Bank loan limit
+                true,
+                true,
+                Money.ofDollars(40000), // Free storage
+                false,
+                6,
+                new UpgradeRequirements(
+                        Money.ofDollars(50_000), // Fee
+                        Money.ofDollars(100_000), // Net worth
+                        150,
+                        4.0,
+                        24000,
+                        7
+                )));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
@@ -54,7 +159,8 @@ public class LegalFormDefDataProvider implements DataProvider {
                                       boolean logisticsNetwork,
                                       Money freeStorage,
                                       boolean founderProtection,
-                                      int maxShippingExits
+                                      int maxShippingExits,
+                                      UpgradeRequirements entryRequirements
     ) {
         JsonObject json = new JsonObject();
         json.addProperty("level", level);
@@ -76,6 +182,17 @@ public class LegalFormDefDataProvider implements DataProvider {
         json.addProperty("free_storage_value_in_dollars", Math.round(freeStorage.toDollars()));
         json.addProperty("founder_protection", founderProtection);
         json.addProperty("max_shipping_exits", maxShippingExits);
+
+        if (entryRequirements != null) {
+            JsonObject requirements = new JsonObject();
+            requirements.addProperty("fee_in_dollars", Math.round(entryRequirements.fee().toDollars()));
+            requirements.addProperty("min_net_worth_in_dollars", Math.round(entryRequirements.minNetWorth().toDollars()));
+            requirements.addProperty("min_fulfilled_orders", entryRequirements.minFulfilledOrders());
+            requirements.addProperty("min_reputation_stars", entryRequirements.minReputationStars());
+            requirements.addProperty("processing_ticks", entryRequirements.processingTicks());
+            requirements.addProperty("resting_days", entryRequirements.restingDays());
+            json.add("upgrade_requirements", requirements);
+        }
 
         ResourceLocation fileId = ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, fileName);
         return DataProvider.saveStable(cache, json, pathProvider.json(fileId));

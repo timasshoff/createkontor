@@ -46,7 +46,8 @@ public record LegalFormDef(
         boolean logisticsNetwork, // Unused for now (no logistics integration)
         Money freeStorage,
         boolean founderProtection,
-        int maxShippingExits
+        int maxShippingExits,
+        UpgradeRequirements entryRequirements
 ) {
 
     public static final int UNLIMITED = Integer.MAX_VALUE;
@@ -70,6 +71,8 @@ public record LegalFormDef(
         if (overdraftLimit.isNegative()) throw new IllegalArgumentException("overdraftLimit must not be negative.");
         if (bankLoanLimit.isNegative()) throw new IllegalArgumentException("bankLoanLimit must not be negative.");
         if (freeStorage.isNegative()) throw new IllegalArgumentException("freeStorage must not be negative.");
+        if (level == 1 && entryRequirements != null) throw new IllegalArgumentException("The first legal form must not have entry requirements.");
+        if (level > 1 && entryRequirements == null) throw new IllegalArgumentException("Legal form of level " + level + " needs entry requirements.");
     }
 
     public boolean bankLoanAllowed() {
@@ -78,6 +81,10 @@ public record LegalFormDef(
 
     public boolean allowsMoreShippingExits(int currentCount) {
         return currentCount < maxShippingExits;
+    }
+
+    public boolean hasEntryRequirements() {
+        return entryRequirements != null;
     }
 
     @Override

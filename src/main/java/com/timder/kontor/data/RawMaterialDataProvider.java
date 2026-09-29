@@ -48,28 +48,28 @@ public class RawMaterialDataProvider implements DataProvider {
         /*
         Wood
          */
-        futures.add(save(cache, "oak_log", "minecraft:oak_log", 1.0, 0.01, 7000.0));
-        futures.add(save(cache, "spruce_log", "minecraft:spruce_log", 1.0, 0.01, 7000.0));
-        futures.add(save(cache, "birch_log", "minecraft:birch_log", 1.0, 0.01, 7000.0));
-        futures.add(save(cache, "jungle_log", "minecraft:jungle_log", 1.0, 0.01, 7000.0));
-        futures.add(save(cache, "acacia_log", "minecraft:acacia_log", 1.0, 0.01, 7000.0));
-        futures.add(save(cache, "dark_oak_log", "minecraft:dark_oak_log", 1.0, 0.01, 7000.0));
-        futures.add(save(cache, "mangrove_log", "minecraft:mangrove_log", 1.5, 0.02, 4000.0));
-        futures.add(save(cache, "cherry_log", "minecraft:cherry_log", 1.0, 0.01, 7000.0));
-        futures.add(save(cache, "crimsom_stem", "minecraft:crimsom_stem", 2.5, 0.035, 3000.0));
-        futures.add(save(cache, "warped_stem", "minecraft:warped_stem", 2.5, 0.035, 3000.0));
+        futures.add(save(cache, "oak_log", "minecraft:oak_log", 1.5, 0.01, 7000.0));
+        futures.add(save(cache, "spruce_log", "minecraft:spruce_log", 1.5, 0.01, 7000.0));
+        futures.add(save(cache, "birch_log", "minecraft:birch_log", 1.5, 0.01, 7000.0));
+        futures.add(save(cache, "jungle_log", "minecraft:jungle_log", 1.5, 0.01, 7000.0));
+        futures.add(save(cache, "acacia_log", "minecraft:acacia_log", 1.5, 0.01, 7000.0));
+        futures.add(save(cache, "dark_oak_log", "minecraft:dark_oak_log", 1.5, 0.01, 7000.0));
+        futures.add(save(cache, "mangrove_log", "minecraft:mangrove_log", 2.0, 0.02, 4000.0));
+        futures.add(save(cache, "cherry_log", "minecraft:cherry_log", 1.5, 0.01, 7000.0));
+        futures.add(save(cache, "crimsom_stem", "minecraft:crimsom_stem", 3.5, 0.035, 3000.0));
+        futures.add(save(cache, "warped_stem", "minecraft:warped_stem", 3.5, 0.035, 3000.0));
 
         /*
         Misc
          */
-        futures.add(save(cache, "cobblestone", "minecraft:cobblestone", 0.7, 0.01, 9000.0));
-        futures.add(save(cache, "dirt", "minecraft:dirt", 0.6, 0.01, 9000.0));
-        futures.add(save(cache, "sand", "minecraft:sand", 0.6, 0.01, 9000.0));
-        futures.add(save(cache, "gravel", "minecraft:gravel", 0.7, 0.01, 9000.0));
+        futures.add(save(cache, "cobblestone", "minecraft:cobblestone", 1.25, 0.01, 9000.0));
+        futures.add(save(cache, "dirt", "minecraft:dirt", 1.0, 0.01, 9000.0));
+        futures.add(save(cache, "sand", "minecraft:sand", 1.0, 0.01, 9000.0));
+        futures.add(save(cache, "gravel", "minecraft:gravel", 1.1, 0.01, 9000.0));
         futures.add(save(cache, "clay_ball", "minecraft:clay_ball", 0.9, 0.015, 6000.0));
-        futures.add(save(cache, "flint", "minecraft:flint", 1.2, 0.02, 5000.0));
-        futures.add(save(cache, "andesite", "minecraft:andesite", 1.2, 0.02, 5000.0));
-        futures.add(save(cache, "obsidian", "minecraft:obsidian", 9.0, 0.035, 1500.0));
+        futures.add(save(cache, "flint", "minecraft:flint", 1.3, 0.02, 5000.0));
+        futures.add(save(cache, "andesite", "minecraft:andesite", 1.75, 0.02, 5000.0));
+        futures.add(save(cache, "obsidian", "minecraft:obsidian", 15.0, 0.035, 1500.0));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
