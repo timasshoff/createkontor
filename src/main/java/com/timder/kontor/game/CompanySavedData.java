@@ -5,6 +5,7 @@ import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.financial.*;
+import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.OrderPhase;
@@ -144,6 +145,10 @@ public class CompanySavedData extends SavedData {
 
         tag.putLong("FulfilledOrders", state.fulfilledOrders());
 
+        if (state.upgradeApplication() != null) {
+            tag.put("UpgradeApplication", writeUpgradeApplication(state.upgradeApplication()));
+        }
+
         return tag;
     }
 
@@ -187,6 +192,11 @@ public class CompanySavedData extends SavedData {
 
         long fulfilledOrders = tag.getLong("FulfilledOrders");
 
+        UpgradeApplication upgradeApplication = null;
+        if (tag.contains("UpgradeApplication", Tag.TAG_COMPOUND)) {
+            upgradeApplication = readUpgradeApplication(tag.getCompound("UpgradeApplication"));
+        }
+
         return new Company.SaveState(
                 id,
                 name,
@@ -204,7 +214,8 @@ public class CompanySavedData extends SavedData {
                 requestBoard,
                 orderBook,
                 boundResourceCounts,
-                fulfilledOrders
+                fulfilledOrders,
+                upgradeApplication
         );
     }
 
@@ -402,5 +413,22 @@ public class CompanySavedData extends SavedData {
                 tag.getLong("RemainingDeadlineTicks"),
                 tag.getLong("RemainingGracePeriodTicks"),
                 OrderPhase.valueOf(tag.getString("Phase")));
+    }
+
+    private static CompoundTag writeUpgradeApplication(UpgradeApplication application) {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("TargetLevel", application.targetLevel());
+        tag.putString("Phase", application.phase().name());
+        tag.putLong("TicksLeft", application.ticksLeft());
+        tag.putInt("RestingDaysLeft", application.restingDaysLeft());
+        return tag;
+    }
+
+    private static UpgradeApplication readUpgradeApplication(CompoundTag tag) {
+        return new UpgradeApplication(
+                tag.getInt("TargetLevel"),
+                UpgradeApplication.Phase.valueOf(tag.getString("Phase")),
+                tag.getLong("TicksLeft"),
+                tag.getInt("RestingDaysLeft"));
     }
 }
