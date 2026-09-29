@@ -4,6 +4,8 @@ import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
+import com.timder.kontor.core.company.license.LicenseHolding;
+import com.timder.kontor.core.company.license.LicenseKey;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.RequestOrigin;
@@ -41,6 +43,8 @@ public final class Company {
     private long fulfilledOrders = 0;
 
     private UpgradeApplication upgradeApplication = null;
+
+    private final Map<LicenseKey, LicenseHolding> licenses = new LinkedHashMap<>();
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
@@ -181,6 +185,59 @@ public final class Company {
         boolean present = upgradeApplication != null;
         upgradeApplication = null;
         return present;
+    }
+
+    /**
+     * @return All current licenses
+     */
+    public List<LicenseHolding> licenses() {
+        return List.copyOf(licenses.values());
+    }
+
+    /**
+     * @param key The license key
+     * @return The holding of that license. Empty if the company does not own it.
+     */
+    public Optional<LicenseHolding> license(LicenseKey key) {
+        Objects.requireNonNull(key, "key must not be null.");
+        return Optional.ofNullable(licenses.get(key));
+    }
+
+    /**
+     * Adds a newly bought license
+     * @param holding The new holding, must be active
+     * @throws IllegalStateException if the company already owns the license
+     * @throws IllegalArgumentException if the holding is cancelled
+     */
+    public void addLicense(LicenseHolding holding) {
+        Objects.requireNonNull(holding, "holding must not be null.");
+        if (holding.cancelled()) throw new IllegalArgumentException("A new license must not be cancelled.");
+        if (licenses.containsKey(holding.key())) {
+            throw new IllegalStateException("The company already owns the license " + holding.key() + ".");
+        }
+        licenses.put(holding.key(), holding);
+    }
+
+    /**
+     * Replaces a license the company owns by a changed version of it
+     * @param holding The changed holding
+     * @throws IllegalStateException if the company does not own the license
+     */
+    public void replaceLicense(LicenseHolding holding) {
+        Objects.requireNonNull(holding, "holding must not be null.");
+        if (!licenses.containsKey(holding.key())) {
+            throw new IllegalStateException("The company does not own the license " + holding.key() + ".");
+        }
+        licenses.put(holding.key(), holding);
+    }
+
+    /**
+     * @param key The license
+     * @return True if the company owned the license and it was removed.
+     */
+    public boolean removeLicense(LicenseKey key) {
+        Objects.requireNonNull(key, "key must not be null.");
+        return licenses.remove(key) != null;
     }
 
     /**
@@ -417,7 +474,8 @@ public final class Company {
             OrderBook.SaveState orderBook,
             Map<String, Integer> boundResourceCounts,
             long fulfilledOrders,
-            UpgradeApplication upgradeApplication
+            UpgradeApplication upgradeApplication,
+            List<LicenseHolding> licenses
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -439,6 +497,12 @@ public final class Company {
 
             if (upgradeApplication != null && upgradeApplication.targetLevel() != legalLevel + 1) {
                 throw new IllegalArgumentException("upgradeApplication must aim at level " + (legalLevel + 1) + ".");
+            }
+
+            licenses = licenses == null ? List.of() : List.copyOf(licenses);
+            Set<LicenseKey> keys = new HashSet<>();
+            for (LicenseHolding holding : licenses) {
+                if (!keys.add(holding.key())) throw new IllegalArgumentException("licenses contains " + holding.key() + " twice.");
             }
         }
     }
@@ -466,7 +530,8 @@ public final class Company {
                 orderBook.getSaveState(),
                 boundResourceCounts,
                 fulfilledOrders,
-                upgradeApplication);
+                upgradeApplication,
+                List.copyOf(licenses.values()));
     }
 
     public static Company restore(SaveState saveState) {
@@ -491,6 +556,9 @@ public final class Company {
         company.boundResourceCounts.putAll(saveState.boundResourceCounts());
         company.fulfilledOrders = saveState.fulfilledOrders();
         company.upgradeApplication = saveState.upgradeApplication();
+        for (LicenseHolding holding : saveState.licenses()) {
+            company.licenses.put(holding.key(), holding);
+        }
         return company;
     }
 }

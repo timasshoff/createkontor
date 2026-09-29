@@ -6,6 +6,8 @@ import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
+import com.timder.kontor.core.company.license.LicenseHolding;
+import com.timder.kontor.core.company.license.LicenseKeyCodec;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.OrderPhase;
@@ -149,6 +151,11 @@ public class CompanySavedData extends SavedData {
             tag.put("UpgradeApplication", writeUpgradeApplication(state.upgradeApplication()));
         }
 
+        ListTag licenses = new ListTag();
+        for (LicenseHolding holding : state.licenses()) {
+            licenses.add(writeLicenseHolding(holding));
+        }
+
         return tag;
     }
 
@@ -197,6 +204,11 @@ public class CompanySavedData extends SavedData {
             upgradeApplication = readUpgradeApplication(tag.getCompound("UpgradeApplication"));
         }
 
+        List<LicenseHolding> licenses = new ArrayList<>();
+        for (Tag t : tag.getList("Licenses", Tag.TAG_COMPOUND)) {
+            licenses.add(readLicenseHolding((CompoundTag) t));
+        }
+
         return new Company.SaveState(
                 id,
                 name,
@@ -215,7 +227,8 @@ public class CompanySavedData extends SavedData {
                 orderBook,
                 boundResourceCounts,
                 fulfilledOrders,
-                upgradeApplication
+                upgradeApplication,
+                licenses
         );
     }
 
@@ -430,5 +443,20 @@ public class CompanySavedData extends SavedData {
                 UpgradeApplication.Phase.valueOf(tag.getString("Phase")),
                 tag.getLong("TicksLeft"),
                 tag.getInt("RestingDaysLeft"));
+    }
+
+    private static CompoundTag writeLicenseHolding(LicenseHolding holding) {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Key", LicenseKeyCodec.encode(holding.key()));
+        tag.putLong("AcquiredDay", holding.acquiredDay());
+        tag.putBoolean("Cancelled", holding.cancelled());
+        return tag;
+    }
+
+    private static LicenseHolding readLicenseHolding(CompoundTag tag) {
+        return new LicenseHolding(
+                LicenseKeyCodec.decode(tag.getString("Key")),
+                tag.getLong("AcquiredDay"),
+                tag.getBoolean("Cancelled"));
     }
 }
