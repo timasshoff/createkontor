@@ -24,6 +24,7 @@ public final class OrderRules {
 
         Money revenue = fullValue(order);
         bookIfPositive(company, day, BookingKind.ORDER_REVENUE, revenue, order);
+        company.recordFulfilledOrder();
         return new OrderSettlementResult(OrderSettlementOutcome.ON_TIME, order.getQuantity(), revenue);
     }
 
@@ -40,8 +41,9 @@ public final class OrderRules {
         if (!order.isFullyDelivered()) throw new IllegalStateException("Order is not fully delivered.");
         if (order.getPhase() != OrderPhase.GRACE_PERIOD || order.remainingGracePeriodTicks() <= 0) throw new IllegalStateException("Order is not within its grace period.");
 
-        Money revenue = fullValue(order).scaled(0.7); // TODO make this configurable
+        Money revenue = fullValue(order).scaled(0.5); // TODO make this configurable
         bookIfPositive(company, day, BookingKind.ORDER_REVENUE, revenue, order);
+        company.recordFulfilledOrder();
         return new OrderSettlementResult(OrderSettlementOutcome.LATE, order.getQuantity(), revenue);
     }
 

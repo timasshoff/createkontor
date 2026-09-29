@@ -11,6 +11,7 @@ import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.*;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketParticipant;
 import com.timder.kontor.core.value.ItemId;

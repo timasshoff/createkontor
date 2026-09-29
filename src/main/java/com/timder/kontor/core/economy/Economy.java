@@ -1,7 +1,7 @@
 package com.timder.kontor.core.economy;
 
 import com.timder.kontor.core.company.CompanyId;
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.ReputationRules;

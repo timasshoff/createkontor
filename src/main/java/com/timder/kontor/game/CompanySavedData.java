@@ -142,6 +142,8 @@ public class CompanySavedData extends SavedData {
         }
         tag.put("BoundResourceCounts", boundResources);
 
+        tag.putLong("FulfilledOrders", state.fulfilledOrders());
+
         return tag;
     }
 
@@ -183,6 +185,8 @@ public class CompanySavedData extends SavedData {
             boundResourceCounts.put(boundTag.getString("Key"), boundTag.getInt("Count"));
         }
 
+        long fulfilledOrders = tag.getLong("FulfilledOrders");
+
         return new Company.SaveState(
                 id,
                 name,
@@ -199,7 +203,8 @@ public class CompanySavedData extends SavedData {
                 history,
                 requestBoard,
                 orderBook,
-                boundResourceCounts
+                boundResourceCounts,
+                fulfilledOrders
         );
     }
 

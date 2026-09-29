@@ -2,10 +2,9 @@ package com.timder.kontor.game;
 
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
-import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
-import com.timder.kontor.core.company.LegalForms;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.request.RequestArrivals;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.economy.Economy;

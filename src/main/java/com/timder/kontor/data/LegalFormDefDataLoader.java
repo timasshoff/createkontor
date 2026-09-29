@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
-import com.timder.kontor.core.company.LegalFormDef;
-import com.timder.kontor.core.company.UpgradeRequirements;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
+import com.timder.kontor.core.company.legalform.UpgradeRequirements;
 import com.timder.kontor.core.company.financial.Money;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -13,7 +13,6 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;

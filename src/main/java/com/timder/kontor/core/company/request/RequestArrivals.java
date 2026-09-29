@@ -1,6 +1,7 @@
 package com.timder.kontor.core.company.request;
 
 import com.timder.kontor.core.company.*;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketParticipant;
 import com.timder.kontor.core.port.Rng;

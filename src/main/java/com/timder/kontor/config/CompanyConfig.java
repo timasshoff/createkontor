@@ -1,7 +1,7 @@
 package com.timder.kontor.config;
 
 import com.timder.kontor.core.company.CompanyParams;
-import com.timder.kontor.core.company.LegalForms;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.financial.Money;
 import net.neoforged.neoforge.common.ModConfigSpec;
 

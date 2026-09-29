@@ -1,4 +1,4 @@
-package com.timder.kontor.core.company;
+package com.timder.kontor.core.company.legalform;
 
 import com.timder.kontor.core.company.financial.Money;
 
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.timder.kontor.core.company.LegalFormDef.UNLIMITED;
+import static com.timder.kontor.core.company.legalform.LegalFormDef.UNLIMITED;
 
 /**
  * All legal forms of this world, ordered by level

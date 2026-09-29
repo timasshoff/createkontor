@@ -1,6 +1,6 @@
 package com.timder.kontor.data;
 
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.market.GroupDef;
 import com.timder.kontor.core.market.MarketDefinition;
 import com.timder.kontor.core.raw.RawMaterialDefinition;

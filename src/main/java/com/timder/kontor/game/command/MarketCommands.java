@@ -8,7 +8,7 @@ import com.timder.kontor.game.ui.chart.ChartSpec;
 import com.timder.kontor.game.ui.chart.MarketCharts;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketHistoryEntry;
 import com.timder.kontor.core.market.MarketRules;

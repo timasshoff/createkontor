@@ -1,6 +1,8 @@
 package com.timder.kontor.core.company;
 
 import com.timder.kontor.core.company.financial.*;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.RequestOrigin;
@@ -34,6 +36,8 @@ public final class Company {
 
     private long nextRequestNumber = 1;
     private long nextOrderNumber = 1;
+
+    private long fulfilledOrders = 0;
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
@@ -203,6 +207,16 @@ public final class Company {
         return order;
     }
 
+    public long fulfilledOrders() {
+        return fulfilledOrders;
+    }
+
+    public void recordFulfilledOrder() {
+        if (fulfilledOrders < Long.MAX_VALUE) {
+            fulfilledOrders++;
+        }
+    }
+
     /**
      * @return A copy of the loans that are not repaid yet
      */
@@ -347,7 +361,8 @@ public final class Company {
             List<CompanyHistoryEntry> history,
             RequestBoard.SaveState requestBoard,
             OrderBook.SaveState orderBook,
-            Map<String, Integer> boundResourceCounts
+            Map<String, Integer> boundResourceCounts,
+            long fulfilledOrders
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -365,6 +380,7 @@ public final class Company {
             loans = List.copyOf(loans);
             history = List.copyOf(history);
             boundResourceCounts = boundResourceCounts == null ? Map.of() : Map.copyOf(boundResourceCounts);
+            if (fulfilledOrders < 0) throw new IllegalArgumentException("fulfilledOrders must not be negative.");
         }
     }
 
@@ -389,7 +405,8 @@ public final class Company {
                 List.copyOf(history),
                 requestBoard.getSaveState(),
                 orderBook.getSaveState(),
-                boundResourceCounts);
+                boundResourceCounts,
+                fulfilledOrders);
     }
 
     public static Company restore(SaveState saveState) {
@@ -412,6 +429,7 @@ public final class Company {
         company.nextOrderNumber = saveState.nextOrderNumber();
         company.history.addAll(saveState.history());
         company.boundResourceCounts.putAll(saveState.boundResourceCounts());
+        company.fulfilledOrders = saveState.fulfilledOrders();
         return company;
     }
 }

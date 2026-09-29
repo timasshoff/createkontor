@@ -28,7 +28,7 @@ import com.timder.kontor.game.ui.chart.CompanyCharts;
 import com.timder.kontor.game.ui.chart.ChartElement;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
-import com.timder.kontor.core.company.LegalForms;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.KontorDeskBlockEntity;
 import com.timder.kontor.game.ui.element.UiButtons;

@@ -2,9 +2,8 @@ package com.timder.kontor.data;
 
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
-import com.timder.kontor.core.company.LegalFormDef;
-import com.timder.kontor.core.company.LegalForms;
-import com.timder.kontor.core.company.UpgradeRequirements;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
+import com.timder.kontor.core.company.legalform.UpgradeRequirements;
 import com.timder.kontor.core.company.financial.Money;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;

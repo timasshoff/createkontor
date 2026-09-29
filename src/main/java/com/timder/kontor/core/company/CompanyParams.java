@@ -1,6 +1,7 @@
 package com.timder.kontor.core.company;
 
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.legalform.LegalForms;
 
 import java.util.Objects;
 
