@@ -85,6 +85,7 @@ public class CreateKontor {
         CompanyCommands.register(event.getDispatcher());
         RequestCommands.register(event.getDispatcher());
         OrderCommands.register(event.getDispatcher());
+        UpgradeCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent
