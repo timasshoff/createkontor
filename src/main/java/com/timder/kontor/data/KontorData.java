@@ -1,6 +1,5 @@
 package com.timder.kontor.data;
 
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseCatalog;
