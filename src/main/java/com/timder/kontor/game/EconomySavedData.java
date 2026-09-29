@@ -31,13 +31,23 @@ public class EconomySavedData extends SavedData {
     private static final long WARMUP_TICKS = 60L * Economy.DAY_LENGTH; // = 60 days of economy warmup
 
     private final Economy economy;
+    private long lastSyncedGameTime;
 
-    private EconomySavedData(Economy economy) {
+    private EconomySavedData(Economy economy, long lastSyncedGameTime) {
         this.economy = economy;
+        this.lastSyncedGameTime = lastSyncedGameTime;
     }
 
     public Economy getEconomy() {
         return economy;
+    }
+
+    public long getLastSyncedGameTime() {
+        return lastSyncedGameTime;
+    }
+
+    public void setLastSyncedGameTime(long gameTime) {
+        this.lastSyncedGameTime = gameTime;
     }
 
     public static EconomySavedData get(MinecraftServer server) {
@@ -55,7 +65,7 @@ public class EconomySavedData extends SavedData {
     private static EconomySavedData create(MinecraftServer server) {
         Economy economy = buildFreshEconomy(server);
         economy.advanceTicksQuietly(WARMUP_TICKS);
-        return new EconomySavedData(economy);
+        return new EconomySavedData(economy, server.overworld().getGameTime());
     }
 
     private static EconomySavedData load(CompoundTag tag, MinecraftServer server) {
@@ -75,12 +85,16 @@ public class EconomySavedData extends SavedData {
                 FullRecipeGraph.createRecipeGraph(server),
                 rng,
                 saveState);
-        return new EconomySavedData(economy);
+        long lastSyncedGameTime = tag.contains("LastSyncedGameTime")
+                ? tag.getLong("LastSyncedGameTime")
+                : economy.ticksElapsed();
+        return new EconomySavedData(economy, lastSyncedGameTime);
     }
 
     @Override
     public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
         writeSaveState(compoundTag, economy.getSaveState());
+        compoundTag.putLong("LastSyncedGameTime", lastSyncedGameTime);
         return compoundTag;
     }
 

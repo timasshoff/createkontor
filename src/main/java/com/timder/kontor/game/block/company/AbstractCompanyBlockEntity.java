@@ -58,6 +58,10 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         CompanyBlockSupport.afterCompanyIdChanged(this);
     }
 
+    public boolean isBoundToCompany() {
+        return companyId != null;
+    }
+
     @Nullable
     protected String boundResourceKey() {
         return null;

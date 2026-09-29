@@ -114,6 +114,18 @@ public final class Company {
     }
 
     /**
+     * Directly sets the company's legal level.
+     * @param level The new legal level, must be a valid level in {@code legalForms}
+     * @param legalForms The legal forms of this world, used only to validate the level
+     * @throws IllegalArgumentException if level is not a valid level in legalForms
+     */
+    public void setLegalLevel(int level, LegalForms legalForms) {
+        Objects.requireNonNull(legalForms, "legalForms must not be null.");
+        legalForms.get(level);
+        this.legalLevel = level;
+    }
+
+    /**
      * @param params The company parameters
      * @return The overdraft limit of the current legal form
      */
@@ -143,7 +155,7 @@ public final class Company {
 
     public void addManager(UUID player) {
         Objects.requireNonNull(player, "player must not be null.");
-        if (isOwner(player)) throw new IllegalArgumentException("The owner is no manager.");
+        if (isMember(player)) throw new IllegalArgumentException("Player is already a member.");
         managers.add(player);
     }
 

@@ -6,7 +6,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class KontorNetwork {
 
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = "2";
 
     private KontorNetwork() {
     }
@@ -17,6 +17,6 @@ public final class KontorNetwork {
         registrar.playToClient(
                 ChartPayload.TYPE,
                 ChartPayload.STREAM_CODEC,
-                ClientPayloadHandler::handleChart);
+                (payload, context) -> ClientPayloadHandler.handleChart(payload, context));
     }
 }

@@ -1,5 +1,5 @@
 {
-  "base_demand": 250.0,
+  "base_demand": 1900.0,
   "group": "mechanical",
   "item": "create:precision_mechanism",
   "package_size": 4,

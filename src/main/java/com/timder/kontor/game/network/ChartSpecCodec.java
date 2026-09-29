@@ -1,8 +1,9 @@
 package com.timder.kontor.game.network;
 
-import com.timder.kontor.chart.ChartReferenceLine;
-import com.timder.kontor.chart.ChartSeries;
-import com.timder.kontor.chart.ChartSpec;
+import com.timder.kontor.game.ui.chart.ChartKind;
+import com.timder.kontor.game.ui.chart.ChartReferenceLine;
+import com.timder.kontor.game.ui.chart.ChartSeries;
+import com.timder.kontor.game.ui.chart.ChartSpec;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ final class ChartSpecCodec {
 
     static void write(FriendlyByteBuf buf, ChartSpec spec) {
         buf.writeUtf(spec.title(), ChartSpec.MAX_TITLE_LENGTH);
+        buf.writeEnum(spec.kind());
         buf.writeBoolean(spec.includeZero());
         buf.writeUtf(spec.xUnit(), ChartSpec.MAX_UNIT_LENGTH);
         buf.writeUtf(spec.xZeroLabel(), ChartSpec.MAX_UNIT_LENGTH);
@@ -45,10 +47,18 @@ final class ChartSpecCodec {
         for (String label : spec.pointLabels()) {
             buf.writeUtf(label, ChartSpec.MAX_POINT_LABEL_LENGTH);
         }
+
+        buf.writeVarInt(spec.timeRangeOptionsDays().size());
+        for (int days : spec.timeRangeOptionsDays()) {
+            buf.writeVarInt(days);
+        }
+        buf.writeVarInt(spec.defaultTimeRangeDays());
+        buf.writeUtf(spec.xRangeUnit(), ChartSpec.MAX_UNIT_LENGTH);
     }
 
     static ChartSpec read(FriendlyByteBuf buf) {
         String title = buf.readUtf(ChartSpec.MAX_TITLE_LENGTH);
+        ChartKind kind = buf.readEnum(ChartKind.class);
         boolean includeZero = buf.readBoolean();
         String xUnit = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
         String xZeroLabel = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
@@ -84,7 +94,16 @@ final class ChartSpecCodec {
             pointLabels.add(buf.readUtf(ChartSpec.MAX_POINT_LABEL_LENGTH));
         }
 
-        return new ChartSpec(title, series, lines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals, pointLabels);
+        int timeRangeCount = readCount(buf, ChartSpec.MAX_TIME_RANGE_OPTIONS, "time range options");
+        List<Integer> timeRangeOptionsDays = new ArrayList<>(timeRangeCount);
+        for (int i = 0; i < timeRangeCount; i++) {
+            timeRangeOptionsDays.add(buf.readVarInt());
+        }
+        int defaultTimeRangeDays = buf.readVarInt();
+        String xRangeUnit = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
+
+        return new ChartSpec(title, kind, series, lines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals,
+                pointLabels, timeRangeOptionsDays, defaultTimeRangeDays, xRangeUnit);
     }
 
     private static int readCount(FriendlyByteBuf buf, int max, String what) {

@@ -1,5 +1,6 @@
 {
   "values": [
-    "createkontor:shipping_exit"
+    "createkontor:shipping_exit",
+    "createkontor:kontor_desk"
   ]
 }

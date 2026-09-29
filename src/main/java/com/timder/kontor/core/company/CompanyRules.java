@@ -53,7 +53,7 @@ public final class CompanyRules {
         if (account.getBalance().isNegative()) {
             Money overdraftInterest = account.getBalance().abs().scaled(policyRate + params.overdraftSpread());
             if (overdraftInterest.isPositive()) {
-                account.book(day, BookingKind.INTEREST, overdraftInterest.negate(), "");
+                account.book(day, BookingKind.INTEREST, overdraftInterest.negate(), "overdraft");
             }
         }
 
@@ -100,7 +100,7 @@ public final class CompanyRules {
                 costsByKind.put(entry.getKey(), entry.getValue());
             }
         }
-        return new CompanyHistoryEntry(day, account.resultOfDay(day), revenue, costsByKind);
+        return new CompanyHistoryEntry(day, account.resultOfDay(day), revenue, account.getBalance(), costsByKind);
     }
 
     private static String referenceOf(Loan loan) {

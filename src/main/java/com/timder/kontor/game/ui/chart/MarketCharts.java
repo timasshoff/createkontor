@@ -1,4 +1,4 @@
-package com.timder.kontor.chart;
+package com.timder.kontor.game.ui.chart;
 
 import com.timder.kontor.core.market.MarketHistoryEntry;
 import com.timder.kontor.core.market.MarketRules;

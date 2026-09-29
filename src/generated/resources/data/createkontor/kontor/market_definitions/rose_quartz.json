@@ -1,5 +1,5 @@
 {
-  "base_demand": 700.0,
+  "base_demand": 2000.0,
   "group": "metal",
   "item": "create:rose_quartz",
   "package_size": 12,

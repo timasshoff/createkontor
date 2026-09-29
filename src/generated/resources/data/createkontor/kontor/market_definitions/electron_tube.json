@@ -1,5 +1,5 @@
 {
-  "base_demand": 250.0,
+  "base_demand": 1700.0,
   "group": "mechanical",
   "item": "create:electron_tube",
   "package_size": 8,

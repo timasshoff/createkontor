@@ -1,5 +1,5 @@
 {
-  "base_demand": 1800.0,
+  "base_demand": 2200.0,
   "group": "building",
   "item": "minecraft:stone_bricks_stairs",
   "package_size": 64,

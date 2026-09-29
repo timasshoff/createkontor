@@ -1,5 +1,5 @@
 {
-  "base_demand": 1400.0,
+  "base_demand": 2700.0,
   "group": "metal",
   "item": "create:zinc_ingot",
   "package_size": 32,

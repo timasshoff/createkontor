@@ -1,6 +1,7 @@
 package com.timder.kontor.registry;
 
 import com.timder.kontor.CreateKontor;
+import com.timder.kontor.game.block.KontorDeskBlock;
 import com.timder.kontor.game.block.ShippingExitBlock;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.tags.BlockTags;
@@ -29,6 +30,22 @@ public final class KontorBlocks {
                     .add(LootItem.lootTableItem(block))
                     .when(ExplosionCondition.survivesExplosion()))))
             .lang("Shipping Exit")
+            .simpleItem()
+            .register();
+
+    public static final BlockEntry<KontorDeskBlock> KONTOR_DESK = REGISTRATE
+            .block("kontor_desk", KontorDeskBlock::new)
+            .properties(p -> p
+                    .mapColor(MapColor.STONE)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.STONE))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
+            .loot((loot, block) -> loot.add(block, LootTable.lootTable().withPool(LootPool.lootPool()
+                    .setRolls(ConstantValue.exactly(1))
+                    .add(LootItem.lootTableItem(block))
+                    .when(ExplosionCondition.survivesExplosion()))))
+            .lang("Kontor Desk")
             .simpleItem()
             .register();
 

@@ -79,4 +79,9 @@ public record LegalFormDef(
     public boolean allowsMoreShippingExits(int currentCount) {
         return currentCount < maxShippingExits;
     }
+
+    @Override
+    public String toString() {
+        return id;
+    }
 }

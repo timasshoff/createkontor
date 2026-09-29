@@ -1,7 +1,7 @@
 package com.timder.kontor.game.network;
 
 import com.timder.kontor.CreateKontor;
-import com.timder.kontor.chart.ChartSpec;
+import com.timder.kontor.game.ui.chart.ChartSpec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;

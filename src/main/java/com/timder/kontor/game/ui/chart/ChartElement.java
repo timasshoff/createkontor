@@ -1,15 +1,16 @@
-package com.timder.kontor.client.ui.element;
+package com.timder.kontor.game.ui.chart;
 
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Selector;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
+import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
-import com.timder.kontor.chart.ChartReferenceLine;
-import com.timder.kontor.chart.ChartSeries;
-import com.timder.kontor.chart.ChartSpec;
+import dev.vfyjxf.taffy.style.TaffyPosition;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import org.joml.Vector2f;
 
 import javax.annotation.Nullable;
@@ -73,7 +74,9 @@ public class ChartElement extends UIElement {
     private static final float TOOLTIP_PAD = 4f;
     private static final int Y_TICK_TARGET = 6;
     private static final int X_TICK_TARGET = 6;
+    private static final float BAR_WIDTH_FRACTION = 0.6f;
 
+    private ChartKind kind = ChartKind.LINE;
     private List<ChartSeries> series = List.of();
     private final List<ReferenceLine> referenceLines = new ArrayList<>();
     @Nullable
@@ -85,6 +88,13 @@ public class ChartElement extends UIElement {
     private DoubleFunction<String> tooltipValueFormatter = v -> String.format(Locale.ROOT, "%.2f", v);
     @Nullable
     private IntFunction<String> tooltipHeader;
+
+    private List<ChartSeries> fullSeries = List.of();
+    private List<String> fullPointLabels = List.of();
+    private List<String> pointLabels = List.of();
+    @Nullable
+    private Selector<Integer> rangeSelector;
+    private int visibleRange = 0;
 
     public ChartElement() {
         style(s -> s.overflowVisible(false)); // Prevent overflow
@@ -100,6 +110,7 @@ public class ChartElement extends UIElement {
         if (!spec.title().isEmpty()) {
             chart.setTitle(Component.literal(spec.title()));
         }
+        chart.setKind(spec.kind());
         chart.setSeries(spec.series());
         for (ChartReferenceLine line : spec.referenceLines()) {
             chart.addReferenceLine(line.label(), line.value(), line.color());
@@ -115,9 +126,13 @@ public class ChartElement extends UIElement {
         chart.setYFormatter((value, decimals) -> NiceScale.format(value, decimals) + yUnit);
         chart.setTooltipValueFormatter(value -> String.format(Locale.ROOT, tooltipFormat, value) + yUnit);
 
-        List<String> pointLabels = spec.pointLabels();
-        if (!pointLabels.isEmpty()) {
-            chart.setTooltipHeader(index -> index < pointLabels.size() ? pointLabels.get(index) : "");
+        if (!spec.pointLabels().isEmpty()) {
+            chart.setPointLabels(spec.pointLabels());
+            chart.setTooltipHeader(chart::pointLabelAt);
+        }
+
+        if (!spec.timeRangeOptionsDays().isEmpty()) {
+            chart.enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays(), spec.xRangeUnit());
         }
         return chart;
     }
@@ -127,13 +142,25 @@ public class ChartElement extends UIElement {
         return this;
     }
 
+    public ChartElement setKind(ChartKind kind) {
+        this.kind = kind;
+        return this;
+    }
+
     /**
      * Replaces all lines
      * @param series The new chart series
      * @return This chart element
      */
     public ChartElement setSeries(List<ChartSeries> series) {
-        this.series = List.copyOf(series);
+        this.fullSeries = List.copyOf(series);
+        applyXRangeFilter();
+        return this;
+    }
+
+    public ChartElement setPointLabels(List<String> pointLabels) {
+        this.fullPointLabels = List.copyOf(pointLabels);
+        applyXRangeFilter();
         return this;
     }
 
@@ -177,6 +204,102 @@ public class ChartElement extends UIElement {
         return this;
     }
 
+    public ChartElement enableRangeFilter(List<Integer> options, int defaultRange) {
+        return enableRangeFilter(options, defaultRange, null);
+    }
+
+    public ChartElement enableRangeFilter(List<Integer> options, int defaultRange, @Nullable String labelUnit) {
+        if (options.isEmpty()) {
+            throw new IllegalArgumentException("options must not be empty.");
+        }
+        if (!options.contains(defaultRange)) {
+            throw new IllegalArgumentException("defaultRange must be one of options.");
+        }
+        if (rangeSelector != null) {
+            removeChild(rangeSelector);
+        }
+
+        Font font = LDLibFonts.font();
+        int maxTextWidth = 0;
+        for (Integer option : options) {
+            String text = labelUnit != null ? NiceScale.format(option, 0) + labelUnit : xFormatter.format(option, 0);
+            maxTextWidth = Math.max(maxTextWidth, font.width(text));
+        }
+        int selectorWidth = maxTextWidth + 30;
+
+        Selector<Integer> selector = new Selector<>();
+        selector.setCandidateUIProvider(UIElementProvider.text(value -> {
+            if (value == null) {
+                return Component.literal("—");
+            }
+            String text = labelUnit != null
+                    ? NiceScale.format(value, 0) + labelUnit
+                    : xFormatter.format(value, 0);
+            return Component.literal(text);
+        }));
+        selector.setCandidates(options);
+        selector.setOnValueChanged(value -> {
+            visibleRange = value;
+            applyXRangeFilter();
+        });
+        selector.setSelected(defaultRange, false);
+        selector.layout(layout -> layout
+                .positionType(TaffyPosition.ABSOLUTE)
+                .top(PAD)
+                .right(PAD)
+                .width(selectorWidth));
+
+        addChild(selector);
+        rangeSelector = selector;
+        visibleRange = defaultRange;
+        applyXRangeFilter();
+        return this;
+    }
+
+    private void applyXRangeFilter() {
+        if (visibleRange <= 0) {
+            this.series = fullSeries;
+            this.pointLabels = fullPointLabels;
+        } else {
+            List<ChartSeries> filtered = new ArrayList<>(fullSeries.size());
+            for (ChartSeries s : fullSeries) {
+                filtered.add(lastPoints(s, visibleRange));
+            }
+            this.series = filtered;
+            this.pointLabels = lastPoints(fullPointLabels, visibleRange);
+        }
+        if (rangeSelector != null) {
+            rangeSelector.setDisplay(dataRange() != null);
+        }
+    }
+
+    private static ChartSeries lastPoints(ChartSeries s, int count) {
+        int size = s.size();
+        if (size <= count) {
+            return s;
+        }
+        int from = size - count;
+        double[] x = new double[count];
+        double[] y = new double[count];
+        for (int i = 0; i < count; i++) {
+            x[i] = s.x(from + i);
+            y[i] = s.y(from + i);
+        }
+        return new ChartSeries(s.label(), s.color(), x, y);
+    }
+
+    private static List<String> lastPoints(List<String> labels, int count) {
+        int size = labels.size();
+        if (size <= count) {
+            return labels;
+        }
+        return labels.subList(size - count, size);
+    }
+
+    private String pointLabelAt(int index) {
+        return index >= 0 && index < pointLabels.size() ? pointLabels.get(index) : "";
+    }
+
     @Override
     public void drawBackgroundAdditional(GUIContext ctx) {
         super.drawBackgroundAdditional(ctx);
@@ -193,8 +316,16 @@ public class ChartElement extends UIElement {
 
         double[] range = dataRange();
         if (range == null) {
-            String text = "No data";
-            drawText(g, font, text, left + (width - font.width(text)) / 2f, top + (height - lineHeight) / 2f, TEXT_DIM);
+            Component message = title != null
+                    ? Component.translatable("ui.createkontor.chart.no_data.detailed", title)
+                    : Component.translatable("ui.createkontor.chart.no_data.short");
+            List<FormattedCharSequence> lines = font.split(message, Math.round(width - 2f * PAD));
+            float textY = top + (height - lines.size() * lineHeight) / 2f;
+            for (FormattedCharSequence line : lines) {
+                float textX = left + (width - font.width(line)) / 2f;
+                LDLibFonts.drawText(g, font, line, textX, textY, TEXT_DIM, false);
+                textY += lineHeight;
+            }
             return;
         }
 
@@ -263,8 +394,12 @@ public class ChartElement extends UIElement {
         }
         g.flush();
 
-        for (ChartSeries s : series) {
-            drawSeries(g, plot, s);
+        if (kind == ChartKind.STACKED_BAR) {
+            drawStackedBars(g, plot);
+        } else {
+            for (ChartSeries s : series) {
+                drawSeries(g, plot, s);
+            }
         }
         g.flush();
 
@@ -291,17 +426,37 @@ public class ChartElement extends UIElement {
         for (ChartSeries s : series) {
             for (int i = 0; i < s.size(); i++) {
                 double v = s.y(i);
-                if (Double.isNaN(v)) {
-                    continue;
-                }
                 xMin = Math.min(xMin, s.x(i));
                 xMax = Math.max(xMax, s.x(i));
-                yMin = Math.min(yMin, v);
-                yMax = Math.max(yMax, v);
+                if (kind == ChartKind.LINE && !Double.isNaN(v)) {
+                    yMin = Math.min(yMin, v);
+                    yMax = Math.max(yMax, v);
+                }
             }
         }
         if (xMin > xMax) {
             return null; // not a single usable point
+        }
+        if (kind == ChartKind.STACKED_BAR) {
+            yMin = 0.0;
+            yMax = 0.0;
+            int size = series.isEmpty() ? 0 : series.get(0).size();
+            for (int i = 0; i < size; i++) {
+                double sum = 0.0;
+                for (ChartSeries s : series) {
+                    double v = s.y(i);
+                    if (!Double.isNaN(v)) {
+                        sum += v;
+                    }
+                }
+                yMax = Math.max(yMax, sum);
+            }
+            if (size >= 2) {
+                double spacing = (series.get(0).x(size - 1) - series.get(0).x(0)) / (size - 1);
+                double halfSlot = spacing / 2.0;
+                xMin -= halfSlot;
+                xMax += halfSlot;
+            }
         }
         for (ReferenceLine line : referenceLines) {
             yMin = Math.min(yMin, line.value());
@@ -350,6 +505,34 @@ public class ChartElement extends UIElement {
         flushRun(g, run, s.color());
     }
 
+    private void drawStackedBars(GuiGraphics g, Plot plot) {
+        if (series.isEmpty()) {
+            return;
+        }
+        ChartSeries first = series.get(0);
+        int size = first.size();
+        float barWidth = barWidthPx(plot, first);
+
+        for (int i = 0; i < size; i++) {
+            float cx = plot.x(first.x(i));
+            float left = cx - barWidth / 2f;
+            double cumBefore = 0.0;
+            for (ChartSeries s : series) {
+                double v = s.y(i);
+                if (Double.isNaN(v)) {
+                    continue;
+                }
+                double cumAfter = cumBefore + v;
+                float yTop = plot.y(cumAfter);
+                float yBottom = plot.y(cumBefore);
+                if (yBottom > yTop) {
+                    DrawerHelper.drawSolidRect(g, left, yTop, barWidth, yBottom - yTop, s.color());
+                }
+                cumBefore = cumAfter;
+            }
+        }
+    }
+
     private static void flushRun(GuiGraphics g, List<Vector2f> run, int color) {
         if (run.size() >= 2) {
             DrawerHelper.drawLines(g, run, color, color, LINE_HALF_WIDTH);
@@ -357,6 +540,16 @@ public class ChartElement extends UIElement {
             Vector2f p = run.get(0);
             DrawerHelper.drawSolidRect(g, Math.round(p.x) - 1f, Math.round(p.y) - 1f, 3f, 3f, color);
         }
+    }
+
+    private static float barWidthPx(Plot plot, ChartSeries series) {
+        int size = series.size();
+        double spacing = size >= 2 ? (series.x(size - 1) - series.x(0)) / (size - 1) : (plot.xMax() - plot.xMin());
+        if (spacing <= 0) {
+            spacing = plot.xMax() - plot.xMin();
+        }
+        float slotPx = (float) (spacing * plot.width() / (plot.xMax() - plot.xMin()));
+        return slotPx * BAR_WIDTH_FRACTION;
     }
 
     private void drawHover(GUIContext ctx, GuiGraphics g, Font font, Plot plot, float mx, float my, float left, float top, float width, float height) {
@@ -382,7 +575,9 @@ public class ChartElement extends UIElement {
             if (Double.isNaN(value)) {
                 continue;
             }
-            dots.add(new Dot(plot.x(s.x(index)), plot.y(value), s.color()));
+            if (kind != ChartKind.STACKED_BAR) {
+                dots.add(new Dot(plot.x(s.x(index)), plot.y(value), s.color()));
+            }
             lines.add(new TipLine(s.color(), s.label() + ": " + tooltipValueFormatter.apply(value)));
         }
         if (Float.isNaN(cursorX) || lines.isEmpty()) {

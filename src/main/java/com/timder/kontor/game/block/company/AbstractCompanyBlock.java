@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractCompanyBlock extends Block implements EntityBlock {
+public abstract class AbstractCompanyBlock extends Block {
 
     public AbstractCompanyBlock(Properties properties) {
         super(properties);

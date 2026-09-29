@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "createkontor:block/kontor_desk"
+    }
+  }
+}
