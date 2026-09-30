@@ -24,6 +24,19 @@ public class LicenseDefDataProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         List<CompletableFuture<?>> futures = new ArrayList<>();
 
+        /*
+        Each license has a reference cost.
+        It is calculated as the REFERENCE_FEE_RATE * Base Demand * Product Reference cost.
+
+        The fee factor is a factor for both the daily fee and the application fee.
+        This factor is applied onto the reference cost. It can be used to make an entire license cheaper or more expensive.
+
+        The application fee is the reference cost * fee factor * 3.
+
+        The daily fraction is the fraction of the reference cost * fee factor that is due every day.
+
+        The revenue share is the fraction of revenue of the product that is due every day.
+         */
 
         futures.add(save(cache, "iron_sheet", "iron_sheet", List.of(
                 "create:iron_sheet"
