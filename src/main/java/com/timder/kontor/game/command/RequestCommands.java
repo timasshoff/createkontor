@@ -75,9 +75,14 @@ public class RequestCommands {
             source.sendFailure(Component.literal("There is no market for " + location + "."));
             return 0;
         }
+        if (economy.isPaused(product, company.id())) {
+            source.sendFailure(Component.literal(company.name() + " has paused the market for " + location
+                    + ", so it gets no requests for it. Use /kontor market join to resume."));
+            return 0;
+        }
         if (!economy.isParticipant(product, company.id())) {
             source.sendFailure(Component.literal(company.name() + " does not take part in the market for " + location
-                    + ", so it gets no requests for it. Use /kontor market register first."));
+                    + ", so it gets no requests for it. Use /kontor market join first."));
             return 0;
         }
 

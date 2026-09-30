@@ -45,6 +45,8 @@
   "legal_forms.createkontor.partnership": "§bPartnership",
   "legal_forms.createkontor.public_company": "§6Public Company",
   "legal_forms.createkontor.sole_proprietorship": "§7Sole Proprietorship",
+  "license.createkontor.generated": "%s License",
+  "license.createkontor.sheet_metal_bundle": "Sheet Metal Bundle License",
   "loan.createkontor.bank": "Bank Loan",
   "loan.createkontor.founder": "Founder's Loan",
   "loan.createkontor.principal": "Principal: %s",

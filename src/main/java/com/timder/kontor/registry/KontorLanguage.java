@@ -99,6 +99,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
         REGISTRATE.addRawLang("legal_forms.createkontor.public_company", "§6Public Company");
 
+        REGISTRATE.addRawLang("license.createkontor.sheet_metal_bundle", "Sheet Metal Bundle License");
+        REGISTRATE.addRawLang("license.createkontor.generated", "%s License");
+
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
 
         REGISTRATE.addRawLang("loan.createkontor.bank", "Bank Loan");
