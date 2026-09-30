@@ -1,4 +1,4 @@
-package com.timder.kontor.data;
+package com.timder.kontor.data.loader;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -7,6 +7,7 @@ import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.UpgradeRequirements;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.data.KontorData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;

@@ -1,4 +1,4 @@
-package com.timder.kontor.data;
+package com.timder.kontor.data.provider;
 
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;

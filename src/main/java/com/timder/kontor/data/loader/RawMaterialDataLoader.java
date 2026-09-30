@@ -1,4 +1,4 @@
-package com.timder.kontor.data;
+package com.timder.kontor.data.loader;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -7,6 +7,7 @@ import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.raw.RawMaterialDefinition;
 import com.timder.kontor.core.raw.RawMaterialParams;
 import com.timder.kontor.core.value.ItemId;
+import com.timder.kontor.data.KontorData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
