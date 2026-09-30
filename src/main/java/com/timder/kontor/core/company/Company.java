@@ -1,5 +1,6 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.employee.Employee;
 import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.LegalForms;
@@ -45,6 +46,9 @@ public final class Company {
     private UpgradeApplication upgradeApplication = null;
 
     private final Map<LicenseKey, LicenseHolding> licenses = new LinkedHashMap<>();
+
+    private long nextEmployeeNumber = 1;
+    private final Map<Long, Employee> employees = new LinkedHashMap<>();
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
@@ -238,6 +242,53 @@ public final class Company {
     public boolean removeLicense(LicenseKey key) {
         Objects.requireNonNull(key, "key must not be null.");
         return licenses.remove(key) != null;
+    }
+
+    public List<Employee> employees() {
+        return List.copyOf(employees.values());
+    }
+
+    public int employeeCount() {
+        return employees.size();
+    }
+
+    public Optional<Employee> employee(long number) {
+        return Optional.ofNullable(employees.get(number));
+    }
+
+    public long issueEmployeeNumber() {
+        return nextEmployeeNumber++;
+    }
+
+    /**
+     * Adds a newly hired employee
+     * @param employee The employee to add
+     */
+    public void addEmployee(Employee employee) {
+        Objects.requireNonNull(employee, "employee must not be null.");
+        if (employee.number() >= nextEmployeeNumber) {
+            throw new IllegalArgumentException("The employee number " + employee.number() + " was not issued.");
+        }
+        if (employees.containsKey(employee.number())) {
+            throw new IllegalStateException("The company already has the employee " + employee.number() + ".");
+        }
+        employees.put(employee.number(), employee);
+    }
+
+    /**
+     * Replaces an employee with a changed version of the same employee
+     * @param employee The employee
+     */
+    public void replaceEmployee(Employee employee) {
+        Objects.requireNonNull(employee, "employee must not be null.");
+        if (!employees.containsKey(employee.number())) {
+            throw new IllegalStateException("The company has no employee " + employee.number() + ".");
+        }
+        employees.put(employee.number(), employee);
+    }
+
+    public Optional<Employee> removeEmployee(long number) {
+        return Optional.ofNullable(employees.remove(number));
     }
 
     /**
@@ -475,7 +526,9 @@ public final class Company {
             Map<String, Integer> boundResourceCounts,
             long fulfilledOrders,
             UpgradeApplication upgradeApplication,
-            List<LicenseHolding> licenses
+            List<LicenseHolding> licenses,
+            long nextEmployeeNumber,
+            List<Employee> employees
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -504,6 +557,16 @@ public final class Company {
             for (LicenseHolding holding : licenses) {
                 if (!keys.add(holding.key())) throw new IllegalArgumentException("licenses contains " + holding.key() + " twice.");
             }
+
+            if (nextEmployeeNumber < 1) throw new IllegalArgumentException("nextEmployeeNumber must be at least 1.");
+            employees = employees == null ? List.of() : List.copyOf(employees);
+            Set<Long> numbers = new HashSet<>();
+            for (Employee employee : employees) {
+                if (!numbers.add(employee.number())) throw new IllegalArgumentException("employees contains number " + employee.number() + " twice.");
+                if (employee.number() >= nextEmployeeNumber) {
+                    throw new IllegalArgumentException("employee number " + employee.number() + " is not below nextEmployeeNumber.");
+                }
+            }
         }
     }
 
@@ -531,7 +594,9 @@ public final class Company {
                 boundResourceCounts,
                 fulfilledOrders,
                 upgradeApplication,
-                List.copyOf(licenses.values()));
+                List.copyOf(licenses.values()),
+                nextEmployeeNumber,
+                List.copyOf(employees.values()));
     }
 
     public static Company restore(SaveState saveState) {
@@ -558,6 +623,10 @@ public final class Company {
         company.upgradeApplication = saveState.upgradeApplication();
         for (LicenseHolding holding : saveState.licenses()) {
             company.licenses.put(holding.key(), holding);
+        }
+        company.nextEmployeeNumber = saveState.nextEmployeeNumber();
+        for (Employee employee : saveState.employees()) {
+            company.employees.put(employee.number(), employee);
         }
         return company;
     }

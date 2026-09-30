@@ -229,7 +229,9 @@ public class CompanySavedData extends SavedData {
                 boundResourceCounts,
                 fulfilledOrders,
                 upgradeApplication,
-                licenses
+                licenses,
+                1L,
+                List.of() // TODO
         );
     }
 
