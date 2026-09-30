@@ -75,7 +75,7 @@ public class KontorTickHandler {
         }
 
         if (economy.currentDay() != dayBefore) {
-            settleCompanies(server, companyData, economy, lastHistoryDayBefore);
+            settleCompanies(server, companyData, economyData, lastHistoryDayBefore);
         }
     }
 
@@ -87,7 +87,8 @@ public class KontorTickHandler {
         return !arrivals.isEmpty();
     }
 
-    public static void settleCompanies(MinecraftServer server, CompanySavedData companyData, Economy economy, long lastHistoryDayBefore) {
+    public static void settleCompanies(MinecraftServer server, CompanySavedData companyData, EconomySavedData economyData, long lastHistoryDayBefore) {
+        Economy economy = economyData.getEconomy();
         if (companyData.getRegistry().size() == 0) {
             return;
         }
@@ -107,6 +108,7 @@ public class KontorTickHandler {
             PlayerNotifications.sendUpgradeEventNotifications(server, companyData.getRegistry(), upgradeEvents, params);
         }
         companyData.setDirty();
+        economyData.setDirty();
     }
 
     public static long lastHistoryDay(Economy economy) {
