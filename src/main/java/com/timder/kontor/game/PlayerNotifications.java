@@ -61,7 +61,7 @@ public final class PlayerNotifications {
         for (UUID member : members) {
             ServerPlayer player = server.getPlayerList().getPlayer(member);
             if (player != null) {
-                player.displayClientMessage(message, false);
+                player.displayClientMessage(message, true);
             }
         }
     }

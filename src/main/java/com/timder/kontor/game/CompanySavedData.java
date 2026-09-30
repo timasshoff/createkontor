@@ -155,6 +155,7 @@ public class CompanySavedData extends SavedData {
         for (LicenseHolding holding : state.licenses()) {
             licenses.add(writeLicenseHolding(holding));
         }
+        tag.put("Licenses", licenses);
 
         return tag;
     }

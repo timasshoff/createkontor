@@ -31,6 +31,7 @@ public record LegalFormDef(
         int level,
         String id,
         int maxEmployees,
+        double employeeSalaryFactor,
         int maxProductLicenses,
         int maxOpenRequestsPerProduct,
         int maxOpenRequestsTotal,
@@ -56,6 +57,7 @@ public record LegalFormDef(
         if (level < 1) throw new IllegalArgumentException("level must be at least 1.");
         if (id == null || id.isBlank()) throw new IllegalArgumentException("id must not be blank.");
         if (maxEmployees < 0) throw new IllegalArgumentException("maxEmployees must not be negative.");
+        if (!(employeeSalaryFactor > 0.0) || Double.isInfinite(employeeSalaryFactor)) throw new IllegalArgumentException("employeeSalaryFactor must be positive and finite.");
         if (maxProductLicenses < 0) throw new IllegalArgumentException("maxProductLicenses must not be negative.");
         if (maxOpenRequestsPerProduct < 0) throw new IllegalArgumentException("maxOpenRequestsPerProduct must not be negative.");
         if (maxOpenRequestsTotal < 0) throw new IllegalArgumentException("maxOpenRequestsTotal must not be negative.");

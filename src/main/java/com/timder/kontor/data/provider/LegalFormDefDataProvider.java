@@ -30,6 +30,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 1,
                 "sole_proprietorship",
                 2,
+                0.8,
                 2,
                 2,
                 5,
@@ -52,6 +53,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 2,
                 "partnership",
                 4,
+                1.0,
                 6,
                 3,
                 12,
@@ -81,6 +83,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 3,
                 "limited_company",
                 6,
+                1.25,
                 15,
                 5,
                 30,
@@ -110,6 +113,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 4,
                 "public_company",
                 10,
+                1.5,
                 LegalFormDef.UNLIMITED,
                 8,
                 80,
@@ -143,6 +147,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                                       int level,
                                       String id,
                                       int maxEmployees,
+                                      double employeeSalaryFactor,
                                       int maxProductLicenses,
                                       int maxOpenRequestsPerProduct,
                                       int maxOpenRequestsTotal,
@@ -165,6 +170,7 @@ public class LegalFormDefDataProvider implements DataProvider {
         json.addProperty("level", level);
         json.addProperty("id", id);
         json.addProperty("max_employees", maxEmployees);
+        json.addProperty("employee_salary_factor", employeeSalaryFactor);
         json.addProperty("max_product_licenses", maxProductLicenses);
         json.addProperty("max_open_requests_per_product", maxOpenRequestsPerProduct);
         json.addProperty("max_open_requests_total", maxOpenRequestsTotal);

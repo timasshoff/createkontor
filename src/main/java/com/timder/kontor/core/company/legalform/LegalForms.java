@@ -70,11 +70,16 @@ public record LegalForms(List<LegalFormDef> forms) {
     The following code is AI generated.
      */
 
+/*
+    The following code is AI generated.
+     */
+
     public static LegalForms standard() {
         return new LegalForms(List.of(
                 new LegalFormDef(
                         1, "sole_proprietorship",
                         2,                   // employee slots
+                        1.0,                 // employee salary factor
                         2,                   // product licenses
                         2,                   // open requests per product
                         5,                   // open requests total
@@ -94,21 +99,21 @@ public record LegalForms(List<LegalFormDef> forms) {
                         null),
                 new LegalFormDef(
                         2, "partnership",
-                        4, 6, 3, 12, 10, 0, 256, 1.2, 4_096, 1,
+                        4, 1.1, 6, 3, 12, 10, 0, 256, 1.2, 4_096, 1,
                         Money.ofDollars(5_000), Money.ofDollars(20_000),
                         true, false, Money.ZERO, false,
                         2,
                         new UpgradeRequirements(Money.ofDollars(1_000), Money.ofDollars(5_000), 30, 3.0, 24_000, 7)),
                 new LegalFormDef(
                         3, "limited_company",
-                        6, 15, 5, 30, 40, 6, 1_024, 1.0, 16_384, 2,
+                        6, 1.25, 15, 5, 30, 40, 6, 1_024, 1.0, 16_384, 2,
                         Money.ofDollars(20_000), Money.ofDollars(100_000),
                         true, true, Money.ofDollars(20_000), false,
                         4,
                         new UpgradeRequirements(Money.ofDollars(5_000), Money.ofDollars(25_000), 150, 3.5, 48_000, 7)),
                 new LegalFormDef(
                         4, "public_company",
-                        10, UNLIMITED, 8, 80, 150, 20, 4_096, 1.0, 65_536, 3,
+                        10, 1.5, UNLIMITED, 8, 80, 150, 20, 4_096, 1.0, 65_536, 3,
                         Money.ofDollars(100_000), Money.ofDollars(500_000),
                         true, true, Money.ofDollars(100_000), false,
                         8,
