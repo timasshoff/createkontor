@@ -364,15 +364,21 @@ public final class Economy {
     }
 
     public double expectedDailyQuantity(ItemId market, CompanyId company) {
+        if (!isParticipant(market, company)) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
+        MarketParticipant participant = participantsOf(market).get(company);
+        return dailyQuantityOf(market, participant);
+    }
+
+    private double dailyQuantityOf(ItemId market, MarketParticipant participant) {
         MarketState state = stateOf(market);
         MarketParams marketParams = marketParamsMap.get(market);
         Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
 
-        Double own = attractiveness.byCompany().get(company);
-        if (own == null) {
-            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
-        }
-        double other = attractiveness.total() - own;
+        double own = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+        Double counted = attractiveness.byCompany().get(participant.companyId());
+        double other = counted == null ? attractiveness.total() : attractiveness.total() - counted;
         double share = MarketRules.shareFrom(own, other, state, marketParams);
         return share * currentDemand.get(market);
     }
@@ -420,24 +426,25 @@ public final class Economy {
      * @return The reputation (0 to 100)
      */
     public double overallReputation(CompanyId company) {
-        List<ItemId> participatedMarkets = marketIds().stream()
-                .filter(market -> isParticipant(market, company))
-                .toList();
-        if (participatedMarkets.isEmpty()) {
+        Map<ItemId, MarketParticipant> entries = new LinkedHashMap<>();
+        for (ItemId market : marketIds()) {
+            participantsOf(market).stored(company).ifPresent(entry -> entries.put(market, entry));
+        }
+        if (entries.isEmpty()) {
             return 50.0;
         }
 
         double weightedSum = 0.0;
         double totalWeight = 0.0;
-        for (ItemId market : participatedMarkets) {
-            double weight = expectedDailyQuantity(market, company);
-            weightedSum += participantsOf(market).get(company).reputation() * weight;
+        for (Map.Entry<ItemId, MarketParticipant> entry : entries.entrySet()) {
+            double weight = dailyQuantityOf(entry.getKey(), entry.getValue());
+            weightedSum += entry.getValue().reputation() * weight;
             totalWeight += weight;
         }
 
         if (totalWeight <= 0) {
-            return participatedMarkets.stream()
-                    .mapToDouble(market -> participantsOf(market).get(company).reputation())
+            return entries.values().stream()
+                    .mapToDouble(MarketParticipant::reputation)
                     .average()
                     .orElseThrow();
         }

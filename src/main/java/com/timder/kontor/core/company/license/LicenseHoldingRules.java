@@ -47,7 +47,7 @@ public final class LicenseHoldingRules {
         if (company.legalLevel() < license.minLegalLevel()) {
             return new AcquireResult(AcquireResult.Status.LEGAL_LEVEL_TOO_LOW, Money.ZERO);
         }
-        if (activeCount(company) >= company.legalForm(params).maxProductLicenses()) {
+        if (activeCount(company, params.licenses()) >= company.legalForm(params).maxProductLicenses()) {
             return new AcquireResult(AcquireResult.Status.LIMIT_REACHED, Money.ZERO);
         }
         if (existing != null) {
@@ -125,11 +125,11 @@ public final class LicenseHoldingRules {
      * @param company The company
      * @return The number of licenses that count towards the limit of the legal form: every one that is not cancelled.
      */
-    public static int activeCount(Company company) {
+    public static int activeCount(Company company, LicenseCatalog catalog) {
         Objects.requireNonNull(company, "company must not be null.");
         int count = 0;
         for (LicenseHolding holding : company.licenses()) {
-            if (holding.isActive()) {
+            if (holding.isActive() && catalog.find(holding.key()).isPresent()) {
                 count++;
             }
         }
