@@ -1,0 +1,10 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 1.0,
+  "id": "cogwheel_turnover",
+  "markets": [
+    "create:cogwheel"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.05
+}

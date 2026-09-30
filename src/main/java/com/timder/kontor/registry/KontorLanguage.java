@@ -82,7 +82,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.purchase", "Purchase");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.interest", "Interest");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.contract_penalty", "Contract Penalty");
-        REGISTRATE.addRawLang("enum.createkontor.booking_kind.upgrade_fee", "Legal form Upgrade Eee");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.upgrade_fee", "Legal Form Upgrade Fee");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.order_revenue", "Order Revenue");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.partial_payment", "Partial Order Revenue");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.feed_in_revenue", "SU Feed-in Revenue");

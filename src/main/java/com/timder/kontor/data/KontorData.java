@@ -27,7 +27,7 @@ public class KontorData {
         return rawMaterials;
     }
 
-    static void setRawMaterials(List<RawMaterialDefinition> value) {
+    public static void setRawMaterials(List<RawMaterialDefinition> value) {
         rawMaterials = List.copyOf(value);
     }
 
@@ -35,7 +35,7 @@ public class KontorData {
         return groupDefinitions;
     }
 
-    static void setGroupDefinitions(Map<String, GroupDef> value) {
+    public static void setGroupDefinitions(Map<String, GroupDef> value) {
         groupDefinitions = Map.copyOf(value);
     }
 
@@ -43,7 +43,7 @@ public class KontorData {
         return marketDefinitions;
     }
 
-    static void setMarketDefinitions(List<MarketDefinition> value) {
+    public static void setMarketDefinitions(List<MarketDefinition> value) {
         marketDefinitions = List.copyOf(value);
     }
 
@@ -51,7 +51,7 @@ public class KontorData {
         return processCosts;
     }
 
-    static void setProcessCosts(Map<String, Double> value) {
+    public static void setProcessCosts(Map<String, Double> value) {
         processCosts = Map.copyOf(value);
     }
 
@@ -59,7 +59,7 @@ public class KontorData {
         return legalFormDefinitions;
     }
 
-    static void setLegalFormDefinitions(List<LegalFormDef> value) {
+    public static void setLegalFormDefinitions(List<LegalFormDef> value) {
         legalFormDefinitions = List.copyOf(value);
     }
 
@@ -67,7 +67,7 @@ public class KontorData {
         return licenseDefinitions;
     }
 
-    static void setLicenseDefinitions(List<LicenseDef> value) {
+    public static void setLicenseDefinitions(List<LicenseDef> value) {
         licenseDefinitions = List.copyOf(value);
     }
 

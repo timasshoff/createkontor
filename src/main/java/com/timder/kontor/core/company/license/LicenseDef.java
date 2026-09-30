@@ -9,7 +9,7 @@ import java.util.*;
  *
  * @param key The identity
  * @param markets The markets that this license opens
- * @param feeFactor Factor on the reference fee, positive
+ * @param feeFactor Factor on the reference fee, positive TODO explain
  * @param dailyFraction The part of the (factored) reference fee that is due every day, 0 to 1
  * @param revenueShare The share of the revenue that is due, at least 0 and below 1
  * @param minLegalLevel The lowest legal form level a company needs to acquire the license, at least 1
