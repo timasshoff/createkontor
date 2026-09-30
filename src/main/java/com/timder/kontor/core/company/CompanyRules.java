@@ -1,6 +1,7 @@
 package com.timder.kontor.core.company;
 
 import com.timder.kontor.core.company.financial.*;
+import com.timder.kontor.core.company.license.HeldLicense;
 import com.timder.kontor.core.company.license.LicenseDef;
 import com.timder.kontor.core.company.license.LicenseHolding;
 import com.timder.kontor.core.company.license.LicenseHoldingRules;
@@ -78,13 +79,12 @@ public final class CompanyRules {
     }
 
     private static void bookLicenseFees(Company company, long day, CompanyParams params) {
-        for (LicenseHolding holding : company.licenses()) {
-            LicenseDef license = params.licenses().find(holding.key()).orElse(null);
-            if (license == null || !holding.dailyFee().isPositive()) {
+        for (HeldLicense held : LicenseHoldingRules.holdings(company, params.licenses())) {
+            if (!held.billed()) {
                 continue;
             }
-            BookingKind kind = license.hasRevenueShare() ? BookingKind.TURNOVER_LICENSE : BookingKind.FLAT_LICENSE;
-            company.account().book(day, kind, holding.dailyFee().negate(), holding.key().toString());
+            BookingKind kind = held.hasRevenueShare() ? BookingKind.TURNOVER_LICENSE : BookingKind.FLAT_LICENSE;
+            company.account().book(day, kind, held.dailyFee().negate(), held.key().toString());
         }
         LicenseHoldingRules.dropCancelled(company);
     }

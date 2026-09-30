@@ -844,6 +844,10 @@ public final class Economy {
         return macroHistory.stream().filter(entry -> entry.day() > day).toList();
     }
 
+    public List<MarketDefinition> marketDefinitions() {
+        return marketDefinitions;
+    }
+
     public List<ItemId> marketIds() {
         return marketDefinitions.stream().map(MarketDefinition::id).toList();
     }

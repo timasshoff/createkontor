@@ -19,12 +19,20 @@ public final class LicenseHoldingRules {
         NOT_HELD
     }
 
-    public static AcquireResult acquire(Company company, LicenseKey key, Map<ItemId, Money> referenceFees, long day, CompanyParams params) {
+    /**
+     * Checks what {@link  #acquire(Company, LicenseKey, Map, long, CompanyParams)} would do right now.
+     * Does not change anything.
+     * @param company The company
+     * @param key The license key
+     * @param referenceFees The current reference fee of every market
+     * @param params The company parameters
+     * @return What would happen
+     */
+    public static AcquireResult preview(Company company, LicenseKey key, Map<ItemId, Money> referenceFees, CompanyParams params) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(key, "key must not be null.");
         Objects.requireNonNull(referenceFees, "referenceFees must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
-        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
 
         LicenseCatalog catalog = params.licenses();
         LicenseDef license = catalog.find(key).orElse(null);
@@ -42,23 +50,34 @@ public final class LicenseHoldingRules {
         if (activeCount(company) >= company.legalForm(params).maxProductLicenses()) {
             return new AcquireResult(AcquireResult.Status.LIMIT_REACHED, Money.ZERO);
         }
-
         if (existing != null) {
-            company.replaceLicense(existing.reactivate());
             return new AcquireResult(AcquireResult.Status.REACTIVATED, Money.ZERO);
         }
 
         Money fee = LicenseRules.applicationFee(license, catalog.params(), referenceFees);
-        Money dailyFee = LicenseRules.dailyFee(license, referenceFees);
         if (!company.isOperational()) {
             return new AcquireResult(AcquireResult.Status.NOT_OPERATIONAL, fee);
         }
-        if (fee.isPositive() && !company.trySpend(day, BookingKind.APPLICATION_FEE, fee, key.toString(), params)) {
+        if (fee.isPositive() && !company.canSpend(fee, params)) {
             return new AcquireResult(AcquireResult.Status.CANNOT_AFFORD, fee);
         }
-
-        company.addLicense(LicenseHolding.acquire(key, day, dailyFee));
         return new AcquireResult(AcquireResult.Status.ACQUIRED, fee);
+    }
+
+    public static AcquireResult acquire(Company company, LicenseKey key, Map<ItemId, Money> referenceFees, long day, CompanyParams params) {
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+
+        AcquireResult result = preview(company, key, referenceFees, params);
+        if (result.status() == AcquireResult.Status.REACTIVATED) {
+            company.replaceLicense(company.license(key).orElseThrow().reactivate());
+        } else if (result.status() == AcquireResult.Status.ACQUIRED) {
+            if (result.fee().isPositive() && !company.trySpend(day, BookingKind.APPLICATION_FEE, result.fee(), key.toString(), params)) {
+                throw new IllegalStateException("The company could pay " + result.fee() + " a moment ago but cannot now.");
+            }
+            Money dailyFee = LicenseRules.dailyFee(params.licenses().get(key), referenceFees);
+            company.addLicense(LicenseHolding.acquire(key, day, dailyFee));
+        }
+        return result;
     }
 
     /**
@@ -151,6 +170,37 @@ public final class LicenseHoldingRules {
             }
         }
         return unknown;
+    }
+
+    /**
+     * @param company The company
+     * @param catalog The license catalog
+     * @return Every license the company owns, active, cancelled and unknown ones
+     */
+    public static List<HeldLicense> holdings(Company company, LicenseCatalog catalog) {
+        Objects.requireNonNull(company, "company must not be null.");
+        Objects.requireNonNull(catalog, "catalog must not be null.");
+
+        List<HeldLicense> result = new ArrayList<>();
+        for (LicenseHolding holding : company.licenses()) {
+            result.add(new HeldLicense(holding, catalog.find(holding.key())));
+        }
+        return result;
+    }
+
+    /**
+     * @param company The company
+     * @param catalog The license catalog
+     * @return The sum of the daily fees that are booked at the next day change
+     */
+    public static Money totalDailyFee(Company company, LicenseCatalog catalog) {
+        Money total = Money.ZERO;
+        for (HeldLicense held : holdings(company, catalog)) {
+            if (held.billed()) {
+                total = total.plus(held.dailyFee());
+            }
+        }
+        return total;
     }
 
     /**
