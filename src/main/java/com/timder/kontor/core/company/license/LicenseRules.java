@@ -1,11 +1,13 @@
 package com.timder.kontor.core.company.license;
 
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.market.MarketDefinition;
 import com.timder.kontor.core.value.ItemId;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.function.ToDoubleFunction;
 
 public final class LicenseRules {
 
@@ -25,6 +27,25 @@ public final class LicenseRules {
                 .multiply(BigDecimal.valueOf(baseDemand))
                 .multiply(BigDecimal.valueOf(referenceCost));
         return roundToMoney(dollars.movePointRight(2));
+    }
+
+    /**
+     * The reference fee of every given market
+     * @param params The license parameters
+     * @param markets The markets
+     * @param referenceCost The current reference cost of a market
+     * @return The reference fee per market
+     */
+    public static Map<ItemId, Money> referenceFees(LicenseParams params, Collection<MarketDefinition> markets, ToDoubleFunction<ItemId> referenceCost) {
+        Objects.requireNonNull(params, "params must not be null.");
+        Objects.requireNonNull(markets, "markets must not be null.");
+        Objects.requireNonNull(referenceCost, "referenceCost must not be null.");
+
+        Map<ItemId, Money> fees = new LinkedHashMap<>();
+        for (MarketDefinition market : markets) {
+            fees.put(market.id(), referenceFee(params, market.baseDemand(), referenceCost.applyAsDouble(market.id())));
+        }
+        return fees;
     }
 
     /**

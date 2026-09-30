@@ -111,6 +111,18 @@ public final class RequestBoard {
         return request;
     }
 
+    /**
+     * Removes all request that is open for a market
+     * @param product The product
+     * @return The removed Requests
+     */
+    public List<Request> removeOpenRequests(ItemId product) {
+        Objects.requireNonNull(product, "product must not be null.");
+
+        List<Request> removed = requestsByProduct.remove(product);
+        return removed == null ? List.of() : List.copyOf(removed);
+    }
+
     private Request remove(long requestNumber) {
         for (List<Request> requests : requestsByProduct.values()) {
             Iterator<Request> it = requests.iterator();

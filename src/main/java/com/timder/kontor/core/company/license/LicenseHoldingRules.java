@@ -6,10 +6,7 @@ import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.value.ItemId;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public final class LicenseHoldingRules {
 
@@ -35,12 +32,6 @@ public final class LicenseHoldingRules {
             return new AcquireResult(AcquireResult.Status.UNKNOWN_LICENSE, Money.ZERO);
         }
 
-        LicenseCatalog catalog = params.licenses();
-        LicenseDef license = catalog.find(key).orElse(null);
-        if (license == null) {
-            return new AcquireResult(AcquireResult.Status.UNKNOWN_LICENSE, Money.ZERO);
-        }
-
         LicenseHolding existing = company.license(key).orElse(null);
         if (existing != null && existing.isActive()) {
             return new AcquireResult(AcquireResult.Status.ALREADY_HELD, Money.ZERO);
@@ -58,6 +49,7 @@ public final class LicenseHoldingRules {
         }
 
         Money fee = LicenseRules.applicationFee(license, catalog.params(), referenceFees);
+        Money dailyFee = LicenseRules.dailyFee(license, referenceFees);
         if (!company.isOperational()) {
             return new AcquireResult(AcquireResult.Status.NOT_OPERATIONAL, fee);
         }
@@ -65,7 +57,7 @@ public final class LicenseHoldingRules {
             return new AcquireResult(AcquireResult.Status.CANNOT_AFFORD, fee);
         }
 
-        company.addLicense(LicenseHolding.acquire(key, day));
+        company.addLicense(LicenseHolding.acquire(key, day, dailyFee));
         return new AcquireResult(AcquireResult.Status.ACQUIRED, fee);
     }
 
@@ -170,6 +162,19 @@ public final class LicenseHoldingRules {
     public static boolean mayTrade(Company company, LicenseCatalog catalog, ItemId market) {
         Objects.requireNonNull(market, "market must not be null.");
         return LicenseRules.cheapestApplicable(activeLicenses(company, catalog), market).isPresent();
+    }
+
+    /**
+     * @param company The company
+     * @param catalog The license catalog
+     * @return Every market covered by at least one active license of the company
+     */
+    public static List<ItemId> licensedMarkets(Company company, LicenseCatalog catalog) {
+        Set<ItemId> markets = new LinkedHashSet<>();
+        for (LicenseDef license : activeLicenses(company, catalog)) {
+            markets.addAll(license.markets());
+        }
+        return List.copyOf(markets);
     }
 
     private static List<LicenseDef> definitions(Company company, LicenseCatalog catalog, boolean includeCancelled) {

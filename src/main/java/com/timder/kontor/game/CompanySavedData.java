@@ -449,6 +449,7 @@ public class CompanySavedData extends SavedData {
         CompoundTag tag = new CompoundTag();
         tag.putString("Key", LicenseKeyCodec.encode(holding.key()));
         tag.putLong("AcquiredDay", holding.acquiredDay());
+        tag.putLong("DailyFeeCents", holding.dailyFee().cents());
         tag.putBoolean("Cancelled", holding.cancelled());
         return tag;
     }
@@ -457,6 +458,7 @@ public class CompanySavedData extends SavedData {
         return new LicenseHolding(
                 LicenseKeyCodec.decode(tag.getString("Key")),
                 tag.getLong("AcquiredDay"),
+                Money.ofCents(tag.getLong("DailyFeeCents")),
                 tag.getBoolean("Cancelled"));
     }
 }

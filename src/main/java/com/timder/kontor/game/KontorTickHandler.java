@@ -100,7 +100,7 @@ public class KontorTickHandler {
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         List<UpgradeEvent> upgradeEvents = new ArrayList<>();
         for (MacroHistoryEntry entry : newDays) {
-            companyData.getRegistry().settleDay(entry.day(), entry.policyRate(), params);
+            companyData.getRegistry().settleDay(entry.day(), entry.policyRate(), params, economy);
             upgradeEvents.addAll(companyData.getRegistry().advanceUpgradeDay(params));
         }
         if (!upgradeEvents.isEmpty()) {

@@ -522,7 +522,7 @@ public final class Economy {
 
     private void applyReputationDrift(ItemId market) {
         Set<CompanyId> fulfilled = fulfilledToday.getOrDefault(market, Set.of());
-        for (MarketParticipant participant : participantsOf(market).all()) {
+        for (MarketParticipant participant : participantsOf(market).allStored()) {
             boolean hasFulfilled = fulfilled.contains(participant.companyId());
             double newReputation = ReputationRules.drift(participant.reputation(), hasFulfilled, reputationParams);
             if (newReputation != participant.reputation()) {
@@ -614,7 +614,8 @@ public final class Economy {
      */
     public void recordOrderCompleted(ItemId market, CompanyId company, Order order, boolean late) {
         Objects.requireNonNull(order, "order must not be null.");
-        MarketParticipant participant = participantsOf(market).get(company);
+        MarketParticipant participant = participantsOf(market).stored(company)
+                .orElseThrow(() -> new IllegalArgumentException(company + " is not registered on market " + market + "."));
         double structuralPrice = stateOf(market).getPriceLevel();
         double newReputation = late
                 ? ReputationRules.changeLate(participant.reputation(), order, packageSize(market), structuralPrice, reputationParams)
@@ -632,10 +633,10 @@ public final class Economy {
     public void recordOrderFailed(ItemId market, CompanyId company, Order order, LegalFormDef legalForm) {
         Objects.requireNonNull(order, "order must not be null.");
         Objects.requireNonNull(legalForm, "legalForm must not be null.");
-        if (!participantsOf(market).isRegistered(company)) {
+        MarketParticipant participant = participantsOf(market).stored(company).orElse(null);
+        if (participant == null) {
             return;
         }
-        MarketParticipant participant = participantsOf(market).get(company);
         double newReputation = ReputationRules.changeFailed(
                 participant.reputation(),
                 order,
@@ -706,6 +707,50 @@ public final class Economy {
      */
     public void withdrawParticipant(ItemId market, CompanyId company) {
         participantsOf(market).withdraw(company);
+    }
+
+    /**
+     * Pauses a participant
+     * @param market The market to pause the company in
+     * @param company The company to pause
+     */
+    public void pauseParticipant(ItemId market, CompanyId company) {
+        participantsOf(market).pause(company);
+    }
+
+    /**
+     * Resumes a participant in a marked
+     * @param market The market to resume the company in
+     * @param company The company to resume
+     */
+    public void resumeParticipant(ItemId market, CompanyId company) {
+        participantsOf(market).resume(company);
+    }
+
+    /**
+     * @param market The market
+     * @param company The company
+     * @return True, if the company is paused in the market
+     */
+    public boolean isPaused(ItemId market, CompanyId company) {
+        return participantsOf(market).isPaused(company);
+    }
+
+    /**
+     * @param market The market
+     * @param company The company
+     * @return The list price and reputation the market has stored for the company, whether it is active or paused. Empty if the market does not know the company.
+     */
+    public Optional<MarketParticipant> storedParticipant(ItemId market, CompanyId company) {
+        return participantsOf(market).stored(company);
+    }
+
+    /**
+     * @param market The market
+     * @return The paused companies of the market
+     */
+    public Collection<MarketParticipant> pausedParticipants(ItemId market) {
+        return participantsOf(market).pausedAll();
     }
 
     /**
