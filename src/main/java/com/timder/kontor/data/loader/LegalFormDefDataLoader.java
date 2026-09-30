@@ -1,18 +1,19 @@
-package com.timder.kontor.data;
+package com.timder.kontor.data.loader;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
+import com.timder.kontor.core.company.legalform.UpgradeRequirements;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.data.KontorData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -66,6 +67,10 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
         boolean founderProtection = GsonHelper.getAsBoolean(object, "founder_protection");
         int maxShippingExits = GsonHelper.getAsInt(object, "max_shipping_exits");
 
+        UpgradeRequirements entryRequirements = object.has("upgrade_requirements")
+                ? parseUpgradeRequirements(GsonHelper.getAsJsonObject(object, "upgrade_requirements"))
+                : null;
+
         return new LegalFormDef(
                 level,
                 id,
@@ -85,7 +90,19 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
                 logisticsNetwork,
                 freeStorage,
                 founderProtection,
-                maxShippingExits
+                maxShippingExits,
+                entryRequirements
         );
+    }
+
+    private static UpgradeRequirements parseUpgradeRequirements(JsonObject object) {
+        Money fee = Money.ofDollars(GsonHelper.getAsLong(object, "fee_in_dollars"));
+        Money minNetWorth = Money.ofDollars(GsonHelper.getAsLong(object, "min_net_worth_in_dollars"));
+        int minFulfilledOrders = GsonHelper.getAsInt(object, "min_fulfilled_orders");
+        double minReputationStars = GsonHelper.getAsDouble(object, "min_reputation_stars");
+        long processingTicks = GsonHelper.getAsLong(object, "processing_ticks");
+        int restingDays = GsonHelper.getAsInt(object, "resting_days");
+
+        return new UpgradeRequirements(fee, minNetWorth, minFulfilledOrders, minReputationStars, processingTicks, restingDays);
     }
 }

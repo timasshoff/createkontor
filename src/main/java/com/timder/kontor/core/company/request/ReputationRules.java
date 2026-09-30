@@ -1,6 +1,6 @@
 package com.timder.kontor.core.company.request;
 
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.order.Order;
 
 import java.util.Objects;

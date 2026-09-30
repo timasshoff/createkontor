@@ -5,6 +5,9 @@ import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.financial.*;
+import com.timder.kontor.core.company.legalform.UpgradeApplication;
+import com.timder.kontor.core.company.license.LicenseHolding;
+import com.timder.kontor.core.company.license.LicenseKeyCodec;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.OrderPhase;
@@ -142,6 +145,17 @@ public class CompanySavedData extends SavedData {
         }
         tag.put("BoundResourceCounts", boundResources);
 
+        tag.putLong("FulfilledOrders", state.fulfilledOrders());
+
+        if (state.upgradeApplication() != null) {
+            tag.put("UpgradeApplication", writeUpgradeApplication(state.upgradeApplication()));
+        }
+
+        ListTag licenses = new ListTag();
+        for (LicenseHolding holding : state.licenses()) {
+            licenses.add(writeLicenseHolding(holding));
+        }
+
         return tag;
     }
 
@@ -183,6 +197,18 @@ public class CompanySavedData extends SavedData {
             boundResourceCounts.put(boundTag.getString("Key"), boundTag.getInt("Count"));
         }
 
+        long fulfilledOrders = tag.getLong("FulfilledOrders");
+
+        UpgradeApplication upgradeApplication = null;
+        if (tag.contains("UpgradeApplication", Tag.TAG_COMPOUND)) {
+            upgradeApplication = readUpgradeApplication(tag.getCompound("UpgradeApplication"));
+        }
+
+        List<LicenseHolding> licenses = new ArrayList<>();
+        for (Tag t : tag.getList("Licenses", Tag.TAG_COMPOUND)) {
+            licenses.add(readLicenseHolding((CompoundTag) t));
+        }
+
         return new Company.SaveState(
                 id,
                 name,
@@ -199,7 +225,10 @@ public class CompanySavedData extends SavedData {
                 history,
                 requestBoard,
                 orderBook,
-                boundResourceCounts
+                boundResourceCounts,
+                fulfilledOrders,
+                upgradeApplication,
+                licenses
         );
     }
 
@@ -397,5 +426,39 @@ public class CompanySavedData extends SavedData {
                 tag.getLong("RemainingDeadlineTicks"),
                 tag.getLong("RemainingGracePeriodTicks"),
                 OrderPhase.valueOf(tag.getString("Phase")));
+    }
+
+    private static CompoundTag writeUpgradeApplication(UpgradeApplication application) {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("TargetLevel", application.targetLevel());
+        tag.putString("Phase", application.phase().name());
+        tag.putLong("TicksLeft", application.ticksLeft());
+        tag.putInt("RestingDaysLeft", application.restingDaysLeft());
+        return tag;
+    }
+
+    private static UpgradeApplication readUpgradeApplication(CompoundTag tag) {
+        return new UpgradeApplication(
+                tag.getInt("TargetLevel"),
+                UpgradeApplication.Phase.valueOf(tag.getString("Phase")),
+                tag.getLong("TicksLeft"),
+                tag.getInt("RestingDaysLeft"));
+    }
+
+    private static CompoundTag writeLicenseHolding(LicenseHolding holding) {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Key", LicenseKeyCodec.encode(holding.key()));
+        tag.putLong("AcquiredDay", holding.acquiredDay());
+        tag.putLong("DailyFeeCents", holding.dailyFee().cents());
+        tag.putBoolean("Cancelled", holding.cancelled());
+        return tag;
+    }
+
+    private static LicenseHolding readLicenseHolding(CompoundTag tag) {
+        return new LicenseHolding(
+                LicenseKeyCodec.decode(tag.getString("Key")),
+                tag.getLong("AcquiredDay"),
+                Money.ofCents(tag.getLong("DailyFeeCents")),
+                tag.getBoolean("Cancelled"));
     }
 }

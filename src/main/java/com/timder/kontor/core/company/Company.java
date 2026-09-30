@@ -1,6 +1,11 @@
 package com.timder.kontor.core.company;
 
 import com.timder.kontor.core.company.financial.*;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.legalform.UpgradeApplication;
+import com.timder.kontor.core.company.license.LicenseHolding;
+import com.timder.kontor.core.company.license.LicenseKey;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.RequestOrigin;
@@ -34,6 +39,12 @@ public final class Company {
 
     private long nextRequestNumber = 1;
     private long nextOrderNumber = 1;
+
+    private long fulfilledOrders = 0;
+
+    private UpgradeApplication upgradeApplication = null;
+
+    private final Map<LicenseKey, LicenseHolding> licenses = new LinkedHashMap<>();
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
@@ -114,7 +125,7 @@ public final class Company {
     }
 
     /**
-     * Directly sets the company's legal level.
+     * Directly sets the company's legal level and removes any pending application.
      * @param level The new legal level, must be a valid level in {@code legalForms}
      * @param legalForms The legal forms of this world, used only to validate the level
      * @throws IllegalArgumentException if level is not a valid level in legalForms
@@ -123,6 +134,110 @@ public final class Company {
         Objects.requireNonNull(legalForms, "legalForms must not be null.");
         legalForms.get(level);
         this.legalLevel = level;
+        if (upgradeApplication != null && upgradeApplication.targetLevel() != level + 1) {
+            upgradeApplication = null;
+        }
+    }
+
+    /**
+     * @return The running application for a higher legal form. Empty if there is none
+     */
+    public Optional<UpgradeApplication> upgradeApplication() {
+        return Optional.ofNullable(upgradeApplication);
+    }
+
+    /**
+     * Starts an application.
+     * @param application The application
+     * @throws IllegalStateException if the company already has an application
+     * @throws IllegalArgumentException if the application does not aim at the next level
+     */
+    public void startUpgrade(UpgradeApplication application) {
+        Objects.requireNonNull(application, "application must not be null.");
+        if (upgradeApplication != null) throw new IllegalStateException("The company already has an application.");
+        if (application.targetLevel() != legalLevel + 1) {
+            throw new IllegalArgumentException("A company of level " + legalLevel + " can only apply for level " + (legalLevel + 1) + ", not " + application.targetLevel() + ".");
+        }
+        this.upgradeApplication = application;
+    }
+
+    /**
+     * Replaces the running application by its next state (e.g. fewer ticks or resting).
+     * Target must stay the same.
+     * @param application The new application state
+     */
+    public void replaceUpgrade(UpgradeApplication application) {
+        Objects.requireNonNull(application, "application must not be null.");
+        if (upgradeApplication == null) throw new IllegalStateException("The company has no application.");
+
+        if (application.targetLevel() != upgradeApplication.targetLevel()) {
+            throw new IllegalArgumentException("The target level of a running application cannot change.");
+        }
+
+        this.upgradeApplication = application;
+    }
+
+    /**
+     * Removes the running application.
+     * @return True if there was an application to remove.
+     */
+    public boolean discardUpgrade() {
+        boolean present = upgradeApplication != null;
+        upgradeApplication = null;
+        return present;
+    }
+
+    /**
+     * @return All current licenses
+     */
+    public List<LicenseHolding> licenses() {
+        return List.copyOf(licenses.values());
+    }
+
+    /**
+     * @param key The license key
+     * @return The holding of that license. Empty if the company does not own it.
+     */
+    public Optional<LicenseHolding> license(LicenseKey key) {
+        Objects.requireNonNull(key, "key must not be null.");
+        return Optional.ofNullable(licenses.get(key));
+    }
+
+    /**
+     * Adds a newly bought license
+     * @param holding The new holding, must be active
+     * @throws IllegalStateException if the company already owns the license
+     * @throws IllegalArgumentException if the holding is cancelled
+     */
+    public void addLicense(LicenseHolding holding) {
+        Objects.requireNonNull(holding, "holding must not be null.");
+        if (holding.cancelled()) throw new IllegalArgumentException("A new license must not be cancelled.");
+        if (licenses.containsKey(holding.key())) {
+            throw new IllegalStateException("The company already owns the license " + holding.key() + ".");
+        }
+        licenses.put(holding.key(), holding);
+    }
+
+    /**
+     * Replaces a license the company owns by a changed version of it
+     * @param holding The changed holding
+     * @throws IllegalStateException if the company does not own the license
+     */
+    public void replaceLicense(LicenseHolding holding) {
+        Objects.requireNonNull(holding, "holding must not be null.");
+        if (!licenses.containsKey(holding.key())) {
+            throw new IllegalStateException("The company does not own the license " + holding.key() + ".");
+        }
+        licenses.put(holding.key(), holding);
+    }
+
+    /**
+     * @param key The license
+     * @return True if the company owned the license and it was removed.
+     */
+    public boolean removeLicense(LicenseKey key) {
+        Objects.requireNonNull(key, "key must not be null.");
+        return licenses.remove(key) != null;
     }
 
     /**
@@ -201,6 +316,16 @@ public final class Company {
         nextOrderNumber++;
         orderBook.add(order, legalForm);
         return order;
+    }
+
+    public long fulfilledOrders() {
+        return fulfilledOrders;
+    }
+
+    public void recordFulfilledOrder() {
+        if (fulfilledOrders < Long.MAX_VALUE) {
+            fulfilledOrders++;
+        }
     }
 
     /**
@@ -347,7 +472,10 @@ public final class Company {
             List<CompanyHistoryEntry> history,
             RequestBoard.SaveState requestBoard,
             OrderBook.SaveState orderBook,
-            Map<String, Integer> boundResourceCounts
+            Map<String, Integer> boundResourceCounts,
+            long fulfilledOrders,
+            UpgradeApplication upgradeApplication,
+            List<LicenseHolding> licenses
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -365,6 +493,17 @@ public final class Company {
             loans = List.copyOf(loans);
             history = List.copyOf(history);
             boundResourceCounts = boundResourceCounts == null ? Map.of() : Map.copyOf(boundResourceCounts);
+            if (fulfilledOrders < 0) throw new IllegalArgumentException("fulfilledOrders must not be negative.");
+
+            if (upgradeApplication != null && upgradeApplication.targetLevel() != legalLevel + 1) {
+                throw new IllegalArgumentException("upgradeApplication must aim at level " + (legalLevel + 1) + ".");
+            }
+
+            licenses = licenses == null ? List.of() : List.copyOf(licenses);
+            Set<LicenseKey> keys = new HashSet<>();
+            for (LicenseHolding holding : licenses) {
+                if (!keys.add(holding.key())) throw new IllegalArgumentException("licenses contains " + holding.key() + " twice.");
+            }
         }
     }
 
@@ -389,7 +528,10 @@ public final class Company {
                 List.copyOf(history),
                 requestBoard.getSaveState(),
                 orderBook.getSaveState(),
-                boundResourceCounts);
+                boundResourceCounts,
+                fulfilledOrders,
+                upgradeApplication,
+                List.copyOf(licenses.values()));
     }
 
     public static Company restore(SaveState saveState) {
@@ -412,6 +554,11 @@ public final class Company {
         company.nextOrderNumber = saveState.nextOrderNumber();
         company.history.addAll(saveState.history());
         company.boundResourceCounts.putAll(saveState.boundResourceCounts());
+        company.fulfilledOrders = saveState.fulfilledOrders();
+        company.upgradeApplication = saveState.upgradeApplication();
+        for (LicenseHolding holding : saveState.licenses()) {
+            company.licenses.put(holding.key(), holding);
+        }
         return company;
     }
 }

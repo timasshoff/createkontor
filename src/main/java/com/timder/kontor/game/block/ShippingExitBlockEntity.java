@@ -3,12 +3,16 @@ package com.timder.kontor.game.block;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
 import com.simibubi.create.foundation.item.ItemHelper;
+import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
+import com.timder.kontor.core.company.CompanyParams;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.order.DeliveryRules;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
+import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
@@ -123,10 +127,11 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         EconomySavedData economyData = EconomySavedData.get(server);
         Economy economy = economyData.getEconomy();
         long day = economy.currentDay();
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
 
         boolean anyDelivered = false;
         for (ItemId product : products) {
-            anyDelivered |= fulfillAsManyAsPossible(company, economy, day, product, handlers);
+            anyDelivered |= fulfillAsManyAsPossible(company, economy, day, product, handlers, params);
         }
 
         if (anyDelivered) {
@@ -144,7 +149,7 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         }
     }
 
-    private boolean fulfillAsManyAsPossible(Company company, Economy economy, long day, ItemId product, List<IItemHandler> handlers) {
+    private boolean fulfillAsManyAsPossible(Company company, Economy economy, long day, ItemId product, List<IItemHandler> handlers, CompanyParams params) {
         Item item = itemOf(product);
         if (item == null) {
             return false;
@@ -168,7 +173,7 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
                 return deliveredAny;
             }
 
-            DeliveryRules.deliverAndComplete(company, economy, day, order);
+            DeliveryRules.deliverAndComplete(company, economy, day, order, params);
             deliveredAny = true;
         }
     }

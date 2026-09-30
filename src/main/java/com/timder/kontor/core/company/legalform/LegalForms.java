@@ -1,4 +1,4 @@
-package com.timder.kontor.core.company;
+package com.timder.kontor.core.company.legalform;
 
 import com.timder.kontor.core.company.financial.Money;
 
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.timder.kontor.core.company.LegalFormDef.UNLIMITED;
+import static com.timder.kontor.core.company.legalform.LegalFormDef.UNLIMITED;
 
 /**
  * All legal forms of this world, ordered by level
@@ -90,25 +90,29 @@ public record LegalForms(List<LegalFormDef> forms) {
                         false,               // company network, dispatch, framework contracts
                         Money.ZERO,          // free storage
                         true,                // founder protection
-                        1),                  // max shipping exits - see NOTE below
+                        1,
+                        null),
                 new LegalFormDef(
                         2, "partnership",
                         4, 6, 3, 12, 10, 0, 256, 1.2, 4_096, 1,
                         Money.ofDollars(5_000), Money.ofDollars(20_000),
                         true, false, Money.ZERO, false,
-                        2),
+                        2,
+                        new UpgradeRequirements(Money.ofDollars(1_000), Money.ofDollars(5_000), 30, 3.0, 24_000, 7)),
                 new LegalFormDef(
                         3, "limited_company",
                         6, 15, 5, 30, 40, 6, 1_024, 1.0, 16_384, 2,
                         Money.ofDollars(20_000), Money.ofDollars(100_000),
                         true, true, Money.ofDollars(20_000), false,
-                        4),
+                        4,
+                        new UpgradeRequirements(Money.ofDollars(5_000), Money.ofDollars(25_000), 150, 3.5, 48_000, 7)),
                 new LegalFormDef(
                         4, "public_company",
                         10, UNLIMITED, 8, 80, 150, 20, 4_096, 1.0, 65_536, 3,
                         Money.ofDollars(100_000), Money.ofDollars(500_000),
                         true, true, Money.ofDollars(100_000), false,
-                        8)
+                        8,
+                        new UpgradeRequirements(Money.ofDollars(25_000), Money.ofDollars(150_000), 500, 4.0, 72_000, 7))
         ));
     }
 }

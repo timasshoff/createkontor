@@ -11,8 +11,12 @@ import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.*;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.license.LicenseHoldingRules;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketParticipant;
+import com.timder.kontor.core.market.MarketParticipationRules;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
@@ -111,6 +115,19 @@ public class CompanyCommands {
             legalForm = "Level " + company.legalLevel() + " (legal form data unavailable)";
         }
 
+        int activeLicenses = LicenseHoldingRules.activeCount(company, params.licenses());
+        String licenses;
+        try {
+            int limit = company.legalForm(params).maxProductLicenses();
+            licenses = activeLicenses + " of " + (limit == LegalFormDef.UNLIMITED ? "unlimited" : String.valueOf(limit)) + " active";
+        } catch (IllegalArgumentException e) {
+            licenses = activeLicenses + " active";
+        }
+        Economy economy = EconomySavedData.get(server).getEconomy();
+        String pausedMarkets = MarketParticipationRules.pausedMarkets(company, economy).stream()
+                .map(ItemId::value)
+                .collect(Collectors.joining(", "));
+
         String managers = company.managers().isEmpty()
                 ? "none"
                 : company.managers().stream().map(id -> playerName(server, id)).collect(Collectors.joining(", "));
@@ -136,6 +153,8 @@ public class CompanyCommands {
                         "Outstanding loans: %s (%d)\n" +
                         "\n" +
                         "Open requests: %d | Open orders: %d\n" +
+                        "Licenses: %s | Daily license fees: %s\n" +
+                        "Paused markets: %s\n" +
                         "%s",
                 company.name(), company.id().value(), legalForm,
                 company.foundingDay(),
@@ -145,6 +164,8 @@ public class CompanyCommands {
                 company.netWorth(),
                 company.totalDebt(), company.loans().size(),
                 company.requestBoard().openRequestsTotal(), company.orderBook().openOrders(),
+                licenses, LicenseHoldingRules.totalDailyFee(company, params.licenses()),
+                pausedMarkets.isEmpty() ? "none" : pausedMarkets,
                 lastResult);
 
         source.sendSuccess(() -> Component.literal(text), false);
@@ -220,7 +241,7 @@ public class CompanyCommands {
         Economy economy = EconomySavedData.get(source.getServer()).getEconomy();
 
         List<ItemId> markets = economy.marketIds().stream()
-                .filter(market -> economy.isParticipant(market, company.id()))
+                .filter(market -> economy.storedParticipant(market, company.id()).isPresent())
                 .toList();
 
         StringBuilder text = new StringBuilder();
@@ -230,12 +251,10 @@ public class CompanyCommands {
             text.append("Not registered in any market.");
         } else {
             for (ItemId market : markets) {
-                MarketParticipant participant = economy.participants(market).stream()
-                        .filter(p -> p.companyId().equals(company.id()))
-                        .findFirst()
-                        .orElseThrow();
-                text.append(String.format(Locale.ROOT, "%-15s %5.1f  (%.1f stars)%n",
-                        market.value() + ":", participant.reputation(), participant.reputationInStars()));
+                MarketParticipant participant = economy.storedParticipant(market, company.id()).orElseThrow();
+                text.append(String.format(Locale.ROOT, "%-15s %5.1f  (%.1f stars)%s%n",
+                        market.value() + ":", participant.reputation(), participant.reputationInStars(),
+                        economy.isPaused(market, company.id()) ? "  [paused]" : ""));
             }
             text.append(String.format(Locale.ROOT, "%nOverall: %.1f (%.1f stars)",
                     economy.overallReputation(company.id()), economy.overallReputationInStars(company.id())));

@@ -17,5 +17,13 @@
   "max_order_quantity": 4096,
   "max_product_licenses": 2147483647,
   "max_shipping_exits": 6,
-  "overdraft_limit_in_dollars": 100000
+  "overdraft_limit_in_dollars": 100000,
+  "upgrade_requirements": {
+    "fee_in_dollars": 50000,
+    "min_fulfilled_orders": 150,
+    "min_net_worth_in_dollars": 100000,
+    "min_reputation_stars": 4.0,
+    "processing_ticks": 24000,
+    "resting_days": 7
+  }
 }

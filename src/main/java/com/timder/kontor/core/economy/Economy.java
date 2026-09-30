@@ -1,7 +1,7 @@
 package com.timder.kontor.core.economy;
 
 import com.timder.kontor.core.company.CompanyId;
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.ReputationRules;
@@ -364,15 +364,21 @@ public final class Economy {
     }
 
     public double expectedDailyQuantity(ItemId market, CompanyId company) {
+        if (!isParticipant(market, company)) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
+        MarketParticipant participant = participantsOf(market).get(company);
+        return dailyQuantityOf(market, participant);
+    }
+
+    private double dailyQuantityOf(ItemId market, MarketParticipant participant) {
         MarketState state = stateOf(market);
         MarketParams marketParams = marketParamsMap.get(market);
         Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
 
-        Double own = attractiveness.byCompany().get(company);
-        if (own == null) {
-            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
-        }
-        double other = attractiveness.total() - own;
+        double own = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+        Double counted = attractiveness.byCompany().get(participant.companyId());
+        double other = counted == null ? attractiveness.total() : attractiveness.total() - counted;
         double share = MarketRules.shareFrom(own, other, state, marketParams);
         return share * currentDemand.get(market);
     }
@@ -420,24 +426,25 @@ public final class Economy {
      * @return The reputation (0 to 100)
      */
     public double overallReputation(CompanyId company) {
-        List<ItemId> participatedMarkets = marketIds().stream()
-                .filter(market -> isParticipant(market, company))
-                .toList();
-        if (participatedMarkets.isEmpty()) {
+        Map<ItemId, MarketParticipant> entries = new LinkedHashMap<>();
+        for (ItemId market : marketIds()) {
+            participantsOf(market).stored(company).ifPresent(entry -> entries.put(market, entry));
+        }
+        if (entries.isEmpty()) {
             return 50.0;
         }
 
         double weightedSum = 0.0;
         double totalWeight = 0.0;
-        for (ItemId market : participatedMarkets) {
-            double weight = expectedDailyQuantity(market, company);
-            weightedSum += participantsOf(market).get(company).reputation() * weight;
+        for (Map.Entry<ItemId, MarketParticipant> entry : entries.entrySet()) {
+            double weight = dailyQuantityOf(entry.getKey(), entry.getValue());
+            weightedSum += entry.getValue().reputation() * weight;
             totalWeight += weight;
         }
 
         if (totalWeight <= 0) {
-            return participatedMarkets.stream()
-                    .mapToDouble(market -> participantsOf(market).get(company).reputation())
+            return entries.values().stream()
+                    .mapToDouble(MarketParticipant::reputation)
                     .average()
                     .orElseThrow();
         }
@@ -522,7 +529,7 @@ public final class Economy {
 
     private void applyReputationDrift(ItemId market) {
         Set<CompanyId> fulfilled = fulfilledToday.getOrDefault(market, Set.of());
-        for (MarketParticipant participant : participantsOf(market).all()) {
+        for (MarketParticipant participant : participantsOf(market).allStored()) {
             boolean hasFulfilled = fulfilled.contains(participant.companyId());
             double newReputation = ReputationRules.drift(participant.reputation(), hasFulfilled, reputationParams);
             if (newReputation != participant.reputation()) {
@@ -614,7 +621,8 @@ public final class Economy {
      */
     public void recordOrderCompleted(ItemId market, CompanyId company, Order order, boolean late) {
         Objects.requireNonNull(order, "order must not be null.");
-        MarketParticipant participant = participantsOf(market).get(company);
+        MarketParticipant participant = participantsOf(market).stored(company)
+                .orElseThrow(() -> new IllegalArgumentException(company + " is not registered on market " + market + "."));
         double structuralPrice = stateOf(market).getPriceLevel();
         double newReputation = late
                 ? ReputationRules.changeLate(participant.reputation(), order, packageSize(market), structuralPrice, reputationParams)
@@ -632,10 +640,10 @@ public final class Economy {
     public void recordOrderFailed(ItemId market, CompanyId company, Order order, LegalFormDef legalForm) {
         Objects.requireNonNull(order, "order must not be null.");
         Objects.requireNonNull(legalForm, "legalForm must not be null.");
-        if (!participantsOf(market).isRegistered(company)) {
+        MarketParticipant participant = participantsOf(market).stored(company).orElse(null);
+        if (participant == null) {
             return;
         }
-        MarketParticipant participant = participantsOf(market).get(company);
         double newReputation = ReputationRules.changeFailed(
                 participant.reputation(),
                 order,
@@ -706,6 +714,50 @@ public final class Economy {
      */
     public void withdrawParticipant(ItemId market, CompanyId company) {
         participantsOf(market).withdraw(company);
+    }
+
+    /**
+     * Pauses a participant
+     * @param market The market to pause the company in
+     * @param company The company to pause
+     */
+    public void pauseParticipant(ItemId market, CompanyId company) {
+        participantsOf(market).pause(company);
+    }
+
+    /**
+     * Resumes a participant in a marked
+     * @param market The market to resume the company in
+     * @param company The company to resume
+     */
+    public void resumeParticipant(ItemId market, CompanyId company) {
+        participantsOf(market).resume(company);
+    }
+
+    /**
+     * @param market The market
+     * @param company The company
+     * @return True, if the company is paused in the market
+     */
+    public boolean isPaused(ItemId market, CompanyId company) {
+        return participantsOf(market).isPaused(company);
+    }
+
+    /**
+     * @param market The market
+     * @param company The company
+     * @return The list price and reputation the market has stored for the company, whether it is active or paused. Empty if the market does not know the company.
+     */
+    public Optional<MarketParticipant> storedParticipant(ItemId market, CompanyId company) {
+        return participantsOf(market).stored(company);
+    }
+
+    /**
+     * @param market The market
+     * @return The paused companies of the market
+     */
+    public Collection<MarketParticipant> pausedParticipants(ItemId market) {
+        return participantsOf(market).pausedAll();
     }
 
     /**
@@ -797,6 +849,10 @@ public final class Economy {
      */
     public List<MacroHistoryEntry> macroHistorySince(long day) {
         return macroHistory.stream().filter(entry -> entry.day() > day).toList();
+    }
+
+    public List<MarketDefinition> marketDefinitions() {
+        return marketDefinitions;
     }
 
     public List<ItemId> marketIds() {

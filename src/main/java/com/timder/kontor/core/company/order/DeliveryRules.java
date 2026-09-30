@@ -1,6 +1,7 @@
 package com.timder.kontor.core.company.order;
 
 import com.timder.kontor.core.company.Company;
+import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
 
@@ -29,7 +30,7 @@ public final class DeliveryRules {
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(product, "product must not be null.");
 
-        if (!takesPart(company, economy, product)) {
+        if (!marketExists(economy, product)) {
             return List.of();
         }
 
@@ -44,14 +45,15 @@ public final class DeliveryRules {
         return List.copyOf(candidates);
     }
 
-    public static OrderSettlementResult deliverAndComplete(Company company, Economy economy, long day, Order order) {
+    public static OrderSettlementResult deliverAndComplete(Company company, Economy economy, long day, Order order, CompanyParams params) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(order, "order must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
         if (!company.orderBook().allOrders().contains(order)) throw new IllegalArgumentException("The order is not in the company's order book.");
         ItemId product = order.getProduct();
-        if (!takesPart(company, economy, product)) throw new IllegalStateException(company.id() + " does not take part in the market of " + product + ".");
+        if (!marketExists(economy, product)) throw new IllegalStateException("There is no market for " + product + ".");
         if (!canStillBeFulfilled(order)) throw new IllegalStateException("Order " + order.getNumber() + " can no longer be fulfilled.");
 
         boolean late = order.getPhase() == OrderPhase.GRACE_PERIOD;
@@ -62,13 +64,19 @@ public final class DeliveryRules {
             company.orderBook().deliver(order.getNumber(), remaining);
         }
         OrderSettlementResult result = late
-                ? OrderRules.settleLate(company, day, order)
-                : OrderRules.settleOnTime(company, day, order);
+                ? OrderRules.settleLate(company, day, order, params)
+                : OrderRules.settleOnTime(company, day, order, params);
         company.orderBook().remove(order.getNumber());
 
-        economy.recordDelivery(product, company.id(), quantity);
-        economy.recordFulfillment(product, company.id());
-        economy.recordOrderCompleted(product, company.id(), order, late);
+        if (economy.isParticipant(product, company.id())) {
+            economy.recordDelivery(product, company.id(), quantity);
+        } else {
+            economy.recordDelivery(product, quantity);
+        }
+        if (economy.storedParticipant(product, company.id()).isPresent()) {
+            economy.recordFulfillment(product, company.id());
+            economy.recordOrderCompleted(product, company.id(), order, late);
+        }
         return result;
     }
 
@@ -78,8 +86,8 @@ public final class DeliveryRules {
                 : order.remainingDeadlineTicks();
     }
 
-    private static boolean takesPart(Company company, Economy economy, ItemId product) {
-        return economy.marketIds().contains(product) && economy.isParticipant(product, company.id());
+    private static boolean marketExists(Economy economy, ItemId product) {
+        return economy.marketIds().contains(product);
     }
 
     private static boolean canStillBeFulfilled(Order order) {

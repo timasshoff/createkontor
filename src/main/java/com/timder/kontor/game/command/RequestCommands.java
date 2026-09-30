@@ -8,18 +8,15 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.order.Order;
-import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.RequestOrigin;
 import com.timder.kontor.core.company.request.*;
 import com.timder.kontor.core.economy.Economy;
-import com.timder.kontor.core.market.MarketDefinition;
 import com.timder.kontor.core.market.MarketParticipant;
 import com.timder.kontor.core.port.Rng;
 import com.timder.kontor.core.port.SeededRng;
 import com.timder.kontor.core.value.ItemId;
-import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import net.minecraft.commands.CommandSourceStack;
@@ -78,9 +75,14 @@ public class RequestCommands {
             source.sendFailure(Component.literal("There is no market for " + location + "."));
             return 0;
         }
+        if (economy.isPaused(product, company.id())) {
+            source.sendFailure(Component.literal(company.name() + " has paused the market for " + location
+                    + ", so it gets no requests for it. Use /kontor market join to resume."));
+            return 0;
+        }
         if (!economy.isParticipant(product, company.id())) {
             source.sendFailure(Component.literal(company.name() + " does not take part in the market for " + location
-                    + ", so it gets no requests for it. Use /kontor market register first."));
+                    + ", so it gets no requests for it. Use /kontor market join first."));
             return 0;
         }
 

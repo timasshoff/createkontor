@@ -1,12 +1,18 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.legalform.UpgradeApplication;
+import com.timder.kontor.core.company.legalform.UpgradeEvent;
+import com.timder.kontor.core.company.legalform.UpgradeRules;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.OrderRules;
 import com.timder.kontor.core.company.order.OrderSettlementResult;
 import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.core.market.MarketParticipationRules;
+import com.timder.kontor.core.value.ItemId;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public final class CompanyRegistry {
     private final Map<CompanyId, Company> companies = new LinkedHashMap<>();
@@ -106,7 +112,7 @@ public final class CompanyRegistry {
         return insolvent;
     }
 
-    public Map<CompanyId, CompanyHistoryEntry> settleDay(long day, double policyRate, CompanyParams params) {
+    public Map<CompanyId, CompanyHistoryEntry> settleDay(long day, double policyRate, CompanyParams params, Economy economy) {
         Objects.requireNonNull(params, "params must not be null.");
         Map<CompanyId, CompanyHistoryEntry> entries = new LinkedHashMap<>();
         for (Company company : companies.values()) {
@@ -114,7 +120,27 @@ public final class CompanyRegistry {
             // TODO Maybe notify company members of lost requests.
             company.requestBoard().resetLostRequestsToday();
         }
+        syncParticipation(economy, params);
         return entries;
+    }
+
+    /**
+     * Lets every company withdraw from the markets it takes part in but no active license covers
+     * @param economy The economy
+     * @param params The company parameters
+     * @return The withdrawn markets
+     */
+    public Map<CompanyId, List<ItemId>> syncParticipation(Economy economy, CompanyParams params) {
+        Objects.requireNonNull(economy, "economy must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+        Map<CompanyId, List<ItemId>> paused = new LinkedHashMap<>();
+        for (Company company : companies.values()) {
+            List<ItemId> markets = MarketParticipationRules.syncParticipation(company, economy, params);
+            if (!markets.isEmpty()) {
+                paused.put(company.id(), markets);
+            }
+        }
+        return paused;
     }
 
     public List<BurstOrder> advance(long ticks, long day) {
@@ -132,6 +158,40 @@ public final class CompanyRegistry {
             }
         }
         return burst;
+    }
+
+    /**
+     * Lets all upgrade applications advance.
+     * @param ticks The ticks that passed
+     * @param canProcess Tells whether a company's application may be worked on right now
+     * @param params The company parameters
+     * @return The events, in the order of the companies
+     */
+    public List<UpgradeEvent> advanceUpgrades(long ticks, Predicate<Company> canProcess, CompanyParams params) {
+        Objects.requireNonNull(canProcess, "canProcess must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+        List<UpgradeEvent> events = new ArrayList<>();
+        for (Company company : companies.values()) {
+            if (company.upgradeApplication().filter(UpgradeApplication::isProcessing).isEmpty()) {
+                continue;
+            }
+            UpgradeRules.advance(company, ticks, canProcess.test(company), params).ifPresent(events::add);
+        }
+        return events;
+    }
+
+    /**
+     * Checks every resting application and advances its resting days (if resting)
+     * @param params The company parameters
+     * @return The events, in the order of the companies
+     */
+    public List<UpgradeEvent> advanceUpgradeDay(CompanyParams params) {
+        Objects.requireNonNull(params, "params must not be null.");
+        List<UpgradeEvent> events = new ArrayList<>();
+        for (Company company : companies.values()) {
+            UpgradeRules.advanceDay(company, params).ifPresent(events::add);
+        }
+        return events;
     }
 
     /**

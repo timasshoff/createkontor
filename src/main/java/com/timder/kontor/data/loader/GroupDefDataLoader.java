@@ -1,10 +1,11 @@
-package com.timder.kontor.data;
+package com.timder.kontor.data.loader;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.market.GroupDef;
+import com.timder.kontor.data.KontorData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;

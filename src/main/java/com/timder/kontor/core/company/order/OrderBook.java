@@ -1,6 +1,6 @@
 package com.timder.kontor.core.company.order;
 
-import com.timder.kontor.core.company.LegalFormDef;
+import com.timder.kontor.core.company.legalform.LegalFormDef;
 
 import java.util.ArrayList;
 import java.util.List;

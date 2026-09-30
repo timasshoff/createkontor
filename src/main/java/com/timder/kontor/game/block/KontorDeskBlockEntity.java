@@ -1,20 +1,13 @@
 package com.timder.kontor.game.block;
 
 import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType;
-import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
-import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.TextField;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
-import com.timder.kontor.core.company.LegalForms;
-import com.timder.kontor.core.company.financial.Booking;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
@@ -33,7 +26,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 

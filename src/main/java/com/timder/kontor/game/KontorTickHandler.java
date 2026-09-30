@@ -5,7 +5,8 @@ import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
-import com.timder.kontor.core.company.LegalForms;
+import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.legalform.UpgradeEvent;
 import com.timder.kontor.core.company.request.RequestArrivals;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.economy.Economy;
@@ -15,6 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class KontorTickHandler {
@@ -47,6 +49,7 @@ public class KontorTickHandler {
         }
 
         boolean orderBurstOccurred = false; // = an order has failed
+        boolean upgradeEventOccurred = false;
         boolean requestArrived = false;
         if (registry.size() > 0) {
             CompanyParams companyParams = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
@@ -58,15 +61,21 @@ public class KontorTickHandler {
                 // TODO once notifications exist: tell the company's members an order burst.
             }
 
+            List<UpgradeEvent> upgradeEvents = registry.advanceUpgrades(1, KontorTickHandler::canProcessUpgrade, companyParams);
+            upgradeEventOccurred = !upgradeEvents.isEmpty();
+            if (upgradeEventOccurred) {
+                PlayerNotifications.sendUpgradeEventNotifications(server, registry, upgradeEvents, companyParams);
+            }
+
             requestArrived = letRequestsArrive(server, companyData, economy, tradingTickPassed);
         }
 
-        if (orderBurstOccurred || requestArrived || (tradingTickPassed && registry.size() > 0)) {
+        if (orderBurstOccurred || requestArrived || upgradeEventOccurred || (tradingTickPassed && registry.size() > 0)) {
             companyData.setDirty();
         }
 
         if (economy.currentDay() != dayBefore) {
-            settleCompanies(companyData, economy, lastHistoryDayBefore);
+            settleCompanies(server, companyData, economyData, lastHistoryDayBefore);
         }
     }
 
@@ -78,7 +87,8 @@ public class KontorTickHandler {
         return !arrivals.isEmpty();
     }
 
-    public static void settleCompanies(CompanySavedData companyData, Economy economy, long lastHistoryDayBefore) {
+    public static void settleCompanies(MinecraftServer server, CompanySavedData companyData, EconomySavedData economyData, long lastHistoryDayBefore) {
+        Economy economy = economyData.getEconomy();
         if (companyData.getRegistry().size() == 0) {
             return;
         }
@@ -89,14 +99,24 @@ public class KontorTickHandler {
         }
 
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        List<UpgradeEvent> upgradeEvents = new ArrayList<>();
         for (MacroHistoryEntry entry : newDays) {
-            companyData.getRegistry().settleDay(entry.day(), entry.policyRate(), params);
+            companyData.getRegistry().settleDay(entry.day(), entry.policyRate(), params, economy);
+            upgradeEvents.addAll(companyData.getRegistry().advanceUpgradeDay(params));
+        }
+        if (!upgradeEvents.isEmpty()) {
+            PlayerNotifications.sendUpgradeEventNotifications(server, companyData.getRegistry(), upgradeEvents, params);
         }
         companyData.setDirty();
+        economyData.setDirty();
     }
 
     public static long lastHistoryDay(Economy economy) {
         List<MacroHistoryEntry> history = economy.macroHistory();
         return history.isEmpty() ? -1 : history.get(history.size() - 1).day();
+    }
+
+    public static boolean canProcessUpgrade(Company company) {
+        return true;
     }
 }

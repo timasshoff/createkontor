@@ -1,0 +1,10 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 1.0,
+  "id": "precision_mechanism",
+  "markets": [
+    "create:precision_mechanism"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}

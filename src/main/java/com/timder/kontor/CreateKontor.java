@@ -2,7 +2,8 @@ package com.timder.kontor;
 
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
-import com.timder.kontor.data.*;
+import com.timder.kontor.data.loader.*;
+import com.timder.kontor.data.provider.*;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.KontorTickHandler;
 import com.timder.kontor.game.command.*;
@@ -47,6 +48,7 @@ public class CreateKontor {
             event.addListener(new MarketDefinitionDataLoader());
             event.addListener(new ProcessCostDataLoader());
             event.addListener(new LegalFormDefDataLoader());
+            event.addListener(new LicenseDefDataLoader());
         });
 
         NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
@@ -76,6 +78,9 @@ public class CreateKontor {
         event.getGenerator().addProvider(
                 event.includeServer(),
                 new LegalFormDefDataProvider(generator.getPackOutput()));
+        event.getGenerator().addProvider(
+                event.includeServer(),
+                new LicenseDefDataProvider(generator.getPackOutput()));
     }
 
     public static void onRegisterCommands(RegisterCommandsEvent event) {
@@ -85,6 +90,8 @@ public class CreateKontor {
         CompanyCommands.register(event.getDispatcher());
         RequestCommands.register(event.getDispatcher());
         OrderCommands.register(event.getDispatcher());
+        UpgradeCommands.register(event.getDispatcher());
+        LicenseCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

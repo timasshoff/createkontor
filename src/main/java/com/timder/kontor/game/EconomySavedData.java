@@ -348,12 +348,18 @@ public class EconomySavedData extends SavedData {
 
     private static MarketParticipants.SaveState readParticipants(ListTag participantsTag) {
         Map<CompanyId, MarketParticipant> participants = new LinkedHashMap<>();
+        Map<CompanyId, MarketParticipant> paused = new LinkedHashMap<>();
         for (Tag t : participantsTag) {
             CompoundTag entryTag = (CompoundTag) t;
             CompanyId companyId = new CompanyId(entryTag.getInt("CompanyId"));
-            participants.put(companyId, new MarketParticipant(companyId, entryTag.getDouble("ListPrice"), entryTag.getDouble("Reputation")));
+            MarketParticipant participant = new MarketParticipant(companyId, entryTag.getDouble("ListPrice"), entryTag.getDouble("Reputation"));
+            if (entryTag.getBoolean("Paused")) {
+                paused.put(companyId, participant);
+            } else {
+                participants.put(companyId, participant);
+            }
         }
-        return new MarketParticipants.SaveState(participants);
+        return new MarketParticipants.SaveState(participants, paused);
     }
 
     private static ListTag writeParticipants(MarketParticipants.SaveState saveState) {
@@ -361,14 +367,21 @@ public class EconomySavedData extends SavedData {
         if (saveState == null) {
             return participantsTag;
         }
-        for (Map.Entry<CompanyId, MarketParticipant> entry : saveState.participants().entrySet()) {
-            MarketParticipant participant = entry.getValue();
-            CompoundTag entryTag = new CompoundTag();
-            entryTag.putInt("CompanyId", participant.companyId().value());
-            entryTag.putDouble("ListPrice", participant.listPrice());
-            entryTag.putDouble("Reputation", participant.reputation());
-            participantsTag.add(entryTag);
+        for (MarketParticipant participant : saveState.participants().values()) {
+            participantsTag.add(writeParticipant(participant, false));
+        }
+        for (MarketParticipant participant : saveState.paused().values()) {
+            participantsTag.add(writeParticipant(participant, true));
         }
         return participantsTag;
+    }
+
+    private static CompoundTag writeParticipant(MarketParticipant participant, boolean paused) {
+        CompoundTag entryTag = new CompoundTag();
+        entryTag.putInt("CompanyId", participant.companyId().value());
+        entryTag.putDouble("ListPrice", participant.listPrice());
+        entryTag.putDouble("Reputation", participant.reputation());
+        entryTag.putBoolean("Paused", paused);
+        return entryTag;
     }
 }
