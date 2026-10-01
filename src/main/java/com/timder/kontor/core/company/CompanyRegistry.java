@@ -126,6 +126,9 @@ public final class CompanyRegistry {
         if (orphanDays < 1) throw new IllegalArgumentException("orphanDays must be at least 1.");
         List<EmployeeEvent> events = new ArrayList<>();
         for (Company company : companies.values()) {
+            if (!company.isActiveDay(day)) {
+                continue;
+            }
             events.addAll(EmployeeRules.endContracts(company, day, orphanDays));
         }
         return events;
@@ -135,6 +138,9 @@ public final class CompanyRegistry {
         Objects.requireNonNull(params, "params must not be null.");
         Map<CompanyId, CompanyHistoryEntry> entries = new LinkedHashMap<>();
         for (Company company : companies.values()) {
+            if (!company.isActiveDay(day)) {
+                continue;
+            }
             entries.put(company.id(), CompanyRules.settleDay(company, day, policyRate, Map.of(), params));
             // TODO Maybe notify company members of lost requests.
             company.requestBoard().resetLostRequestsToday();
@@ -165,6 +171,9 @@ public final class CompanyRegistry {
     public List<BurstOrder> advance(long ticks, long day) {
         List<BurstOrder> burst = new ArrayList<>();
         for (Company company : companies.values()) {
+            if (!company.isActive()) {
+                continue;
+            }
             company.requestBoard().advance(ticks);
             company.orderBook().advance(ticks);
 
@@ -191,7 +200,7 @@ public final class CompanyRegistry {
         Objects.requireNonNull(params, "params must not be null.");
         List<UpgradeEvent> events = new ArrayList<>();
         for (Company company : companies.values()) {
-            if (company.upgradeApplication().filter(UpgradeApplication::isProcessing).isEmpty()) {
+            if (!company.isActive() || company.upgradeApplication().filter(UpgradeApplication::isProcessing).isEmpty()) {
                 continue;
             }
             UpgradeRules.advance(company, ticks, canProcess.test(company), params).ifPresent(events::add);
@@ -204,10 +213,15 @@ public final class CompanyRegistry {
      * @param params The company parameters
      * @return The events, in the order of the companies
      */
-    public List<UpgradeEvent> advanceUpgradeDay(CompanyParams params) {
+    public List<UpgradeEvent> advanceUpgradeDay(long day, CompanyParams params) {
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
         Objects.requireNonNull(params, "params must not be null.");
+
         List<UpgradeEvent> events = new ArrayList<>();
         for (Company company : companies.values()) {
+            if (!company.isActiveDay(day)) {
+                continue;
+            }
             UpgradeRules.advanceDay(company, params).ifPresent(events::add);
         }
         return events;

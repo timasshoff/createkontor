@@ -102,7 +102,7 @@ public class KontorTickHandler {
         List<UpgradeEvent> upgradeEvents = new ArrayList<>();
         for (MacroHistoryEntry entry : newDays) {
             companyData.getRegistry().settleDay(entry.day(), entry.policyRate(), params, economy);
-            upgradeEvents.addAll(companyData.getRegistry().advanceUpgradeDay(params));
+            upgradeEvents.addAll(companyData.getRegistry().advanceUpgradeDay(entry.day(), params));
         }
         if (!upgradeEvents.isEmpty()) {
             PlayerNotifications.sendUpgradeEventNotifications(server, companyData.getRegistry(), upgradeEvents, params);

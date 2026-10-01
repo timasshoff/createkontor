@@ -166,6 +166,8 @@ public class CompanySavedData extends SavedData {
         }
         tag.put("Employees", employees);
 
+        tag.putLong("LastActiveDay", state.lastActiveDay());
+
         return tag;
     }
 
@@ -225,6 +227,8 @@ public class CompanySavedData extends SavedData {
             employees.add(readEmployee((CompoundTag) t));
         }
 
+        long lastActiveDay = tag.contains("LastActiveDay", Tag.TAG_LONG) ? tag.getLong("LastActiveDay") : Company.NEVER_ACTIVE;
+
         return new Company.SaveState(
                 id,
                 name,
@@ -246,7 +250,8 @@ public class CompanySavedData extends SavedData {
                 upgradeApplication,
                 licenses,
                 nextEmployeeNumber,
-                employees
+                employees,
+                lastActiveDay
         );
     }
 

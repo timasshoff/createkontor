@@ -24,6 +24,8 @@ public final class Company {
 
     public static final String FOUNDER_LOAN_REFERENCE = "founder_loan";
 
+    public static final long NEVER_ACTIVE = -1L;
+
     private final CompanyId id;
     private final String name;
     private final long foundingDay;
@@ -53,6 +55,9 @@ public final class Company {
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
     private final Map<String, Integer> boundResourceCounts = new LinkedHashMap<>();
+
+    private long lastActiveDay = NEVER_ACTIVE;
+    private boolean active = false;
 
     private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account, RequestBoard requestBoard, OrderBook orderBook) {
         this.id = id;
@@ -85,6 +90,7 @@ public final class Company {
             company.loans.add(loan);
         }
 
+        company.markActive(day);
         return company;
     }
 
@@ -111,6 +117,49 @@ public final class Company {
 
     public long foundingDay() {
         return foundingDay;
+    }
+
+    /**
+     * A company is active while at least one member is online.
+     * @return True if the company is active right now
+     */
+    public boolean isActive() {
+        return active;
+    }
+
+    /**
+     * @return The last day on which the company was active
+     */
+    public long lastActiveDay() {
+        return lastActiveDay;
+    }
+
+    /**
+     * Whether a day is settled for this company: only if the company was active on it.
+     * @param day The day that is being closed
+     * @return True if the last active day is this day
+     */
+    public boolean isActiveDay(long day) {
+        return day >= 0 && lastActiveDay == day;
+    }
+
+    /**
+     * Records that a member is online right now.
+     * @param day The current day, not before the last active day
+     * @throws IllegalArgumentException if the day is negative or before the last active day
+     */
+    public void markActive(long day) {
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+        if (day < lastActiveDay) throw new IllegalArgumentException("day " + day + " is before the last active day " + lastActiveDay + ".");
+        this.active = true;
+        this.lastActiveDay = day;
+    }
+
+    /**
+     * Records that no member is online right now
+     */
+    public void markInactive() {
+        this.active = false;
     }
 
     /**
@@ -528,7 +577,8 @@ public final class Company {
             UpgradeApplication upgradeApplication,
             List<LicenseHolding> licenses,
             long nextEmployeeNumber,
-            List<Employee> employees
+            List<Employee> employees,
+            long lastActiveDay
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -567,6 +617,8 @@ public final class Company {
                     throw new IllegalArgumentException("employee number " + employee.number() + " is not below nextEmployeeNumber.");
                 }
             }
+
+            if (lastActiveDay < NEVER_ACTIVE) throw new IllegalArgumentException("lastActiveDay must be at least " + NEVER_ACTIVE + ".");
         }
     }
 
@@ -596,7 +648,8 @@ public final class Company {
                 upgradeApplication,
                 List.copyOf(licenses.values()),
                 nextEmployeeNumber,
-                List.copyOf(employees.values()));
+                List.copyOf(employees.values()),
+                lastActiveDay);
     }
 
     public static Company restore(SaveState saveState) {
@@ -628,6 +681,7 @@ public final class Company {
         for (Employee employee : saveState.employees()) {
             company.employees.put(employee.number(), employee);
         }
+        company.lastActiveDay = saveState.lastActiveDay();
         return company;
     }
 }
