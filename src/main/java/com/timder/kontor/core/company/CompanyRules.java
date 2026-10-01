@@ -1,5 +1,7 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.employee.Employee;
+import com.timder.kontor.core.company.employee.EmployeeRules;
 import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.license.HeldLicense;
 import com.timder.kontor.core.company.license.LicenseDef;
@@ -36,6 +38,7 @@ public final class CompanyRules {
             account.book(day, BookingKind.BUSINESS_LICENSE, params.businessLicenseFee().negate(), "");
         }
         bookLicenseFees(company, day, params);
+        bookSalaries(company, day, params);
         for (Map.Entry<BookingKind, Money> entry : otherCosts.entrySet()) {
             account.book(day, entry.getKey(), entry.getValue().negate(), "");
         }
@@ -89,11 +92,24 @@ public final class CompanyRules {
         LicenseHoldingRules.dropCancelled(company);
     }
 
+    private static void bookSalaries(Company company, long day, CompanyParams params) {
+        for (Employee employee : company.employees()) {
+            Money salary = EmployeeRules.dailySalary(employee.baseSalary(), company.legalForm(params));
+            if (salary.isPositive()) {
+                company.account().book(day, BookingKind.SALARY, salary.negate(), employee.role().value());
+            }
+        }
+    }
+
     private static void validateOtherCosts(Map<BookingKind, Money> otherCosts) {
         for (Map.Entry<BookingKind, Money> entry : otherCosts.entrySet()) {
             BookingKind kind = entry.getKey();
             Money amount = entry.getValue();
-            if (kind == BookingKind.BUSINESS_LICENSE || kind == BookingKind.FLAT_LICENSE || kind == BookingKind.TURNOVER_LICENSE || kind == BookingKind.INTEREST) {
+            if (kind == BookingKind.BUSINESS_LICENSE
+                    || kind == BookingKind.FLAT_LICENSE
+                    || kind == BookingKind.TURNOVER_LICENSE
+                    || kind == BookingKind.INTEREST
+                    || kind == BookingKind.SALARY) {
                 throw new IllegalArgumentException(kind + " is booked by settleDay itself, it must not be in otherCosts.");
             }
             if (!kind.isCost()) {

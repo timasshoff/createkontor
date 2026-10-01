@@ -39,7 +39,7 @@ public final class EmployeeRules {
      * @param spec The role specification
      * @param day The day of the hiring
      * @param params The company parameters
-     * @return
+     * @return The hired employee
      */
     public static Employee hire(Company company, RoleSpec spec, long day, CompanyParams params) {
         Objects.requireNonNull(company, "company must not be null.");
