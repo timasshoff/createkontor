@@ -67,6 +67,8 @@ public final class Economy {
      */
     private final Set<ItemId> discoveredScope;
 
+    private final Set<CompanyId> inactiveCompanies = new HashSet<>();
+
     private final MacroState macro;
     private long ticksElapsed = 0;
 
@@ -387,6 +389,9 @@ public final class Economy {
         Map<CompanyId, Double> byCompany = new LinkedHashMap<>();
         double total = 0.0;
         for (MarketParticipant participant : participantsOf(market).all()) {
+            if (inactiveCompanies.contains(participant.companyId())) {
+                continue;
+            }
             double a = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
             byCompany.put(participant.companyId(), a);
             total += a;
@@ -406,18 +411,28 @@ public final class Economy {
             return 0.0;
         }
 
+        if (!isParticipant(market, company)) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
         MarketState state = stateOf(market);
         MarketParams marketParams = marketParamsMap.get(market);
         Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
 
-        Double own = attractiveness.byCompany().get(company);
-        if (own == null) {
-            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        Double counted = attractiveness.byCompany().get(company);
+        double own;
+        double total;
+        if (counted != null) {
+            own = counted;
+            total = attractiveness.total();
+        } else {
+            MarketParticipant participant = participantsOf(market).get(company);
+            own = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+            total = attractiveness.total() + own;
         }
-        if (attractiveness.total() <= 0) {
+        if (total <= 0) {
             return 0.0;
         }
-        return lastResult.overflow() * (own / attractiveness.total());
+        return lastResult.overflow() * (own / total);
     }
 
     /**
@@ -530,6 +545,9 @@ public final class Economy {
     private void applyReputationDrift(ItemId market) {
         Set<CompanyId> fulfilled = fulfilledToday.getOrDefault(market, Set.of());
         for (MarketParticipant participant : participantsOf(market).allStored()) {
+            if (inactiveCompanies.contains(participant.companyId())) {
+                continue;
+            }
             boolean hasFulfilled = fulfilled.contains(participant.companyId());
             double newReputation = ReputationRules.drift(participant.reputation(), hasFulfilled, reputationParams);
             if (newReputation != participant.reputation()) {
@@ -758,6 +776,28 @@ public final class Economy {
      */
     public Collection<MarketParticipant> pausedParticipants(ItemId market) {
         return participantsOf(market).pausedAll();
+    }
+
+    /**
+     * Sets which companies are inactive right now (no member online).
+     * @param companies The inactive companies
+     */
+    public void setInactiveCompanies(Collection<CompanyId> companies) {
+        Objects.requireNonNull(companies, "companies must not be null.");
+        Set<CompanyId> copy = new HashSet<>();
+        for (CompanyId company : companies) {
+            copy.add(Objects.requireNonNull(company, "companies must not contain null."));
+        }
+        inactiveCompanies.clear();
+        inactiveCompanies.addAll(copy);
+    }
+
+    /**
+     * @param company The company
+     * @return True if the markets ignore the company right now
+     */
+    public boolean isInactive(CompanyId company) {
+        return inactiveCompanies.contains(company);
     }
 
     /**
