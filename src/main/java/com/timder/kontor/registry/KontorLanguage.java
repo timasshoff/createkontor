@@ -22,6 +22,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.request_accepting_failed", "§cAccepting request %s §cfailed: %s");
         REGISTRATE.addRawLang("message.createkontor.upgrade.completed", "§7The company %s §7has advanced to %s§7.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.resting", "§7The application of %s §7for %s §7is being processed, but the net worth is too low. It rests for up to %s §7day(s). Raise the net worth to at least %s§7.");
+        REGISTRATE.addRawLang("message.createkontor.upgrade.cancelled", "§cThe application of %s §cfor %s §cwas cancelled because the company has no lawyer anymore. The fee of %s §cwas refunded.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.rejected", "§cThe application of %s §cfor %s §cwas rejected: the net worth was below %s§c for too long. The fee of %s §cis lost.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");

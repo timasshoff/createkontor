@@ -13,6 +13,7 @@ import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.EmployeeContracts;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
@@ -81,9 +82,11 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         if (oldId != null && employeeNumber != NO_EMPLOYEE && level instanceof ServerLevel serverLevel) {
             CompanySavedData data = CompanySavedData.get(serverLevel.getServer());
             long day = EconomySavedData.get(serverLevel.getServer()).getEconomy().currentDay();
+            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
             data.getRegistry().get(oldId).ifPresent(company -> {
                 if (company.employee(employeeNumber).isPresent()) {
-                    EmployeeRules.dismiss(company, employeeNumber, day);
+                    Employee employee = EmployeeRules.dismiss(company, employeeNumber, day);
+                    EmployeeContracts.ended(serverLevel.getServer(), company, employee, day, params);
                     data.setDirty();
                 }
             });
@@ -143,7 +146,8 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         } else if (employeeNumber != NO_EMPLOYEE) {
             emptyChecks++;
             if (emptyChecks >= EMPTY_CHECKS_BEFORE_DISMISSAL) {
-                EmployeeRules.dismiss(company, employeeNumber, day);
+                Employee employee = EmployeeRules.dismiss(company, employeeNumber, day);
+                EmployeeContracts.ended(level.getServer(), company, employee, day, params);
                 data.setDirty();
                 forgetEmployee();
             }

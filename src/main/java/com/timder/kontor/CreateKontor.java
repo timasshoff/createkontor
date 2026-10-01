@@ -5,6 +5,7 @@ import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.data.loader.*;
 import com.timder.kontor.data.provider.*;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.EmployeeContracts;
 import com.timder.kontor.game.KontorTickHandler;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.command.*;
@@ -95,6 +96,7 @@ public class CreateKontor {
         OrderCommands.register(event.getDispatcher());
         UpgradeCommands.register(event.getDispatcher());
         LicenseCommands.register(event.getDispatcher());
+        EmployeeCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

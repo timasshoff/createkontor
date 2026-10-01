@@ -6,6 +6,7 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.employee.EmployeeEvent;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
 import com.timder.kontor.core.company.request.RequestArrivals;
@@ -157,6 +158,13 @@ public class KontorTickHandler {
                 }
             }
 
+            for (EmployeeEvent event : registry.endContracts(day, orphanDays, minActiveTicks)) {
+                if (event instanceof EmployeeEvent.ContractEnded ended) {
+                    registry.get(ended.companyId()).ifPresent(company ->
+                            EmployeeContracts.ended(server, company, ended.employee(), day, params));
+                }
+            }
+
             registry.endContracts(day, orphanDays, minActiveTicks);
             registry.settleDay(day, entry.policyRate(), params, economy);
             upgradeEvents.addAll(registry.advanceUpgradeDay(day, params));
@@ -174,6 +182,6 @@ public class KontorTickHandler {
     }
 
     public static boolean canProcessUpgrade(Company company) {
-        return true;
+        return EmployeeContracts.hasLawyer(company);
     }
 }
