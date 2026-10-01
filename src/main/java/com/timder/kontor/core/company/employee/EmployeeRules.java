@@ -58,6 +58,7 @@ public final class EmployeeRules {
         }
         Employee employee = Employee.hire(company.issueEmployeeNumber(), spec, day);
         company.addEmployee(employee);
+        company.consumeDeparture(spec.id(), day);
         return employee;
     }
 
@@ -65,12 +66,17 @@ public final class EmployeeRules {
      * Removes an employee from the company.
      * @param company The company
      * @param number The employee number to remove
+     * @param day The current day
      * @return The removed employee
      */
-    public static Employee dismiss(Company company, long number) {
+    public static Employee dismiss(Company company, long number, long day) {
         Objects.requireNonNull(company, "company must not be null.");
-        return company.removeEmployee(number)
+        Employee employee = company.employee(number)
                 .orElseThrow(() -> new IllegalArgumentException("The company has no employee " + number + "."));
+        Departure departure = new Departure(employee, day); // validates the day before anything changes
+        company.removeEmployee(number);
+        company.addDeparture(departure);
+        return employee;
     }
 
     /**

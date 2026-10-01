@@ -4,6 +4,7 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.employee.Departure;
 import com.timder.kontor.core.company.employee.Employee;
 import com.timder.kontor.core.company.employee.RoleId;
 import com.timder.kontor.core.company.financial.*;
@@ -168,6 +169,15 @@ public class CompanySavedData extends SavedData {
 
         tag.putLong("LastActiveDay", state.lastActiveDay());
 
+        ListTag departures = new ListTag();
+        for (Departure departure : state.departures()) {
+            CompoundTag departureTag = new CompoundTag();
+            departureTag.put("Employee", writeEmployee(departure.employee()));
+            departureTag.putLong("Day", departure.day());
+            departures.add(departureTag);
+        }
+        tag.put("Departures", departures);
+
         return tag;
     }
 
@@ -229,6 +239,12 @@ public class CompanySavedData extends SavedData {
 
         long lastActiveDay = tag.contains("LastActiveDay", Tag.TAG_LONG) ? tag.getLong("LastActiveDay") : Company.NEVER_ACTIVE;
 
+        List<Departure> departures = new ArrayList<>();
+        for (Tag t : tag.getList("Departures", Tag.TAG_COMPOUND)) {
+            CompoundTag departureTag = (CompoundTag) t;
+            departures.add(new Departure(readEmployee(departureTag.getCompound("Employee")), departureTag.getLong("Day")));
+        }
+
         return new Company.SaveState(
                 id,
                 name,
@@ -251,7 +267,8 @@ public class CompanySavedData extends SavedData {
                 licenses,
                 nextEmployeeNumber,
                 employees,
-                lastActiveDay
+                lastActiveDay,
+                departures
         );
     }
 

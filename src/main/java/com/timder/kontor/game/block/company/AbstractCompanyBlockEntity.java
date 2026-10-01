@@ -9,6 +9,7 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -57,10 +58,25 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         companyId = id;
         companyName = resolveCompanyName();
         CompanyBlockSupport.afterCompanyIdChanged(this);
+        if (loadsChunks() && level instanceof ServerLevel serverLevel) {
+            KontorChunkLoading.deskBound(serverLevel, getBlockPos(), oldId, id);
+        }
         onCompanyChanged(oldId, id);
     }
 
     protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
+    }
+
+    protected boolean loadsChunks() {
+        return false;
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        if (loadsChunks() && level instanceof ServerLevel serverLevel && companyId != null) {
+            KontorChunkLoading.deskLoaded(serverLevel, getBlockPos(), companyId);
+        }
     }
 
     public boolean isBoundToCompany() {

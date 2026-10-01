@@ -26,6 +26,14 @@ public class KontorLanguage {
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.role", "Role: %s");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.seat_empty", "Seat: empty");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.employed", "Employed: %s");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.salary", "Daily salary: %s");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.vacant", "Not staffed.");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.no_free_slot", "Cannot hire: the legal form allows no more employees.");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.not_operational", "Cannot hire: the company is in payment difficulties.");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.inactive", "Paused: no member of the company is online.");
 
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.detailed", "There is no data for the chart \"%s\" yet. You can try again later.");
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.short", "There is no data for this chart yet. You can try again later.");
@@ -101,6 +109,8 @@ public class KontorLanguage {
 
         REGISTRATE.addRawLang("license.createkontor.sheet_metal_bundle", "Sheet Metal Bundle License");
         REGISTRATE.addRawLang("license.createkontor.generated", "%s License");
+
+        REGISTRATE.addRawLang("employee_role.createkontor.lawyer", "Lawyer");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
 

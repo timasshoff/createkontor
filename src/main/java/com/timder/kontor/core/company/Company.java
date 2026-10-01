@@ -1,6 +1,8 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.employee.Departure;
 import com.timder.kontor.core.company.employee.Employee;
+import com.timder.kontor.core.company.employee.RoleId;
 import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.LegalForms;
@@ -51,6 +53,7 @@ public final class Company {
 
     private long nextEmployeeNumber = 1;
     private final Map<Long, Employee> employees = new LinkedHashMap<>();
+    private final List<Departure> departures = new ArrayList<>();
 
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
@@ -357,6 +360,52 @@ public final class Company {
     }
 
     /**
+     * @return The dismissed employees whose salary for the day of dismissal is still to be booked
+     */
+    public List<Departure> departures() {
+        return List.copyOf(departures);
+    }
+
+    /**
+     * Remembers a dismissed employee
+     * @param departure The departure
+     */
+    public void addDeparture(Departure departure) {
+        Objects.requireNonNull(departure, "departure must not be null.");
+        if (employees.containsKey(departure.employee().number())) {
+            throw new IllegalStateException("The employee " + departure.employee().number() + " still works for the company.");
+        }
+        departures.add(departure);
+    }
+
+    /**
+     * Removes the oldest departure of a role on a day
+     * @param role The role
+     * @param day The day
+     * @return True if a departure was removed
+     */
+    public boolean consumeDeparture(RoleId role, long day) {
+        Objects.requireNonNull(role, "role must not be null.");
+        Iterator<Departure> iterator = departures.iterator();
+        while (iterator.hasNext()) {
+            Departure departure = iterator.next();
+            if (departure.day() == day && departure.employee().role().equals(role)) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Forgets every departure up to and including a day
+     * @param day The day
+     */
+    public void dropDeparturesUpTo(long day) {
+        departures.removeIf(departure -> departure.day() <= day);
+    }
+
+    /**
      * @param params The company parameters
      * @return The overdraft limit of the current legal form
      */
@@ -594,7 +643,8 @@ public final class Company {
             List<LicenseHolding> licenses,
             long nextEmployeeNumber,
             List<Employee> employees,
-            long lastActiveDay
+            long lastActiveDay,
+            List<Departure> departures
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -635,6 +685,13 @@ public final class Company {
             }
 
             if (lastActiveDay < NEVER_ACTIVE) throw new IllegalArgumentException("lastActiveDay must be at least " + NEVER_ACTIVE + ".");
+
+            departures = departures == null ? List.of() : List.copyOf(departures);
+            for (Departure departure : departures) {
+                if (numbers.contains(departure.employee().number())) {
+                    throw new IllegalArgumentException("employee " + departure.employee().number() + " is both employed and departed.");
+                }
+            }
         }
     }
 
@@ -665,7 +722,8 @@ public final class Company {
                 List.copyOf(licenses.values()),
                 nextEmployeeNumber,
                 List.copyOf(employees.values()),
-                lastActiveDay);
+                lastActiveDay,
+                List.copyOf(departures));
     }
 
     public static Company restore(SaveState saveState) {
@@ -698,6 +756,7 @@ public final class Company {
             company.employees.put(employee.number(), employee);
         }
         company.lastActiveDay = saveState.lastActiveDay();
+        company.departures.addAll(saveState.departures());
         return company;
     }
 }

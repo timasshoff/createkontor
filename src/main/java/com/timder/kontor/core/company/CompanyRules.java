@@ -1,5 +1,6 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.employee.Departure;
 import com.timder.kontor.core.company.employee.Employee;
 import com.timder.kontor.core.company.employee.EmployeeRules;
 import com.timder.kontor.core.company.financial.*;
@@ -94,10 +95,20 @@ public final class CompanyRules {
 
     private static void bookSalaries(Company company, long day, CompanyParams params) {
         for (Employee employee : company.employees()) {
-            Money salary = EmployeeRules.dailySalary(employee.baseSalary(), company.legalForm(params));
-            if (salary.isPositive()) {
-                company.account().book(day, BookingKind.SALARY, salary.negate(), employee.role().value());
+            bookSalary(company, employee, day, params);
+        }
+        for (Departure departure : company.departures()) {
+            if (departure.day() == day) {
+                bookSalary(company, departure.employee(), day, params);
             }
+        }
+        company.dropDeparturesUpTo(day);
+    }
+
+    private static void bookSalary(Company company, Employee employee, long day, CompanyParams params) {
+        Money salary = EmployeeRules.dailySalary(employee.baseSalary(), company.legalForm(params));
+        if (salary.isPositive()) {
+            company.account().book(day, BookingKind.SALARY, salary.negate(), employee.role().value());
         }
     }
 

@@ -41,18 +41,8 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
     }
 
     @Override
-    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
-        if (level instanceof ServerLevel serverLevel) {
-            KontorChunkLoading.deskBound(serverLevel, getBlockPos(), oldId, newId);
-        }
-    }
-
-    @Override
-    public void initialize() {
-        super.initialize();
-        if (level instanceof ServerLevel serverLevel && getCompanyId() != null) {
-            KontorChunkLoading.deskLoaded(serverLevel, getBlockPos(), getCompanyId());
-        }
+    protected boolean loadsChunks() {
+        return true;
     }
 
     public ModularUI createUI(BlockUIMenuType.BlockUIHolder holder) {
