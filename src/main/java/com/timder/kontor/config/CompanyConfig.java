@@ -24,6 +24,7 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue LICENSE_APPLICATION_FEE_MULTIPLIER;
 
     public static final ModConfigSpec.IntValue EMPLOYEE_ORPHAN_DAYS;
+    public static final ModConfigSpec.IntValue CONTRACT_CHECK_MIN_ACTIVE_TICKS;
     public static final ModConfigSpec.IntValue LAWYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CALCULATOR_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
@@ -69,6 +70,8 @@ public class CompanyConfig {
 
         EMPLOYEE_ORPHAN_DAYS = builder.comment("An employee whose desk has not reported for this many days loses the contract (e.g. the desk sits in an unloaded chunk)")
                 .defineInRange("orphanDays", 3, 1, Integer.MAX_VALUE);
+        CONTRACT_CHECK_MIN_ACTIVE_TICKS = builder.comment("Contracts are only checked at the end of a day on which the company was active for at least this many ticks, so its desks had time to report")
+                .defineInRange("contractCheckMinActiveTicks", 200, 0, 24_000);
         LAWYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a lawyer per day. Fixed when the lawyer is hired")
                 .defineInRange("lawyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
         CALCULATOR_SALARY_IN_DOLLARS = builder.comment("Base salary of a calculator per day. Fixed when the calculator is hired")

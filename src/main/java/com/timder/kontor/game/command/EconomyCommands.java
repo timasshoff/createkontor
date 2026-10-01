@@ -54,7 +54,7 @@ public class EconomyCommands {
 
         economy.advanceTo(economy.ticksElapsed() + (long) days * Economy.DAY_LENGTH);
         economyData.setDirty();
-        KontorTickHandler.settleCompanies(source.getServer(), companyData, economyData, lastHistoryDayBefore);
+        KontorTickHandler.settleCompanies(source.getServer(), companyData, economyData, lastHistoryDayBefore, KontorTickHandler.activeCompanies(source.getServer(), companyData.getRegistry()));
 
         source.sendSuccess(() -> Component.literal("Advanced the entire economy simulation by " + days + " days."), false);
 

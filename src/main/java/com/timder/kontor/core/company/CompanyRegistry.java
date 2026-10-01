@@ -121,12 +121,13 @@ public final class CompanyRegistry {
      * @param orphanDays The days without a report after which a contract ends
      * @return The events
      */
-    public List<EmployeeEvent> endContracts(long day, int orphanDays) {
+    public List<EmployeeEvent> endContracts(long day, int orphanDays, long minActiveTicks) {
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
         if (orphanDays < 1) throw new IllegalArgumentException("orphanDays must be at least 1.");
+        if (minActiveTicks < 0) throw new IllegalArgumentException("minActiveTicks must not be negative.");
         List<EmployeeEvent> events = new ArrayList<>();
         for (Company company : companies.values()) {
-            if (!company.isActiveDay(day)) {
+            if (!company.isActiveDay(day) || company.activeTicksOn(day) < minActiveTicks) {
                 continue;
             }
             events.addAll(EmployeeRules.endContracts(company, day, orphanDays));

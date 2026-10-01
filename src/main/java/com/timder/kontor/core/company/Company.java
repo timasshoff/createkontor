@@ -58,6 +58,7 @@ public final class Company {
 
     private long lastActiveDay = NEVER_ACTIVE;
     private boolean active = false;
+    private long activeTicks = 0;
 
     private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account, RequestBoard requestBoard, OrderBook orderBook) {
         this.id = id;
@@ -144,6 +145,15 @@ public final class Company {
     }
 
     /**
+     * How long the company was active on one day
+     * @param day The day
+     * @return How often markActive was called on that day
+     */
+    public long activeTicksOn(long day) {
+        return isActiveDay(day) ? activeTicks : 0;
+    }
+
+    /**
      * Records that a member is online right now.
      * @param day The current day, not before the last active day
      * @throws IllegalArgumentException if the day is negative or before the last active day
@@ -151,8 +161,14 @@ public final class Company {
     public void markActive(long day) {
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
         if (day < lastActiveDay) throw new IllegalArgumentException("day " + day + " is before the last active day " + lastActiveDay + ".");
+        if (day != lastActiveDay) {
+            this.activeTicks = 0;
+        }
         this.active = true;
         this.lastActiveDay = day;
+        if (activeTicks < Long.MAX_VALUE) {
+            this.activeTicks++;
+        }
     }
 
     /**

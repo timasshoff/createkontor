@@ -3,6 +3,7 @@ package com.timder.kontor.game;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.Company;
+import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.legalform.LegalForms;
@@ -16,8 +17,7 @@ import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class KontorTickHandler {
 
@@ -29,6 +29,9 @@ public class KontorTickHandler {
         Economy economy = economyData.getEconomy();
         CompanySavedData companyData = CompanySavedData.get(server);
         CompanyRegistry registry = companyData.getRegistry();
+
+        Set<CompanyId> activeNow = activeCompanies(server, registry);
+        economy.setInactiveCompanies(inactiveCompanies(registry, activeNow));
 
         long ticksBefore = economy.ticksElapsed();
         long dayBefore = economy.currentDay();
@@ -46,6 +49,14 @@ public class KontorTickHandler {
 
         if (tradingTickPassed) {
             economyData.setDirty();
+        }
+
+        if (economy.currentDay() != dayBefore) {
+            settleCompanies(server, companyData, economyData, lastHistoryDayBefore, activeNow);
+        }
+
+        if (markActivity(registry, activeNow, economy.currentDay())) {
+            companyData.setDirty();
         }
 
         boolean orderBurstOccurred = false; // = an order has failed
@@ -73,10 +84,43 @@ public class KontorTickHandler {
         if (orderBurstOccurred || requestArrived || upgradeEventOccurred || (tradingTickPassed && registry.size() > 0)) {
             companyData.setDirty();
         }
+    }
 
-        if (economy.currentDay() != dayBefore) {
-            settleCompanies(server, companyData, economyData, lastHistoryDayBefore);
+    public static Set<CompanyId> activeCompanies(MinecraftServer server, CompanyRegistry registry) {
+        Set<CompanyId> active = new HashSet<>();
+        for (Company company : registry.all()) {
+            if (isOnline(server, company.owner()) || company.managers().stream().anyMatch(manager -> isOnline(server, manager))) {
+                active.add(company.id());
+            }
         }
+        return active;
+    }
+
+    private static boolean isOnline(MinecraftServer server, UUID player) {
+        return server.getPlayerList().getPlayer(player) != null;
+    }
+
+    private static Set<CompanyId> inactiveCompanies(CompanyRegistry registry, Set<CompanyId> activeNow) {
+        Set<CompanyId> inactive = new HashSet<>();
+        for (Company company : registry.all()) {
+            if (!activeNow.contains(company.id())) {
+                inactive.add(company.id());
+            }
+        }
+        return inactive;
+    }
+
+    private static boolean markActivity(CompanyRegistry registry, Set<CompanyId> activeNow, long day) {
+        boolean newActiveDay = false;
+        for (Company company : registry.all()) {
+            if (activeNow.contains(company.id())) {
+                newActiveDay |= company.lastActiveDay() != day;
+                company.markActive(day);
+            } else {
+                company.markInactive();
+            }
+        }
+        return newActiveDay;
     }
 
     private static boolean letRequestsArrive(MinecraftServer server, CompanySavedData companyData, Economy economy, boolean tradingTickPassed) {
@@ -87,9 +131,10 @@ public class KontorTickHandler {
         return !arrivals.isEmpty();
     }
 
-    public static void settleCompanies(MinecraftServer server, CompanySavedData companyData, EconomySavedData economyData, long lastHistoryDayBefore) {
+    public static void settleCompanies(MinecraftServer server, CompanySavedData companyData, EconomySavedData economyData, long lastHistoryDayBefore, Set<CompanyId> activeNow) {
         Economy economy = economyData.getEconomy();
-        if (companyData.getRegistry().size() == 0) {
+        CompanyRegistry registry = companyData.getRegistry();
+        if (registry.size() == 0) {
             return;
         }
 
@@ -99,10 +144,20 @@ public class KontorTickHandler {
         }
 
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        int orphanDays = CompanyConfig.EMPLOYEE_ORPHAN_DAYS.get();
+        long minActiveTicks = CompanyConfig.CONTRACT_CHECK_MIN_ACTIVE_TICKS.get();
         List<UpgradeEvent> upgradeEvents = new ArrayList<>();
         for (MacroHistoryEntry entry : newDays) {
-            companyData.getRegistry().settleDay(entry.day(), entry.policyRate(), params, economy);
-            upgradeEvents.addAll(companyData.getRegistry().advanceUpgradeDay(entry.day(), params));
+            long day = entry.day();
+            for (Company company : registry.all()) {
+                if (activeNow.contains(company.id())) {
+                    company.markActive(day);
+                }
+            }
+
+            registry.endContracts(day, orphanDays, minActiveTicks);
+            registry.settleDay(day, entry.policyRate(), params, economy);
+            upgradeEvents.addAll(registry.advanceUpgradeDay(day, params));
         }
         if (!upgradeEvents.isEmpty()) {
             PlayerNotifications.sendUpgradeEventNotifications(server, companyData.getRegistry(), upgradeEvents, params);
