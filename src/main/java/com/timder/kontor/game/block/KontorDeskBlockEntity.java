@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.Company;
+import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.legalform.LegalForms;
@@ -14,6 +15,7 @@ import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
+import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.ui.KontorDeskBoundUi;
 import com.timder.kontor.game.ui.KontorDeskUnboundUi;
 import com.timder.kontor.util.ComponentFormatting;
@@ -36,6 +38,21 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
     @Override
     protected @Nullable String boundResourceKey() {
         return KontorDeskBlock.RESOURCE_KEY;
+    }
+
+    @Override
+    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
+        if (level instanceof ServerLevel serverLevel) {
+            KontorChunkLoading.deskBound(serverLevel, getBlockPos(), oldId, newId);
+        }
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        if (level instanceof ServerLevel serverLevel && getCompanyId() != null) {
+            KontorChunkLoading.deskLoaded(serverLevel, getBlockPos(), getCompanyId());
+        }
     }
 
     public ModularUI createUI(BlockUIMenuType.BlockUIHolder holder) {

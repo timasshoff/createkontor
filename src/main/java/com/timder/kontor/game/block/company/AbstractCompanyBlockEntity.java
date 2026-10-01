@@ -53,9 +53,14 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
             return;
         }
         updateBoundResourceCount(companyId, id);
+        CompanyId oldId = companyId;
         companyId = id;
         companyName = resolveCompanyName();
         CompanyBlockSupport.afterCompanyIdChanged(this);
+        onCompanyChanged(oldId, id);
+    }
+
+    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
     }
 
     public boolean isBoundToCompany() {

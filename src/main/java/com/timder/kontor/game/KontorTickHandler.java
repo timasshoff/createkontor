@@ -13,6 +13,7 @@ import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.data.KontorData;
+import com.timder.kontor.game.chunk.KontorChunkLoading;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -32,6 +33,7 @@ public class KontorTickHandler {
 
         Set<CompanyId> activeNow = activeCompanies(server, registry);
         economy.setInactiveCompanies(inactiveCompanies(registry, activeNow));
+        KontorChunkLoading.update(server, registry, activeNow);
 
         long ticksBefore = economy.ticksElapsed();
         long dayBefore = economy.currentDay();
