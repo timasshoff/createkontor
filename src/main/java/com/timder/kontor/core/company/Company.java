@@ -378,6 +378,16 @@ public final class Company {
         departures.add(departure);
     }
 
+    public boolean hasDeparture(RoleId role, long day) {
+        Objects.requireNonNull(role, "role must not be null.");
+        for (Departure departure : departures) {
+            if (departure.day() == day && departure.employee().role().equals(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Removes the oldest departure of a role on a day
      * @param role The role

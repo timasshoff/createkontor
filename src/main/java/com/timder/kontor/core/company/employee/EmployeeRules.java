@@ -2,6 +2,7 @@ package com.timder.kontor.core.company.employee;
 
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
+import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 
@@ -23,6 +24,36 @@ public final class EmployeeRules {
         Objects.requireNonNull(legalForm, "legalForm must not be null.");
         if (baseSalary.isNegative()) throw new IllegalArgumentException("baseSalary must not be negative.");
         return baseSalary.scaled(legalForm.employeeSalaryFactor());
+    }
+
+    /**
+     * The one-time bonus for hiring somebody
+     * @param spec The role and the base salary
+     * @param legalForm The current legal form
+     * @param params The company parameters
+     * @return The bonus
+     */
+    public static Money hireBonus(RoleSpec spec, LegalFormDef legalForm, CompanyParams params) {
+        Objects.requireNonNull(spec, "spec must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+        return dailySalary(spec.baseSalary(), legalForm).scaled(params.hireBonusSalaryMultiple());
+    }
+
+    /**
+     * What hiring costs right now
+     * @param company The company
+     * @param spec The role and base salary
+     * @param day The current day
+     * @param params The company parameters
+     * @return The bonus
+     */
+    public static Money hireCost(Company company, RoleSpec spec, long day, CompanyParams params) {
+        Objects.requireNonNull(company, "company must not be null.");
+        Objects.requireNonNull(spec, "spec must not be null.");
+        if (company.hasDeparture(spec.id(), day)) {
+            return Money.ZERO;
+        }
+        return hireBonus(spec, company.legalForm(params), params);
     }
 
     /**
@@ -56,9 +87,16 @@ public final class EmployeeRules {
         if (!company.isOperational()) {
             throw new IllegalStateException("The company is in payment difficulties and cannot hire.");
         }
+        Money bonus = hireCost(company, spec, day, params);
+        if (bonus.isPositive() && !company.canSpend(bonus, params)) {
+            throw new IllegalStateException("The company cannot afford the hiring bonus of " + bonus + ".");
+        }
         Employee employee = Employee.hire(company.issueEmployeeNumber(), spec, day);
         company.addEmployee(employee);
         company.consumeDeparture(spec.id(), day);
+        if (bonus.isPositive() && !company.trySpend(day, BookingKind.HIRE_BONUS, bonus, spec.id().value(), params)) {
+            throw new IllegalStateException("The company could pay the hiring bonus of " + bonus + " a moment ago but cannot now.");
+        }
         return employee;
     }
 

@@ -16,6 +16,8 @@ public enum BookingKind {
     FEED_IN_LICENSE(BookingCategory.COST),
     /** Salaries. */
     SALARY(BookingCategory.COST),
+    /** One-time bonus when an employee is hired. */
+    HIRE_BONUS(BookingCategory.COST),
     /** Power and work price together. */
     POWER(BookingCategory.COST),
     /** Storage cost. */

@@ -165,7 +165,6 @@ public class KontorTickHandler {
                 }
             }
 
-            registry.endContracts(day, orphanDays, minActiveTicks);
             registry.settleDay(day, entry.policyRate(), params, economy);
             upgradeEvents.addAll(registry.advanceUpgradeDay(day, params));
         }

@@ -34,7 +34,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.vacant", "Not staffed.");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.no_free_slot", "Cannot hire: the legal form allows no more employees.");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.not_operational", "Cannot hire: the company is in payment difficulties.");
-        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.inactive", "Paused: no member of the company is online.");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.not_affordable", "Cannot hire: the company cannot afford the hiring bonus.");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_salary", "Salary: %s per day");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_bonus", "Hiring bonus: %s once");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.inactive", "Paused");
 
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.detailed", "There is no data for the chart \"%s\" yet. You can try again later.");
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.short", "There is no data for this chart yet. You can try again later.");
@@ -86,6 +89,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.application_fee", "Application Fee");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.feed_in_license", "SU Feed-in License");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.salary", "Salary");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.hire_bonus", "Hire Bonus");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.power", "Power");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.storage", "Storage");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.purchase", "Purchase");

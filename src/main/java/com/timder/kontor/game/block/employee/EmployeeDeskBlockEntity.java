@@ -45,6 +45,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private static final String TAG_SEATED = "Seated";
     private static final String TAG_STATUS = "Status";
     private static final String TAG_SALARY = "SalaryCents";
+    private static final String TAG_BONUS = "HireBonusCents";
 
     public enum Status {
         NO_COMPANY,
@@ -52,6 +53,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         VACANT,
         NO_FREE_SLOT,
         NOT_OPERATIONAL,
+        NOT_AFFORDABLE,
         EMPLOYED
     }
 
@@ -61,6 +63,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private boolean seated = false;
     private Status status = Status.NO_COMPANY;
     private long salaryCents = 0;
+    private long bonusCents = 0;
 
     public EmployeeDeskBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -111,7 +114,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
         if (company == null) {
             forgetEmployee();
-            show(nowSeated, Status.NO_COMPANY, 0);
+            show(nowSeated, Status.NO_COMPANY, 0, 0);
             return;
         }
 
@@ -120,7 +123,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
 
         if (!company.isActive()) {
-            show(nowSeated, Status.INACTIVE, 0);
+            show(nowSeated, Status.INACTIVE, 0, 0);
             return;
         }
 
@@ -132,7 +135,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             if (employeeNumber == NO_EMPLOYEE) {
                 Status hireStatus = tryHire(company, day, params);
                 if (hireStatus != Status.EMPLOYED) {
-                    show(true, hireStatus, 0);
+                    showOffer(true, hireStatus, company, day, params);
                     return;
                 }
                 data.setDirty();
@@ -154,9 +157,9 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
 
         if (employeeNumber == NO_EMPLOYEE) {
-            show(nowSeated, Status.VACANT, 0);
+            showOffer(nowSeated, Status.VACANT, company, day, params);
         } else {
-            show(nowSeated, Status.EMPLOYED, salaryOf(company, params).cents());
+            show(nowSeated, Status.EMPLOYED, salaryOf(company, params).cents(), 0);
         }
     }
 
@@ -169,6 +172,10 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
         if (!company.isOperational()) {
             return Status.NOT_OPERATIONAL;
+        }
+        Money bonus = EmployeeRules.hireCost(company, desk.roleSpec(), day, params);
+        if (bonus.isPositive() && !company.canSpend(bonus, params)) {
+            return Status.NOT_AFFORDABLE;
         }
         Employee employee = EmployeeRules.hire(company, desk.roleSpec(), day, params);
         employeeNumber = employee.number();
@@ -221,13 +228,24 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         return desks;
     }
 
-    private void show(boolean seated, Status status, long salaryCents) {
-        if (this.seated == seated && this.status == status && this.salaryCents == salaryCents) {
+    private void showOffer(boolean seated, Status status, Company company, long day, CompanyParams params) {
+        if (!(getBlockState().getBlock() instanceof AbstractEmployeeDeskBlock desk)) {
+            show(seated, status, 0, 0);
+            return;
+        }
+        Money salary = EmployeeRules.dailySalary(desk.roleSpec().baseSalary(), company.legalForm(params));
+        Money bonus = EmployeeRules.hireCost(company, desk.roleSpec(), day, params);
+        show(seated, status, salary.cents(), bonus.cents());
+    }
+
+    private void show(boolean seated, Status status, long salaryCents, long bonusCents) {
+        if (this.seated == seated && this.status == status && this.salaryCents == salaryCents && this.bonusCents == bonusCents) {
             return;
         }
         this.seated = seated;
         this.status = status;
         this.salaryCents = salaryCents;
+        this.bonusCents = bonusCents;
         notifyUpdate();
     }
 
@@ -259,9 +277,22 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
                                 ComponentFormatting.highlightStandard(Money.ofCents(salaryCents).toString())).withStyle(ComponentFormatting.DEFAULT))
                         .forGoggles(tooltip, 2);
             }
-            case VACANT -> line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.vacant"));
-            case NO_FREE_SLOT -> line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.no_free_slot"));
-            case NOT_OPERATIONAL -> line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_operational"));
+            case VACANT -> {
+                line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.vacant"));
+                offer(tooltip);
+            }
+            case NO_FREE_SLOT -> {
+                line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.no_free_slot"));
+                offer(tooltip);
+            }
+            case NOT_OPERATIONAL -> {
+                line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_operational"));
+                offer(tooltip);
+            }
+            case NOT_AFFORDABLE -> {
+                line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_affordable"));
+                offer(tooltip);
+            }
             case INACTIVE -> line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.inactive"));
             case NO_COMPANY -> {}
         }
@@ -273,6 +304,17 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         CreateLang.builder().add(text).forGoggles(tooltip, 1);
     }
 
+    private void offer(List<Component> tooltip) {
+        CreateLang.builder()
+                .add(Component.translatable("goggle.createkontor.employee_desk.offer_salary",
+                        ComponentFormatting.highlightStandard(Money.ofCents(salaryCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                .forGoggles(tooltip, 2);
+        CreateLang.builder()
+                .add(Component.translatable("goggle.createkontor.employee_desk.offer_bonus",
+                        ComponentFormatting.highlightStandard(Money.ofCents(bonusCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                .forGoggles(tooltip, 2);
+    }
+
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
@@ -281,6 +323,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             tag.putBoolean(TAG_SEATED, seated);
             tag.putString(TAG_STATUS, status.name());
             tag.putLong(TAG_SALARY, salaryCents);
+            tag.putLong(TAG_BONUS, bonusCents);
         }
     }
 
@@ -296,6 +339,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
                 status = Status.NO_COMPANY;
             }
             salaryCents = tag.getLong(TAG_SALARY);
+            bonusCents = tag.getLong(TAG_BONUS);
         }
     }
 }
