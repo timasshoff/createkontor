@@ -163,6 +163,10 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
     }
 
+    public boolean hasEmployee() {
+        return employeeNumber != NO_EMPLOYEE;
+    }
+
     private Status tryHire(Company company, long day, CompanyParams params) {
         if (!(getBlockState().getBlock() instanceof AbstractEmployeeDeskBlock desk)) {
             return Status.VACANT;
@@ -201,7 +205,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         for (Direction side : Direction.Plane.HORIZONTAL) {
             BlockPos seatPos = worldPosition.relative(side);
             for (SeatEntity seat : level.getEntitiesOfClass(SeatEntity.class, new AABB(seatPos))) {
-                if (hasAdultVillager(seat.getPassengers()) && adjacentEmployeeDesks(level, seatPos) == 1) {
+                if (hasAdultVillager(seat.getPassengers()) && EmployeeSeats.singleAdjacentDesk(level, seatPos).isPresent()) {
                     return true;
                 }
             }
@@ -216,16 +220,6 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             }
         }
         return false;
-    }
-
-    private static int adjacentEmployeeDesks(Level level, BlockPos seatPos) {
-        int desks = 0;
-        for (Direction side : Direction.Plane.HORIZONTAL) {
-            if (level.getBlockState(seatPos.relative(side)).getBlock() instanceof AbstractEmployeeDeskBlock) {
-                desks++;
-            }
-        }
-        return desks;
     }
 
     private void showOffer(boolean seated, Status status, Company company, long day, CompanyParams params) {

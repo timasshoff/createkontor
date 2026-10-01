@@ -1,9 +1,8 @@
 package com.timder.kontor.registry;
 
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.game.block.KontorDeskBlock;
 import com.timder.kontor.game.block.ShippingExitBlock;
-import com.timder.kontor.game.block.employee.LawyerDeskBlock;
+import com.timder.kontor.game.block.LawyerDeskBlock;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.SoundType;

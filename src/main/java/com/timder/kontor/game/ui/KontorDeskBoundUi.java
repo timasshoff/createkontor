@@ -55,7 +55,6 @@ import java.util.*;
 
 public class KontorDeskBoundUi {
     public static ModularUI create(BlockUIMenuType.BlockUIHolder holder, KontorDeskBlockEntity be, Company company, Economy economy) {
-
         ObservableList<CompanyHistoryEntry> companyHistory = new ObservableList<>();
         SimpleBinding<Tag> companyHistoryBinding = DataBindingBuilder.tagS2C(() -> historyToTag(company.history()))
                 .onRemoteSyncReceived(tag -> companyHistory.set(tagToHistory(tag)))
@@ -67,7 +66,6 @@ public class KontorDeskBoundUi {
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.requests_orders")), requestsOrdersTab(company, be));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(company, economy));
-
         return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
     }
 

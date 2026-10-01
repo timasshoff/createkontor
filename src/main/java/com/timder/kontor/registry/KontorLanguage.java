@@ -17,6 +17,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_NOT_MEMBER, "§cThis block belongs to another company.");
         REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_STATUS, "§7Company: %s");
         REGISTRATE.addRawLang("message.createkontor.already_member", "§cYou are already a member of a company.");
+        REGISTRATE.addRawLang("message.createkontor.employee_desk.vacant", "§cThis desk is not staffed.");
         REGISTRATE.addRawLang("message.createkontor.shipping_exit.limit", "§cLimit reached: Legal form allows at most %s §cbound shipping exits.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.limit", "§cThis company already has a Kontor Desk.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.request_accepting_failed", "§cAccepting request %s §cfailed: %s");

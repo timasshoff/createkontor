@@ -7,6 +7,7 @@ import com.timder.kontor.data.provider.*;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.EmployeeContracts;
 import com.timder.kontor.game.KontorTickHandler;
+import com.timder.kontor.game.block.employee.EmployeeDeskInteraction;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.command.*;
 import com.timder.kontor.game.network.KontorNetwork;
@@ -44,6 +45,7 @@ public class CreateKontor {
 
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(KontorTickHandler.class);
+        NeoForge.EVENT_BUS.register(EmployeeDeskInteraction.class);
         NeoForge.EVENT_BUS.addListener(KontorChunkLoading::onServerStopped);
 
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
