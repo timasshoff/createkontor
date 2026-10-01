@@ -5,7 +5,10 @@ import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class EmployeeRules {
 
@@ -70,4 +73,64 @@ public final class EmployeeRules {
                 .orElseThrow(() -> new IllegalArgumentException("The company has no employee " + number + "."));
     }
 
+    /**
+     * Stores whether an employee is present or not.
+     * @param company The company
+     * @param number The employee number
+     * @param present Whether the employee is present or not
+     * @param day The current day
+     * @return The employee with the new state
+     */
+    public static Employee reportPresence(Company company, long number, boolean present, long day) {
+        Objects.requireNonNull(company, "company must not be null.");
+        Employee employee = company.employee(number)
+                .orElseThrow(() -> new IllegalArgumentException("The company has no employee " + number + "."));
+        Employee updated = employee.withPresence(present, day);
+        company.replaceEmployee(updated);
+        return updated;
+    }
+
+    /**
+     * Whether the contract of an employee ends
+     * @param employee The employee
+     * @param day The day of the check
+     * @param orphanDays The days without a report after which the contract ends
+     * @return The end reason. Empty if the contract continues
+     */
+    public static Optional<EmployeeEvent.EndReason> endReason(Employee employee, long day, int orphanDays) {
+        Objects.requireNonNull(employee, "employee must not be null.");
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+        if (orphanDays < 1) throw new IllegalArgumentException("orphanDays must be at least 1.");
+
+        if (!employee.present()) {
+            return Optional.of(EmployeeEvent.EndReason.ABSENT);
+        }
+        if (day - employee.lastReportDay() >= orphanDays) {
+            return Optional.of(EmployeeEvent.EndReason.NOT_REPORTING);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Ends the contract of every employee that qualified for termination
+     *
+     * @param company The company
+     * @param day The current day
+     * @param orphanDays The days without a report after which the contract ends
+     * @return One event per ended contract
+     */
+    public static List<EmployeeEvent> endContracts(Company company, long day, int orphanDays) {
+        Objects.requireNonNull(company, "company must not be null.");
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+        if (orphanDays < 1) throw new IllegalArgumentException("orphanDays must be at least 1.");
+        List<EmployeeEvent> events = new ArrayList<>();
+        for (Employee employee : company.employees()) {
+            Optional<EmployeeEvent.EndReason> reason = endReason(employee, day, orphanDays);
+            if (reason.isPresent()) {
+                company.removeEmployee(employee.number());
+                events.add(new EmployeeEvent.ContractEnded(company.id(), employee, reason.get()));
+            }
+        }
+        return events;
+    }
 }

@@ -1,5 +1,7 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.employee.EmployeeEvent;
+import com.timder.kontor.core.company.employee.EmployeeRules;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
 import com.timder.kontor.core.company.legalform.UpgradeRules;
@@ -110,6 +112,23 @@ public final class CompanyRegistry {
             }
         }
         return insolvent;
+    }
+
+    /**
+     * Ends the employments of employees that qualified for termination.
+     * Runs for every company.
+     * @param day The current day
+     * @param orphanDays The days without a report after which a contract ends
+     * @return The events
+     */
+    public List<EmployeeEvent> endContracts(long day, int orphanDays) {
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+        if (orphanDays < 1) throw new IllegalArgumentException("orphanDays must be at least 1.");
+        List<EmployeeEvent> events = new ArrayList<>();
+        for (Company company : companies.values()) {
+            events.addAll(EmployeeRules.endContracts(company, day, orphanDays));
+        }
+        return events;
     }
 
     public Map<CompanyId, CompanyHistoryEntry> settleDay(long day, double policyRate, CompanyParams params, Economy economy) {

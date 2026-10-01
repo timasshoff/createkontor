@@ -23,6 +23,11 @@ public class CompanyConfig {
     public static final ModConfigSpec.DoubleValue LICENSE_REFERENCE_FEE_RATE;
     public static final ModConfigSpec.IntValue LICENSE_APPLICATION_FEE_MULTIPLIER;
 
+    public static final ModConfigSpec.IntValue EMPLOYEE_ORPHAN_DAYS;
+    public static final ModConfigSpec.IntValue LAWYER_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue CALCULATOR_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -57,6 +62,19 @@ public class CompanyConfig {
                 .defineInRange("referenceFeeRate", 0.009, 0.000001, 1.0);
         LICENSE_APPLICATION_FEE_MULTIPLIER = builder.comment("The application fee of a license is this many times its reference fee")
                 .defineInRange("applicationFeeMultiplier", 3, 1, 1_000);
+
+        builder.pop();
+
+        builder.comment("Employees. The salaries are base salaries per day, the salary factor of the legal form is applied on top.").push("employees");
+
+        EMPLOYEE_ORPHAN_DAYS = builder.comment("An employee whose desk has not reported for this many days loses the contract (e.g. the desk sits in an unloaded chunk)")
+                .defineInRange("orphanDays", 3, 1, Integer.MAX_VALUE);
+        LAWYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a lawyer per day. Fixed when the lawyer is hired")
+                .defineInRange("lawyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
+        CALCULATOR_SALARY_IN_DOLLARS = builder.comment("Base salary of a calculator per day. Fixed when the calculator is hired")
+                .defineInRange("calculatorSalaryInDollars", 60, 0, Integer.MAX_VALUE);
+        MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment("Base salary of a market analyst per day. Fixed when the market analyst is hired")
+                .defineInRange("marketAnalystSalaryInDollars", 90, 0, Integer.MAX_VALUE);
 
         builder.pop();
 

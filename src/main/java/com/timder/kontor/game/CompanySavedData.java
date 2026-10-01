@@ -4,6 +4,8 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.employee.Employee;
+import com.timder.kontor.core.company.employee.RoleId;
 import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.license.LicenseHolding;
@@ -157,6 +159,13 @@ public class CompanySavedData extends SavedData {
         }
         tag.put("Licenses", licenses);
 
+        tag.putLong("NextEmployeeNumber", state.nextEmployeeNumber());
+        ListTag employees = new ListTag();
+        for (Employee employee : state.employees()) {
+            employees.add(writeEmployee(employee));
+        }
+        tag.put("Employees", employees);
+
         return tag;
     }
 
@@ -210,6 +219,12 @@ public class CompanySavedData extends SavedData {
             licenses.add(readLicenseHolding((CompoundTag) t));
         }
 
+        long nextEmployeeNumber = tag.contains("NextEmployeeNumber", Tag.TAG_LONG) ? tag.getLong("NextEmployeeNumber") : 1L;
+        List<Employee> employees = new ArrayList<>();
+        for (Tag t : tag.getList("Employees", Tag.TAG_COMPOUND)) {
+            employees.add(readEmployee((CompoundTag) t));
+        }
+
         return new Company.SaveState(
                 id,
                 name,
@@ -230,8 +245,8 @@ public class CompanySavedData extends SavedData {
                 fulfilledOrders,
                 upgradeApplication,
                 licenses,
-                1L,
-                List.of() // TODO
+                nextEmployeeNumber,
+                employees
         );
     }
 
@@ -463,5 +478,26 @@ public class CompanySavedData extends SavedData {
                 tag.getLong("AcquiredDay"),
                 Money.ofCents(tag.getLong("DailyFeeCents")),
                 tag.getBoolean("Cancelled"));
+    }
+
+    private static CompoundTag writeEmployee(Employee employee) {
+        CompoundTag tag = new CompoundTag();
+        tag.putLong("Number", employee.number());
+        tag.putString("Role", employee.role().value());
+        tag.putLong("BaseSalaryCents", employee.baseSalary().cents());
+        tag.putLong("HiredDay", employee.hiredDay());
+        tag.putBoolean("Present", employee.present());
+        tag.putLong("LastReportDay", employee.lastReportDay());
+        return tag;
+    }
+
+    private static Employee readEmployee(CompoundTag tag) {
+        return new Employee(
+                tag.getLong("Number"),
+                new RoleId(tag.getString("Role")),
+                Money.ofCents(tag.getLong("BaseSalaryCents")),
+                tag.getLong("HiredDay"),
+                tag.getBoolean("Present"),
+                tag.getLong("LastReportDay"));
     }
 }
