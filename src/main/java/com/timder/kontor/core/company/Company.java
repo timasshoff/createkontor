@@ -1,5 +1,8 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.employee.Departure;
+import com.timder.kontor.core.company.employee.Employee;
+import com.timder.kontor.core.company.employee.RoleId;
 import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.LegalForms;
@@ -22,6 +25,8 @@ public final class Company {
     public static final int MAX_NAME_LENGTH = 32;
 
     public static final String FOUNDER_LOAN_REFERENCE = "founder_loan";
+
+    public static final long NEVER_ACTIVE = -1L;
 
     private final CompanyId id;
     private final String name;
@@ -46,9 +51,17 @@ public final class Company {
 
     private final Map<LicenseKey, LicenseHolding> licenses = new LinkedHashMap<>();
 
+    private long nextEmployeeNumber = 1;
+    private final Map<Long, Employee> employees = new LinkedHashMap<>();
+    private final List<Departure> departures = new ArrayList<>();
+
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
     private final Map<String, Integer> boundResourceCounts = new LinkedHashMap<>();
+
+    private long lastActiveDay = NEVER_ACTIVE;
+    private boolean active = false;
+    private long activeTicks = 0;
 
     private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account, RequestBoard requestBoard, OrderBook orderBook) {
         this.id = id;
@@ -81,6 +94,7 @@ public final class Company {
             company.loans.add(loan);
         }
 
+        company.markActive(day);
         return company;
     }
 
@@ -107,6 +121,64 @@ public final class Company {
 
     public long foundingDay() {
         return foundingDay;
+    }
+
+    /**
+     * A company is active while at least one member is online.
+     * @return True if the company is active right now
+     */
+    public boolean isActive() {
+        return active;
+    }
+
+    /**
+     * @return The last day on which the company was active
+     */
+    public long lastActiveDay() {
+        return lastActiveDay;
+    }
+
+    /**
+     * Whether a day is settled for this company: only if the company was active on it.
+     * @param day The day that is being closed
+     * @return True if the last active day is this day
+     */
+    public boolean isActiveDay(long day) {
+        return day >= 0 && lastActiveDay == day;
+    }
+
+    /**
+     * How long the company was active on one day
+     * @param day The day
+     * @return How often markActive was called on that day
+     */
+    public long activeTicksOn(long day) {
+        return isActiveDay(day) ? activeTicks : 0;
+    }
+
+    /**
+     * Records that a member is online right now.
+     * @param day The current day, not before the last active day
+     * @throws IllegalArgumentException if the day is negative or before the last active day
+     */
+    public void markActive(long day) {
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+        if (day < lastActiveDay) throw new IllegalArgumentException("day " + day + " is before the last active day " + lastActiveDay + ".");
+        if (day != lastActiveDay) {
+            this.activeTicks = 0;
+        }
+        this.active = true;
+        this.lastActiveDay = day;
+        if (activeTicks < Long.MAX_VALUE) {
+            this.activeTicks++;
+        }
+    }
+
+    /**
+     * Records that no member is online right now
+     */
+    public void markInactive() {
+        this.active = false;
     }
 
     /**
@@ -238,6 +310,109 @@ public final class Company {
     public boolean removeLicense(LicenseKey key) {
         Objects.requireNonNull(key, "key must not be null.");
         return licenses.remove(key) != null;
+    }
+
+    public List<Employee> employees() {
+        return List.copyOf(employees.values());
+    }
+
+    public int employeeCount() {
+        return employees.size();
+    }
+
+    public Optional<Employee> employee(long number) {
+        return Optional.ofNullable(employees.get(number));
+    }
+
+    public long issueEmployeeNumber() {
+        return nextEmployeeNumber++;
+    }
+
+    /**
+     * Adds a newly hired employee
+     * @param employee The employee to add
+     */
+    public void addEmployee(Employee employee) {
+        Objects.requireNonNull(employee, "employee must not be null.");
+        if (employee.number() >= nextEmployeeNumber) {
+            throw new IllegalArgumentException("The employee number " + employee.number() + " was not issued.");
+        }
+        if (employees.containsKey(employee.number())) {
+            throw new IllegalStateException("The company already has the employee " + employee.number() + ".");
+        }
+        employees.put(employee.number(), employee);
+    }
+
+    /**
+     * Replaces an employee with a changed version of the same employee
+     * @param employee The employee
+     */
+    public void replaceEmployee(Employee employee) {
+        Objects.requireNonNull(employee, "employee must not be null.");
+        if (!employees.containsKey(employee.number())) {
+            throw new IllegalStateException("The company has no employee " + employee.number() + ".");
+        }
+        employees.put(employee.number(), employee);
+    }
+
+    public Optional<Employee> removeEmployee(long number) {
+        return Optional.ofNullable(employees.remove(number));
+    }
+
+    /**
+     * @return The dismissed employees whose salary for the day of dismissal is still to be booked
+     */
+    public List<Departure> departures() {
+        return List.copyOf(departures);
+    }
+
+    /**
+     * Remembers a dismissed employee
+     * @param departure The departure
+     */
+    public void addDeparture(Departure departure) {
+        Objects.requireNonNull(departure, "departure must not be null.");
+        if (employees.containsKey(departure.employee().number())) {
+            throw new IllegalStateException("The employee " + departure.employee().number() + " still works for the company.");
+        }
+        departures.add(departure);
+    }
+
+    public boolean hasDeparture(RoleId role, long day) {
+        Objects.requireNonNull(role, "role must not be null.");
+        for (Departure departure : departures) {
+            if (departure.day() == day && departure.employee().role().equals(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes the oldest departure of a role on a day
+     * @param role The role
+     * @param day The day
+     * @return True if a departure was removed
+     */
+    public boolean consumeDeparture(RoleId role, long day) {
+        Objects.requireNonNull(role, "role must not be null.");
+        Iterator<Departure> iterator = departures.iterator();
+        while (iterator.hasNext()) {
+            Departure departure = iterator.next();
+            if (departure.day() == day && departure.employee().role().equals(role)) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Forgets every departure up to and including a day
+     * @param day The day
+     */
+    public void dropDeparturesUpTo(long day) {
+        departures.removeIf(departure -> departure.day() <= day);
     }
 
     /**
@@ -475,7 +650,11 @@ public final class Company {
             Map<String, Integer> boundResourceCounts,
             long fulfilledOrders,
             UpgradeApplication upgradeApplication,
-            List<LicenseHolding> licenses
+            List<LicenseHolding> licenses,
+            long nextEmployeeNumber,
+            List<Employee> employees,
+            long lastActiveDay,
+            List<Departure> departures
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -504,6 +683,25 @@ public final class Company {
             for (LicenseHolding holding : licenses) {
                 if (!keys.add(holding.key())) throw new IllegalArgumentException("licenses contains " + holding.key() + " twice.");
             }
+
+            if (nextEmployeeNumber < 1) throw new IllegalArgumentException("nextEmployeeNumber must be at least 1.");
+            employees = employees == null ? List.of() : List.copyOf(employees);
+            Set<Long> numbers = new HashSet<>();
+            for (Employee employee : employees) {
+                if (!numbers.add(employee.number())) throw new IllegalArgumentException("employees contains number " + employee.number() + " twice.");
+                if (employee.number() >= nextEmployeeNumber) {
+                    throw new IllegalArgumentException("employee number " + employee.number() + " is not below nextEmployeeNumber.");
+                }
+            }
+
+            if (lastActiveDay < NEVER_ACTIVE) throw new IllegalArgumentException("lastActiveDay must be at least " + NEVER_ACTIVE + ".");
+
+            departures = departures == null ? List.of() : List.copyOf(departures);
+            for (Departure departure : departures) {
+                if (numbers.contains(departure.employee().number())) {
+                    throw new IllegalArgumentException("employee " + departure.employee().number() + " is both employed and departed.");
+                }
+            }
         }
     }
 
@@ -531,7 +729,11 @@ public final class Company {
                 boundResourceCounts,
                 fulfilledOrders,
                 upgradeApplication,
-                List.copyOf(licenses.values()));
+                List.copyOf(licenses.values()),
+                nextEmployeeNumber,
+                List.copyOf(employees.values()),
+                lastActiveDay,
+                List.copyOf(departures));
     }
 
     public static Company restore(SaveState saveState) {
@@ -559,6 +761,12 @@ public final class Company {
         for (LicenseHolding holding : saveState.licenses()) {
             company.licenses.put(holding.key(), holding);
         }
+        company.nextEmployeeNumber = saveState.nextEmployeeNumber();
+        for (Employee employee : saveState.employees()) {
+            company.employees.put(employee.number(), employee);
+        }
+        company.lastActiveDay = saveState.lastActiveDay();
+        company.departures.addAll(saveState.departures());
         return company;
     }
 }

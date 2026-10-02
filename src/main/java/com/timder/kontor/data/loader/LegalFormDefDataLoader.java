@@ -50,6 +50,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
         int level = GsonHelper.getAsInt(object, "level");
         String id = GsonHelper.getAsString(object, "id");
         int maxEmployees = GsonHelper.getAsInt(object, "max_employees");
+        double employeeSalaryFactor = GsonHelper.getAsDouble(object, "employee_salary_factor");
         int maxProductLicenses = GsonHelper.getAsInt(object, "max_product_licenses");
         int maxOpenRequestsPerProduct = GsonHelper.getAsInt(object, "max_open_requests_per_product");
         int maxOpenRequestsTotal = GsonHelper.getAsInt(object, "max_open_requests_total");
@@ -75,6 +76,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
                 level,
                 id,
                 maxEmployees,
+                employeeSalaryFactor,
                 maxProductLicenses,
                 maxOpenRequestsPerProduct,
                 maxOpenRequestsTotal,

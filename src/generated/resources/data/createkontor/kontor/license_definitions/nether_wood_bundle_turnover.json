@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "nether_wood_bundle_turnover",
+  "markets": [
+    "crimson_planks",
+    "crimson_stairs",
+    "crimson_slab",
+    "warped_planks",
+    "warped_stairs",
+    "warped_slab"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.06
+}

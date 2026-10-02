@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "mangrove_bundle",
+  "markets": [
+    "mangrove_planks",
+    "mangrove_stairs",
+    "mangrove_slab"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}

@@ -88,7 +88,7 @@ public final class RequestArrivals {
         for (ItemId market : economy.marketIds()) {
             for (MarketParticipant participant : economy.participants(market)) {
                 Company company = registry.get(participant.companyId()).orElse(null);
-                if (company == null) {
+                if (company == null || !company.isActive()) {
                     continue;
                 }
                 LegalFormDef legalForm = company.legalForm(companyParams);

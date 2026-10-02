@@ -82,4 +82,16 @@ public final class ComponentFormatting {
         return Component.literal(s);
     }
 
+    public static MutableComponent check(boolean met) {
+        return met
+                ? Component.literal("\u2713")
+                : Component.literal("\u2717");
+    }
+
+    public static MutableComponent progress(String actual, String required, boolean met) {
+        return Component.empty()
+                .append(Component.literal(actual).withStyle(met ? ChatFormatting.GREEN : ChatFormatting.RED))
+                .append(Component.literal(" / ").withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal(required));
+    }
 }

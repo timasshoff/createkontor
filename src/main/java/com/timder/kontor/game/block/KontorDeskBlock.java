@@ -9,6 +9,7 @@ import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.block.company.CompanyBindGate;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.block.ui.AbstractUIBlock;
+import com.timder.kontor.game.chunk.ChunkLoadingDesk;
 import com.timder.kontor.registry.KontorBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -22,7 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public class KontorDeskBlock extends AbstractUIBlock<KontorDeskBlockEntity> {
+public class KontorDeskBlock extends AbstractUIBlock<KontorDeskBlockEntity> implements ChunkLoadingDesk {
 
     public static final String RESOURCE_KEY = "kontor_desk";
 

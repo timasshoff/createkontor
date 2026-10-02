@@ -1,0 +1,17 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.8,
+  "id": "large_andesite_bundle",
+  "markets": [
+    "andesite_stairs",
+    "andesite_slab",
+    "andesite_wall",
+    "polished_andesite",
+    "polished_andesite_stairs",
+    "polished_andesite_slab",
+    "polished_andesite_wall",
+    "create:andesite_alloy"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.05
+}

@@ -21,7 +21,8 @@ import java.util.Objects;
  * @param businessLicenseFee Daily fee of the business license
  * @param insolvencyDays Amount of days in payment difficulties that end in insolvency. 0 = no insolvency.
  * @param bookingRetentionDays The amount of days that individual bookings are saved
- * @param historyLengthDays The amount fo days that a daily history is saved per company
+ * @param historyLengthDays The amount of days that a daily history is saved per company
+ * @param hireBonusSalaryMultiple The multiple of the salary that is paid as a hiring bonus
  */
 public record CompanyParams(
         LegalForms legalForms,
@@ -35,7 +36,8 @@ public record CompanyParams(
         Money businessLicenseFee,
         int insolvencyDays,
         int bookingRetentionDays,
-        int historyLengthDays
+        int historyLengthDays,
+        double hireBonusSalaryMultiple
 ) {
 
     public CompanyParams {
@@ -54,6 +56,8 @@ public record CompanyParams(
         if (insolvencyDays < 0) throw new IllegalArgumentException("insolvencyDays must not be negative.");
         if (bookingRetentionDays < 1) throw new IllegalArgumentException("bookingRetentionDays must be at least 1.");
         if (historyLengthDays < 1) throw new IllegalArgumentException("historyLengthDays must be at least 1.");
+        if (!(hireBonusSalaryMultiple >= 0.0) || Double.isInfinite(hireBonusSalaryMultiple)) throw new IllegalArgumentException("hireBonusSalaryMultiple must be a finite number, not negative.");
+
     }
 
     public boolean insolvencyEnabled() {
@@ -77,7 +81,8 @@ public record CompanyParams(
                 Money.ofDollars(20),
                 5,
                 30,
-                360
+                360,
+                3.0
         );
     }
 

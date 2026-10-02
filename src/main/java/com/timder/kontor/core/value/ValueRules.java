@@ -21,6 +21,8 @@ public final class ValueRules {
      */
     public static final double CONVERGENCE_THRESHOLD = 0.001;
 
+    public static final double MIN_OUTPUT_YIELD = 0.01;
+
     /**
      * Finds every item that COULD matter for the given roots.
      * Follows the recipes ingredients backwards up to {@link #MAX_DISCOVERY_DEPTH}.
@@ -127,7 +129,7 @@ public final class ValueRules {
                             break;
                         }
                     }
-                    if (targetOutput == null) {
+                    if (targetOutput == null || targetOutput.yield() < MIN_OUTPUT_YIELD) {
                         continue;
                     }
 

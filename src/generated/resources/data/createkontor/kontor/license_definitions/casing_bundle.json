@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "casing_bundle",
+  "markets": [
+    "create:andesite_casing",
+    "create:copper_casing",
+    "create:brass_casing"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.0
+}

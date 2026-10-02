@@ -4,7 +4,8 @@
   "id": "sheet_metal_bundle",
   "markets": [
     "create:iron_sheet",
-    "create:brass_sheet"
+    "create:brass_sheet",
+    "create:copper_sheet"
   ],
   "min_legal_level": 2,
   "revenue_share": 0.0

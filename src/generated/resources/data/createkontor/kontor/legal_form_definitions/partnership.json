@@ -2,6 +2,7 @@
   "auto_accept_requests": true,
   "bankloan_limit_in_dollars": 20000,
   "deadline_factor": 1.2,
+  "employee_salary_factor": 1.0,
   "feed_in_license_tier": 1,
   "founder_protection": false,
   "free_storage_value_in_dollars": 0,
@@ -20,7 +21,7 @@
   "overdraft_limit_in_dollars": 5000,
   "upgrade_requirements": {
     "fee_in_dollars": 10000,
-    "min_fulfilled_orders": 30,
+    "min_fulfilled_orders": 1,
     "min_net_worth_in_dollars": 5000,
     "min_reputation_stars": 3.0,
     "processing_ticks": 24000,

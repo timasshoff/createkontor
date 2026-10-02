@@ -42,6 +42,14 @@ public final class PlayerNotifications {
         }
     }
 
+    public static void sendUpgradeCancelledNotification(MinecraftServer server, Company company, int targetLevel, Money refund, CompanyParams params) {
+        Component message = Component.translatable("message.createkontor.upgrade.cancelled",
+                ComponentFormatting.highlightError(company.name()),
+                legalFormName(params, targetLevel),
+                ComponentFormatting.highlightError(refund.toString()));
+        sendMessageToAllMembers(company, server, message);
+    }
+
     public static void sendMessageToAllMembers(Company company, MinecraftServer server, Component message) {
         List<UUID> members = new ArrayList<>();
         members.add(company.owner());
@@ -61,7 +69,7 @@ public final class PlayerNotifications {
         for (UUID member : members) {
             ServerPlayer player = server.getPlayerList().getPlayer(member);
             if (player != null) {
-                player.displayClientMessage(message, false);
+                player.displayClientMessage(message, true);
             }
         }
     }

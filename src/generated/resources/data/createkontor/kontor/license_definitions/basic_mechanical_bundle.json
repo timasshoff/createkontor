@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "basic_mechanical_bundle",
+  "markets": [
+    "create:andesite_alloy",
+    "create:shaft",
+    "create:cogwheel"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

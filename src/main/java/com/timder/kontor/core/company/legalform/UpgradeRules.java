@@ -63,6 +63,33 @@ public final class UpgradeRules {
     }
 
     /**
+     * Cancels an application that is being processed.
+     * Refunds the application fee.
+     * @param company The company
+     * @param day The current day
+     * @param params The company parameters
+     * @return The refunded fee. Empty if no application was cancelled
+     */
+    public static Optional<Money> cancel(Company company, long day, CompanyParams params) {
+        Objects.requireNonNull(company, "company must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+
+        UpgradeApplication application = company.upgradeApplication().orElse(null);
+        if (application == null || !application.isProcessing()) {
+            return Optional.empty();
+        }
+
+        LegalFormDef target = targetOf(company, application, params);
+        Money fee = target.entryRequirements().fee();
+        company.discardUpgrade();
+        if (fee.isPositive()) {
+            company.account().book(day, BookingKind.UPGRADE_FEE, fee, target.id()); // TODO change booking kind
+        }
+        return Optional.of(fee);
+    }
+
+    /**
      * Lets this application process time.
      * @param company The company
      * @param ticks The ticks to pass
