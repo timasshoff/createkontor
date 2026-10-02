@@ -13,6 +13,9 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 public final class UiLabels {
+
+    private static final float MIN_LABEL_WIDTH = 80;
+
     public static Label h1(Component text, Horizontal horizontalAlignment) {
         return (Label) new Label()
                 .setText(text)
@@ -117,6 +120,20 @@ public final class UiLabels {
                         .widthPercent(100));
     }
 
+    public static Label paragraphTertiary(Component text, Horizontal horizontalAlignment) {
+        return (Label) new Label()
+                .setText(text)
+                .textStyle(style -> style
+                        .textColor(0x555555)
+                        .textAlignHorizontal(horizontalAlignment)
+                        .textWrap(TextWrap.WRAP)
+                        .adaptiveHeight(true)
+                        .adaptiveWidth(false))
+                .layout(layout -> layout
+                        .marginAll(2)
+                        .widthPercent(100));
+    }
+
     public static Label paragraphError(Component text, Horizontal horizontalAlignment) {
         return (Label) new Label()
                 .setText(text)
@@ -149,6 +166,43 @@ public final class UiLabels {
                 row.addChild(UiLabels.secondary(Component.literal("•"), Horizontal.CENTER));
             }
         }
+        return row;
+    }
+
+    public static UIElement labelValue(Component label, Component value) {
+        return labelValue(label, primary(value, Horizontal.RIGHT));
+    }
+
+    public static UIElement labelValue(Component label, Label valueLabel) {
+        UIElement row = new UIElement().layout(layout -> layout
+                .flexDirection(FlexDirection.ROW)
+                .flexWrap(FlexWrap.WRAP)
+                .alignItems(AlignItems.FLEX_START)
+                .gapAll(4)
+                .widthPercent(100));
+        Label labelElement = (Label) secondary(label, Horizontal.LEFT)
+                .textStyle(style -> style.adaptiveWidth(false))
+                .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1)
+                        .minWidth(MIN_LABEL_WIDTH));
+        row.addChild(labelElement);
+        valueLabel.layout(layout -> layout.alignSelf(AlignItems.FLEX_END));
+        row.addChild(valueLabel);
+        return row;
+    }
+
+    public static UIElement labelValueNoWrap(Component label, Component value) {
+        UIElement row = new UIElement().layout(layout -> layout
+                .flexDirection(FlexDirection.ROW)
+                .alignItems(AlignItems.FLEX_START)
+                .gapAll(4)
+                .widthPercent(100));
+        Label labelElement = (Label) secondary(label, Horizontal.LEFT)
+                .textStyle(style -> style.adaptiveWidth(false))
+                .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
+        Label valueElement = primary(value, Horizontal.RIGHT);
+        valueElement.layout(layout -> layout.alignSelf(AlignItems.FLEX_END));
+        row.addChild(labelElement);
+        row.addChild(valueElement);
         return row;
     }
 }

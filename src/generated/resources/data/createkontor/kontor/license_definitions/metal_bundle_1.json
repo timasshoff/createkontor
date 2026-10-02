@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "metal_bundle_1",
+  "markets": [
+    "iron_ingot",
+    "copper_ingot",
+    "create:zinc_ingot",
+    "create:brass_ingot"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

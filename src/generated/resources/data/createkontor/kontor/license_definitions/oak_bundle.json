@@ -1,9 +1,11 @@
 {
   "daily_fraction": 1.0,
-  "fee_factor": 1.0,
-  "id": "cogwheel",
+  "fee_factor": 0.8,
+  "id": "oak_bundle",
   "markets": [
-    "create:cogwheel"
+    "oak_planks",
+    "oak_stairs",
+    "oak_slab"
   ],
   "min_legal_level": 1,
   "revenue_share": 0.0

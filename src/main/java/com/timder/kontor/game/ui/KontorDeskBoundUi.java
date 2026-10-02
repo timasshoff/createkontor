@@ -13,17 +13,23 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.core.company.CompanyHistoryEntry;
+import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Booking;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Loan;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.license.LicenseDef;
+import com.timder.kontor.core.company.license.LicenseKeyCodec;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.RequestOrigin;
 import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.core.market.MarketParticipationRules;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.ui.chart.CompanyCharts;
 import com.timder.kontor.game.ui.chart.ChartElement;
 import com.timder.kontor.config.CompanyConfig;
@@ -34,7 +40,9 @@ import com.timder.kontor.game.block.KontorDeskBlockEntity;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
+import com.timder.kontor.game.ui.element.UiSliders;
 import com.timder.kontor.util.ComponentFormatting;
+import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.AlignContent;
@@ -49,9 +57,15 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
 import java.util.*;
+
+import static com.timder.kontor.game.ui.LawyerUi.itemIdsToTag;
+import static com.timder.kontor.game.ui.LawyerUi.tagToItemIds;
 
 public class KontorDeskBoundUi {
     public static ModularUI create(BlockUIMenuType.BlockUIHolder holder, KontorDeskBlockEntity be, Company company, Economy economy) {
@@ -64,6 +78,7 @@ public class KontorDeskBoundUi {
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.overview")), overviewTab(company, economy, companyHistory, companyHistoryBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")), accountTab(company, companyHistory, companyHistoryBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.requests_orders")), requestsOrdersTab(company, be));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.markets")), marketsTab(company, be));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(company, economy));
         return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
@@ -170,13 +185,19 @@ public class KontorDeskBoundUi {
                 .build().getSyncValue()
         );
 
+        Label netWorth = UiLabels.primary(Component.empty(), Horizontal.CENTER);
+        netWorth.addSyncValue(DataBindingBuilder.componentS2C(() -> Component.translatable("ui.createkontor.kontor_desk.net_worth", company.netWorth().toString()))
+                .onRemoteSyncReceived(netWorth::setText)
+                .build().getSyncValue()
+        );
+
         Label overdraftLimitLabel = UiLabels.primary(Component.empty(), Horizontal.CENTER);
         overdraftLimitCents.addListener(() -> overdraftLimitLabel.setText(Component.translatable("ui.createkontor.kontor_desk.current_overdraft_limit", Money.ofCents(overdraftLimitCents.get()).toString())));
         overdraftLimitLabel.addSyncValue(overdraftLimitBinding.getSyncValue());
 
         content.addChild(UiContainer.headerWithSubtitle(
                 balance,
-                UiLabels.seperatedLabelRow(List.of(liquidity, overdraftLimitLabel))
+                UiLabels.seperatedLabelRow(List.of(liquidity, overdraftLimitLabel, netWorth))
         ));
 
         TabView tabView = (TabView) UiContainer.largeTabView().layout(layout -> layout
@@ -562,6 +583,105 @@ public class KontorDeskBoundUi {
         return content;
     }
 
+    public static UIElement marketsTab(Company company, KontorDeskBlockEntity be) {
+        ScrollerView content = UiContainer.tabScroller();
+
+        ObservableList<MarketEntry> entries = new ObservableList<>();
+        SimpleBinding<Tag> entriesBinding = DataBindingBuilder.tagS2C(() -> marketEntriesToTag(company, be))
+                .onRemoteSyncReceived(tag -> entries.set(tagToMarketEntries(tag)))
+                .build();
+
+        Label title = UiLabels.h1(Component.translatable("ui.createkontor.kontor_desk.tab.markets"), Horizontal.LEFT);
+        title.addSyncValue(entriesBinding.getSyncValue());
+        entries.addListener(() -> title.setText(Component.translatable("ui.createkontor.kontor_desk.markets_count", entries.get().size())));
+        content.addScrollViewChildren(title);
+
+        UIElement marketsBox = new UIElement().layout(layout -> layout.gapAll(4)).addSyncValue(entriesBinding.getSyncValue());
+        Component[] error = { Component.empty() };
+
+        marketsBox.onMessage("c2s_set_participation", tag ->
+                error[0] = be.setMarketParticipation(new ItemId(tag.getString("Market")), tag.getBoolean("Participate")));
+        marketsBox.onMessage("c2s_set_list_price", tag ->
+                error[0] = be.setListPrice(new ItemId(tag.getString("Market")), tag.getLong("PriceCents")));
+
+        Label errorLabel = UiLabels.paragraphError(Component.empty(), Horizontal.LEFT);
+        var errorBinding = DataBindingBuilder.componentS2C(() -> error[0])
+                .onRemoteSyncReceived(errorLabel::setText)
+                .build();
+        errorLabel.addSyncValue(errorBinding.getSyncValue());
+        content.addScrollViewChildren(errorLabel);
+        entries.addListener(() -> {
+            marketsBox.clearAllChildren();
+
+            if (entries.get().isEmpty()) {
+                marketsBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.kontor_desk.markets.empty"), Horizontal.LEFT));
+                return;
+            }
+
+            for (MarketEntry entry : entries.get()) {
+                UIElement element = new UIElement()
+                        .style(style -> style.background(Sprites.BORDER_DARK))
+                        .layout(layout -> layout.paddingAll(8).gapAll(4));
+
+                UIElement titleRow = new UIElement()
+                        .layout(layout -> layout
+                                .flexDirection(FlexDirection.ROW)
+                                .flexWrap(FlexWrap.WRAP)
+                                .justifyContent(AlignContent.FLEX_START)
+                                .alignItems(AlignItems.CENTER)
+                                .gapAll(4)
+                                .widthPercent(100));
+                titleRow.addChild(new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())), 1)));
+                titleRow.addChild(UiLabels.paragraphPrimary(Component.literal(BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())).asItem().getDescription().getString()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT)
+                        .layout(layout -> layout
+                                .widthAuto()
+                                .flexBasis(0)
+                                .flexGrow(1)));
+                element.addChild(titleRow);
+
+                Toggle toggle = new Toggle();
+                toggle.setText("ui.createkontor.kontor_desk.markets.participate", true);
+                toggle.setOn(entry.market().participating(), false);
+                toggle.setOnToggleChanged(isOn -> {
+                    CompoundTag tag = new CompoundTag();
+                    tag.putString("Market", entry.market().market().value());
+                    tag.putBoolean("Participate", isOn);
+                    marketsBox.sendMessage("c2s_set_participation", tag);
+                });
+                element.addChild(toggle);
+
+                if (entry.market().participating()) {
+                    element.addChild(UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.kontor_desk.markets.list_price"), Horizontal.LEFT));
+
+                    UIElement priceSlider = UiSliders.labeled(
+                            Math.max(0.01f, (float) entry.marketPrice().toDollars() * 0.01f),
+                            (float) entry.marketPrice().toDollars() * 2f,
+                            (float) (entry.listPrice() != null ? entry.listPrice().toDollars() : 0.0f),
+                            0.01f,
+                            2,
+                            400,
+                            value -> ComponentFormatting.moneyColored(Money.fromDollar((double) value)),
+                            value -> { },
+                            value -> {
+                                CompoundTag tag = new CompoundTag();
+                                tag.putString("Market", entry.market().market().value());
+                                tag.putLong("PriceCents", Money.fromDollar(value).cents());
+                                marketsBox.sendMessage("c2s_set_list_price", tag);
+                            }
+                    );
+
+                    element.addChild(priceSlider);
+                    element.addChild(UiLabels.secondary(Component.translatable("ui.createkontor.kontor_desk.markets.market_price", ComponentFormatting.moneyColored(entry.marketPrice())), Horizontal.LEFT));
+                }
+
+                marketsBox.addChild(element);
+            }
+        });
+
+        content.addScrollViewChildren(marketsBox);
+        return content;
+    }
+
     private static List<Booking> tagToBookings(Tag tag) {
         ListTag list = (ListTag) tag;
         List<Booking> bookings = new ArrayList<>();
@@ -593,13 +713,6 @@ public class KontorDeskBoundUi {
 
     private static void buildBalanceChart(List<Booking> bookings, long overdraftLimit, UIElement parent) {
         ChartElement newChart = ChartElement.from(CompanyCharts.balanceSpecFromBookings(bookings, -overdraftLimit / 100.0));
-        newChart.layout(layout -> layout.widthPercent(100).flex(1));
-        parent.clearAllChildren();
-        parent.addChild(newChart);
-    }
-
-    private static void buildCostStructureChart(List<CompanyHistoryEntry> history, UIElement parent) {
-        ChartElement newChart = ChartElement.from(CompanyCharts.costStructureFromHistory(history));
         newChart.layout(layout -> layout.widthPercent(100).flex(1));
         parent.clearAllChildren();
         parent.addChild(newChart);
@@ -756,4 +869,66 @@ public class KontorDeskBoundUi {
         return level != null ? level.getGameTime() : 0L;
     }
 
+    private static CompoundTag licenseDefToTag(LicenseDef def) {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Key", LicenseKeyCodec.encode(def.key()));
+        tag.put("Markets", itemIdsToTag(def.markets()));
+        tag.putDouble("FeeFactor", def.feeFactor());
+        tag.putDouble("DailyFraction", def.dailyFraction());
+        tag.putDouble("RevenueShare", def.revenueShare());
+        tag.putInt("MinLegalLevel", def.minLegalLevel());
+        return tag;
+    }
+
+    private static LicenseDef tagToLicenseDef(CompoundTag tag) {
+        return new LicenseDef(
+                LicenseKeyCodec.decode(tag.getString("Key")),
+                new LinkedHashSet<>(tagToItemIds(tag.getList("Markets", Tag.TAG_STRING))),
+                tag.getDouble("FeeFactor"),
+                tag.getDouble("DailyFraction"),
+                tag.getDouble("RevenueShare"),
+                tag.getInt("MinLegalLevel"));
+    }
+
+    private record MarketEntry(MarketParticipationRules.LicensedMarket market, Money marketPrice, @Nullable Money listPrice) {}
+
+    private static Tag marketEntriesToTag(Company company, KontorDeskBlockEntity be) {
+        ListTag list = new ListTag();
+        if (!(be.getLevel() instanceof ServerLevel serverLevel))
+            return list;
+
+        Economy economy = EconomySavedData.get(serverLevel.getServer()).getEconomy();
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+
+        for (MarketParticipationRules.LicensedMarket market : MarketParticipationRules.licensedMarkets(company, economy, params)) {
+            CompoundTag tag = new CompoundTag();
+            tag.putString("Market", market.market().value());
+            tag.putBoolean("Participating", market.participating());
+            market.storedReputation().ifPresent(reputation -> tag.putDouble("Reputation", reputation));
+            tag.put("License", licenseDefToTag(market.license()));
+            tag.putLong("MarketPriceCents", Money.fromDollar(economy.marketSnapshot(market.market()).displayedPrice()).cents());
+            economy.storedParticipant(market.market(), company.id())
+                    .ifPresent(p -> tag.putLong("ListPriceCents", Money.fromDollar(p.listPrice()).cents()));
+            list.add(tag);
+        }
+        return list;
+    }
+
+    private static List<MarketEntry> tagToMarketEntries(Tag tag) {
+        List<MarketEntry> entries = new ArrayList<>();
+        if (!(tag instanceof ListTag list)) return entries;
+
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag entry = list.getCompound(i);
+            entries.add(new MarketEntry(
+                    new MarketParticipationRules.LicensedMarket(
+                            new ItemId(entry.getString("Market")),
+                            tagToLicenseDef(entry.getCompound("License")),
+                            entry.getBoolean("Participating"),
+                            entry.contains("Reputation") ? OptionalDouble.of(entry.getDouble("Reputation")) : OptionalDouble.empty()),
+                    Money.ofCents(entry.getLong("MarketPriceCents")),
+                    entry.contains("ListPriceCents") ? Money.ofCents(entry.getLong("ListPriceCents")) : null));
+        }
+        return entries;
+    }
 }

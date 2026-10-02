@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "cobblestone_bundle",
+  "markets": [
+    "cobblestone_stairs",
+    "cobblestone_slab",
+    "cobblestone_wall"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}

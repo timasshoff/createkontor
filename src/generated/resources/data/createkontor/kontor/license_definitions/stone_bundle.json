@@ -1,0 +1,16 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "stone_bundle",
+  "markets": [
+    "stone_stairs",
+    "stone_slab",
+    "stone_wall",
+    "stone_bricks",
+    "stone_brick_stairs",
+    "stone_brick_slab",
+    "stone_brick_wall"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.05
+}

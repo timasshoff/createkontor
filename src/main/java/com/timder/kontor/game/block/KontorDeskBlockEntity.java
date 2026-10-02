@@ -8,8 +8,11 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.core.market.MarketParticipationRules;
+import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
@@ -104,6 +107,60 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
                     ComponentFormatting.error(e.getMessage())
             );
         }
+        return Component.empty();
+    }
+
+    public Component setMarketParticipation(ItemId market, boolean participate) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return Component.empty();
+        }
+        MinecraftServer server = serverLevel.getServer();
+        CompanySavedData companyData = CompanySavedData.get(server);
+        Company company = companyData.getRegistry().get(getCompanyId()).orElse(null);
+        if (company == null) {
+            return ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE);
+        }
+
+        EconomySavedData economyData = EconomySavedData.get(server);
+        Economy economy = economyData.getEconomy();
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+
+        try {
+            if (participate) {
+                MarketParticipationRules.join(company, economy, market, params);
+            } else {
+                MarketParticipationRules.pause(company, economy, market);
+            }
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ComponentFormatting.error(e.getMessage());
+        }
+        economyData.setDirty();
+        companyData.setDirty();
+        return Component.empty();
+    }
+
+    public Component setListPrice(ItemId market, long priceCents) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return Component.empty();
+        }
+        MinecraftServer server = serverLevel.getServer();
+        Company company = CompanySavedData.get(server).getRegistry().get(getCompanyId()).orElse(null);
+        if (company == null) {
+            return ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE);
+        }
+
+        EconomySavedData economyData = EconomySavedData.get(server);
+        Economy economy = economyData.getEconomy();
+        if (!economy.isParticipant(market, company.id())) {
+            return ComponentFormatting.error("The company does not actively take part in " + market + ".");
+        }
+
+        try {
+            economy.updateListPrice(market, company.id(), Money.ofCents(priceCents).toDollars());
+        } catch (IllegalArgumentException e) {
+            return ComponentFormatting.error(e.getMessage());
+        }
+        economyData.setDirty();
         return Component.empty();
     }
 }

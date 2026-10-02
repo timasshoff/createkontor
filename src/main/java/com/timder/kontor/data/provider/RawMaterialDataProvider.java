@@ -48,16 +48,16 @@ public class RawMaterialDataProvider implements DataProvider {
         /*
         Wood
          */
-        futures.add(save(cache, "oak_log", "minecraft:oak_log", 1.5, 0.01, 7000.0));
-        futures.add(save(cache, "spruce_log", "minecraft:spruce_log", 1.5, 0.01, 7000.0));
-        futures.add(save(cache, "birch_log", "minecraft:birch_log", 1.5, 0.01, 7000.0));
-        futures.add(save(cache, "jungle_log", "minecraft:jungle_log", 1.5, 0.01, 7000.0));
-        futures.add(save(cache, "acacia_log", "minecraft:acacia_log", 1.5, 0.01, 7000.0));
-        futures.add(save(cache, "dark_oak_log", "minecraft:dark_oak_log", 1.5, 0.01, 7000.0));
-        futures.add(save(cache, "mangrove_log", "minecraft:mangrove_log", 2.0, 0.02, 4000.0));
-        futures.add(save(cache, "cherry_log", "minecraft:cherry_log", 1.5, 0.01, 7000.0));
-        futures.add(save(cache, "crimsom_stem", "minecraft:crimsom_stem", 3.5, 0.035, 3000.0));
-        futures.add(save(cache, "warped_stem", "minecraft:warped_stem", 3.5, 0.035, 3000.0));
+        futures.add(save(cache, "oak_log", "minecraft:oak_log", 1.7, 0.01, 7000.0));
+        futures.add(save(cache, "spruce_log", "minecraft:spruce_log", 1.7, 0.01, 7000.0));
+        futures.add(save(cache, "birch_log", "minecraft:birch_log", 1.7, 0.01, 7000.0));
+        futures.add(save(cache, "jungle_log", "minecraft:jungle_log", 1.7, 0.01, 7000.0));
+        futures.add(save(cache, "acacia_log", "minecraft:acacia_log", 1.7, 0.01, 7000.0));
+        futures.add(save(cache, "dark_oak_log", "minecraft:dark_oak_log", 1.7, 0.01, 7000.0));
+        futures.add(save(cache, "mangrove_log", "minecraft:mangrove_log", 2.2, 0.02, 4000.0));
+        futures.add(save(cache, "cherry_log", "minecraft:cherry_log", 1.7, 0.01, 7000.0));
+        futures.add(save(cache, "crimsom_stem", "minecraft:crimsom_stem", 3.7, 0.035, 3000.0));
+        futures.add(save(cache, "warped_stem", "minecraft:warped_stem", 3.7, 0.035, 3000.0));
 
         /*
         Misc
@@ -70,6 +70,27 @@ public class RawMaterialDataProvider implements DataProvider {
         futures.add(save(cache, "flint", "minecraft:flint", 1.3, 0.02, 5000.0));
         futures.add(save(cache, "andesite", "minecraft:andesite", 1.75, 0.02, 5000.0));
         futures.add(save(cache, "obsidian", "minecraft:obsidian", 15.0, 0.035, 1500.0));
+        futures.add(save(cache, "ink_sac", "minecraft:ink_sac", 10.0, 0.04, 1500.0));
+        futures.add(save(cache, "bone", "minecraft:bone", 5.0, 0.025, 1500.0));
+
+        /*
+        Flowers
+         */
+        futures.add(save(cache, "dandelion", "minecraft:dandelion", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "poppy", "minecraft:poppy", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "blue_orchid", "minecraft:blue_orchid", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "allium", "minecraft:allium", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "azure_bluet", "minecraft:azure_bluet", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "red_tulip", "minecraft:red_tulip", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "orange_tulip", "minecraft:orange_tulip", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "white_tulip", "minecraft:white_tulip", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "oxeye_daisy", "minecraft:oxeye_daisy", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "cornflower", "minecraft:cornflower", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "lily_of_the_valley", "minecraft:lily_of_the_valley", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "sunflower", "minecraft:sunflower", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "lilac", "minecraft:lilac", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "rose_bush", "minecraft:rose_bush", 7.5, 0.037, 3500.0));
+        futures.add(save(cache, "wither_rose", "minecraft:wither_rose", 18.0, 0.04, 1500.0));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }

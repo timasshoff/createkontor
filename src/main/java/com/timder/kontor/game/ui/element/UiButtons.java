@@ -9,4 +9,11 @@ public final class UiButtons {
                 .setText(text)
                 .layout(layout -> layout.height(20));
     }
+
+    public static Button critical(Component text) {
+        return (Button) new Button()
+                .setText(text)
+                .textStyle(style -> style.textColor(0xFF5555))
+                .layout(layout -> layout.height(20));
+    }
 }

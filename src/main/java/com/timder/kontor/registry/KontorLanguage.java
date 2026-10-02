@@ -56,9 +56,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.cost_structure", "Cost Structure");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bookings", "Bookings");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.open_loans", "Open Loans");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.markets", "Markets");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.open_orders", "Open Orders: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.total_bookings_visible", "Visible Bookings: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.current_overdraft_limit", "Overdraft Limit: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.net_worth", "Net Worth: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.bookings_count", "Bookings (%s)");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loans_count", "Open Loans (%s)");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.principal", "%s: %s");
@@ -80,6 +82,52 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.orders.empty", "Accepted requests will be visible here.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.order.delivery_time", "Remaining time to deliver: %s.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.order.grace_period", "Deadline reached! Fulfill this order now to receive a partial payout!");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets_count", "Licensed Markets (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.empty", "No licensed markets found. Buy a license for a market through a lawyer.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.participate", "Participate and receive requests");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.list_price", "List Price");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.market_price", "Current Market Price: %s");
+
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form", "Legal Form");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_in_progress", "Legal form upgrade in progress...");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.no_upgrade", "No legal form upgrade in progress.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.no_next_legal_form", "No next legal form available :(");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_to", "Upgrade legal form to");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats", "Legal Form Stats");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.application_fee", "Application Fee: %s");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_requirements", "Upgrade Requirements");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.all_requirements_met", "All requirements met! Ready to upgrade.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.not_all_requirements_met", "Not all requirements are met.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_to_in_progress", "Upgrade to %s in progress.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.waiting_for_net_worth", "§cApplication is resting because the net worth is too low. Raise the net worth to at least %s§c.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.resting_days_remaining", "§cRemaining days before application is cancelled: %s");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.apply_for_upgrade", "Apply for upgrade (application fee: %s)");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_info", "After applying you will need to hold the minimum net worth for the duration of the upgrade. If your net worth gets too low the upgrade application will rest for a few days before it gets rejected and you lose your application fee.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_lawyer_lost", "Your company has to have a lawyer for the entire duration of the upgrade. If the lawyer gets lost, the application will be cancelled and the application fee will be refunded.");
+
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog", "License Catalog");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog_count", "License Catalog (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.daily_fee", "Daily Fee");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.revenue_share", "Revenue Share");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.application_fee", "Activation Fee");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.covered_markets", "You already have licenses for these markets:");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.already_held", "You already own this license.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.unknown_license", "License unknown.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.legal_level_too_low", "Legal level too low.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.limit_reached", "Max. licenses reached.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.not_operational", "Payment difficulties");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.cannot_afford", "Too expensive");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.buy", "Buy license");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.reactivate", "Reactivate cancelled license");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.no_result", "No matching license found.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.search", "Search license catalog");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses", "Licenses");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses_count", "Licenses (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses.empty", "Your company does not hold any licenses. Buy a license using the license catalog.");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses.daily_fee", "Daily Fee: %s");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses.revenue_share", "Revenue Share: %s");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses.cancel", "Cancel License");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses.cancelled", "This license has been cancelled and will be removed from this list tomorrow.");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
@@ -87,7 +135,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.business_license", "Business License");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.flat_license", "Flat Product License");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.turnover_license", "Turnover Product License");
-        REGISTRATE.addRawLang("enum.createkontor.booking_kind.application_fee", "Application Fee");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.application_fee", "License Application Fee");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.feed_in_license", "SU Feed-in License");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.salary", "Salary");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.hire_bonus", "Hire Bonus");
@@ -108,12 +156,40 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_category.revenue", "Revenue");
         REGISTRATE.addRawLang("enum.createkontor.booking_category.financing", "Financing");
 
+        REGISTRATE.addRawLang("enum.createkontor.upgrade_criterion.net_worth", "Net Worth (Required Net Worth + Application Fee)");
+        REGISTRATE.addRawLang("enum.createkontor.upgrade_criterion.fulfilled_orders", "Fulfilled Orders");
+        REGISTRATE.addRawLang("enum.createkontor.upgrade_criterion.reputation", "Reputation");
+        REGISTRATE.addRawLang("enum.createkontor.upgrade_criterion.liquidity", "No payment difficulties");
+
+        REGISTRATE.addRawLang("enum.createkontor.license_cancel_result.already_cancelled", "License already cancelled.");
+        REGISTRATE.addRawLang("enum.createkontor.license_cancel_result.not_held", "Company does not own this license.");
+
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
         REGISTRATE.addRawLang("legal_forms.createkontor.public_company", "§6Public Company");
 
-        REGISTRATE.addRawLang("license.createkontor.sheet_metal_bundle", "Sheet Metal Bundle License");
+        REGISTRATE.addRawLang("license.createkontor.oak_bundle", "Oak Bundle");
+        REGISTRATE.addRawLang("license.createkontor.spruce_bundle", "Spruce Bundle");
+        REGISTRATE.addRawLang("license.createkontor.birch_bundle", "Birch Bundle");
+        REGISTRATE.addRawLang("license.createkontor.jungle_bundle", "Jungle Bundle");
+        REGISTRATE.addRawLang("license.createkontor.acacia_bundle", "Acacia Bundle");
+        REGISTRATE.addRawLang("license.createkontor.dark_oak_bundle", "Dark Oak Bundle");
+        REGISTRATE.addRawLang("license.createkontor.mangrove_bundle", "Mangrove Bundle");
+        REGISTRATE.addRawLang("license.createkontor.cherry_bundle", "Cherry Bundle");
+        REGISTRATE.addRawLang("license.createkontor.nether_wood_bundle", "Nether Wood Bundle");
+        REGISTRATE.addRawLang("license.createkontor.nether_wood_bundle_turnover", "Nether Wood Bundle");
+        REGISTRATE.addRawLang("license.createkontor.cobblestone_bundle", "Cobblestone Bundle");
+        REGISTRATE.addRawLang("license.createkontor.stone_bundle", "Stone Bundle");
+        REGISTRATE.addRawLang("license.createkontor.small_andesite_bundle", "Small Andesite Bundle");
+        REGISTRATE.addRawLang("license.createkontor.large_andesite_bundle", "Large Andesite Bundle");
+        REGISTRATE.addRawLang("license.createkontor.basic_mechanical_bundle", "Basic Mechanical Bundle");
+        REGISTRATE.addRawLang("license.createkontor.metal_bundle_1", "Metal Bundle I");
+        REGISTRATE.addRawLang("license.createkontor.metal_bundle_2", "Metal Bundle II");
+        REGISTRATE.addRawLang("license.createkontor.sheet_metal_bundle", "Sheet Metal Bundle");
+        REGISTRATE.addRawLang("license.createkontor.casing_bundle", "Casing Bundle");
+        REGISTRATE.addRawLang("license.createkontor.dye_bundle_1", "Dye Bundle I");
+        REGISTRATE.addRawLang("license.createkontor.dye_bundle_2", "Dye Bundle II");
         REGISTRATE.addRawLang("license.createkontor.generated", "%s License");
 
         REGISTRATE.addRawLang("employee_role.createkontor.lawyer", "Lawyer");

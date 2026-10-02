@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "small_andesite_bundle",
+  "markets": [
+    "andesite_stairs",
+    "andesite_slab",
+    "andesite_wall"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}

@@ -1,0 +1,7 @@
+{
+  "base_demand": 2200.0,
+  "group": "building",
+  "item": "minecraft:polished_andesite_slab",
+  "package_size": 64,
+  "target_utilisation": 0.8
+}

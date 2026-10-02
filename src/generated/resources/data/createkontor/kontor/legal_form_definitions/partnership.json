@@ -21,7 +21,7 @@
   "overdraft_limit_in_dollars": 5000,
   "upgrade_requirements": {
     "fee_in_dollars": 10000,
-    "min_fulfilled_orders": 30,
+    "min_fulfilled_orders": 1,
     "min_net_worth_in_dollars": 5000,
     "min_reputation_stars": 3.0,
     "processing_ticks": 24000,
