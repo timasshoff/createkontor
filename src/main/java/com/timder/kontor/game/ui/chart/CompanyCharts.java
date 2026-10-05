@@ -102,6 +102,7 @@ public class CompanyCharts {
         ChartSpec.Builder builder = ChartSpec.builder(Component.translatable("chart.createkontor.cost_structure.title").getString())
                 .kind(ChartKind.STACKED_BAR)
                 .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
+                .hideXAxis()
                 .pointLabels(pointLabels)
                 .xRangeOptions(List.of(5, 10, 30, 100, 360), 30);
 

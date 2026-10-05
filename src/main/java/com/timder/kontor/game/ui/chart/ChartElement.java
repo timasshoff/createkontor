@@ -95,6 +95,7 @@ public class ChartElement extends UIElement {
     @Nullable
     private Selector<Integer> rangeSelector;
     private int visibleRange = 0;
+    private boolean showXAxis = true;
 
     public ChartElement() {
         style(s -> s.overflowVisible(false)); // Prevent overflow
@@ -116,6 +117,7 @@ public class ChartElement extends UIElement {
             chart.addReferenceLine(line.label(), line.value(), line.color());
         }
         chart.setIncludeZero(spec.includeZero());
+        chart.setShowXAxis(spec.showXAxis());
 
         String xUnit = spec.xUnit();
         String xZeroLabel = spec.xZeroLabel();
@@ -181,6 +183,11 @@ public class ChartElement extends UIElement {
 
     public ChartElement setIncludeZero(boolean includeZero) {
         this.includeZero = includeZero;
+        return this;
+    }
+
+    public ChartElement setShowXAxis(boolean showXAxis) {
+        this.showXAxis = showXAxis;
         return this;
     }
 
@@ -332,7 +339,7 @@ public class ChartElement extends UIElement {
         NiceScale yScale = NiceScale.of(range[2], range[3], Y_TICK_TARGET);
         NiceScale xScale = NiceScale.of(range[0], range[1], X_TICK_TARGET);
         double[] yTicks = yScale.ticks();
-        double[] xTicks = xScale.ticksWithin(range[0], range[1]);
+        double[] xTicks = showXAxis ? xScale.ticksWithin(range[0], range[1]) : new double[0];
 
         String[] yLabels = new String[yTicks.length];
         float labelWidth = 0f;
@@ -355,7 +362,7 @@ public class ChartElement extends UIElement {
                 left + PAD + labelWidth + 4f,
                 y,
                 left + width - PAD - 2f,
-                top + height - PAD - lineHeight - 4f,
+                top + height - PAD - (showXAxis ? lineHeight + 4f : 0f),
                 range[0],
                 range[1],
                 yScale.min(),
