@@ -527,24 +527,13 @@ public final class Economy {
         }
 
         ValueResult result = ValueRules.computeValues(discoveredScope, graph, params.processCosts(), leafValues, marketPrices, technicalProgress);
-        for (String name : List.of("minecraft:iron_nugget", "create:crushed_raw_iron", "minecraft:redstone")) {
-            ItemId item = new ItemId(name);
-            System.out.printf("[Kontor debug] day %s %s cost=%s market=%s via %s%n",
-                    macro.getDay(), name, result.referenceCost().get(item), marketPrices.get(item),
-                    result.standardRecipe().get(item));
-        }
-        double trend = MacroRules.trend(macro, params.macro());
 
+        double trend = MacroRules.trend(macro, params.macro());
         for (MarketDefinition def : marketDefinitions) {
             Double newCost = result.referenceCost().get(def.id());
             MarketParams previous = marketParamsMap.get(def.id());
 
             double referenceCost = newCost != null ? newCost : previous.referenceCost();
-            if (Math.abs(referenceCost - previous.referenceCost()) / previous.referenceCost() > 0.10) {
-                System.out.printf("[Kontor debug] day %s %s referenceCost %.2f -> %.2f via %s%n",
-                        macro.getDay(), def.id(), previous.referenceCost(), referenceCost,
-                        result.standardRecipe().get(def.id()));
-            }
             double plantSize = def.params().plantSize() * trend; // Grows plant size with trend & therefor with demand
             MarketParams updated = new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
             marketParamsMap.put(def.id(), updated);

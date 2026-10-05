@@ -27,6 +27,7 @@ import java.util.function.Function;
 public final class UiContainer {
 
     private static final float GRID_GAP = 4;
+    private static final int LIST_GAP = 4;
 
     public static UIElement hudBox(Company company, Economy economy) {
         UIElement hud = new UIElement()
@@ -276,6 +277,56 @@ public final class UiContainer {
         };
 
         scroller.viewPort.addEventListener(UIEvents.LAYOUT_CHANGED, event -> applyLayout.run());
+        query.addListener(rebuild);
+        entries.addListener(rebuild);
+        rebuild.run();
+
+        return new UIElement()
+                .layout(layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0).gapAll(4))
+                .addChildren(searchField, scroller);
+    }
+
+    public static <T> UIElement searchableList(ObservableList<T> entries, Function<T, UIElement> rowFactory,
+                                               Function<T, List<String>> searchTexts, Component searchPlaceholder, Component noResultsText) {
+
+        ObservableValue<String> query = new ObservableValue<>("");
+
+        TextField searchField = new TextField();
+        searchField.textFieldStyle(style -> style.placeholder(searchPlaceholder));
+        searchField.setTextResponder(query::set);
+        searchField.layout(layout -> layout.widthPercent(100));
+
+        ScrollerView scroller = tabScroller();
+        scroller.layout(layout -> layout.heightAuto().flexBasis(0).flexGrow(1).minHeight(0));
+        scroller.viewContainer.layout(layout -> layout.flexDirection(FlexDirection.COLUMN).gapAll(LIST_GAP));
+
+        float[] appliedWidth = {0};
+
+        Runnable applyWidth = () -> {
+            float available = scroller.viewPort.getContentWidth();
+            if (available <= 0 || Math.abs(available - appliedWidth[0]) < 0.01f) return;
+            appliedWidth[0] = available;
+            scroller.viewContainer.layout(layout -> layout.width(available));
+        };
+
+        Runnable rebuild = () -> {
+            List<String> terms = searchTerms(query.get());
+            scroller.clearAllScrollViewChildren();
+
+            int shown = 0;
+            for (T entry : entries.get()) {
+                if (!matchesAny(searchTexts.apply(entry), terms)) continue;
+                scroller.addScrollViewChild(rowFactory.apply(entry));
+                shown++;
+            }
+            if (shown == 0) {
+                scroller.addScrollViewChild(UiLabels.secondary(noResultsText, Horizontal.CENTER)
+                        .layout(layout -> layout.widthPercent(100)));
+            }
+            applyWidth.run();
+        };
+
+        scroller.viewPort.addEventListener(UIEvents.LAYOUT_CHANGED, event -> applyWidth.run());
         query.addListener(rebuild);
         entries.addListener(rebuild);
         rebuild.run();

@@ -37,10 +37,7 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.KontorDeskBlockEntity;
-import com.timder.kontor.game.ui.element.UiButtons;
-import com.timder.kontor.game.ui.element.UiContainer;
-import com.timder.kontor.game.ui.element.UiLabels;
-import com.timder.kontor.game.ui.element.UiSliders;
+import com.timder.kontor.game.ui.element.*;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.ObservableList;
@@ -639,16 +636,15 @@ public class KontorDeskBoundUi {
                                 .flexGrow(1)));
                 element.addChild(titleRow);
 
-                Toggle toggle = new Toggle();
-                toggle.setText("ui.createkontor.kontor_desk.markets.participate", true);
-                toggle.setOn(entry.market().participating(), false);
-                toggle.setOnToggleChanged(isOn -> {
-                    CompoundTag tag = new CompoundTag();
-                    tag.putString("Market", entry.market().market().value());
-                    tag.putBoolean("Participate", isOn);
-                    marketsBox.sendMessage("c2s_set_participation", tag);
-                });
-                element.addChild(toggle);
+                element.addChild(UiSwitches.labeled(
+                        Component.translatable("ui.createkontor.kontor_desk.markets.participate"),
+                        entry.market().participating(),
+                        isOn -> {
+                            CompoundTag tag = new CompoundTag();
+                            tag.putString("Market", entry.market().market().value());
+                            tag.putBoolean("Participate", isOn);
+                            marketsBox.sendMessage("c2s_set_participation", tag);
+                        }));
 
                 if (entry.market().participating()) {
                     element.addChild(UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.kontor_desk.markets.list_price"), Horizontal.LEFT));
