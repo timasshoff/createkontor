@@ -54,6 +54,7 @@ final class ChartSpecCodec {
         }
         buf.writeVarInt(spec.defaultTimeRangeDays());
         buf.writeUtf(spec.xRangeUnit(), ChartSpec.MAX_UNIT_LENGTH);
+        buf.writeBoolean(spec.showXAxis());
     }
 
     static ChartSpec read(FriendlyByteBuf buf) {
@@ -101,9 +102,24 @@ final class ChartSpecCodec {
         }
         int defaultTimeRangeDays = buf.readVarInt();
         String xRangeUnit = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
+        boolean showXAxis = buf.readBoolean();
 
-        return new ChartSpec(title, kind, series, lines, includeZero, xUnit, xZeroLabel, yUnit, tooltipDecimals,
-                pointLabels, timeRangeOptionsDays, defaultTimeRangeDays, xRangeUnit);
+        return new ChartSpec(
+                title,
+                kind,
+                series,
+                lines,
+                includeZero,
+                xUnit,
+                xZeroLabel,
+                yUnit,
+                tooltipDecimals,
+                pointLabels,
+                timeRangeOptionsDays,
+                defaultTimeRangeDays,
+                xRangeUnit,
+                showXAxis
+        );
     }
 
     private static int readCount(FriendlyByteBuf buf, int max, String what) {

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Every data needed to show one line chart.
+ * Every data needed to show one chart.
  */
 public record ChartSpec(
         String title,
@@ -20,7 +20,8 @@ public record ChartSpec(
         List<String> pointLabels,
         List<Integer> timeRangeOptionsDays,
         int defaultTimeRangeDays,
-        String xRangeUnit
+        String xRangeUnit,
+        boolean showXAxis
 ) {
     public static final int MAX_SERIES = 6;
     public static final int MAX_POINTS = 5000;
@@ -155,6 +156,7 @@ public record ChartSpec(
         private List<Integer> xRangeOptions = List.of();
         private int defaultXRange = 0;
         private String xRangeUnit;
+        private boolean showXAxis = true;
 
         private Builder(String title) {
             this.title = title;
@@ -183,6 +185,11 @@ public record ChartSpec(
         public Builder xAxis(String unit, String zeroLabel) {
             this.xUnit = unit;
             this.xZeroLabel = zeroLabel;
+            return this;
+        }
+
+        public Builder hideXAxis() {
+            this.showXAxis = false;
             return this;
         }
 
@@ -220,8 +227,22 @@ public record ChartSpec(
 
         public ChartSpec build() {
             String resolvedRangeUnit = xRangeUnit != null ? xRangeUnit : xUnit;
-            return new ChartSpec(title, kind, series, referenceLines, includeZero, xUnit, xZeroLabel, yUnit,
-                    tooltipDecimals, pointLabels, xRangeOptions, defaultXRange, resolvedRangeUnit);
+            return new ChartSpec(
+                    title,
+                    kind,
+                    series,
+                    referenceLines,
+                    includeZero,
+                    xUnit,
+                    xZeroLabel,
+                    yUnit,
+                    tooltipDecimals,
+                    pointLabels,
+                    xRangeOptions,
+                    defaultXRange,
+                    resolvedRangeUnit,
+                    showXAxis
+            );
         }
     }
 }
