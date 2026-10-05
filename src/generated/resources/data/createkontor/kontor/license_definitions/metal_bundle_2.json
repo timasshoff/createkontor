@@ -1,0 +1,10 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.8,
+  "id": "metal_bundle_2",
+  "markets": [
+    "netherite_ingot"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.125
+}

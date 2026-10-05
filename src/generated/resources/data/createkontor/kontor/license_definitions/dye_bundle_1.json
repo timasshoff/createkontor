@@ -1,0 +1,17 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "dye_bundle_1",
+  "markets": [
+    "orange_dye",
+    "yellow_dye",
+    "white_dye",
+    "gray_dye",
+    "blue_dye",
+    "green_dye",
+    "red_dye",
+    "black_dye"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

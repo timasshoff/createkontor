@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "cherry_bundle",
+  "markets": [
+    "cherry_planks",
+    "cherry_stairs",
+    "cherry_slab"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}

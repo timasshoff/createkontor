@@ -1,5 +1,7 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.employee.EmployeeEvent;
+import com.timder.kontor.core.company.employee.EmployeeRules;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
 import com.timder.kontor.core.company.legalform.UpgradeRules;
@@ -112,10 +114,34 @@ public final class CompanyRegistry {
         return insolvent;
     }
 
+    /**
+     * Ends the employments of employees that qualified for termination.
+     * Runs for every company.
+     * @param day The current day
+     * @param orphanDays The days without a report after which a contract ends
+     * @return The events
+     */
+    public List<EmployeeEvent> endContracts(long day, int orphanDays, long minActiveTicks) {
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
+        if (orphanDays < 1) throw new IllegalArgumentException("orphanDays must be at least 1.");
+        if (minActiveTicks < 0) throw new IllegalArgumentException("minActiveTicks must not be negative.");
+        List<EmployeeEvent> events = new ArrayList<>();
+        for (Company company : companies.values()) {
+            if (!company.isActiveDay(day) || company.activeTicksOn(day) < minActiveTicks) {
+                continue;
+            }
+            events.addAll(EmployeeRules.endContracts(company, day, orphanDays));
+        }
+        return events;
+    }
+
     public Map<CompanyId, CompanyHistoryEntry> settleDay(long day, double policyRate, CompanyParams params, Economy economy) {
         Objects.requireNonNull(params, "params must not be null.");
         Map<CompanyId, CompanyHistoryEntry> entries = new LinkedHashMap<>();
         for (Company company : companies.values()) {
+            if (!company.isActiveDay(day)) {
+                continue;
+            }
             entries.put(company.id(), CompanyRules.settleDay(company, day, policyRate, Map.of(), params));
             // TODO Maybe notify company members of lost requests.
             company.requestBoard().resetLostRequestsToday();
@@ -146,6 +172,9 @@ public final class CompanyRegistry {
     public List<BurstOrder> advance(long ticks, long day) {
         List<BurstOrder> burst = new ArrayList<>();
         for (Company company : companies.values()) {
+            if (!company.isActive()) {
+                continue;
+            }
             company.requestBoard().advance(ticks);
             company.orderBook().advance(ticks);
 
@@ -172,7 +201,7 @@ public final class CompanyRegistry {
         Objects.requireNonNull(params, "params must not be null.");
         List<UpgradeEvent> events = new ArrayList<>();
         for (Company company : companies.values()) {
-            if (company.upgradeApplication().filter(UpgradeApplication::isProcessing).isEmpty()) {
+            if (!company.isActive() || company.upgradeApplication().filter(UpgradeApplication::isProcessing).isEmpty()) {
                 continue;
             }
             UpgradeRules.advance(company, ticks, canProcess.test(company), params).ifPresent(events::add);
@@ -185,10 +214,15 @@ public final class CompanyRegistry {
      * @param params The company parameters
      * @return The events, in the order of the companies
      */
-    public List<UpgradeEvent> advanceUpgradeDay(CompanyParams params) {
+    public List<UpgradeEvent> advanceUpgradeDay(long day, CompanyParams params) {
+        if (day < 0) throw new IllegalArgumentException("day must not be negative.");
         Objects.requireNonNull(params, "params must not be null.");
+
         List<UpgradeEvent> events = new ArrayList<>();
         for (Company company : companies.values()) {
+            if (!company.isActiveDay(day)) {
+                continue;
+            }
             UpgradeRules.advanceDay(company, params).ifPresent(events::add);
         }
         return events;

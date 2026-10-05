@@ -23,6 +23,13 @@ public class CompanyConfig {
     public static final ModConfigSpec.DoubleValue LICENSE_REFERENCE_FEE_RATE;
     public static final ModConfigSpec.IntValue LICENSE_APPLICATION_FEE_MULTIPLIER;
 
+    public static final ModConfigSpec.DoubleValue HIRE_BONUS_SALARY_MULTIPLE;
+    public static final ModConfigSpec.IntValue EMPLOYEE_ORPHAN_DAYS;
+    public static final ModConfigSpec.IntValue CONTRACT_CHECK_MIN_ACTIVE_TICKS;
+    public static final ModConfigSpec.IntValue LAWYER_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue CALCULATOR_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -60,6 +67,23 @@ public class CompanyConfig {
 
         builder.pop();
 
+        builder.comment("Employees. The salaries are base salaries per day, the salary factor of the legal form is applied on top.").push("employees");
+
+        HIRE_BONUS_SALARY_MULTIPLE = builder.comment("One-time bonus a company pays when it hires an employee, as a multiple of the employee's daily salary (base salary times the salary factor of the legal form). 0 = no bonus")
+                .defineInRange("hireBonusSalaryMultiple", 3.0, 0.0, 100.0);
+        EMPLOYEE_ORPHAN_DAYS = builder.comment("An employee whose desk has not reported for this many days loses the contract (e.g. the desk sits in an unloaded chunk)")
+                .defineInRange("orphanDays", 3, 1, Integer.MAX_VALUE);
+        CONTRACT_CHECK_MIN_ACTIVE_TICKS = builder.comment("Contracts are only checked at the end of a day on which the company was active for at least this many ticks, so its desks had time to report")
+                .defineInRange("contractCheckMinActiveTicks", 200, 0, 24_000);
+        LAWYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a lawyer per day. Fixed when the lawyer is hired")
+                .defineInRange("lawyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
+        CALCULATOR_SALARY_IN_DOLLARS = builder.comment("Base salary of a calculator per day. Fixed when the calculator is hired")
+                .defineInRange("calculatorSalaryInDollars", 60, 0, Integer.MAX_VALUE);
+        MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment("Base salary of a market analyst per day. Fixed when the market analyst is hired")
+                .defineInRange("marketAnalystSalaryInDollars", 90, 0, Integer.MAX_VALUE);
+
+        builder.pop();
+
         SPEC = builder.build();
     }
 
@@ -80,7 +104,8 @@ public class CompanyConfig {
                 Money.ofDollars(BUSINESS_LICENSE_FEE_IN_DOLLARS.get()),
                 INSOLVENCY_DAYS.get(),
                 BOOKING_RETENTION_DAYS.get(),
-                HISTORY_LENGTH_DAYS.get()
+                HISTORY_LENGTH_DAYS.get(),
+                HIRE_BONUS_SALARY_MULTIPLE.get()
         );
     }
 }

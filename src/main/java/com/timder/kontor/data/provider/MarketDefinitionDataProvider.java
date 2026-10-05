@@ -75,21 +75,26 @@ public class MarketDefinitionDataProvider implements DataProvider {
 
         futures.add(save(cache, "polished_andesite", "minecraft:polished_andesite", "building", 2800, 0.80, 64));
         futures.add(save(cache, "polished_andesite_stairs", "minecraft:polished_andesite_stairs", "building", 2000, 0.80, 64));
-        futures.add(save(cache, "polished_andesite_slabs", "minecraft:polished_andesite_slabs", "building", 2200, 0.80, 64));
+        futures.add(save(cache, "polished_andesite_slab", "minecraft:polished_andesite_slab", "building", 2200, 0.80, 64));
         futures.add(save(cache, "polished_andesite_wall", "minecraft:polished_andesite_wall", "building", 2000, 0.80, 64));
 
         futures.add(save(cache, "andesite_stairs", "minecraft:andesite_stairs", "building", 2000, 0.80, 64));
-        futures.add(save(cache, "andesite_slabs", "minecraft:andesite_slabs", "building", 2200, 0.80, 64));
+        futures.add(save(cache, "andesite_slab", "minecraft:andesite_slab", "building", 2200, 0.80, 64));
         futures.add(save(cache, "andesite_wall", "minecraft:andesite_wall", "building", 2000, 0.80, 64));
 
-        futures.add(save(cache, "cobblestone_stairs", "minecraft:cobblestone_stairs", "building", 2000, 0.80, 64));
-        futures.add(save(cache, "cobblestone_slab", "minecraft:cobblestone_stairs", "building", 2200, 0.80, 64));
-        futures.add(save(cache, "cobblestone_wall", "minecraft:cobblestone_stairs", "building", 2000, 0.80, 64));
+        futures.add(save(cache, "cobblestone_stairs", "minecraft:cobblestone_stairs", "building", 2200, 0.80, 64));
+        futures.add(save(cache, "cobblestone_slab", "minecraft:cobblestone_slab", "building", 2100, 0.80, 64));
+        futures.add(save(cache, "cobblestone_wall", "minecraft:cobblestone_wall", "building", 2000, 0.80, 64));
+
+        futures.add(save(cache, "stone", "minecraft:stone", "building", 2800, 0.80, 64));
+        futures.add(save(cache, "stone_stairs", "minecraft:stone_stairs", "building", 2300, 0.80, 64));
+        futures.add(save(cache, "stone_slab", "minecraft:stone_slab", "building", 2300, 0.80, 64));
+        futures.add(save(cache, "stone_wall", "minecraft:stone_wall", "building", 2100, 0.80, 64));
 
         futures.add(save(cache, "stone_bricks", "minecraft:stone_bricks", "building", 2800, 0.85, 64));
-        futures.add(save(cache, "stone_brick_stairs", "minecraft:stone_bricks_stairs", "building", 2200, 0.85, 64));
-        futures.add(save(cache, "stone_brick_slabs", "minecraft:stone_bricks_slabs", "building", 2000, 0.85, 64));
-        futures.add(save(cache, "stone_brick_wall", "minecraft:stone_bricks_wall", "building", 2000, 0.85, 64));
+        futures.add(save(cache, "stone_brick_stairs", "minecraft:stone_brick_stairs", "building", 2200, 0.85, 64));
+        futures.add(save(cache, "stone_brick_slabs", "minecraft:stone_brick_slab", "building", 2000, 0.85, 64));
+        futures.add(save(cache, "stone_brick_wall", "minecraft:stone_brick_wall", "building", 2000, 0.85, 64));
 
         futures.add(save(cache, "metal_girder", "create:metal_girder", "building", 2100, 0.85, 64));
         futures.add(save(cache, "industrial_iron_block", "create:industrial_iron_block", "building", 2500, 0.85, 64));
@@ -142,6 +147,26 @@ public class MarketDefinitionDataProvider implements DataProvider {
          */
         futures.add(save(cache, "bread", "minecraft:bread", "food", 3500, 0.9, 32));
         futures.add(save(cache, "wheat_flour", "create:wheat_flour", "food", 3000, 0.8, 48));
+
+        /*
+        Group: Luxury
+         */
+        futures.add(save(cache, "magenta_dye", "minecraft:magenta_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "light_blue_dye", "minecraft:light_blue_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "lime_dye", "minecraft:lime_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "light_gray_dye", "minecraft:light_gray_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "cyan_dye", "minecraft:cyan_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "purple_dye", "minecraft:purple_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "brown_dye", "minecraft:brown_dye", "luxury", 3000, 0.75, 16));
+
+        futures.add(save(cache, "orange_dye", "minecraft:orange_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "yellow_dye", "minecraft:yellow_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "white_dye", "minecraft:white_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "gray_dye", "minecraft:gray_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "blue_dye", "minecraft:blue_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "green_dye", "minecraft:green_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "red_dye", "minecraft:red_dye", "luxury", 3000, 0.75, 16));
+        futures.add(save(cache, "black_dye", "minecraft:black_dye", "luxury", 3000, 0.75, 16));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }

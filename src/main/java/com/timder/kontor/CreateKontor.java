@@ -5,7 +5,10 @@ import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.data.loader.*;
 import com.timder.kontor.data.provider.*;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.EmployeeContracts;
 import com.timder.kontor.game.KontorTickHandler;
+import com.timder.kontor.game.block.employee.EmployeeDeskInteraction;
+import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.command.*;
 import com.timder.kontor.game.network.KontorNetwork;
 import com.timder.kontor.registry.KontorRegistries;
@@ -36,11 +39,14 @@ public class CreateKontor {
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(KontorNetwork::registerPayloads);
+        modEventBus.addListener(KontorChunkLoading::registerTicketControllers);
 
         KontorRegistries.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(KontorTickHandler.class);
+        NeoForge.EVENT_BUS.register(EmployeeDeskInteraction.class);
+        NeoForge.EVENT_BUS.addListener(KontorChunkLoading::onServerStopped);
 
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
             event.addListener(new RawMaterialDataLoader());
@@ -92,6 +98,7 @@ public class CreateKontor {
         OrderCommands.register(event.getDispatcher());
         UpgradeCommands.register(event.getDispatcher());
         LicenseCommands.register(event.getDispatcher());
+        EmployeeCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

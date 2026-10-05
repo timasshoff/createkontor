@@ -38,42 +38,155 @@ public class LicenseDefDataProvider implements DataProvider {
         The revenue share is the fraction of revenue of the product that is due every day.
          */
 
-        futures.add(save(cache, "iron_sheet", "iron_sheet", List.of(
-                "create:iron_sheet"
-        ), 1.0, 1.0, 0.0, 1));
+        futures.add(save(cache, "oak_bundle", "oak_bundle", List.of(
+                "oak_planks",
+                "oak_stairs",
+                "oak_slab"
+        ), 0.8, 1.0, 0.0, 1));
 
-        futures.add(save(cache, "iron_sheet_turnover", "iron_sheet_turnover", List.of(
-                "create:iron_sheet"
-        ), 1.0, 0.1, 0.05, 1));
+        futures.add(save(cache, "spruce_bundle", "spruce_bundle", List.of(
+                "spruce_planks",
+                "spruce_stairs",
+                "spruce_slab"
+        ), 0.8, 1.0, 0.0, 1));
 
-        futures.add(save(cache, "brass_sheet", "brass_sheet", List.of(
-                "create:brass_sheet"
-        ), 1.0, 1.0, 0.0, 1));
+        futures.add(save(cache, "birch_bundle", "birch_bundle", List.of(
+                "birch_planks",
+                "birch_stairs",
+                "birch_slab"
+        ), 0.8, 1.0, 0.0, 1));
 
-        futures.add(save(cache, "brass_sheet_turnover", "brass_sheet_turnover", List.of(
-                "create:brass_sheet"
-        ), 1.0, 0.1, 0.05, 1));
+        futures.add(save(cache, "jungle_bundle", "jungle_bundle", List.of(
+                "jungle_planks",
+                "jungle_stairs",
+                "jungle_slab"
+        ), 0.8, 1.0, 0.0, 1));
 
-        futures.add(save(cache, "cogwheel", "cogwheel", List.of(
+        futures.add(save(cache, "acacia_bundle", "acacia_bundle", List.of(
+                "acacia_planks",
+                "acacia_stairs",
+                "acacia_slab"
+        ), 0.8, 1.0, 0.0, 1));
+
+        futures.add(save(cache, "dark_oak_bundle", "dark_oak_bundle", List.of(
+                "dark_oak_planks",
+                "dark_oak_stairs",
+                "dark_oak_slab"
+        ), 0.8, 1.0, 0.0, 1));
+
+        futures.add(save(cache, "mangrove_bundle", "mangrove_bundle", List.of(
+                "mangrove_planks",
+                "mangrove_stairs",
+                "mangrove_slab"
+        ), 0.8, 1.0, 0.0, 1));
+
+        futures.add(save(cache, "cherry_bundle", "cherry_bundle", List.of(
+                "cherry_planks",
+                "cherry_stairs",
+                "cherry_slab"
+        ), 0.8, 1.0, 0.0, 1));
+
+        futures.add(save(cache, "nether_wood_bundle", "nether_wood_bundle", List.of(
+                "crimson_planks",
+                "crimson_stairs",
+                "crimson_slab",
+                "warped_planks",
+                "warped_stairs",
+                "warped_slab"
+        ), 0.8, 1.0, 0.0, 1));
+
+        futures.add(save(cache, "nether_wood_bundle_turnover", "nether_wood_bundle_turnover", List.of(
+                "crimson_planks",
+                "crimson_stairs",
+                "crimson_slab",
+                "warped_planks",
+                "warped_stairs",
+                "warped_slab"
+        ), 0.8, 0.1, 0.06, 1));
+
+        futures.add(save(cache, "cobblestone_bundle", "cobblestone_bundle", List.of(
+                "cobblestone_stairs",
+                "cobblestone_slab",
+                "cobblestone_wall"
+        ), 0.8, 1.0, 0.0, 1));
+
+        futures.add(save(cache, "stone_bundle", "stone_bundle", List.of(
+                "stone_stairs",
+                "stone_slab",
+                "stone_wall",
+                "stone_bricks",
+                "stone_brick_stairs",
+                "stone_brick_slab",
+                "stone_brick_wall"
+        ), 0.8, 0.1, 0.05, 1));
+
+        futures.add(save(cache, "small_andesite_bundle", "small_andesite_bundle", List.of(
+                "andesite_stairs",
+                "andesite_slab",
+                "andesite_wall"
+        ), 0.8, 1.0, 0.0, 1));
+
+        futures.add(save(cache, "large_andesite_bundle", "large_andesite_bundle", List.of(
+                "andesite_stairs",
+                "andesite_slab",
+                "andesite_wall",
+                "polished_andesite",
+                "polished_andesite_stairs",
+                "polished_andesite_slab",
+                "polished_andesite_wall",
+                "create:andesite_alloy"
+        ), 0.8, 0.15, 0.05, 1));
+
+        futures.add(save(cache, "basic_mechanical_bundle", "basic_mechanical_bundle", List.of(
+                "create:andesite_alloy",
+                "create:shaft",
                 "create:cogwheel"
-        ), 1.0, 1.0, 0.0, 1));
+        ), 0.8, 1.0, 0.0, 2));
 
-        futures.add(save(cache, "cogwheel_turnover", "cogwheel_turnover", List.of(
-                "create:cogwheel"
-        ), 1.0, 0.1, 0.05, 1));
+        futures.add(save(cache, "metal_bundle_1", "metal_bundle_1", List.of(
+                "iron_ingot",
+                "copper_ingot",
+                "create:zinc_ingot",
+                "create:brass_ingot"
+        ), 0.8, 1.0, 0.0, 2));
 
-        futures.add(save(cache, "precision_mechanism", "precision_mechanism", List.of(
-                "create:precision_mechanism"
-        ), 1.0, 1.0, 0.0, 1));
-
-        futures.add(save(cache, "precision_mechanism_turnover", "precision_mechanism_turnover", List.of(
-                "create:precision_mechanism"
-        ), 1.0, 0.1, 0.05, 1));
+        futures.add(save(cache, "metal_bundle_2", "metal_bundle_2", List.of(
+                "netherite_ingot"
+        ), 0.8, 0.15, 0.125, 3));
 
         futures.add(save(cache, "sheet_metal_bundle", "sheet_metal_bundle", List.of(
                 "create:iron_sheet",
-                "create:brass_sheet"
+                "create:brass_sheet",
+                "create:copper_sheet"
         ), 0.8, 1.0, 0.0, 2));
+
+
+        futures.add(save(cache, "casing_bundle", "casing_bundle", List.of(
+                "create:andesite_casing",
+                "create:copper_casing",
+                "create:brass_casing"
+        ), 0.8, 1.0, 0.0, 3));
+
+        futures.add(save(cache, "dye_bundle_1", "dye_bundle_1", List.of(
+                "orange_dye",
+                "yellow_dye",
+                "white_dye",
+                "gray_dye",
+                "blue_dye",
+                "green_dye",
+                "red_dye",
+                "black_dye"
+        ), 0.8, 1.0, 0.0, 2));
+
+        futures.add(save(cache, "dye_bundle_2", "dye_bundle_2", List.of(
+                "magenta_dye",
+                "light_blue_dye",
+                "lime_dye",
+                "light_gray_dye",
+                "cyan_dye",
+                "purple_dye",
+                "brown_dye"
+        ), 0.9, 0.15, 0.08, 2));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }

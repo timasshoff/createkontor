@@ -2,6 +2,7 @@
   "auto_accept_requests": true,
   "bankloan_limit_in_dollars": 500000,
   "deadline_factor": 1.0,
+  "employee_salary_factor": 1.5,
   "feed_in_license_tier": 3,
   "founder_protection": false,
   "free_storage_value_in_dollars": 40000,
