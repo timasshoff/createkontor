@@ -15,6 +15,7 @@ import org.joml.Vector2f;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.DoubleFunction;
@@ -76,6 +77,11 @@ public class ChartElement extends UIElement {
     private static final int X_TICK_TARGET = 6;
     private static final float BAR_WIDTH_FRACTION = 0.6f;
 
+    private static final float LEGEND_SWATCH = 8f;
+    private static final float LEGEND_GAP = 4f;
+    private static final float LEGEND_ENTRY_GAP = 8f;
+    private static final float LEGEND_DROPDOWN_GAP = 6f;
+
     private ChartKind kind = ChartKind.LINE;
     private List<ChartSeries> series = List.of();
     private final List<ReferenceLine> referenceLines = new ArrayList<>();
@@ -94,6 +100,7 @@ public class ChartElement extends UIElement {
     private List<String> pointLabels = List.of();
     @Nullable
     private Selector<Integer> rangeSelector;
+    private float rangeSelectorWidth = 0f;
     private int visibleRange = 0;
     private boolean showXAxis = true;
 
@@ -233,6 +240,7 @@ public class ChartElement extends UIElement {
             maxTextWidth = Math.max(maxTextWidth, font.width(text));
         }
         int selectorWidth = maxTextWidth + 30;
+        this.rangeSelectorWidth = selectorWidth;
 
         Selector<Integer> selector = new Selector<>();
         selector.setCandidateUIProvider(UIElementProvider.text(value -> {
@@ -354,7 +362,7 @@ public class ChartElement extends UIElement {
             y += lineHeight + 4f;
         }
         if (!series.isEmpty()) {
-            drawLegend(g, font, left + PAD, y);
+            drawLegend(g, font, left + PAD, y, width - 2f * PAD);
             y += lineHeight + 4f;
         }
 
@@ -633,14 +641,82 @@ public class ChartElement extends UIElement {
         }
     }
 
-    private void drawLegend(GuiGraphics g, Font font, float x, float y) {
-        float lineHeight = font.lineHeight;
-        for (ChartSeries s : series) {
-            DrawerHelper.drawSolidRect(g, Math.round(x), Math.round(y + lineHeight / 2f - 1f), 8f, 2f, s.color());
-            x += 8f + 4f;
-            drawText(g, font, s.label(), x, y, TEXT);
-            x += font.width(s.label()) + 12f;
+    private void drawLegend(GuiGraphics g, Font font, float x0, float y, float maxWidth) {
+        int count = series.size();
+
+        float dropdownClearance = rangeSelectorWidth > 0f ? rangeSelectorWidth + LEGEND_DROPDOWN_GAP : 0f;
+        float legendWidth = maxWidth - dropdownClearance;
+
+        double[] importance = new double[count];
+        float[] widths = new float[count];
+        Integer[] byImportance = new Integer[count];
+        for (int i = 0; i < count; i++) {
+            ChartSeries s = series.get(i);
+            importance[i] = kind == ChartKind.STACKED_BAR ? visibleSum(s) : -i;
+            widths[i] = LEGEND_SWATCH + LEGEND_GAP + font.width(s.label());
+            byImportance[i] = i;
         }
+        Arrays.sort(byImportance, (a, b) -> Double.compare(importance[b], importance[a]));
+
+        int shown = entriesThatFit(widths, byImportance, legendWidth);
+        if (shown < count) {
+            float markerWidth = LEGEND_ENTRY_GAP + font.width("+" + count);
+            shown = Math.max(1, entriesThatFit(widths, byImportance, legendWidth - markerWidth));
+        }
+
+        boolean[] visible = new boolean[count];
+        for (int k = 0; k < shown; k++) {
+            visible[byImportance[k]] = true;
+        }
+
+        float lineHeight = font.lineHeight;
+        float x = x0;
+        for (int i = 0; i < count; i++) {
+            if (!visible[i]) {
+                continue;
+            }
+            ChartSeries s = series.get(i);
+            String label = fitLabel(font, s.label(), legendWidth - LEGEND_SWATCH - LEGEND_GAP);
+            DrawerHelper.drawSolidRect(g, Math.round(x), Math.round(y + lineHeight / 2f - 1f), LEGEND_SWATCH, 2f, s.color());
+            x += LEGEND_SWATCH + LEGEND_GAP;
+            drawText(g, font, label, x, y, TEXT);
+            x += font.width(label) + LEGEND_ENTRY_GAP;
+        }
+        if (shown < count) {
+            drawText(g, font, "+" + (count - shown), x, y, TEXT_DIM);
+        }
+    }
+
+    private static int entriesThatFit(float[] widths, Integer[] order, float budget) {
+        float used = 0f;
+        int n = 0;
+        for (int index : order) {
+            float next = used + (n == 0 ? 0f : LEGEND_ENTRY_GAP) + widths[index];
+            if (next > budget) {
+                break;
+            }
+            used = next;
+            n++;
+        }
+        return n;
+    }
+
+    private static String fitLabel(Font font, String label, float maxWidth) {
+        if (font.width(label) <= maxWidth) {
+            return label;
+        }
+        return font.plainSubstrByWidth(label, (int) (maxWidth - font.width("…"))) + "…";
+    }
+
+    private static double visibleSum(ChartSeries s) {
+        double sum = 0.0;
+        for (int i = 0; i < s.size(); i++) {
+            double v = s.y(i);
+            if (!Double.isNaN(v)) {
+                sum += v;
+            }
+        }
+        return sum;
     }
 
     private static int nearestIndex(ChartSeries s, double x) {
