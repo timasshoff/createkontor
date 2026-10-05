@@ -3,6 +3,8 @@ package com.timder.kontor.game.ui.chart;
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Selector;
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent;
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
@@ -14,10 +16,7 @@ import net.minecraft.util.FormattedCharSequence;
 import org.joml.Vector2f;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.DoubleFunction;
 import java.util.function.IntFunction;
 
@@ -55,6 +54,12 @@ public class ChartElement extends UIElement {
         }
     }
 
+    private record LegendHit(float x, float y, float width, float height, String label) {
+        boolean contains(float px, float py) {
+            return px >= x && px <= x + width && py >= y && py <= y + height;
+        }
+    }
+
     private static final int PANEL_BACKGROUND = 0xFF1B1B1B;
     private static final int PLOT_BACKGROUND = 0xFF262626;
     private static final int GRID = 0xFF3A3A3A;
@@ -81,6 +86,7 @@ public class ChartElement extends UIElement {
     private static final float LEGEND_GAP = 4f;
     private static final float LEGEND_ENTRY_GAP = 8f;
     private static final float LEGEND_DROPDOWN_GAP = 6f;
+    private static final float LEGEND_HIT_PAD = 2f;
 
     private ChartKind kind = ChartKind.LINE;
     private List<ChartSeries> series = List.of();
@@ -104,46 +110,54 @@ public class ChartElement extends UIElement {
     private int visibleRange = 0;
     private boolean showXAxis = true;
 
+    private final Set<String> hiddenLabels = new HashSet<>();
+    private final List<LegendHit> legendHits = new ArrayList<>();
+    private List<ChartSeries> shownSeries = List.of();
+
+
     public ChartElement() {
-        style(s -> s.overflowVisible(false)); // Prevent overflow
+        style(s -> s.overflowVisible(false));
+        addEventListener(UIEvents.MOUSE_DOWN, this::onMouseDown);
+    }
+
+    public static ChartElement from(ChartSpec spec) {
+        ChartElement chart = new ChartElement();
+        chart.update(spec);
+        return chart;
     }
 
     /**
-     * Builds a chart from a description.
+     * Applies a description to this chart
      * @param spec The chart description
-     * @return The configured chart. Size is up to the caller.
+     * @return This chart element
      */
-    public static ChartElement from(ChartSpec spec) {
-        ChartElement chart = new ChartElement();
-        if (!spec.title().isEmpty()) {
-            chart.setTitle(Component.literal(spec.title()));
-        }
-        chart.setKind(spec.kind());
-        chart.setSeries(spec.series());
+    public ChartElement update(ChartSpec spec) {
+        setTitle(spec.title().isEmpty() ? null : Component.literal(spec.title()));
+        setKind(spec.kind());
+        referenceLines.clear();
         for (ChartReferenceLine line : spec.referenceLines()) {
-            chart.addReferenceLine(line.label(), line.value(), line.color());
+            addReferenceLine(line.label(), line.value(), line.color());
         }
-        chart.setIncludeZero(spec.includeZero());
-        chart.setShowXAxis(spec.showXAxis());
+        setIncludeZero(spec.includeZero());
+        setShowXAxis(spec.showXAxis());
 
         String xUnit = spec.xUnit();
         String xZeroLabel = spec.xZeroLabel();
         String yUnit = spec.yUnit();
         String tooltipFormat = "%." + spec.tooltipDecimals() + "f";
-        chart.setXFormatter((value, decimals) ->
+        setXFormatter((value, decimals) ->
                 !xZeroLabel.isEmpty() && Math.abs(value) < 1e-9 ? xZeroLabel : NiceScale.format(value, decimals) + xUnit);
-        chart.setYFormatter((value, decimals) -> NiceScale.format(value, decimals) + yUnit);
-        chart.setTooltipValueFormatter(value -> String.format(Locale.ROOT, tooltipFormat, value) + yUnit);
+        setYFormatter((value, decimals) -> NiceScale.format(value, decimals) + yUnit);
+        setTooltipValueFormatter(value -> String.format(Locale.ROOT, tooltipFormat, value) + yUnit);
 
-        if (!spec.pointLabels().isEmpty()) {
-            chart.setPointLabels(spec.pointLabels());
-            chart.setTooltipHeader(chart::pointLabelAt);
-        }
+        setTooltipHeader(spec.pointLabels().isEmpty() ? null : this::pointLabelAt);
+        setPointLabels(spec.pointLabels());
+        setSeries(spec.series());
 
-        if (!spec.timeRangeOptionsDays().isEmpty()) {
-            chart.enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays(), spec.xRangeUnit());
+        if (rangeSelector == null && !spec.timeRangeOptionsDays().isEmpty()) {
+            enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays(), spec.xRangeUnit());
         }
-        return chart;
+        return this;
     }
 
     public ChartElement setTitle(@Nullable Component title) {
@@ -283,6 +297,7 @@ public class ChartElement extends UIElement {
             this.series = filtered;
             this.pointLabels = lastPoints(fullPointLabels, visibleRange);
         }
+        updateShownSeries();
         if (rangeSelector != null) {
             rangeSelector.setDisplay(dataRange() != null);
         }
@@ -315,6 +330,47 @@ public class ChartElement extends UIElement {
         return index >= 0 && index < pointLabels.size() ? pointLabels.get(index) : "";
     }
 
+    private void updateShownSeries() {
+        List<ChartSeries> shown = new ArrayList<>(series.size());
+        for (ChartSeries s : series) {
+            if (!hiddenLabels.contains(s.label())) {
+                shown.add(s);
+            }
+        }
+        if (shown.isEmpty() && !series.isEmpty()) {
+            hiddenLabels.clear();
+            shown.addAll(series);
+        }
+        this.shownSeries = shown;
+    }
+
+    private void onMouseDown(UIEvent event) {
+        if (event.button != 0 || event.target != this) {
+            return;
+        }
+        Vector2f mouse = getLocalMouse(event.x, event.y);
+        for (LegendHit hit : legendHits) {
+            if (hit.contains(mouse.x, mouse.y)) {
+                toggleSeries(hit.label());
+                return;
+            }
+        }
+    }
+
+    private void toggleSeries(String label) {
+        if (!hiddenLabels.remove(label)) {
+            if (shownSeries.size() <= 1) {
+                return;
+            }
+            hiddenLabels.add(label);
+        }
+        updateShownSeries();
+    }
+
+    private static int faded(int argb) {
+        return (argb & 0x00FFFFFF) | 0x55000000;
+    }
+
     @Override
     public void drawBackgroundAdditional(GUIContext ctx) {
         super.drawBackgroundAdditional(ctx);
@@ -328,6 +384,7 @@ public class ChartElement extends UIElement {
         float lineHeight = font.lineHeight;
 
         DrawerHelper.drawSolidRect(g, left, top, width, height, PANEL_BACKGROUND);
+        legendHits.clear();
 
         double[] range = dataRange();
         if (range == null) {
@@ -362,7 +419,9 @@ public class ChartElement extends UIElement {
             y += lineHeight + 4f;
         }
         if (!series.isEmpty()) {
-            drawLegend(g, font, left + PAD, y, width - 2f * PAD);
+            float legendMx = isHover() ? ctx.localMouseX : Float.NaN;
+            float legendMy = isHover() ? ctx.localMouseY : Float.NaN;
+            drawLegend(g, font, left + PAD, y, width - 2f * PAD, legendMx, legendMy);
             y += lineHeight + 4f;
         }
 
@@ -412,7 +471,7 @@ public class ChartElement extends UIElement {
         if (kind == ChartKind.STACKED_BAR) {
             drawStackedBars(g, plot);
         } else {
-            for (ChartSeries s : series) {
+            for (ChartSeries s : shownSeries) {
                 drawSeries(g, plot, s);
             }
         }
@@ -438,7 +497,7 @@ public class ChartElement extends UIElement {
         double yMin = Double.POSITIVE_INFINITY;
         double yMax = Double.NEGATIVE_INFINITY;
 
-        for (ChartSeries s : series) {
+        for (ChartSeries s : shownSeries) {
             for (int i = 0; i < s.size(); i++) {
                 double v = s.y(i);
                 xMin = Math.min(xMin, s.x(i));
@@ -455,10 +514,10 @@ public class ChartElement extends UIElement {
         if (kind == ChartKind.STACKED_BAR) {
             yMin = 0.0;
             yMax = 0.0;
-            int size = series.isEmpty() ? 0 : series.get(0).size();
+            int size = shownSeries.isEmpty() ? 0 : shownSeries.get(0).size();
             for (int i = 0; i < size; i++) {
                 double sum = 0.0;
-                for (ChartSeries s : series) {
+                for (ChartSeries s : shownSeries) {
                     double v = s.y(i);
                     if (!Double.isNaN(v)) {
                         sum += v;
@@ -467,7 +526,7 @@ public class ChartElement extends UIElement {
                 yMax = Math.max(yMax, sum);
             }
             if (size >= 2) {
-                double spacing = (series.get(0).x(size - 1) - series.get(0).x(0)) / (size - 1);
+                double spacing = (shownSeries.get(0).x(size - 1) - shownSeries.get(0).x(0)) / (size - 1);
                 double halfSlot = spacing / 2.0;
                 xMin -= halfSlot;
                 xMax += halfSlot;
@@ -521,10 +580,10 @@ public class ChartElement extends UIElement {
     }
 
     private void drawStackedBars(GuiGraphics g, Plot plot) {
-        if (series.isEmpty()) {
+        if (shownSeries.isEmpty()) {
             return;
         }
-        ChartSeries first = series.get(0);
+        ChartSeries first = shownSeries.get(0);
         int size = first.size();
         float barWidth = barWidthPx(plot, first);
 
@@ -532,7 +591,7 @@ public class ChartElement extends UIElement {
             float cx = plot.x(first.x(i));
             float left = cx - barWidth / 2f;
             double cumBefore = 0.0;
-            for (ChartSeries s : series) {
+            for (ChartSeries s : shownSeries) {
                 double v = s.y(i);
                 if (Double.isNaN(v)) {
                     continue;
@@ -576,7 +635,7 @@ public class ChartElement extends UIElement {
         int headerIndex = -1;
         double headerX = 0.0;
 
-        for (ChartSeries s : series) {
+        for (ChartSeries s : shownSeries) {
             if (s.size() == 0) {
                 continue;
             }
@@ -641,7 +700,7 @@ public class ChartElement extends UIElement {
         }
     }
 
-    private void drawLegend(GuiGraphics g, Font font, float x0, float y, float maxWidth) {
+    private void drawLegend(GuiGraphics g, Font font, float x0, float y, float maxWidth, float mx, float my) {
         int count = series.size();
 
         float dropdownClearance = rangeSelectorWidth > 0f ? rangeSelectorWidth + LEGEND_DROPDOWN_GAP : 0f;
@@ -652,7 +711,8 @@ public class ChartElement extends UIElement {
         Integer[] byImportance = new Integer[count];
         for (int i = 0; i < count; i++) {
             ChartSeries s = series.get(i);
-            importance[i] = kind == ChartKind.STACKED_BAR ? visibleSum(s) : -i;
+            boolean hidden = hiddenLabels.contains(s.label());
+            importance[i] = hidden ? Double.POSITIVE_INFINITY : kind == ChartKind.STACKED_BAR ? visibleSum(s) : -i;
             widths[i] = LEGEND_SWATCH + LEGEND_GAP + font.width(s.label());
             byImportance[i] = i;
         }
@@ -676,11 +736,26 @@ public class ChartElement extends UIElement {
                 continue;
             }
             ChartSeries s = series.get(i);
+            boolean hidden = hiddenLabels.contains(s.label());
             String label = fitLabel(font, s.label(), legendWidth - LEGEND_SWATCH - LEGEND_GAP);
-            DrawerHelper.drawSolidRect(g, Math.round(x), Math.round(y + lineHeight / 2f - 1f), LEGEND_SWATCH, 2f, s.color());
-            x += LEGEND_SWATCH + LEGEND_GAP;
-            drawText(g, font, label, x, y, TEXT);
-            x += font.width(label) + LEGEND_ENTRY_GAP;
+            float textWidth = font.width(label);
+            float entryWidth = LEGEND_SWATCH + LEGEND_GAP + textWidth;
+
+            LegendHit hit = new LegendHit(x - LEGEND_HIT_PAD, y - LEGEND_HIT_PAD, entryWidth + 2f * LEGEND_HIT_PAD, lineHeight + 2f * LEGEND_HIT_PAD, s.label());
+            legendHits.add(hit);
+            boolean hovered = hit.contains(mx, my);
+
+            int swatchColor = hidden ? faded(s.color()) : s.color();
+            DrawerHelper.drawSolidRect(g, Math.round(x), Math.round(y + lineHeight / 2f - 1f), LEGEND_SWATCH, 2f, swatchColor);
+            float textX = x + LEGEND_SWATCH + LEGEND_GAP;
+            drawText(g, font, label, textX, y, hidden ? TEXT_DIM : TEXT);
+            if (hidden) {
+                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight / 2f), textWidth, 1f, TEXT_DIM);
+            }
+            if (hovered) {
+                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight), textWidth, 1f, TEXT);
+            }
+            x += entryWidth + LEGEND_ENTRY_GAP;
         }
         if (shown < count) {
             drawText(g, font, "+" + (count - shown), x, y, TEXT_DIM);

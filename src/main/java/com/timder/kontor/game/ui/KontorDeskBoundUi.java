@@ -31,6 +31,7 @@ import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.network.ToastPayload;
+import com.timder.kontor.game.ui.chart.ChartHost;
 import com.timder.kontor.game.ui.chart.CompanyCharts;
 import com.timder.kontor.game.ui.chart.ChartElement;
 import com.timder.kontor.config.CompanyConfig;
@@ -137,14 +138,9 @@ public class KontorDeskBoundUi {
 
         overviewContent.addScrollViewChildren(UiContainer.headerWithSubtitle(title, headerSubtitle));
 
-        UIElement dayResultChartBox = new UIElement();
+        ChartHost dayResultChartBox = new ChartHost();
         dayResultChartBox.layout(layout -> layout.widthPercent(100).height(200));
-        companyHistory.addListener(() -> {
-            ChartElement newChart = ChartElement.from(CompanyCharts.revenueResultSpecFromHistory(companyHistory.get()));
-            newChart.layout(layout -> layout.widthPercent(100).flex(1));
-            dayResultChartBox.clearAllChildren();
-            dayResultChartBox.addChild(newChart);
-        });
+        companyHistory.addListener(() -> dayResultChartBox.show(CompanyCharts.revenueResultSpecFromHistory(companyHistory.get())));
         dayResultChartBox.addSyncValue(companyHistoryBinding.getSyncValue());
         overviewContent.addScrollViewChildren(dayResultChartBox);
 
@@ -219,7 +215,7 @@ public class KontorDeskBoundUi {
                         .flexDirection(FlexDirection.COLUMN)
                         .gapAll(4));
 
-        UIElement balanceChartBox = new UIElement();
+        ChartHost balanceChartBox = new ChartHost();
         balanceChartBox.layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         bookings.addListener(() -> buildBalanceChart(bookings.get(), overdraftLimit.get(), balanceChartBox));
@@ -240,14 +236,9 @@ public class KontorDeskBoundUi {
                         .flexDirection(FlexDirection.COLUMN)
                         .gapAll(4));
 
-        UIElement costStructureChartBox = new UIElement();
+        ChartHost costStructureChartBox = new ChartHost();
         costStructureChartBox.layout(layout -> layout.widthPercent(100).heightPercent(100));
-        companyHistory.addListener(() -> {
-            ChartElement newChart = ChartElement.from(CompanyCharts.costStructureFromHistory(companyHistory.get()));
-            newChart.layout(layout -> layout.widthPercent(100).flex(1));
-            costStructureChartBox.clearAllChildren();
-            costStructureChartBox.addChild(newChart);
-        });
+        companyHistory.addListener(() -> costStructureChartBox.show(CompanyCharts.costStructureFromHistory(companyHistory.get())));
         costStructureChartBox.addSyncValue(companyHistoryBinding.getSyncValue());
 
         content.addChild(costStructureChartBox);
@@ -704,11 +695,8 @@ public class KontorDeskBoundUi {
         return tag;
     }
 
-    private static void buildBalanceChart(List<Booking> bookings, long overdraftLimit, UIElement parent) {
-        ChartElement newChart = ChartElement.from(CompanyCharts.balanceSpecFromBookings(bookings, -overdraftLimit / 100.0));
-        newChart.layout(layout -> layout.widthPercent(100).flex(1));
-        parent.clearAllChildren();
-        parent.addChild(newChart);
+    private static void buildBalanceChart(List<Booking> bookings, long overdraftLimit, ChartHost host) {
+        host.show(CompanyCharts.balanceSpecFromBookings(bookings, -overdraftLimit / 100.0));
     }
 
     public static Tag historyToTag(List<CompanyHistoryEntry> history) {
