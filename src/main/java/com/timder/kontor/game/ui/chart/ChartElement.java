@@ -116,46 +116,48 @@ public class ChartElement extends UIElement {
 
 
     public ChartElement() {
-        style(s -> s.overflowVisible(false)); // Prevent overflow
+        style(s -> s.overflowVisible(false));
         addEventListener(UIEvents.MOUSE_DOWN, this::onMouseDown);
     }
 
-    /**
-     * Builds a chart from a description.
-     * @param spec The chart description
-     * @return The configured chart. Size is up to the caller.
-     */
     public static ChartElement from(ChartSpec spec) {
         ChartElement chart = new ChartElement();
-        if (!spec.title().isEmpty()) {
-            chart.setTitle(Component.literal(spec.title()));
-        }
-        chart.setKind(spec.kind());
-        chart.setSeries(spec.series());
+        chart.update(spec);
+        return chart;
+    }
+
+    /**
+     * Applies a description to this chart
+     * @param spec The chart description
+     * @return This chart element
+     */
+    public ChartElement update(ChartSpec spec) {
+        setTitle(spec.title().isEmpty() ? null : Component.literal(spec.title()));
+        setKind(spec.kind());
+        referenceLines.clear();
         for (ChartReferenceLine line : spec.referenceLines()) {
-            chart.addReferenceLine(line.label(), line.value(), line.color());
+            addReferenceLine(line.label(), line.value(), line.color());
         }
-        chart.setIncludeZero(spec.includeZero());
-        chart.setShowXAxis(spec.showXAxis());
+        setIncludeZero(spec.includeZero());
+        setShowXAxis(spec.showXAxis());
 
         String xUnit = spec.xUnit();
         String xZeroLabel = spec.xZeroLabel();
         String yUnit = spec.yUnit();
         String tooltipFormat = "%." + spec.tooltipDecimals() + "f";
-        chart.setXFormatter((value, decimals) ->
+        setXFormatter((value, decimals) ->
                 !xZeroLabel.isEmpty() && Math.abs(value) < 1e-9 ? xZeroLabel : NiceScale.format(value, decimals) + xUnit);
-        chart.setYFormatter((value, decimals) -> NiceScale.format(value, decimals) + yUnit);
-        chart.setTooltipValueFormatter(value -> String.format(Locale.ROOT, tooltipFormat, value) + yUnit);
+        setYFormatter((value, decimals) -> NiceScale.format(value, decimals) + yUnit);
+        setTooltipValueFormatter(value -> String.format(Locale.ROOT, tooltipFormat, value) + yUnit);
 
-        if (!spec.pointLabels().isEmpty()) {
-            chart.setPointLabels(spec.pointLabels());
-            chart.setTooltipHeader(chart::pointLabelAt);
-        }
+        setTooltipHeader(spec.pointLabels().isEmpty() ? null : this::pointLabelAt);
+        setPointLabels(spec.pointLabels());
+        setSeries(spec.series());
 
-        if (!spec.timeRangeOptionsDays().isEmpty()) {
-            chart.enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays(), spec.xRangeUnit());
+        if (rangeSelector == null && !spec.timeRangeOptionsDays().isEmpty()) {
+            enableRangeFilter(spec.timeRangeOptionsDays(), spec.defaultTimeRangeDays(), spec.xRangeUnit());
         }
-        return chart;
+        return this;
     }
 
     public ChartElement setTitle(@Nullable Component title) {
@@ -334,6 +336,10 @@ public class ChartElement extends UIElement {
             if (!hiddenLabels.contains(s.label())) {
                 shown.add(s);
             }
+        }
+        if (shown.isEmpty() && !series.isEmpty()) {
+            hiddenLabels.clear();
+            shown.addAll(series);
         }
         this.shownSeries = shown;
     }
