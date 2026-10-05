@@ -16,13 +16,34 @@ import java.util.Locale;
 import java.util.function.Function;
 
 public final class UiSliders {
+
+    private static final long MIN_TYPING_COMMIT_DELAY_MILLIS = 1000;
+
+    private enum Layout {
+        STACKED,
+        INLINE_FIELD_RIGHT,
+        INLINE_FIELD_LEFT
+    }
+
     public static UIElement labeled(float min, float max, float initial, float step, int decimals, long commitDelayMillis, Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
+        return create(Layout.STACKED, min, max, initial, step, decimals, commitDelayMillis, format, onChange, onCommit);
+    }
+
+    public static UIElement labeledInline(float min, float max, float initial, float step, int decimals, long commitDelayMillis, Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
+        return create(Layout.INLINE_FIELD_RIGHT, min, max, initial, step, decimals, commitDelayMillis, format, onChange, onCommit);
+    }
+
+    public static UIElement labeledInlineLeft(float min, float max, float initial, float step, int decimals, long commitDelayMillis, Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
+        return create(Layout.INLINE_FIELD_LEFT, min, max, initial, step, decimals, commitDelayMillis, format, onChange, onCommit);
+    }
+
+    private static UIElement create(Layout layoutType, float min, float max, float initial, float step, int decimals, long commitDelayMillis,
+                                    Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
         if (max <= min) {
             throw new IllegalArgumentException("max must be greater than min.");
         }
 
         Slider.Horizontal slider = new Slider.Horizontal();
-        slider.layout(layout -> layout.widthPercent(100));
         slider.setRange(min, max);
         slider.setValue(initial, false);
         if (step > 0) {
@@ -34,30 +55,49 @@ public final class UiSliders {
         field.style(style -> style.tooltips(Component.translatable(
                 "ldlib.gui.text_field.number.0", fixed(min, decimals), fixed(max, decimals))));
         field.setWheelDur(decimals, step > 0 ? step : (max - min) / 100f);
-        field.layout(layout -> layout.width(50));
         field.setText(fixed(slider.getValue(), decimals), false);
 
         Label minLabel = UiLabels.secondary(format.apply(min), Horizontal.LEFT);
-        minLabel.textStyle(style -> style.adaptiveWidth(false));
-        minLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
         Label maxLabel = UiLabels.secondary(format.apply(max), Horizontal.RIGHT);
-        maxLabel.textStyle(style -> style.adaptiveWidth(false));
-        maxLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
 
-        UIElement labelRow = new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.ROW)
-                        .justifyContent(AlignContent.SPACE_BETWEEN)
-                        .alignItems(AlignItems.CENTER)
-                        .widthPercent(100));
-        labelRow.addChildren(minLabel, field, maxLabel);
+        UIElement container;
+        switch (layoutType) {
+            case INLINE_FIELD_RIGHT -> {
+                slider.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).minWidth(0));
+                field.layout(layout -> layout.width(50).marginLeft(8));
+                container = inlineRow();
+                container.addChildren(minLabel, slider, maxLabel, field);
+            }
+            case INLINE_FIELD_LEFT -> {
+                slider.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).minWidth(0));
+                field.layout(layout -> layout.width(50).marginRight(8));
+                container = inlineRow();
+                container.addChildren(field, minLabel, slider, maxLabel);
+            }
+            default -> {
+                slider.layout(layout -> layout.widthPercent(100));
+                field.layout(layout -> layout.width(50));
+                minLabel.textStyle(style -> style.adaptiveWidth(false));
+                minLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
+                maxLabel.textStyle(style -> style.adaptiveWidth(false));
+                maxLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
 
-        UIElement container = new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.COLUMN)
-                        .gapAll(2)
-                        .widthPercent(100));
-        container.addChildren(slider, labelRow);
+                UIElement labelRow = new UIElement()
+                        .layout(layout -> layout
+                                .flexDirection(FlexDirection.ROW)
+                                .justifyContent(AlignContent.SPACE_BETWEEN)
+                                .alignItems(AlignItems.CENTER)
+                                .widthPercent(100));
+                labelRow.addChildren(minLabel, field, maxLabel);
+
+                container = new UIElement()
+                        .layout(layout -> layout
+                                .flexDirection(FlexDirection.COLUMN)
+                                .gapAll(2)
+                                .widthPercent(100));
+                container.addChildren(slider, labelRow);
+            }
+        }
 
         long[] lastChange = { 0L };
         long[] delay = { commitDelayMillis };
@@ -86,7 +126,7 @@ public final class UiSliders {
             slider.setValue(snapped, false);
             onChange.accept(snapped);
             lastChange[0] = System.currentTimeMillis();
-            delay[0] = Math.max(commitDelayMillis, 1000);
+            delay[0] = Math.max(commitDelayMillis, MIN_TYPING_COMMIT_DELAY_MILLIS);
             pending[0] = true;
         });
 
@@ -106,6 +146,15 @@ public final class UiSliders {
         });
 
         return container;
+    }
+
+    private static UIElement inlineRow() {
+        return new UIElement()
+                .layout(layout -> layout
+                        .flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .gapAll(4)
+                        .widthPercent(100));
     }
 
     private static float snap(float value, float min, float max, float step) {

@@ -30,4 +30,19 @@ public final class UiSwitches {
                         .widthPercent(100))
                 .addChildren(switchElement, label);
     }
+
+    public static UIElement labeledLeft(Component text, boolean on, BooleanConsumer onChange) {
+        Switch switchElement = new Switch();
+        switchElement.setOn(on, false);
+        switchElement.setOnSwitchChanged(onChange);
+
+        Label label = UiLabels.primary(text, Horizontal.RIGHT);
+
+        return new UIElement()
+                .layout(layout -> layout
+                        .flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .gapAll(4))
+                .addChildren(label, switchElement);
+    }
 }

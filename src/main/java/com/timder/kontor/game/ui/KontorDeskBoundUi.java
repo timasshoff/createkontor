@@ -581,24 +581,26 @@ public class KontorDeskBoundUi {
     }
 
     public static UIElement marketsTab(Company company, KontorDeskBlockEntity be) {
-        ScrollerView content = UiContainer.tabScroller();
+        UIElement content = new UIElement()
+                .layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         ObservableList<MarketEntry> entries = new ObservableList<>();
         SimpleBinding<Tag> entriesBinding = DataBindingBuilder.tagS2C(() -> marketEntriesToTag(company, be))
-                .onRemoteSyncReceived(tag -> entries.set(tagToMarketEntries(tag)))
+                .onRemoteSyncReceived(tag -> entries.set(tagToMarketEntries(tag)
+                        .stream()
+                        .sorted(Comparator.comparing(entry -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())).asItem().getDescription().getString(), String.CASE_INSENSITIVE_ORDER))
+                        .toList()))
                 .build();
 
         Label title = UiLabels.h1(Component.translatable("ui.createkontor.kontor_desk.tab.markets"), Horizontal.LEFT);
         title.addSyncValue(entriesBinding.getSyncValue());
         entries.addListener(() -> title.setText(Component.translatable("ui.createkontor.kontor_desk.markets_count", entries.get().size())));
-        content.addScrollViewChildren(title);
+        content.addChild(title);
 
-        UIElement marketsBox = new UIElement().layout(layout -> layout.gapAll(4)).addSyncValue(entriesBinding.getSyncValue());
         Component[] error = { Component.empty() };
-
-        marketsBox.onMessage("c2s_set_participation", tag ->
+        content.onMessage("c2s_set_participation", tag ->
                 error[0] = be.setMarketParticipation(new ItemId(tag.getString("Market")), tag.getBoolean("Participate")));
-        marketsBox.onMessage("c2s_set_list_price", tag ->
+        content.onMessage("c2s_set_list_price", tag ->
                 error[0] = be.setListPrice(new ItemId(tag.getString("Market")), tag.getLong("PriceCents")));
 
         Label errorLabel = UiLabels.paragraphError(Component.empty(), Horizontal.LEFT);
@@ -606,75 +608,87 @@ public class KontorDeskBoundUi {
                 .onRemoteSyncReceived(errorLabel::setText)
                 .build();
         errorLabel.addSyncValue(errorBinding.getSyncValue());
-        content.addScrollViewChildren(errorLabel);
-        entries.addListener(() -> {
-            marketsBox.clearAllChildren();
+        content.addChild(errorLabel);
 
-            if (entries.get().isEmpty()) {
-                marketsBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.kontor_desk.markets.empty"), Horizontal.LEFT));
-                return;
-            }
+        content.addSyncValue(entriesBinding.getSyncValue());
+        content.addChild(UiContainer.searchableList(
+                entries,
+                (MarketEntry entry) -> {
+                    UIElement element = new UIElement()
+                            .style(style -> style.background(Sprites.BORDER_DARK))
+                            .layout(layout -> layout.paddingAll(8).gapAll(4));
 
-            for (MarketEntry entry : entries.get()) {
-                UIElement element = new UIElement()
-                        .style(style -> style.background(Sprites.BORDER_DARK))
-                        .layout(layout -> layout.paddingAll(8).gapAll(4));
+                    UIElement titleRow = new UIElement()
+                            .layout(layout -> layout
+                                    .flexDirection(FlexDirection.ROW)
+                                    .flexWrap(FlexWrap.WRAP)
+                                    .justifyContent(AlignContent.FLEX_START)
+                                    .alignItems(AlignItems.CENTER)
+                                    .gapAll(4)
+                                    .widthPercent(100));
+                    titleRow.addChild(new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())), 1)));
+                    titleRow.addChild(UiLabels.paragraphPrimary(Component.literal(BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())).asItem().getDescription().getString()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT)
+                            .layout(layout -> layout
+                                    .widthAuto()
+                                    .flexBasis(0)
+                                    .flexGrow(1)));
 
-                UIElement titleRow = new UIElement()
-                        .layout(layout -> layout
-                                .flexDirection(FlexDirection.ROW)
-                                .flexWrap(FlexWrap.WRAP)
-                                .justifyContent(AlignContent.FLEX_START)
-                                .alignItems(AlignItems.CENTER)
-                                .gapAll(4)
-                                .widthPercent(100));
-                titleRow.addChild(new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())), 1)));
-                titleRow.addChild(UiLabels.paragraphPrimary(Component.literal(BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())).asItem().getDescription().getString()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT)
-                        .layout(layout -> layout
-                                .widthAuto()
-                                .flexBasis(0)
-                                .flexGrow(1)));
-                element.addChild(titleRow);
+                   UIElement participateSwitch = UiSwitches.labeledLeft(
+                           Component.translatable("ui.createkontor.kontor_desk.markets.participate_short"),
+                           entry.market().participating(),
+                           isOn -> {
+                               CompoundTag tag = new CompoundTag();
+                               tag.putString("Market", entry.market().market().value());
+                               tag.putBoolean("Participate", isOn);
+                               content.sendMessage("c2s_set_participation", tag);
+                           });
+                    participateSwitch.style(style -> style.tooltips(Component.translatable("ui.createkontor.kontor_desk.markets.participate")));
+                    titleRow.addChild(participateSwitch);
 
-                element.addChild(UiSwitches.labeled(
-                        Component.translatable("ui.createkontor.kontor_desk.markets.participate"),
-                        entry.market().participating(),
-                        isOn -> {
-                            CompoundTag tag = new CompoundTag();
-                            tag.putString("Market", entry.market().market().value());
-                            tag.putBoolean("Participate", isOn);
-                            marketsBox.sendMessage("c2s_set_participation", tag);
-                        }));
+                    element.addChild(titleRow);
 
-                if (entry.market().participating()) {
-                    element.addChild(UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.kontor_desk.markets.list_price"), Horizontal.LEFT));
+                    if (entry.market().participating()) {
+                        Label listPriceLabel = UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.kontor_desk.markets.list_price"), Horizontal.LEFT);
+                        listPriceLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
 
-                    UIElement priceSlider = UiSliders.labeled(
-                            Math.max(0.01f, (float) entry.marketPrice().toDollars() * 0.01f),
-                            (float) entry.marketPrice().toDollars() * 2f,
-                            (float) (entry.listPrice() != null ? entry.listPrice().toDollars() : 0.0f),
-                            0.01f,
-                            2,
-                            400,
-                            value -> ComponentFormatting.moneyColored(Money.fromDollar((double) value)),
-                            value -> { },
-                            value -> {
-                                CompoundTag tag = new CompoundTag();
-                                tag.putString("Market", entry.market().market().value());
-                                tag.putLong("PriceCents", Money.fromDollar(value).cents());
-                                marketsBox.sendMessage("c2s_set_list_price", tag);
-                            }
-                    );
+                        Label marketPriceLabel = UiLabels.secondary(Component.translatable("ui.createkontor.kontor_desk.markets.market_price", ComponentFormatting.moneyColored(entry.marketPrice())), Horizontal.RIGHT);
 
-                    element.addChild(priceSlider);
-                    element.addChild(UiLabels.secondary(Component.translatable("ui.createkontor.kontor_desk.markets.market_price", ComponentFormatting.moneyColored(entry.marketPrice())), Horizontal.LEFT));
-                }
+                        UIElement priceHeader = new UIElement()
+                                .layout(layout -> layout
+                                        .flexDirection(FlexDirection.ROW)
+                                        .alignItems(AlignItems.CENTER)
+                                        .widthPercent(100));
+                        priceHeader.addChildren(listPriceLabel, marketPriceLabel);
+                        element.addChild(priceHeader);
 
-                marketsBox.addChild(element);
-            }
-        });
+                        UIElement priceSlider = UiSliders.labeledInlineLeft(
+                                Math.max(0.01f, (float) entry.marketPrice().toDollars() * 0.01f),
+                                (float) entry.marketPrice().toDollars() * 2f,
+                                (float) (entry.listPrice() != null ? entry.listPrice().toDollars() : 0.0f),
+                                0.01f,
+                                2,
+                                400,
+                                value -> ComponentFormatting.moneyColored(Money.fromDollar((double) value)),
+                                value -> { },
+                                value -> {
+                                    CompoundTag tag = new CompoundTag();
+                                    tag.putString("Market", entry.market().market().value());
+                                    tag.putLong("PriceCents", Money.fromDollar(value).cents());
+                                    content.sendMessage("c2s_set_list_price", tag);
+                                }
+                        );
+                        element.addChild(priceSlider);
+                    }
 
-        content.addScrollViewChildren(marketsBox);
+                    return element;
+                },
+                (MarketEntry entry) -> List.of(
+                        BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())).asItem().getDescription().getString()
+                ),
+                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.search"),
+                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.no_result")
+        ));
+
         return content;
     }
 

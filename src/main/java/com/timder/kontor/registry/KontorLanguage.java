@@ -84,8 +84,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.order.grace_period", "Deadline reached! Fulfill this order now to receive a partial payout!");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets_count", "Licensed Markets (%s)");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.empty", "No licensed markets found. Buy a license for a market through a lawyer.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.no_result", "No matching market found.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.search", "Search licensed markets");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.participate", "Participate and receive requests");
-        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.list_price", "List Price");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.participate_short", "Active");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.list_price", "Your current list price:");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.market_price", "Current Market Price: %s");
 
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form", "Legal Form");
