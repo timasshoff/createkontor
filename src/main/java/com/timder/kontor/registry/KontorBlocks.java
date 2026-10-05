@@ -1,10 +1,16 @@
 package com.timder.kontor.registry;
 
+import com.simibubi.create.foundation.item.ItemDescription;
+import com.simibubi.create.foundation.item.TooltipModifier;
 import com.timder.kontor.game.block.KontorDeskBlock;
 import com.timder.kontor.game.block.ShippingExitBlock;
 import com.timder.kontor.game.block.LawyerDeskBlock;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import net.createmod.catnip.lang.FontHelper;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -46,6 +52,7 @@ public final class KontorBlocks {
                     .add(LootItem.lootTableItem(block))
                     .when(ExplosionCondition.survivesExplosion()))))
             .lang("Kontor Desk")
+            .onRegisterAfter(Registries.ITEM, KontorBlocks::tooltip)
             .simpleItem()
             .register();
 
@@ -62,12 +69,15 @@ public final class KontorBlocks {
                     .add(LootItem.lootTableItem(block))
                     .when(ExplosionCondition.survivesExplosion()))))
             .lang("Lawyer's Desk")
+            .onRegisterAfter(Registries.ITEM, KontorBlocks::tooltip)
             .simpleItem()
             .register();
 
     static void touch() {
     }
 
-    private KontorBlocks() {
+    public static void tooltip(Block block) {
+        Item item = block.asItem();
+        TooltipModifier.REGISTRY.register(item, new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE));
     }
 }

@@ -30,6 +30,7 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.chart.CompanyCharts;
 import com.timder.kontor.game.ui.chart.ChartElement;
 import com.timder.kontor.config.CompanyConfig;
@@ -396,16 +397,8 @@ public class KontorDeskBoundUi {
         title.addSyncValue(requestsLimitBinding.getSyncValue());
         content.addScrollViewChildren(title);
 
-        Component[] error = { Component.empty() };
         UIElement requestsBox = new UIElement().layout(layout -> layout.gapColumn(4)).addSyncValue(requestsBinding.getSyncValue());
-        requestsBox.onMessage("c2s_accept_request", tag -> error[0] = be.acceptRequest(tag.getLong("Number")));
-
-        Label errorLabel = UiLabels.paragraphError(Component.empty(), Horizontal.LEFT);
-        var errorBinding = DataBindingBuilder.componentS2C(() -> error[0])
-                .onRemoteSyncReceived(errorLabel::setText)
-                .build();
-        errorLabel.addSyncValue(errorBinding.getSyncValue());
-        content.addScrollViewChildren(errorLabel);
+        requestsBox.onMessage("c2s_accept_request", tag -> ToastPayload.send(requestsBox.getModularUI().player, be.acceptRequest(tag.getLong("Number"))));
 
         requests.addListener(() -> { // This does not exist on the server
             requestsBox.clearAllChildren();
@@ -513,8 +506,6 @@ public class KontorDeskBoundUi {
         title.addSyncValue(ordersLimitBinding.getSyncValue());
         content.addScrollViewChildren(title);
 
-        content.addScrollViewChildren(UiLabels.paragraphError(Component.empty(), Horizontal.LEFT)); // Placeholder so that the orders start on the same height as the requests
-
         UIElement ordersBox = new UIElement().layout(layout -> layout.gapColumn(4)).addSyncValue(ordersBinding.getSyncValue());
         orders.addListener(() -> { // This does not exist on the server
             ordersBox.clearAllChildren();
@@ -597,18 +588,10 @@ public class KontorDeskBoundUi {
         entries.addListener(() -> title.setText(Component.translatable("ui.createkontor.kontor_desk.markets_count", entries.get().size())));
         content.addChild(title);
 
-        Component[] error = { Component.empty() };
         content.onMessage("c2s_set_participation", tag ->
-                error[0] = be.setMarketParticipation(new ItemId(tag.getString("Market")), tag.getBoolean("Participate")));
+                ToastPayload.send(content.getModularUI().player, be.setMarketParticipation(new ItemId(tag.getString("Market")), tag.getBoolean("Participate"))));
         content.onMessage("c2s_set_list_price", tag ->
-                error[0] = be.setListPrice(new ItemId(tag.getString("Market")), tag.getLong("PriceCents")));
-
-        Label errorLabel = UiLabels.paragraphError(Component.empty(), Horizontal.LEFT);
-        var errorBinding = DataBindingBuilder.componentS2C(() -> error[0])
-                .onRemoteSyncReceived(errorLabel::setText)
-                .build();
-        errorLabel.addSyncValue(errorBinding.getSyncValue());
-        content.addChild(errorLabel);
+                ToastPayload.send(content.getModularUI().player, be.setListPrice(new ItemId(tag.getString("Market")), tag.getLong("PriceCents"))));
 
         content.addSyncValue(entriesBinding.getSyncValue());
         content.addChild(UiContainer.searchableList(
@@ -685,8 +668,8 @@ public class KontorDeskBoundUi {
                 (MarketEntry entry) -> List.of(
                         BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.market().market().value())).asItem().getDescription().getString()
                 ),
-                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.search"),
-                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.no_result")
+                Component.translatable("ui.createkontor.kontor_desk.markets.search"),
+                Component.translatable("ui.createkontor.kontor_desk.markets.no_result")
         ));
 
         return content;

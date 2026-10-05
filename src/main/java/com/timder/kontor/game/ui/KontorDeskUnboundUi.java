@@ -11,6 +11,7 @@ import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.game.block.KontorDeskBlockEntity;
+import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
@@ -25,9 +26,8 @@ public final class KontorDeskUnboundUi {
 
         String[] name = { "" };
         boolean[] takeLoan = { false };
-        Component[] error = { Component.empty() };
         Button button = UiButtons.primary(Component.translatable("ui.createkontor.kontor_desk.founding"))
-                .setOnServerClick(e -> error[0] = be.foundNewCompany((ServerPlayer) holder.player, name[0], takeLoan[0]));
+                .setOnServerClick(e -> ToastPayload.send(holder.player, be.foundNewCompany((ServerPlayer) holder.player, name[0], takeLoan[0])));
         button.setActive(false);
 
         root.addScrollViewChildren(UiLabels.h1(Component.translatable("ui.createkontor.kontor_desk.founding_title"), Horizontal.CENTER));
@@ -76,13 +76,6 @@ public final class KontorDeskUnboundUi {
         root.addScrollViewChildren(loanToggle);
 
         root.addScrollViewChildren(button);
-
-        Label errorLabel = UiLabels.error(Component.empty(), Horizontal.LEFT);
-        var errorBinding = DataBindingBuilder.componentS2C(() -> error[0]) // Sync server error components array to client label
-                .onRemoteSyncReceived(errorLabel::setText)
-                .build();
-        errorLabel.addSyncValue(errorBinding.getSyncValue());
-        root.addScrollViewChildren(errorLabel);
 
         return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
     }
