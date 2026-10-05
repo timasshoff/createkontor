@@ -1,6 +1,5 @@
 package com.timder.kontor.game.block;
 
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
@@ -11,62 +10,52 @@ import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.block.employee.EmployeeActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
-import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.Objects;
+import java.util.Optional;
 
-public final class LawyerActions {
-
-    private final EmployeeDeskBlockEntity desk;
-    private boolean isServer = false;
-    private Company company;
-    private CompanySavedData comapnyData;
-    private Economy economy;
-    private EconomySavedData economyData;
+public final class LawyerActions extends EmployeeActions {
 
     public LawyerActions(EmployeeDeskBlockEntity desk) {
-        this.desk = Objects.requireNonNull(desk, "desk must not be null.");
-
-        if (desk.getLevel() instanceof ServerLevel) {
-            isServer = true;
-            this.comapnyData = CompanySavedData.get(desk.getLevel().getServer());
-            this.company = comapnyData.getRegistry().get(desk.getCompanyId()).orElse(null);
-            this.economyData = EconomySavedData.get(desk.getLevel().getServer());
-            this.economy = economyData.getEconomy();
-        }
+        super(desk);
     }
 
-    public Component applyForUpgrade() {
-        if (!isServer) return Component.empty();
+    public Optional<S2CActionResult> applyForUpgrade() {
+        if (!isServer) return S2CActionResult.illegalEnvironment();
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
 
         try {
             UpgradeRules.apply(company, economy.overallReputationInStars(company.id()), economy.currentDay(), params);
         } catch (Exception e) {
-            return ComponentFormatting.error("Failed: " + e.getMessage());
+            return S2CActionResult.error(ComponentFormatting.error("Failed: " + e.getMessage()));
         }
 
-        return Component.empty();
+        return S2CActionResult.empty();
     }
 
-    public Component buyLicense(LicenseKey key) {
-        if (!isServer) return Component.empty();
+    public Optional<S2CActionResult> buyLicense(LicenseKey key) {
+        if (!isServer) return S2CActionResult.illegalEnvironment();
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         AcquireResult result = LicenseOffers.acquire(company, economy, key, economy.currentDay(), params);
-        return Component.empty();
+        if (!result.success()) {
+            return S2CActionResult.error(Component.translatable("enum.createkontor.acquire_result." + result.status().toString().toLowerCase()));
+        }
+        return S2CActionResult.empty();
     }
 
-    public Component cancelLicense(LicenseKey key) {
-        if (!isServer) return Component.empty();
+    public Optional<S2CActionResult> cancelLicense(LicenseKey key) {
+        if (!isServer) return S2CActionResult.illegalEnvironment();
         LicenseHoldingRules.CancelResult result = LicenseHoldingRules.cancel(company, key);
         if (result != LicenseHoldingRules.CancelResult.CANCELLED) {
-            return Component.translatable("enum.createkontor.license_cancel_result." + result.toString().toLowerCase());
+            return S2CActionResult.error(Component.translatable("enum.createkontor.license_cancel_result." + result.toString().toLowerCase()));
         }
-        return Component.empty();
+        return S2CActionResult.empty();
     }
 
 }

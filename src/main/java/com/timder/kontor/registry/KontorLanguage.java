@@ -48,6 +48,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founders_loan.info", "§7Additionally, you can take a founders loan of %s with %s free days before you need to repay it.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founding", "Found company");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founding_title", "Found a new company");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.founded", "%s has been founded!");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.company_name", "Company Name");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.overview", "Overview");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.requests_orders", "Requests & Orders");
@@ -167,6 +168,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.license_cancel_result.already_cancelled", "License already cancelled.");
         REGISTRATE.addRawLang("enum.createkontor.license_cancel_result.not_held", "Company does not own this license.");
 
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.already_held", "Company already holds this license.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.unknown_license", "License does not exist.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.legal_level_too_low", "Legal level too low.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.limit_reached", "Company already reached max. licenses.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.not_operational", "Company is in payment difficulties.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.cannot_afford", "Company cannot afford this license.");
+
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
@@ -218,6 +226,20 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.result", "Result");
 
         REGISTRATE.addRawLang("chart.createkontor.cost_structure.title", "Cost Structure");
+
+        REGISTRATE.addRawLang("toast.createkontor.error.title", "An error occurred:");
+        REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");
+        REGISTRATE.addRawLang("toast.createkontor.success.title", "Success:");
+
+        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.summary", "Allows _founding_ or _management_ of a company.");
+        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.control1", "When R-Clicked");
+        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.action1", "Opens the _Kontor Desk_ interface.");
+
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.summary", "Staffs the company with a lawyer.");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.behaviour1", "The villager is _hired_ as a lawyer. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.control1", "When R-Clicked");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.action1", "Opens the _Lawyer's Desk_ interface.");
     }
 
     static void touch() {

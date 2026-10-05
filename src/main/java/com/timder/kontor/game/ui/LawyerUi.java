@@ -27,6 +27,7 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.LawyerActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
@@ -138,8 +139,7 @@ public final class LawyerUi {
                 .addSyncValue(nextLegalFormBinding.getSyncValue())
                 .addSyncValue(checklistBinding.getSyncValue())
                 .addSyncValue(applicationBinding.getSyncValue());
-        Component[] error = { Component.empty() };
-        upgradeContainer.onMessage("c2s_apply_upgrade", tag -> error[0] = actions.applyForUpgrade());
+        upgradeContainer.onMessage("c2s_apply_upgrade", tag -> ToastPayload.send(context.player(), actions.applyForUpgrade()));
 
         nextLegalForm.addListener(() -> buildUpgradeContainer(currentLegalForm.get(), nextLegalForm.get(), checklist.get(), applicationStatus.get(), upgradeContainer));
         currentLegalForm.addListener(() -> buildUpgradeContainer(currentLegalForm.get(), nextLegalForm.get(), checklist.get(), applicationStatus.get(), upgradeContainer));
@@ -260,8 +260,7 @@ public final class LawyerUi {
         content.addScrollViewChildren(title);
 
         UIElement licensesBox = new UIElement().addSyncValue(heldLicensesBinding.getSyncValue());
-        Component[] error = { Component.empty() };
-        licensesBox.onMessage("c2s_cancel_license", tag -> error[0] = actions.cancelLicense(LicenseKeyCodec.decode(tag.getString("Key"))));
+        licensesBox.onMessage("c2s_cancel_license", tag -> ToastPayload.send(context.player(), actions.cancelLicense(LicenseKeyCodec.decode(tag.getString("Key")))));
         heldLicenses.addListener(() -> {
             licensesBox.clearAllChildren();
 
@@ -333,8 +332,7 @@ public final class LawyerUi {
         content.addChild(title);
 
         content.addSyncValue(catalogBinding.getSyncValue());
-        Component[] error = { Component.empty() };
-        content.onMessage("c2s_buy_license", tag -> error[0] = actions.buyLicense(LicenseKeyCodec.decode(tag.getString("Key"))));
+        content.onMessage("c2s_buy_license", tag -> ToastPayload.send(context.player(), actions.buyLicense(LicenseKeyCodec.decode(tag.getString("Key")))));
         content.addChild(UiContainer.searchableGrid(
                 catalog,
                 (LicenseCard offer) -> {
