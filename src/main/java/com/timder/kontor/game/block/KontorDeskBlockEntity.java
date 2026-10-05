@@ -83,7 +83,7 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         setCompanyId(company.id());
         CompanyBlockSupport.message(player, CompanyBlockSupport.MESSAGE_BOUND, ComponentFormatting.highlightStandard(company.name()));
         player.closeContainer();
-        return S2CActionResult.success(Component.translatable("ui.createkontor.kontor_desk.founded", ComponentFormatting.highlightStandard(name)));
+        return S2CActionResult.success(Component.translatable("ui.createkontor.kontor_desk.founded", ComponentFormatting.highlightStandard(company.name())));
     }
 
     public Optional<S2CActionResult> acceptRequest(long number) {

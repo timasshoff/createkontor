@@ -43,6 +43,9 @@ public final class LawyerActions extends EmployeeActions {
         if (!isServer) return S2CActionResult.illegalEnvironment();
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         AcquireResult result = LicenseOffers.acquire(company, economy, key, economy.currentDay(), params);
+        if (!result.success()) {
+            return S2CActionResult.error(Component.translatable("enum.createkontor.acquire_result." + result.status().toString().toLowerCase()));
+        }
         return S2CActionResult.empty();
     }
 

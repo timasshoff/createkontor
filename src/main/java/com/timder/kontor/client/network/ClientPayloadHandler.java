@@ -18,6 +18,8 @@ public class ClientPayloadHandler {
     }
 
     public static void handleToast(ToastPayload payload, IPayloadContext context) {
-        KontorToasts.show(payload.kind(), payload.message());
+        context.enqueueWork(() -> {
+            KontorToasts.show(payload.kind(), payload.message());
+        });
     }
 }

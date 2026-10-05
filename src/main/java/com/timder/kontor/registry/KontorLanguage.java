@@ -168,6 +168,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.license_cancel_result.already_cancelled", "License already cancelled.");
         REGISTRATE.addRawLang("enum.createkontor.license_cancel_result.not_held", "Company does not own this license.");
 
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.already_held", "Company already holds this license.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.unknown_license", "License does not exist.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.legal_level_too_low", "Legal level too low.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.limit_reached", "Company already reached max. licenses.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.not_operational", "Company is in payment difficulties.");
+        REGISTRATE.addRawLang("enum.createkontor.acquire_result.cannot_afford", "Company cannot afford this license.");
+
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
