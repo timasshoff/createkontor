@@ -11,17 +11,17 @@ public final class MarketRules {
     /**
      * How much deviation survives from one trading tick to another
      */
-    public static final double DEVIATION_DECAY = 0.94;
+    public static final double DEVIATION_DECAY = 0.96;
 
     /**
      * How strongly a surprise moves the deviation
      */
-    public static final double DEVIATION_STRENGTH = 0.02;
+    public static final double DEVIATION_STRENGTH = 0.05;
 
     /**
      * Max movement a deviation can cause
      */
-    public static final double DEVIATION_BOUND = 0.5; // Max movement that deviation can cause
+    public static final double DEVIATION_BOUND = 0.75; // Max movement that deviation can cause
 
     /**
      * How appealing a supplier is to customers.

@@ -25,6 +25,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.upgrade.resting", "§7The application of %s §7for %s §7is being processed, but the net worth is too low. It rests for up to %s §7day(s). Raise the net worth to at least %s§7.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.cancelled", "§cThe application of %s §cfor %s §cwas cancelled because the company has no lawyer anymore. The fee of %s §cwas refunded.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.rejected", "§cThe application of %s §cfor %s §cwas rejected: the net worth was below %s§c for too long. The fee of %s §cis lost.");
+        REGISTRATE.addRawLang("message.createkontor.buyer_desk.buy.success", "%s package(s) are being delivered!");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -39,6 +40,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_salary", "Salary: %s per day");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_bonus", "Hiring bonus: %s once");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.inactive", "Paused");
+        REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.postboxes", "Connected postboxes: %s");
+        REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.no_postbox", "No postbox connected");
+        REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.connect_hint", "R-Click the desk with a postbox, then place it nearby");
+        REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.pending", "Packages waiting: %s");
 
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.detailed", "There is no data for the chart \"%s\" yet. You can try again later.");
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.short", "There is no data for this chart yet. You can try again later.");
@@ -133,6 +138,24 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses.cancel", "Cancel License");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses.cancelled", "This license has been cancelled and will be removed from this list tomorrow.");
 
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog", "Catalog");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog_count", "Catalog (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote", "Cart");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.search", "Search catalog");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.no_result", "No matching offers found");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.price", "%s per unit");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.raw_material", "Raw Material");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.product", "Product");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.add", "Add");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.empty", "Empty");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.line", "%sx %s");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.total", "Total: %s");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.address", "Package Adresse");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.address.tooltip", "(Optional) Delivered packages will be addressed to this value");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.buy", "Buy");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.remove", "Remove");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.no_postbox", "No connected postbox");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -175,6 +198,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.acquire_result.not_operational", "Company is in payment difficulties.");
         REGISTRATE.addRawLang("enum.createkontor.acquire_result.cannot_afford", "Company cannot afford this license.");
 
+        REGISTRATE.addRawLang("enum.createkontor.purchase_status.not_operational", "Company is in payment difficulties.");
+        REGISTRATE.addRawLang("enum.createkontor.purchase_status.insufficient_funds", "Company cannot afford this delivery.");
+
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
@@ -204,6 +230,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("license.createkontor.generated", "%s License");
 
         REGISTRATE.addRawLang("employee_role.createkontor.lawyer", "Lawyer");
+        REGISTRATE.addRawLang("employee_role.createkontor.buyer", "Buyer");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
 
@@ -240,6 +267,12 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.behaviour1", "The villager is _hired_ as a lawyer. You need to pay a one-time _hiring bonus_.");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.control1", "When R-Clicked");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.action1", "Opens the _Lawyer's Desk_ interface.");
+
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.summary", "Staffs the company with a buyer.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.behaviour1", "The villager is _hired_ as a buyer. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control1", "When R-Clicked with a Postbox");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action1", "The next _Postbox_ you place nearby is _connected_ to this desk. Bought goods arrive there.");
     }
 
     static void touch() {

@@ -313,8 +313,7 @@ public final class LawyerUi {
     }
 
     public static UIElement licenseCatalogTab(EmployeeDeskContext context, LawyerActions actions) {
-        UIElement content = new UIElement()
-                .layout(layout -> layout.widthPercent(100).heightPercent(100));
+        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         ObservableList<LicenseCard> catalog = new ObservableList<>();
         SimpleBinding<Tag> catalogBinding = DataBindingBuilder.tagS2C(() -> licenseOffersToTag(context))

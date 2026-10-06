@@ -36,6 +36,7 @@ public final class LawyerActions extends EmployeeActions {
             return S2CActionResult.error(ComponentFormatting.error("Failed: " + e.getMessage()));
         }
 
+        CompanySavedData.get(serverLevel.getServer()).setDirty();
         return S2CActionResult.empty();
     }
 
@@ -46,6 +47,7 @@ public final class LawyerActions extends EmployeeActions {
         if (!result.success()) {
             return S2CActionResult.error(Component.translatable("enum.createkontor.acquire_result." + result.status().toString().toLowerCase()));
         }
+        CompanySavedData.get(serverLevel.getServer()).setDirty();
         return S2CActionResult.empty();
     }
 
@@ -55,6 +57,7 @@ public final class LawyerActions extends EmployeeActions {
         if (result != LicenseHoldingRules.CancelResult.CANCELLED) {
             return S2CActionResult.error(Component.translatable("enum.createkontor.license_cancel_result." + result.toString().toLowerCase()));
         }
+        CompanySavedData.get(serverLevel.getServer()).setDirty();
         return S2CActionResult.empty();
     }
 

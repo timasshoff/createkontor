@@ -29,6 +29,7 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue LAWYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CALCULATOR_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue BUYER_SALARY_IN_DOLLARS;
 
     public static final ModConfigSpec.DoubleValue PURCHASE_MARKUP;
 
@@ -83,6 +84,8 @@ public class CompanyConfig {
                 .defineInRange("calculatorSalaryInDollars", 60, 0, Integer.MAX_VALUE);
         MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment("Base salary of a market analyst per day. Fixed when the market analyst is hired")
                 .defineInRange("marketAnalystSalaryInDollars", 90, 0, Integer.MAX_VALUE);
+        BUYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a buyer per day. Fixed when the buyer is hired")
+                .defineInRange("buyerSalaryInDollars", 60, 0, Integer.MAX_VALUE);
 
         builder.pop();
 
