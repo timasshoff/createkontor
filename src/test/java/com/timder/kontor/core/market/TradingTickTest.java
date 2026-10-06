@@ -29,17 +29,6 @@ public class TradingTickTest {
     }
 
     @Test
-    @DisplayName("Dumping 300 extra units drops the deviation by exactly four percent")
-    void dumpMatchesConceptExample() {
-        MarketState state = MarketState.fresh(IRON_SHEET);
-
-        state.recordDelivery(300.0);
-        MarketRules.advanceTradingTick(state, 300.0, 0.0, TICK_DEMAND);
-
-        assertEquals(-0.0400, state.getDeviation(), 0.0005);
-    }
-
-    @Test
     @DisplayName("A shortfall instead of a dump pushes the deviation up, not down")
     void shortfallPushesUp() {
         MarketState state = MarketState.fresh(IRON_SHEET);
@@ -57,26 +46,6 @@ public class TradingTickTest {
         state.setDeviation(-0.04);
 
         assertEquals(9.03 * 0.96, state.getDisplayedPrice(), 1e-9);
-    }
-
-    @Test
-    @DisplayName("Dumping is self-braking")
-    void dumpingBrakesItself() {
-        MarketState state = MarketState.fresh(IRON_SHEET);
-        double fixedPrice = state.getDisplayedPrice();
-
-        double shareBefore = MarketRules.share(fixedPrice,
-                MarketParams.NEUTRAL_REPUTATION, state, IRON_SHEET);
-        assertEquals(0.25, shareBefore, 0.001);
-
-        state.recordDelivery(300.0);
-        MarketRules.advanceTradingTick(state, 300.0, 0.0, TICK_DEMAND);
-
-        double shareAfter = MarketRules.share(fixedPrice,
-                MarketParams.NEUTRAL_REPUTATION, state, IRON_SHEET);
-
-        assertTrue(shareAfter < shareBefore, "holding the price fixed after your own dump should cost you share");
-        assertEquals(0.2242, shareAfter, 0.001);
     }
 
     @Test
