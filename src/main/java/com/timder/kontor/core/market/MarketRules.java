@@ -94,21 +94,27 @@ public final class MarketRules {
         return shareFrom(attractiveness(price, reputation, state, params), 0.0, state, params);
     }
 
+    public static void advanceTradingTick(MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
+        advanceTradingTick(state, actualDelivered, 0.0, expectedDelivered, demandThisTick);
+    }
+
     /**
      * Advanced the trading tick forward. Moves the trading deviation.
      * @param state The market state
      * @param actualDelivered The amount of actually delivered product across the market
+     * @param actualPurchased The amount of product that companies bought from the competitors in this tick
      * @param expectedDelivered The expected amount of delivered product by all competitors and concurrence, based on their market shared
-     * @param demandThisTick The demand for this tick (usually daily demand divided by amount of trading ticks per day)
+     * @param demandThisTick The demand for this tick
      */
-    public static void advanceTradingTick(MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
-        double surprise = actualDelivered - expectedDelivered;
+    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick) {
+        double surprise = actualDelivered - expectedDelivered - actualPurchased;
         double reference = demandThisTick > 0 ? demandThisTick : 1.0;
 
         double deviation = DEVIATION_DECAY * state.getDeviation() - DEVIATION_STRENGTH * surprise / reference;
 
         state.setDeviation(clamp(deviation, -DEVIATION_BOUND, DEVIATION_BOUND));
         state.clearDeliveredThisTick();
+        state.clearPurchasedThisTick();
     }
 
     public static DayResult advanceDay(MarketState state, MarketParams params, double demand) {
@@ -120,7 +126,7 @@ public final class MarketRules {
 
         // The remaining demand
         double soldByCompanies = Math.min(state.getDeliveredToday(), demand);
-        double remaining = Math.max(0.0, demand - soldByCompanies);
+        double remaining = Math.max(0.0, demand - soldByCompanies) + state.getPurchasedToday();
 
         // The performance of competitors
         double soldByCompetitors = Math.min(remaining, capacity);
@@ -144,8 +150,9 @@ public final class MarketRules {
         double competitors = clamp(competitorsBefore * (1.0 + params.capacityResponse() * relative), MIN_COMPANIES, MAX_COMPANIES);
         state.setCompetitors(competitors);
 
-        // Clearing counter
+        // Clearing counters
         state.clearDeliveredToday();
+        state.clearPurchasedToday();
 
         return new DayResult(demand, soldByCompanies, soldByCompetitors, overflow, utilisation, priceBefore, price, competitorsBefore, competitors);
     }

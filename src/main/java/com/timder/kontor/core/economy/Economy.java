@@ -338,9 +338,10 @@ public final class Economy {
             double demandPerTick = currentDemand.get(def.id()) / MarketRules.TRADING_TICKS_PER_DAY;
 
             double actual = state.getDeliveredThisTick();
+            double purchased = state.getPurchasedThisTick();
             double expected = expectedTickDelivery(def.id(), state, params);
 
-            MarketRules.advanceTradingTick(state, actual, expected, demandPerTick);
+            MarketRules.advanceTradingTick(state, actual, purchased, expected, demandPerTick);
 
             recordMarketHistory(def.id(), state, actual);
         }
@@ -679,6 +680,15 @@ public final class Economy {
     }
 
     /**
+     * Records a purchase of a product from the competitors of a market.
+     * @param market The market of the bought product
+     * @param quantity The quantity purchased
+     */
+    public void recordMarketPurchase(ItemId market, double quantity) {
+        stateOf(market).recordPurchase(quantity);
+    }
+
+    /**
      * Records a purchase of a raw material.
      * @param material The raw material
      * @param quantity The quantity purchased
@@ -690,6 +700,14 @@ public final class Economy {
         }
 
         state.recordPurchase(quantity);
+    }
+
+    public boolean isMarket(ItemId item) {
+        return marketStates.containsKey(item);
+    }
+
+    public boolean isRawMaterial(ItemId item) {
+        return rawMaterialStates.containsKey(item);
     }
 
     private MarketParticipants participantsOf(ItemId market) {

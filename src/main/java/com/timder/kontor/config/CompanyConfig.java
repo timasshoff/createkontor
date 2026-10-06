@@ -30,6 +30,8 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue CALCULATOR_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
 
+    public static final ModConfigSpec.DoubleValue PURCHASE_MARKUP;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -84,6 +86,12 @@ public class CompanyConfig {
 
         builder.pop();
 
+        builder.comment("Purchasing").push("purchasing");
+        PURCHASE_MARKUP = builder.comment("Surcharge a company pays on the market price when it buys goods, as a fraction (0.10 = 10 %). Raise it to make buying products and reselling them to customers less attractive")
+                .defineInRange("purchaseMarkup", 0.10, 0.0, 10.0);
+
+        builder.pop();
+
         SPEC = builder.build();
     }
 
@@ -105,7 +113,8 @@ public class CompanyConfig {
                 INSOLVENCY_DAYS.get(),
                 BOOKING_RETENTION_DAYS.get(),
                 HISTORY_LENGTH_DAYS.get(),
-                HIRE_BONUS_SALARY_MULTIPLE.get()
+                HIRE_BONUS_SALARY_MULTIPLE.get(),
+                PURCHASE_MARKUP.get()
         );
     }
 }
