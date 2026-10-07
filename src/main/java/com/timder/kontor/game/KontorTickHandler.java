@@ -56,13 +56,14 @@ public class KontorTickHandler {
 
         if (economy.currentDay() != dayBefore) {
             settleCompanies(server, companyData, economyData, lastHistoryDayBefore, activeNow);
+            PlayerNotifications.sendNewDayNotification(server, economy.currentDay());
         }
 
         if (markActivity(registry, activeNow, economy.currentDay())) {
             companyData.setDirty();
         }
 
-        boolean orderBurstOccurred = false; // = an order has failed
+        boolean orderBurstOccurred = false;
         boolean upgradeEventOccurred = false;
         boolean requestArrived = false;
         if (registry.size() > 0) {

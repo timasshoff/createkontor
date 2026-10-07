@@ -16,6 +16,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_COMPANY_GONE, "§cThe company of this block no longer exists.");
         REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_NOT_MEMBER, "§cThis block belongs to another company.");
         REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_STATUS, "§7Company: %s");
+        REGISTRATE.addRawLang("message.createkontor.new_day", "§7Markets have closed and reopened with new prices. Trading day %s §7starts!");
         REGISTRATE.addRawLang("message.createkontor.already_member", "§cYou are already a member of a company.");
         REGISTRATE.addRawLang("message.createkontor.employee_desk.vacant", "§cThis desk is not staffed.");
         REGISTRATE.addRawLang("message.createkontor.shipping_exit.limit", "§cLimit reached: Legal form allows at most %s §cbound shipping exits.");
@@ -265,14 +266,16 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.summary", "Staffs the company with a _lawyer_. A lawyer handles _legal matters_ like licensing or legal form upgrades for your company.");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.condition1", "When a Villager sits next to it");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.behaviour1", "The villager is _hired_ as a lawyer. You need to pay a one-time _hiring bonus_.");
-        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.control1", "When R-Clicked");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.control1", "When R-Clicked on Employee");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.action1", "Opens the _Lawyer's Desk_ interface.");
 
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.summary", "Staffs the company with a _buyer_. A buyer allows you to _buy goods_ from markets.");
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.condition1", "When a Villager sits next to it");
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.behaviour1", "The villager is _hired_ as a buyer. You need to pay a one-time _hiring bonus_.");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control1", "When R-Clicked with a Postbox");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action1", "The next _Postbox_ you place nearby is _connected_ to this desk. Bought goods arrive there.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action1", "Opens the _Buyer's Desk_ interface.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control2", "When R-Clicked with a Postbox");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action2", "The next _Postbox_ you place nearby is _connected_ to this desk. Bought goods arrive there.");
     }
 
     static void touch() {
