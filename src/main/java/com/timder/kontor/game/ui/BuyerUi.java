@@ -90,7 +90,7 @@ public final class BuyerUi {
         UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100)).style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
         content.addSyncValue(offersBinding.getSyncValue());
 
-        Label title = (Label) UiLabels.h2(Component.translatable("ui.createkontor.lawyer_desk.license_catalog"), Horizontal.LEFT).textStyle(style -> style.adaptiveWidth(false));
+        Label title = (Label) UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.catalog"), Horizontal.LEFT).textStyle(style -> style.adaptiveWidth(false));
         offers.addListener(() -> title.setText(Component.translatable("ui.createkontor.buyer_desk.catalog_count", offers.get().size())));
         content.addChild(title);
 
