@@ -42,6 +42,11 @@ public final class PlayerNotifications {
         }
     }
 
+    public static void sendNewDayNotification(MinecraftServer server, long day) {
+        Component message = Component.translatable("message.createkontor.new_day", ComponentFormatting.highlightStandard(String.valueOf(day)));
+        server.getPlayerList().broadcastSystemMessage(message, false);
+    }
+
     public static void sendUpgradeCancelledNotification(MinecraftServer server, Company company, int targetLevel, Money refund, CompanyParams params) {
         Component message = Component.translatable("message.createkontor.upgrade.cancelled",
                 ComponentFormatting.highlightError(company.name()),
