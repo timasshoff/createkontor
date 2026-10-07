@@ -150,7 +150,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.empty", "Empty");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.line", "%sx %s");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.total", "Total: %s");
-        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.address", "Package Adresse");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.address", "Package Address");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.address.tooltip", "(Optional) Delivered packages will be addressed to this value");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.buy", "Buy");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.remove", "Remove");
@@ -262,13 +262,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.control1", "When R-Clicked");
         REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.action1", "Opens the _Kontor Desk_ interface.");
 
-        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.summary", "Staffs the company with a lawyer.");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.summary", "Staffs the company with a _lawyer_. A lawyer handles _legal matters_ like licensing or legal form upgrades for your company.");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.condition1", "When a Villager sits next to it");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.behaviour1", "The villager is _hired_ as a lawyer. You need to pay a one-time _hiring bonus_.");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.control1", "When R-Clicked");
         REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.action1", "Opens the _Lawyer's Desk_ interface.");
 
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.summary", "Staffs the company with a buyer.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.summary", "Staffs the company with a _buyer_. A buyer allows you to _buy goods_ from markets.");
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.condition1", "When a Villager sits next to it");
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.behaviour1", "The villager is _hired_ as a buyer. You need to pay a one-time _hiring bonus_.");
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control1", "When R-Clicked with a Postbox");

@@ -92,7 +92,7 @@ public final class MarketRules {
      * @param demandThisTick The demand for this tick
      */
     public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick, MarketDynamicsParams params) {
-        double surprise = actualDelivered - expectedDelivered - actualPurchased;
+        double surprise = actualDelivered - expectedDelivered - params.purchaseImpact() * actualPurchased;
         double reference = demandThisTick > 0 ? demandThisTick : 1.0;
 
         double deviation = params.deviationDecay() * state.getDeviation() - params.deviationStrength() * surprise / reference;
@@ -100,6 +100,21 @@ public final class MarketRules {
         state.setDeviation(clamp(deviation, -params.deviationBound(), params.deviationBound()));
         state.clearDeliveredThisTick();
         state.clearPurchasedThisTick();
+    }
+
+    /**
+     * Passes a rise of the reference cost on to the price level
+     * @param state The market state
+     * @param previousCost The reference cost before recalculation
+     * @param newCost The reference cost after recalculation
+     * @param dynamics The dynamic market parameters
+     */
+    public static void passCostIncrease(MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
+        if (previousCost <= 0 || newCost <= previousCost) {
+            return;
+        }
+        double ratio = newCost / previousCost;
+        state.setPriceLevel(state.getPriceLevel() * (1.0 + dynamics.costPassThrough() * (ratio - 1.0)));
     }
 
     public static DayResult advanceDay(MarketState state, MarketParams params, double demand) {

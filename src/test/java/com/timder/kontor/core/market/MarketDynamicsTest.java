@@ -18,7 +18,7 @@ public class MarketDynamicsTest {
     private static MarketDynamicsParams withPurchaseImpact(double impact) {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
         return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(), impact,
-                d.maxPriceFactor(), d.minCompetitors(), d.maxCompetitors());
+                d.maxPriceFactor(), d.minCompetitors(), d.maxCompetitors(), d.costPassThrough());
     }
 
     private static double deviationAfterPurchase(double purchased, MarketDynamicsParams dynamics) {
@@ -40,6 +40,7 @@ public class MarketDynamicsTest {
         assertEquals(2.0, standard.maxPriceFactor(), 1e-12);
         assertEquals(1.0, standard.minCompetitors(), 1e-12);
         assertEquals(8.0, standard.maxCompetitors(), 1e-12);
+        assertEquals(1.0, standard.costPassThrough(), 1e-12);
     }
 
     @Test
@@ -101,7 +102,7 @@ public class MarketDynamicsTest {
     @Test
     @DisplayName("Decay, strength and bound are taken from the parameters")
     void deviationConstantsAreConfigurable() {
-        MarketDynamicsParams custom = new MarketDynamicsParams(0.5, 0.1, 0.2, 1.0, 2.0, 1.0, 8.0);
+        MarketDynamicsParams custom = new MarketDynamicsParams(0.5, 0.1, 0.2, 1.0, 2.0, 1.0, 8.0, 1.0);
         MarketState state = MarketState.fresh(IRON_SHEET);
         state.setDeviation(0.1);
 
@@ -119,7 +120,7 @@ public class MarketDynamicsTest {
     void priceCeilingIsConfigurable() {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
         MarketDynamicsParams lowCeiling = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.purchaseImpact(), 1.5, d.minCompetitors(), d.maxCompetitors());
+                d.deviationBound(), d.purchaseImpact(), 1.5, d.minCompetitors(), d.maxCompetitors(), d.costPassThrough());
 
         // One competitor, demand 1800 against capacity 720: full utilisation.
         MarketState standard = new MarketState(15.0, 1.0);
@@ -142,7 +143,7 @@ public class MarketDynamicsTest {
         assertEquals(3.15, growing.getCompetitors(), 1e-9);
 
         MarketDynamicsParams maxThree = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.purchaseImpact(), d.maxPriceFactor(), 1.0, 3.0);
+                d.deviationBound(), d.purchaseImpact(), d.maxPriceFactor(), 1.0, 3.0, 1.0);
         MarketState capped = new MarketState(12.0, 3.0);
         MarketRules.advanceDay(capped, IRON_SHEET, DAILY_DEMAND, maxThree);
         assertEquals(3.0, capped.getCompetitors(), 1e-9);
@@ -153,7 +154,7 @@ public class MarketDynamicsTest {
         assertEquals(2.85, shrinking.getCompetitors(), 1e-9);
 
         MarketDynamicsParams minThree = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.purchaseImpact(), d.maxPriceFactor(), 3.0, 8.0);
+                d.deviationBound(), d.purchaseImpact(), d.maxPriceFactor(), 3.0, 8.0, 1.0);
         MarketState floored = new MarketState(8.06, 3.0);
         MarketRules.advanceDay(floored, IRON_SHEET, 100.0, minThree);
         assertEquals(3.0, floored.getCompetitors(), 1e-9);
@@ -162,12 +163,82 @@ public class MarketDynamicsTest {
     @Test
     @DisplayName("Invalid settings are rejected")
     void invalidValuesAreRejected() {
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(1.0, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, -0.02, 0.5, 1.0, 2.0, 1.0, 8.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 1.0, 1.0, 2.0, 1.0, 8.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, -1.0, 2.0, 1.0, 8.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 1.0, 1.0, 8.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 0.0, 8.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 5.0, 4.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(1.0, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, -0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 1.0, 1.0, 2.0, 1.0, 8.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, -1.0, 2.0, 1.0, 8.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 1.0, 1.0, 8.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 0.0, 8.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 5.0, 4.0, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, -0.1));
+        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.1));
+    }
+
+    private static MarketDynamicsParams withPassThrough(double passThrough) {
+        MarketDynamicsParams d = MarketDynamicsParams.standard();
+        return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(), d.purchaseImpact(),
+                d.maxPriceFactor(), d.minCompetitors(), d.maxCompetitors(), passThrough);
+    }
+
+    @Test
+    @DisplayName("A cost rise of two percent raises the price level by two percent and keeps the margin")
+    void fullPassThroughKeepsTheMargin() {
+        MarketState state = MarketState.fresh(IRON_SHEET); // price level 8.06 * 1.12 = 9.0272
+        double newCost = 8.06 * 1.02;
+
+        MarketRules.passCostIncrease(state, 8.06, newCost, withPassThrough(1.0));
+
+        assertEquals(9.207744, state.getPriceLevel(), 1e-9);
+        assertEquals(0.12, (state.getPriceLevel() - newCost) / newCost, 1e-9);
+    }
+
+    @Test
+    @DisplayName("Half pass-through passes on half of the rise")
+    void halfPassThrough() {
+        MarketState state = MarketState.fresh(IRON_SHEET);
+
+        MarketRules.passCostIncrease(state, 8.06, 8.06 * 1.02, withPassThrough(0.5));
+
+        assertEquals(9.117472, state.getPriceLevel(), 1e-9);
+    }
+
+    @Test
+    @DisplayName("With pass-through 0 the price level stays")
+    void noPassThrough() {
+        MarketState state = MarketState.fresh(IRON_SHEET);
+
+        MarketRules.passCostIncrease(state, 8.06, 8.06 * 1.02, withPassThrough(0.0));
+
+        assertEquals(9.0272, state.getPriceLevel(), 1e-9);
+    }
+
+    @Test
+    @DisplayName("A falling cost is not passed on")
+    void fallingCostIsIgnored() {
+        MarketState state = MarketState.fresh(IRON_SHEET);
+
+        MarketRules.passCostIncrease(state, 8.06, 7.9, withPassThrough(1.0));
+
+        assertEquals(9.0272, state.getPriceLevel(), 1e-9);
+    }
+
+    @Test
+    @DisplayName("An unchanged cost leaves the price level alone")
+    void unchangedCostIsIgnored() {
+        MarketState state = MarketState.fresh(IRON_SHEET);
+
+        MarketRules.passCostIncrease(state, 8.06, 8.06, withPassThrough(1.0));
+
+        assertEquals(9.0272, state.getPriceLevel(), 1e-9);
+    }
+
+    @Test
+    @DisplayName("A cost rise from 10 to 12 at a price of 20 and half pass-through gives 22")
+    void ratioIsRelativeToThePreviousCost() {
+        MarketState state = new MarketState(20.0, 3.0);
+
+        MarketRules.passCostIncrease(state, 10.0, 12.0, withPassThrough(0.5));
+
+        assertEquals(22.0, state.getPriceLevel(), 1e-9);
     }
 }

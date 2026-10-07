@@ -76,8 +76,8 @@ public final class BuyerUi {
 
         SplitView.Horizontal split = new SplitView.Horizontal();
         split.layout(layout -> layout.widthPercent(100).heightPercent(100));
-        split.setMinPercentage(60);
-        split.setMaxPercentage(90);
+        split.setMinPercentage(50);
+        split.setMaxPercentage(80);
         split.setPercentage(75);
 
         split.left(offers(offers, offersBinding, quote));
@@ -140,11 +140,11 @@ public final class BuyerUi {
                                     .marginTopAuto());
 
                     TextField quantityField = new TextField();
-                    quantityField.setNumbersOnlyInt(1, 999);
+                    quantityField.setNumbersOnlyInt(1, BuyerDeskBlockEntity.MAX_GOOD_SIZE);
                     quantityField.setText("1", false);
                     quantityField.setTextResponder(text -> {
                         try {
-                            quantity[0] = Math.max(1, Math.min(Integer.parseInt(text.trim()), 999));
+                            quantity[0] = Math.max(1, Math.min(Integer.parseInt(text.trim()), BuyerDeskBlockEntity.MAX_GOOD_SIZE));
                         } catch (NumberFormatException e) {
                             quantity[0] = 1;
                         }
@@ -153,7 +153,7 @@ public final class BuyerUi {
                     quantityField.layout(layout -> layout.width(40));
 
                     Button add = (Button) UiButtons.primary(Component.translatable("ui.createkontor.buyer_desk.catalog.add"))
-                            .setOnClick(e -> addToCart(quote, offer.item(), Math.max(1, Math.min(quantity[0], 999))))
+                            .setOnClick(e -> addToCart(quote, offer.item(), Math.max(1, Math.min(quantity[0], BuyerDeskBlockEntity.MAX_GOOD_SIZE))))
                             .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).height(14));
 
                     buyRow.addChildren(quantityField, add);

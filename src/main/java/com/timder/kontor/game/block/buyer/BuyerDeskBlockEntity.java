@@ -42,6 +42,7 @@ import java.util.*;
 public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
     private static final int MAX_STACK_IN_PACKAGE = 64;
+    public static final int MAX_GOOD_SIZE = 9999;
 
     private static final String TAG_PORT_COUNT = "ConnectedPorts";
     private static final String TAG_PENDING = "PendingPackages";
@@ -123,7 +124,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
             ResourceLocation id = ResourceLocation.tryParse(entry.getKey().value());
             Optional<Item> item = id == null ? Optional.empty() : BuiltInRegistries.ITEM.getOptional(id);
 
-            if (quantity < 1 || quantity > 999 || item.isEmpty()) return S2CActionResult.error(Component.literal("Quantity invalid."));
+            if (quantity < 1 || quantity > MAX_GOOD_SIZE || item.isEmpty()) return S2CActionResult.error(Component.literal("Quantity invalid."));
 
             try {
                 lines.add(PurchaseOffers.offerFor(economy, params, entry.getKey()).lineFor(quantity));
@@ -167,9 +168,10 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         int packages = 0;
         for (int from = 0; from < stacks.size(); from += PackageItem.SLOTS) {
             ItemStack box = PackageItem.containing(stacks.subList(from, Math.min(from + PackageItem.SLOTS, stacks.size())));
-            if (!address.isBlank()) {
-                PackageItem.addAddress(box, address);
+            if (address.isBlank()) {
+                address = "";
             }
+            PackageItem.addAddress(box, address);
             pendingPackages.add(box);
             packages++;
         }
@@ -209,11 +211,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
     private static boolean deliver(ItemStack box, List<PackagePortBlockEntity> ports) {
         for (PackagePortBlockEntity port : ports) {
-            ItemStack stamped = box.copy();
-            if (!port.addressFilter.isBlank()) {
-                PackageItem.addAddress(stamped, port.addressFilter);
-            }
-            if (ItemHandlerHelper.insertItem(port.inventory, stamped, false).isEmpty()) {
+            if (ItemHandlerHelper.insertItem(port.inventory, box.copy(), false).isEmpty()) {
                 return true;
             }
         }

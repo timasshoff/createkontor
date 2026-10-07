@@ -539,6 +539,7 @@ public final class Economy {
             double plantSize = def.params().plantSize() * trend; // Grows plant size with trend & therefor with demand
             MarketParams updated = new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
             marketParamsMap.put(def.id(), updated);
+            MarketRules.passCostIncrease(marketStates.get(def.id()), previous.referenceCost(), referenceCost, params.marketDynamics());
 
             Integer depth = result.depth().get(def.id());
             if (depth != null) {
