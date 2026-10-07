@@ -17,6 +17,7 @@
   "block.createkontor.lawyer_desk.tooltip.condition1": "ʇı oʇ ʇxǝu sʇıs ɹǝbɐןןıΛ ɐ uǝɥM",
   "block.createkontor.lawyer_desk.tooltip.control1": "ǝǝʎoןdɯƎ uo pǝʞɔıןƆ-ᴚ uǝɥM",
   "block.createkontor.lawyer_desk.tooltip.summary": "˙ʎuɐdɯoɔ ɹnoʎ ɹoɟ sǝpɐɹbdn ɯɹoɟ ןɐbǝן ɹo buısuǝɔıן ǝʞıן ‾sɹǝʇʇɐɯ ןɐbǝן‾ sǝןpuɐɥ ɹǝʎʍɐן Ɐ ˙‾ɹǝʎʍɐן‾ ɐ ɥʇıʍ ʎuɐdɯoɔ ǝɥʇ sɟɟɐʇS",
+  "block.createkontor.market_analyst_desk": "ʞsǝᗡ s,ʇsʎןɐuⱯ ʇǝʞɹɐW",
   "block.createkontor.shipping_exit": "ʇıxƎ buıddıɥS",
   "chart.createkontor.balance.bookings": "sbuıʞooᗺ ",
   "chart.createkontor.balance.reference.overdraft": "ʇıɯıꞀ ʇɟɐɹpɹǝʌO",
@@ -25,6 +26,10 @@
   "chart.createkontor.cost_structure.title": "ǝɹnʇɔnɹʇS ʇsoƆ",
   "chart.createkontor.d": "p",
   "chart.createkontor.day": " ʎɐᗡ",
+  "chart.createkontor.market_history.series.competitors": "sɹoʇıʇǝdɯoƆ",
+  "chart.createkontor.market_history.series.demand": "puɐɯǝᗡ",
+  "chart.createkontor.market_history.series.price": "ǝɔıɹԀ",
+  "chart.createkontor.market_history.title": "ʎɹoʇsıH ʇǝʞɹɐW",
   "chart.createkontor.other": "ɹǝɥʇO",
   "chart.createkontor.revenue_result.series.result": "ʇןnsǝᴚ",
   "chart.createkontor.revenue_result.series.revenue": "ǝnuǝʌǝᴚ",
@@ -34,6 +39,7 @@
   "economy.createkontor.current_day": "%s ʎɐᗡㄥ§",
   "employee_role.createkontor.buyer": "ɹǝʎnᗺ",
   "employee_role.createkontor.lawyer": "ɹǝʎʍɐꞀ",
+  "employee_role.createkontor.market_analyst": "ʇsʎןɐuⱯ ʇǝʞɹɐW",
   "enum.createkontor.acquire_result.already_held": "˙ǝsuǝɔıן sıɥʇ spןoɥ ʎpɐǝɹןɐ ʎuɐdɯoƆ",
   "enum.createkontor.acquire_result.cannot_afford": "˙ǝsuǝɔıן sıɥʇ pɹoɟɟɐ ʇouuɐɔ ʎuɐdɯoƆ",
   "enum.createkontor.acquire_result.legal_level_too_low": "˙ʍoן ooʇ ןǝʌǝן ןɐbǝꞀ",
@@ -244,5 +250,10 @@
   "ui.createkontor.lawyer_desk.licenses.daily_fee": "%s :ǝǝℲ ʎןıɐᗡ",
   "ui.createkontor.lawyer_desk.licenses.empty": "˙boןɐʇɐɔ ǝsuǝɔıן ǝɥʇ buısn ǝsuǝɔıן ɐ ʎnᗺ ˙sǝsuǝɔıן ʎuɐ pןoɥ ʇou sǝop ʎuɐdɯoɔ ɹnoʎ",
   "ui.createkontor.lawyer_desk.licenses.revenue_share": "%s :ǝɹɐɥS ǝnuǝʌǝᴚ",
-  "ui.createkontor.lawyer_desk.licenses_count": ")%s( sǝsuǝɔıꞀ"
+  "ui.createkontor.lawyer_desk.licenses_count": ")%s( sǝsuǝɔıꞀ",
+  "ui.createkontor.market_analyst_desk.current_competitors": "%s :sɹoʇıʇǝdɯoƆ ʇuǝɹɹnƆ",
+  "ui.createkontor.market_analyst_desk.current_price": ")ㄥ§%s(ㄥ§ %s :ǝɔıɹԀ ʇuǝɹɹnƆ",
+  "ui.createkontor.market_analyst_desk.markets": "sʇǝʞɹɐW",
+  "ui.createkontor.market_analyst_desk.raw_materials": "sןɐıɹǝʇɐW ʍɐᴚ",
+  "ui.createkontor.market_analyst_desk.select_market": "ʇǝʞɹɐɯ ɐ ʇɔǝןǝS"
 }

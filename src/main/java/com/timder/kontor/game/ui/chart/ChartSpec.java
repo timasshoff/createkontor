@@ -21,6 +21,7 @@ public record ChartSpec(
         List<Integer> timeRangeOptionsDays,
         int defaultTimeRangeDays,
         String xRangeUnit,
+        int pointsPerRangeUnit,
         boolean showXAxis
 ) {
     public static final int MAX_SERIES = 6;
@@ -96,6 +97,9 @@ public record ChartSpec(
                 throw new IllegalArgumentException("time range option must be positive: " + days);
             }
         }
+        if (pointsPerRangeUnit < 1) {
+            throw new IllegalArgumentException("pointsPerRangeUnit must be >= 1: " + pointsPerRangeUnit);
+        }
         if (!timeRangeOptionsDays.isEmpty() && !timeRangeOptionsDays.contains(defaultTimeRangeDays)) {
             throw new IllegalArgumentException("defaultTimeRangeDays must be one of timeRangeOptionsDays.");
         }
@@ -156,6 +160,7 @@ public record ChartSpec(
         private List<Integer> xRangeOptions = List.of();
         private int defaultXRange = 0;
         private String xRangeUnit;
+        private int pointsPerRangeUnit = 1;
         private boolean showXAxis = true;
 
         private Builder(String title) {
@@ -225,6 +230,11 @@ public record ChartSpec(
             return this;
         }
 
+        public Builder xRangePointsPerUnit(int pointsPerUnit) {
+            this.pointsPerRangeUnit = pointsPerUnit;
+            return this;
+        }
+
         public ChartSpec build() {
             String resolvedRangeUnit = xRangeUnit != null ? xRangeUnit : xUnit;
             return new ChartSpec(
@@ -241,6 +251,7 @@ public record ChartSpec(
                     xRangeOptions,
                     defaultXRange,
                     resolvedRangeUnit,
+                    pointsPerRangeUnit,
                     showXAxis
             );
         }

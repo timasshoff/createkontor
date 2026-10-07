@@ -109,6 +109,7 @@ public class ChartElement extends UIElement {
     private float rangeSelectorWidth = 0f;
     private int visibleRange = 0;
     private boolean showXAxis = true;
+    private int pointsPerRangeUnit = 1;
 
     private final Set<String> hiddenLabels = new HashSet<>();
     private final List<LegendHit> legendHits = new ArrayList<>();
@@ -132,6 +133,7 @@ public class ChartElement extends UIElement {
      * @return This chart element
      */
     public ChartElement update(ChartSpec spec) {
+        this.pointsPerRangeUnit = spec.pointsPerRangeUnit();
         setTitle(spec.title().isEmpty() ? null : Component.literal(spec.title()));
         setKind(spec.kind());
         referenceLines.clear();
@@ -290,12 +292,13 @@ public class ChartElement extends UIElement {
             this.series = fullSeries;
             this.pointLabels = fullPointLabels;
         } else {
+            int keep = visibleRange * pointsPerRangeUnit;
             List<ChartSeries> filtered = new ArrayList<>(fullSeries.size());
             for (ChartSeries s : fullSeries) {
-                filtered.add(lastPoints(s, visibleRange));
+                filtered.add(lastPoints(s, keep));
             }
             this.series = filtered;
-            this.pointLabels = lastPoints(fullPointLabels, visibleRange);
+            this.pointLabels = lastPoints(fullPointLabels, keep);
         }
         updateShownSeries();
         if (rangeSelector != null) {

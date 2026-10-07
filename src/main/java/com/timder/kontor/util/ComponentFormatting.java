@@ -5,6 +5,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Locale;
+
 public final class ComponentFormatting {
 
     public static final ChatFormatting DEFAULT = ChatFormatting.GRAY;
@@ -64,6 +68,21 @@ public final class ComponentFormatting {
 
     public static Component moneyNegative(Money money) {
         return Component.literal(money.toString()).withStyle(MONEY_NEGATIVE);
+    }
+
+    public static Component percentColored(double fraction) {
+        if (!Double.isFinite(fraction)) {
+            return Component.literal("Inf.");
+        }
+        double percent = BigDecimal.valueOf(fraction * 100).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        String text = String.format(Locale.ROOT, "%.2f%%", percent);
+        if (percent > 0.0) {
+            return Component.literal("+" + text).withStyle(MONEY_POSITIVE);
+        }
+        if (percent == 0.0) {
+            return Component.literal(text ).withStyle(MONEY_NEUTRAL);
+        }
+        return Component.literal(text ).withStyle(MONEY_NEGATIVE);
     }
 
     public static Component day(long day) {

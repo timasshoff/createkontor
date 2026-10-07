@@ -308,7 +308,8 @@ public class EconomySavedData extends SavedData {
                     entryTag.getDouble("Deviation"),
                     entryTag.getDouble("DisplayedPrice"),
                     entryTag.getDouble("Competitors"),
-                    entryTag.getDouble("DeliveredThisTick")));
+                    entryTag.getDouble("DeliveredThisTick"),
+                    entryTag.getDouble("Demand")));
         }
         return history;
     }
@@ -324,6 +325,7 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("DisplayedPrice", entry.displayedPrice());
             entryTag.putDouble("Competitors", entry.competitors());
             entryTag.putDouble("DeliveredThisTick", entry.deliveredThisTick());
+            entryTag.putDouble("Demand", entry.demand());
             historyTag.add(entryTag);
         }
         return historyTag;

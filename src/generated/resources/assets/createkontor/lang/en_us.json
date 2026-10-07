@@ -17,6 +17,7 @@
   "block.createkontor.lawyer_desk.tooltip.condition1": "When a Villager sits next to it",
   "block.createkontor.lawyer_desk.tooltip.control1": "When R-Clicked on Employee",
   "block.createkontor.lawyer_desk.tooltip.summary": "Staffs the company with a _lawyer_. A lawyer handles _legal matters_ like licensing or legal form upgrades for your company.",
+  "block.createkontor.market_analyst_desk": "Market Analyst's Desk",
   "block.createkontor.shipping_exit": "Shipping Exit",
   "chart.createkontor.balance.bookings": " Bookings",
   "chart.createkontor.balance.reference.overdraft": "Overdraft Limit",
@@ -25,6 +26,10 @@
   "chart.createkontor.cost_structure.title": "Cost Structure",
   "chart.createkontor.d": "d",
   "chart.createkontor.day": "Day ",
+  "chart.createkontor.market_history.series.competitors": "Competitors",
+  "chart.createkontor.market_history.series.demand": "Demand",
+  "chart.createkontor.market_history.series.price": "Price",
+  "chart.createkontor.market_history.title": "Market History",
   "chart.createkontor.other": "Other",
   "chart.createkontor.revenue_result.series.result": "Result",
   "chart.createkontor.revenue_result.series.revenue": "Revenue",
@@ -34,6 +39,7 @@
   "economy.createkontor.current_day": "§7Day %s",
   "employee_role.createkontor.buyer": "Buyer",
   "employee_role.createkontor.lawyer": "Lawyer",
+  "employee_role.createkontor.market_analyst": "Market Analyst",
   "enum.createkontor.acquire_result.already_held": "Company already holds this license.",
   "enum.createkontor.acquire_result.cannot_afford": "Company cannot afford this license.",
   "enum.createkontor.acquire_result.legal_level_too_low": "Legal level too low.",
@@ -244,5 +250,10 @@
   "ui.createkontor.lawyer_desk.licenses.daily_fee": "Daily Fee: %s",
   "ui.createkontor.lawyer_desk.licenses.empty": "Your company does not hold any licenses. Buy a license using the license catalog.",
   "ui.createkontor.lawyer_desk.licenses.revenue_share": "Revenue Share: %s",
-  "ui.createkontor.lawyer_desk.licenses_count": "Licenses (%s)"
+  "ui.createkontor.lawyer_desk.licenses_count": "Licenses (%s)",
+  "ui.createkontor.market_analyst_desk.current_competitors": "Current Competitors: %s",
+  "ui.createkontor.market_analyst_desk.current_price": "Current Price: %s §7(%s§7)",
+  "ui.createkontor.market_analyst_desk.markets": "Markets",
+  "ui.createkontor.market_analyst_desk.raw_materials": "Raw Materials",
+  "ui.createkontor.market_analyst_desk.select_market": "Select a market"
 }

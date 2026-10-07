@@ -13,5 +13,6 @@ public record MarketHistoryEntry(
         double deviation,
         double displayedPrice,
         double competitors,
-        double deliveredThisTick
+        double deliveredThisTick,
+        double demand
 ) { }

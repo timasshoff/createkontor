@@ -584,7 +584,8 @@ public final class Economy {
                 state.getDeviation(),
                 state.getDisplayedPrice(),
                 state.getCompetitors(),
-                delivered
+                delivered,
+                currentDemand.get(id)
         ));
         if (history.size() > HISTORY_LENGTH_TICKS) {
             history.removeFirst();

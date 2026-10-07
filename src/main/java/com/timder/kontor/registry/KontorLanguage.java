@@ -157,6 +157,12 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.remove", "Remove");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.no_postbox", "No connected postbox");
 
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.markets", "Markets");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.raw_materials", "Raw Materials");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.select_market", "Select a market");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_price", "Current Price: %s §7(%s§7)");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors", "Current Competitors: %s");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -232,6 +238,7 @@ public class KontorLanguage {
 
         REGISTRATE.addRawLang("employee_role.createkontor.lawyer", "Lawyer");
         REGISTRATE.addRawLang("employee_role.createkontor.buyer", "Buyer");
+        REGISTRATE.addRawLang("employee_role.createkontor.market_analyst", "Market Analyst");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
 
@@ -252,6 +259,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.title", "Daily Revenue & Daily Result");
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.revenue", "Revenue");
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.result", "Result");
+
+        REGISTRATE.addRawLang("chart.createkontor.market_history.title", "Market History");
+        REGISTRATE.addRawLang("chart.createkontor.market_history.series.price", "Price");
+        REGISTRATE.addRawLang("chart.createkontor.market_history.series.competitors", "Competitors");
+        REGISTRATE.addRawLang("chart.createkontor.market_history.series.demand", "Demand");
 
         REGISTRATE.addRawLang("chart.createkontor.cost_structure.title", "Cost Structure");
 
