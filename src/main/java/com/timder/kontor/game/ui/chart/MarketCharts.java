@@ -54,7 +54,7 @@ public final class MarketCharts {
         }
 
         return ChartSpec.builder(Component.translatable("chart.createkontor.market_price_competitors.title").getString())
-                .series(new ChartSeries(Component.translatable("chart.createkontor.market_price_competitors.series.price").getString(), ChartColors.BLUE, x, price))
+                .series(new ChartSeries(Component.translatable("chart.createkontor.market_price_competitors.series.price").getString(), ChartColors.GREEN, x, price))
                 .series(new ChartSeries(Component.translatable("chart.createkontor.market_price_competitors.series.competitors").getString(), ChartColors.RED, x, competitors))
                 .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
                 .xRangeOptions(List.of(5, 10, 30, 100, 360), 30)

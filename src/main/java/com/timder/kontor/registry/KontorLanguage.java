@@ -163,7 +163,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.price_tab", "Price & Competitors");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.demand_overflow_tab", "Demand & Overflow");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_price", "Current Price: %s §7(%s§7)");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_price.tooltip", "The current market price of this item");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors", "Current Competitors: %s");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors.tooltip", "The amount of simulated competitors.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand", "Current Demand: %s §7units");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand.tooltip", "The current units per day that are being sold on the market.");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");

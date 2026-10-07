@@ -18,6 +18,6 @@ public record MarketHistoryEntry(
         double overflow
 ) {
     public MarketHistoryEntry withOverflow(double overflow) {
-        return new MarketHistoryEntry(id, tick, day, priceLevel, deviation, displayedPrice, competitors, demand, deliveredThisTick, overflow);
+        return new MarketHistoryEntry(id, tick, day, priceLevel, deviation, displayedPrice, competitors, deliveredThisTick, demand, overflow);
     }
 }

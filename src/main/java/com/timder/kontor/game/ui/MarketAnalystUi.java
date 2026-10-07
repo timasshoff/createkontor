@@ -134,11 +134,17 @@ public class MarketAnalystUi {
                 .marginTop(4)
                 .minHeight(0));
 
-        Label currentPrice = UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_price", "-", "-"), Horizontal.LEFT);
-        Label currentCompetitors = UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", "-"), Horizontal.LEFT);
+        Label currentPrice = (Label) UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_price", "-", "-"), Horizontal.LEFT)
+                .style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.current_price.tooltip")));
+        Label currentCompetitors = (Label) UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", "-"), Horizontal.LEFT)
+                .style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors.tooltip")));
+        Label currentDemand = (Label) UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_demand", "-"), Horizontal.LEFT)
+                .style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.current_demand.tooltip")));
+
         UIElement labelRow = UiLabels.seperatedLabelRow(List.of(
                 currentPrice,
-                currentCompetitors
+                currentCompetitors,
+                currentDemand
         )).layout(layout -> layout.justifyContent(AlignContent.FLEX_START));
         labelRow.setDisplay(false);
         marketBox.addChild(labelRow);
@@ -184,6 +190,7 @@ public class MarketAnalystUi {
 
                     currentPrice.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_price", ComponentFormatting.moneyColored(Money.fromDollar(history.getLast().displayedPrice())), ComponentFormatting.percentColored(percentageChange(history))));
                     currentCompetitors.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", Component.literal(String.valueOf((int) Math.round(history.getLast().competitors()))).withStyle(ChatFormatting.RED)));
+                    currentDemand.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_demand", Component.literal(String.valueOf((int) Math.round(history.getLast().demand()))).withStyle(ChatFormatting.GOLD)));
                     priceChartHost.show(MarketCharts.priceCompetitors(history));
                     demandOverflowChartHost.show(MarketCharts.demandOverflow(history));
                 })
