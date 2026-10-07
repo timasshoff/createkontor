@@ -14,5 +14,10 @@ public record MarketHistoryEntry(
         double displayedPrice,
         double competitors,
         double deliveredThisTick,
-        double demand
-) { }
+        double demand,
+        double overflow
+) {
+    public MarketHistoryEntry withOverflow(double overflow) {
+        return new MarketHistoryEntry(id, tick, day, priceLevel, deviation, displayedPrice, competitors, demand, deliveredThisTick, overflow);
+    }
+}

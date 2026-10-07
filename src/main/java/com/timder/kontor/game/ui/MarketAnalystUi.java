@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ItemSlot;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.SearchComponent;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.TabView;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import com.timder.kontor.core.company.financial.Money;
@@ -142,35 +143,53 @@ public class MarketAnalystUi {
         labelRow.setDisplay(false);
         marketBox.addChild(labelRow);
 
-        ChartHost chartHost = new ChartHost();
-        chartHost.layout(layout -> layout
+        ChartHost priceChartHost = new ChartHost();
+        priceChartHost.layout(layout -> layout
                 .widthPercent(100)
                 .flexBasis(0)
                 .flexGrow(1)
                 .minHeight(0));
-        chartHost.setDisplay(false);
+        priceChartHost.setDisplay(false);
+
+        ChartHost demandOverflowChartHost = new ChartHost();
+        demandOverflowChartHost.layout(layout -> layout
+                .widthPercent(100)
+                .flexBasis(0)
+                .flexGrow(1)
+                .minHeight(0));
+        demandOverflowChartHost.setDisplay(false);
+
+        TabView chartTabs = (TabView) UiContainer.largeTabView().layout(layout -> layout
+                .widthPercent(100)
+                .flexGrow(1)
+                .flexBasis(0));
+        chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.price_tab")), priceChartHost);
+        chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.demand_overflow_tab")), demandOverflowChartHost);
+        chartTabs.setDisplay(false);
+
         SimpleBinding<Tag> historyBinding = DataBindingBuilder.tagS2C(() -> marketHistoryToTag(context.economy(), selected[0]))
                 .onRemoteSyncReceived(tag -> {
                     CompoundTag data = (CompoundTag) tag;
                     boolean hasMarket = data.contains("Market");
-                    chartHost.setDisplay(hasMarket);
+                    chartTabs.setDisplay(hasMarket);
                     labelRow.setDisplay(hasMarket);
                     if (!hasMarket) return;
 
                     List<MarketHistoryEntry> history = tagToHistory(data);
                     if (history.isEmpty()) {
-                        chartHost.setDisplay(false);
+                        chartTabs.setDisplay(false);
                         labelRow.setDisplay(false);
                         return;
                     }
 
                     currentPrice.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_price", ComponentFormatting.moneyColored(Money.fromDollar(history.getLast().displayedPrice())), ComponentFormatting.percentColored(percentageChange(history))));
                     currentCompetitors.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", Component.literal(String.valueOf((int) Math.round(history.getLast().competitors()))).withStyle(ChatFormatting.RED)));
-                    chartHost.show(MarketCharts.history(history));
+                    priceChartHost.show(MarketCharts.priceCompetitors(history));
+                    demandOverflowChartHost.show(MarketCharts.demandOverflow(history));
                 })
                 .build();
         marketBox.addSyncValue(historyBinding.getSyncValue());
-        marketBox.addChild(chartHost);
+        marketBox.addChild(chartTabs);
 
         content.addChild(marketBox);
         return content;
@@ -214,6 +233,7 @@ public class MarketAnalystUi {
             entry.putDouble("Competitors", e.competitors());
             entry.putDouble("Delivered", e.deliveredThisTick());
             entry.putDouble("Demand", e.demand());
+            entry.putDouble("Overflow", e.overflow());
             list.add(entry);
         }
         tag.putString("Market", id.value());
@@ -237,7 +257,8 @@ public class MarketAnalystUi {
                     e.getDouble("Price"),
                     e.getDouble("Competitors"),
                     e.getDouble("Delivered"),
-                    e.getDouble("Demand"))
+                    e.getDouble("Demand"),
+                    e.contains("Overflow", Tag.TAG_DOUBLE) ? e.getDouble("Overflow") : Double.NaN)
             );
         }
         return history;

@@ -493,6 +493,7 @@ public final class Economy {
 
             DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()), params.marketDynamics());
             lastDayResults.put(def.id(), result);
+            backfillOverflow(def.id(), day, result.overflow());
 
             if (result.competitorClosed()) {
                 events.add(new CompetitorExitedEvent(def.id()));
@@ -585,10 +586,22 @@ public final class Economy {
                 state.getDisplayedPrice(),
                 state.getCompetitors(),
                 delivered,
-                currentDemand.get(id)
+                currentDemand.get(id),
+                Double.NaN
         ));
         if (history.size() > HISTORY_LENGTH_TICKS) {
             history.removeFirst();
+        }
+    }
+
+    private void backfillOverflow(ItemId id, long day, double overflow) {
+        Deque<MarketHistoryEntry> history = marketHistory.get(id);
+        List<MarketHistoryEntry> ofDay = new ArrayList<>();
+        while (!history.isEmpty() && history.peekLast().day() == day) {
+            ofDay.add(history.removeLast());
+        }
+        for (int i = ofDay.size() - 1; i >= 0; i--) {
+            history.addLast(ofDay.get(i).withOverflow(overflow));
         }
     }
 

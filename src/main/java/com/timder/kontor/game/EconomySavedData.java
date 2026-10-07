@@ -309,7 +309,8 @@ public class EconomySavedData extends SavedData {
                     entryTag.getDouble("DisplayedPrice"),
                     entryTag.getDouble("Competitors"),
                     entryTag.getDouble("DeliveredThisTick"),
-                    entryTag.getDouble("Demand")));
+                    entryTag.getDouble("Demand"),
+                    entryTag.contains("Overflow", Tag.TAG_DOUBLE) ? entryTag.getDouble("Overflow") : Double.NaN));
         }
         return history;
     }
@@ -326,6 +327,7 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("Competitors", entry.competitors());
             entryTag.putDouble("DeliveredThisTick", entry.deliveredThisTick());
             entryTag.putDouble("Demand", entry.demand());
+            entryTag.putDouble("Overflow", entry.overflow());
             historyTag.add(entryTag);
         }
         return historyTag;
