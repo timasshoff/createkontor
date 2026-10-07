@@ -79,6 +79,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toMacroParams(),
                         EconomyConfig.toProgressParams(),
                         EconomyConfig.toPriceProcessParams(),
+                        EconomyConfig.toMarketDynamicsParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
                 EconomyConfig.toReputationParams(),
@@ -108,6 +109,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toMacroParams(),
                         EconomyConfig.toProgressParams(),
                         EconomyConfig.toPriceProcessParams(),
+                        EconomyConfig.toMarketDynamicsParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
                 EconomyConfig.toReputationParams(),
@@ -149,6 +151,8 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("Deviation", s.deviation());
             entryTag.putDouble("DeliveredToday", s.deliveredToday());
             entryTag.putDouble("DeliveredThisTick", s.deliveredThisTick());
+            entryTag.putDouble("PurchasedToday", s.purchasedToday());
+            entryTag.putDouble("PurchasedThisTick", s.purchasedThisTick());
             entryTag.putDouble("ReferenceCost", params.referenceCost());
             entryTag.putDouble("PlantSize", params.plantSize());
             entryTag.putInt("Depth", saveState.manufacturingDepths().getOrDefault(id, 0));
@@ -202,7 +206,9 @@ public class EconomySavedData extends SavedData {
                     entryTag.getDouble("CompetitorReputation"),
                     entryTag.getDouble("Deviation"),
                     entryTag.getDouble("DeliveredToday"),
-                    entryTag.getDouble("DeliveredThisTick")));
+                    entryTag.getDouble("DeliveredThisTick"),
+                    entryTag.getDouble("PurchasedToday"),
+                    entryTag.getDouble("PurchasedThisTick")));
 
             MarketDefinition def = definitionsById.get(id);
             marketParams.put(id, new MarketParams(

@@ -332,15 +332,17 @@ public final class Economy {
     }
 
     private void runTradingTick() {
+        MarketDynamicsParams dynamics = this.params.marketDynamics();
         for (MarketDefinition def : marketDefinitions) {
             MarketState state = marketStates.get(def.id());
             MarketParams params = marketParamsMap.get(def.id());
             double demandPerTick = currentDemand.get(def.id()) / MarketRules.TRADING_TICKS_PER_DAY;
 
             double actual = state.getDeliveredThisTick();
+            double purchased = state.getPurchasedThisTick();
             double expected = expectedTickDelivery(def.id(), state, params);
 
-            MarketRules.advanceTradingTick(state, actual, expected, demandPerTick);
+            MarketRules.advanceTradingTick(state, actual, purchased, expected, demandPerTick, dynamics);
 
             recordMarketHistory(def.id(), state, actual);
         }
@@ -489,7 +491,7 @@ public final class Economy {
             MarketState state = marketStates.get(def.id());
             MarketParams marketParams = marketParamsMap.get(def.id());
 
-            DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()));
+            DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()), params.marketDynamics());
             lastDayResults.put(def.id(), result);
 
             if (result.competitorClosed()) {
@@ -537,6 +539,7 @@ public final class Economy {
             double plantSize = def.params().plantSize() * trend; // Grows plant size with trend & therefor with demand
             MarketParams updated = new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
             marketParamsMap.put(def.id(), updated);
+            MarketRules.passCostIncrease(marketStates.get(def.id()), previous.referenceCost(), referenceCost, params.marketDynamics());
 
             Integer depth = result.depth().get(def.id());
             if (depth != null) {
@@ -679,6 +682,15 @@ public final class Economy {
     }
 
     /**
+     * Records a purchase of a product from the competitors of a market.
+     * @param market The market of the bought product
+     * @param quantity The quantity purchased
+     */
+    public void recordMarketPurchase(ItemId market, double quantity) {
+        stateOf(market).recordPurchase(quantity);
+    }
+
+    /**
      * Records a purchase of a raw material.
      * @param material The raw material
      * @param quantity The quantity purchased
@@ -690,6 +702,14 @@ public final class Economy {
         }
 
         state.recordPurchase(quantity);
+    }
+
+    public boolean isMarket(ItemId item) {
+        return marketStates.containsKey(item);
+    }
+
+    public boolean isRawMaterial(ItemId item) {
+        return rawMaterialStates.containsKey(item);
     }
 
     private MarketParticipants participantsOf(ItemId market) {

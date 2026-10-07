@@ -2,6 +2,7 @@ package com.timder.kontor.core.economy;
 
 import com.timder.kontor.core.macro.MacroParams;
 import com.timder.kontor.core.macro.ProgressParams;
+import com.timder.kontor.core.market.MarketDynamicsParams;
 import com.timder.kontor.core.raw.PriceProcessParams;
 import com.timder.kontor.core.value.ProcessCosts;
 
@@ -16,6 +17,7 @@ public record EconomyParams(
         MacroParams macro,
         ProgressParams progress,
         PriceProcessParams priceProcess,
+        MarketDynamicsParams marketDynamics,
         ProcessCosts processCosts
 ) {
 
@@ -23,6 +25,7 @@ public record EconomyParams(
         if (macro == null) throw new IllegalArgumentException("macro must not be null.");
         if (progress == null) throw new IllegalArgumentException("progress must not be null.");
         if (priceProcess == null) throw new IllegalArgumentException("priceProcess must not be null.");
+        if (marketDynamics == null) throw new IllegalArgumentException("marketDynamics must not be null.");
         if (processCosts == null) throw new IllegalArgumentException("processCosts must not be null.");
     }
 
@@ -32,7 +35,7 @@ public record EconomyParams(
 
     public static EconomyParams standard() {
         return new EconomyParams(MacroParams.standard(), ProgressParams.standard(),
-                PriceProcessParams.standard(), ProcessCosts.standard());
+                PriceProcessParams.standard(), MarketDynamicsParams.standard(), ProcessCosts.standard());
     }
 
 }

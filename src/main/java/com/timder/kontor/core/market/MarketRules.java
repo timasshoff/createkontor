@@ -2,26 +2,7 @@ package com.timder.kontor.core.market;
 
 public final class MarketRules {
 
-    public static final double MAX_PRICE_FACTOR = 2.0;
-    public static final double MIN_COMPANIES = 1.0;
-    public static final double MAX_COMPANIES = 8.0;
-
     public static final int TRADING_TICKS_PER_DAY = 12;
-
-    /**
-     * How much deviation survives from one trading tick to another
-     */
-    public static final double DEVIATION_DECAY = 0.94;
-
-    /**
-     * How strongly a surprise moves the deviation
-     */
-    public static final double DEVIATION_STRENGTH = 0.02;
-
-    /**
-     * Max movement a deviation can cause
-     */
-    public static final double DEVIATION_BOUND = 0.5; // Max movement that deviation can cause
 
     /**
      * How appealing a supplier is to customers.
@@ -94,24 +75,53 @@ public final class MarketRules {
         return shareFrom(attractiveness(price, reputation, state, params), 0.0, state, params);
     }
 
+    public static void advanceTradingTick(MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
+        advanceTradingTick(state, actualDelivered, 0.0, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
+    }
+
+    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick) {
+        advanceTradingTick(state, actualDelivered, actualPurchased, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
+    }
+
     /**
      * Advanced the trading tick forward. Moves the trading deviation.
      * @param state The market state
      * @param actualDelivered The amount of actually delivered product across the market
+     * @param actualPurchased The amount of product that companies bought from the competitors in this tick
      * @param expectedDelivered The expected amount of delivered product by all competitors and concurrence, based on their market shared
-     * @param demandThisTick The demand for this tick (usually daily demand divided by amount of trading ticks per day)
+     * @param demandThisTick The demand for this tick
      */
-    public static void advanceTradingTick(MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
-        double surprise = actualDelivered - expectedDelivered;
+    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick, MarketDynamicsParams params) {
+        double surprise = actualDelivered - expectedDelivered - params.purchaseImpact() * actualPurchased;
         double reference = demandThisTick > 0 ? demandThisTick : 1.0;
 
-        double deviation = DEVIATION_DECAY * state.getDeviation() - DEVIATION_STRENGTH * surprise / reference;
+        double deviation = params.deviationDecay() * state.getDeviation() - params.deviationStrength() * surprise / reference;
 
-        state.setDeviation(clamp(deviation, -DEVIATION_BOUND, DEVIATION_BOUND));
+        state.setDeviation(clamp(deviation, -params.deviationBound(), params.deviationBound()));
         state.clearDeliveredThisTick();
+        state.clearPurchasedThisTick();
+    }
+
+    /**
+     * Passes a rise of the reference cost on to the price level
+     * @param state The market state
+     * @param previousCost The reference cost before recalculation
+     * @param newCost The reference cost after recalculation
+     * @param dynamics The dynamic market parameters
+     */
+    public static void passCostIncrease(MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
+        if (previousCost <= 0 || newCost <= previousCost) {
+            return;
+        }
+        double ratio = newCost / previousCost;
+        state.setPriceLevel(state.getPriceLevel() * (1.0 + dynamics.costPassThrough() * (ratio - 1.0)));
     }
 
     public static DayResult advanceDay(MarketState state, MarketParams params, double demand) {
+        return advanceDay(state, params, demand, MarketDynamicsParams.standard());
+    }
+
+    public static DayResult advanceDay(MarketState state, MarketParams params, double demand, MarketDynamicsParams dynamicsParams) {
         double priceBefore = state.getPriceLevel();
         double competitorsBefore = state.getCompetitors();
 
@@ -120,7 +130,7 @@ public final class MarketRules {
 
         // The remaining demand
         double soldByCompanies = Math.min(state.getDeliveredToday(), demand);
-        double remaining = Math.max(0.0, demand - soldByCompanies);
+        double remaining = Math.max(0.0, demand - soldByCompanies) + state.getPurchasedToday();
 
         // The performance of competitors
         double soldByCompetitors = Math.min(remaining, capacity);
@@ -131,7 +141,7 @@ public final class MarketRules {
 
         // Adapt price level
         double price = priceBefore * (1.0 + params.priceResponse() * (utilisation - params.targetUtilisation()));
-        price = clamp(price, params.referenceCost(), params.referenceCost() * MAX_PRICE_FACTOR);
+        price = clamp(price, params.referenceCost(), params.referenceCost() * dynamicsParams.maxPriceFactor());
         state.setPriceLevel(price);
 
         // Profitability
@@ -141,11 +151,12 @@ public final class MarketRules {
         double relative = clamp((profitability - target) / target, -1.0, 1.0);
 
         // Adapt amount of competitors
-        double competitors = clamp(competitorsBefore * (1.0 + params.capacityResponse() * relative), MIN_COMPANIES, MAX_COMPANIES);
+        double competitors = clamp(competitorsBefore * (1.0 + params.capacityResponse() * relative), dynamicsParams.minCompetitors(), dynamicsParams.maxCompetitors());
         state.setCompetitors(competitors);
 
-        // Clearing counter
+        // Clearing counters
         state.clearDeliveredToday();
+        state.clearPurchasedToday();
 
         return new DayResult(demand, soldByCompanies, soldByCompetitors, overflow, utilisation, priceBefore, price, competitorsBefore, competitors);
     }

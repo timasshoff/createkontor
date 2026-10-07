@@ -2,6 +2,7 @@
   "values": [
     "createkontor:shipping_exit",
     "createkontor:kontor_desk",
-    "createkontor:lawyer_desk"
+    "createkontor:lawyer_desk",
+    "createkontor:buyer_desk"
   ]
 }

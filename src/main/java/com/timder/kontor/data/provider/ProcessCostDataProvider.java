@@ -24,24 +24,24 @@ public class ProcessCostDataProvider implements DataProvider {
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         Map<String, Double> entries = new LinkedHashMap<>();
-        entries.put("minecraft:crafting", 1.00);
-        entries.put("minecraft:smelting", 0.40);
-        entries.put("minecraft:blasting", 0.40);
-        entries.put("minecraft:smoking", 0.30);
-        entries.put("minecraft:campfire_cooking", 0.30);
-        entries.put("minecraft:stonecutting", 0.05);
-        entries.put("create:pressing", 0.80);
-        entries.put("create:crushing", 0.80);
-        entries.put("create:milling", 0.40);
-        entries.put("create:mixing", 0.60);
-        entries.put("create:cutting", 0.30);
-        entries.put("create:deploying", 0.40);
-        entries.put("create:mechanical_crafting", 1.00);
-        entries.put("create:splashing", 0.30);
-        entries.put("create:haunting", 0.30);
-        entries.put("create:filling", 0.20);
-        entries.put("create:emptying", 0.20);
-        entries.put("create:sandpaper_polishing", 0.20);
+        entries.put("minecraft:crafting", 5.00);
+        entries.put("minecraft:smelting", 7.50);
+        entries.put("minecraft:blasting", 8.20);
+        entries.put("minecraft:smoking", 7.90);
+        entries.put("minecraft:campfire_cooking", 6.60);
+        entries.put("minecraft:stonecutting", 3.50);
+        entries.put("create:pressing", 4.25);
+        entries.put("create:crushing", 6.50);
+        entries.put("create:milling", 5.50);
+        entries.put("create:mixing", 4.00);
+        entries.put("create:cutting", 4.25);
+        entries.put("create:deploying", 5.50);
+        entries.put("create:mechanical_crafting", 5.00);
+        entries.put("create:splashing", 7.00);
+        entries.put("create:haunting", 8.00);
+        entries.put("create:filling", 6.50);
+        entries.put("create:emptying", 3.50);
+        entries.put("create:sandpaper_polishing", 5.25);
 
         List<CompletableFuture<?>> futures = new ArrayList<>();
         for (Map.Entry<String, Double> entry : entries.entrySet()) {

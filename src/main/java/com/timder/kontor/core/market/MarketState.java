@@ -40,6 +40,16 @@ public final class MarketState {
     private double deliveredThisTick;
 
     /**
+     * How much product company bought today
+     */
+    private double purchasedToday;
+
+    /**
+     * How much product companies bought from the competitors this trading tick
+     */
+    private double purchasedThisTick;
+
+    /**
      * Creates a new market state representing the changeable state of a market.
      * @param priceLevel The structural price level
      * @param competitors Amount of competitors
@@ -51,6 +61,8 @@ public final class MarketState {
         this.deviation = 0.0;
         this.deliveredToday = 0.0;
         this.deliveredThisTick = 0.0;
+        this.purchasedToday = 0.0;
+        this.purchasedThisTick = 0.0;
     }
 
     /**
@@ -84,6 +96,14 @@ public final class MarketState {
 
     public double getDeliveredThisTick() {
         return deliveredThisTick;
+    }
+
+    public double getPurchasedToday() {
+        return purchasedToday;
+    }
+
+    public double getPurchasedThisTick() {
+        return purchasedThisTick;
     }
 
     /**
@@ -123,6 +143,17 @@ public final class MarketState {
     }
 
     /**
+     * Records a purchase of product from the competitors.
+     * @param quantity The amount of bought product
+     */
+    public void recordPurchase(double quantity) {
+        if (quantity > 0) {
+            purchasedToday += quantity;
+            purchasedThisTick += quantity;
+        }
+    }
+
+    /**
      * Changes the reputation of the competitors. Used by events, clamped to one to five stars.
      * @param value The new reputation in stars
      */
@@ -150,15 +181,27 @@ public final class MarketState {
         this.deliveredThisTick = 0.0;
     }
 
+    void clearPurchasedToday() {
+        this.purchasedToday = 0.0;
+    }
+
+    void clearPurchasedThisTick() {
+        this.purchasedThisTick = 0.0;
+    }
+
     @Override
     public String toString() {
         return "MarketState[price=%.2f, competitors=%.2f, deliveredToday=%.0f]".formatted(priceLevel, competitors, deliveredToday);
     }
 
-    public record SaveState(double priceLevel, double competitors, double competitorReputation, double deviation, double deliveredToday, double deliveredThisTick) {}
+    public record SaveState(double priceLevel, double competitors, double competitorReputation, double deviation, double deliveredToday, double deliveredThisTick, double purchasedToday, double purchasedThisTick) {
+        public SaveState(double priceLevel, double competitors, double competitorReputation, double deviation, double deliveredToday, double deliveredThisTick) {
+            this(priceLevel, competitors, competitorReputation, deviation, deliveredToday, deliveredThisTick, 0.0, 0.0);
+        }
+    }
 
     public SaveState getSaveState() {
-        return new SaveState(priceLevel, competitors, competitorReputation, deviation, deliveredToday, deliveredThisTick);
+        return new SaveState(priceLevel, competitors, competitorReputation, deviation, deliveredToday, deliveredThisTick, purchasedToday, purchasedThisTick);
     }
 
     public static MarketState restore(SaveState snapshot) {
@@ -167,6 +210,8 @@ public final class MarketState {
         state.deviation = snapshot.deviation();
         state.deliveredToday = snapshot.deliveredToday();
         state.deliveredThisTick = snapshot.deliveredThisTick();
+        state.purchasedToday = snapshot.purchasedToday();
+        state.purchasedThisTick = snapshot.purchasedThisTick();
         return state;
     }
 }

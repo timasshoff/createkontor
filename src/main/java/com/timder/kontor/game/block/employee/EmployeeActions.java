@@ -11,6 +11,7 @@ import java.util.Objects;
 public abstract class EmployeeActions {
     protected final EmployeeDeskBlockEntity desk;
     protected boolean isServer = false;
+    protected ServerLevel serverLevel;
     protected Company company;
     protected CompanySavedData comapnyData;
     protected Economy economy;
@@ -19,8 +20,9 @@ public abstract class EmployeeActions {
     public EmployeeActions(EmployeeDeskBlockEntity desk) {
         this.desk = Objects.requireNonNull(desk, "desk must not be null.");
 
-        if (desk.getLevel() instanceof ServerLevel) {
+        if (desk.getLevel() instanceof ServerLevel serverLevel) {
             isServer = true;
+            this.serverLevel = serverLevel;
             this.comapnyData = CompanySavedData.get(desk.getLevel().getServer());
             this.company = comapnyData.getRegistry().get(desk.getCompanyId()).orElse(null);
             this.economyData = EconomySavedData.get(desk.getLevel().getServer());
