@@ -43,10 +43,14 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
     private static final int MAX_STACK_IN_PACKAGE = 64;
     public static final int MAX_GOOD_SIZE = 9999;
+    public static final int MAX_ADDRESS_LENGTH = 25;
 
     private static final String TAG_PORT_COUNT = "ConnectedPorts";
     private static final String TAG_PENDING = "PendingPackages";
     private static final String TAG_PENDING_COUNT = "PendingCount";
+    private static final String TAG_ADDRESS = "Address";
+
+    private String address = "";
 
     public record Goods(Item item, int quantity) {
         public Goods {
@@ -61,6 +65,25 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
     public BuyerDeskBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String value) {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        String cleaned = value == null ? "" : value.trim();
+        if (cleaned.length() > MAX_ADDRESS_LENGTH) {
+            cleaned = cleaned.substring(0, MAX_ADDRESS_LENGTH);
+        }
+        if (cleaned.equals(address)) {
+            return;
+        }
+        address = cleaned;
+        notifyUpdate();
     }
 
     public void attachPort(PackagePortBlockEntity port) {
@@ -103,7 +126,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         return null;
     }
 
-    public Optional<S2CActionResult> buy(Map<ItemId, Integer> quote, long expectedTotalCents, String address) {
+    public Optional<S2CActionResult> buy(Map<ItemId, Integer> quote, long expectedTotalCents) {
         if (!(level instanceof ServerLevel serverLevel)) return S2CActionResult.illegalEnvironment();
         if (quote.isEmpty()) return S2CActionResult.error(Component.literal("Quote is empty"));
         if (connectedPorts().isEmpty()) return S2CActionResult.error(Component.translatable("ui.createkontor.buyer_desk.no_postbox"));
@@ -248,6 +271,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
+        tag.putString(TAG_ADDRESS, address);
         if (clientPacket) {
             tag.putInt(TAG_PORT_COUNT, portCount);
             tag.putInt(TAG_PENDING_COUNT, pendingCount);
@@ -263,6 +287,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
+        address = tag.getString(TAG_ADDRESS);
         if (clientPacket) {
             portCount = tag.getInt(TAG_PORT_COUNT);
             pendingCount = tag.getInt(TAG_PENDING_COUNT);

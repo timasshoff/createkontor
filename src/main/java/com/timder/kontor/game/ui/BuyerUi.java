@@ -181,12 +181,14 @@ public final class BuyerUi {
         int[] seen = {0}; // Client sided
 
         content.onMessage("c2s_buy", tag -> {
-            Optional<S2CActionResult> result = be.buy(tagToCart(tag), tag.getLong("TotalCents"), tag.getString("Address"));
+            be.setAddress(tag.getString("Address"));
+            Optional<S2CActionResult> result = be.buy(tagToCart(tag), tag.getLong("TotalCents"));
             ToastPayload.send(context.player(), result);
             if (result.isPresent() && result.get().kind() == ToastPayload.ToastKind.SUCCESS) {
                 purchases[0]++;
             }
         });
+        content.onMessage("c2s_address", tag -> be.setAddress(tag.getString("Address")));
 
         content.addSyncValue( // Clears quote on successful purchase
                 DataBindingBuilder.tagS2C(() -> IntTag.valueOf(purchases[0]))
@@ -228,12 +230,18 @@ public final class BuyerUi {
         offers.addListener(() -> buildQuoteElement(linesScroller, total, quote, offers.get()));
         buildQuoteElement(linesScroller, total, quote, offers.get());
 
-        String[] address = {""};
+        String[] address = {be.getAddress()};
         TextField addressField = new TextField();
         addressField.textFieldStyle(style -> style.placeholder(Component.translatable("ui.createkontor.buyer_desk.quote.address")));
         addressField.style(style -> style.tooltips(Component.translatable("ui.createkontor.buyer_desk.quote.address.tooltip")));
         addressField.layout(layout -> layout.widthPercent(100));
+        addressField.setText(address[0], false);
         addressField.setTextResponder(text -> address[0] = text.trim());
+        addressField.addEventListener(UIEvents.BLUR, event -> {
+            CompoundTag addressTag = new CompoundTag();
+            addressTag.putString("Address", address[0]);
+            content.sendMessage("c2s_address", addressTag);
+        });
         content.addChild(addressField);
 
         Button buy = UiButtons.primary(Component.translatable("ui.createkontor.buyer_desk.quote.buy"));

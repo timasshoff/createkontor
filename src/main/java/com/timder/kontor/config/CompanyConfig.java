@@ -91,7 +91,7 @@ public class CompanyConfig {
 
         builder.comment("Purchasing").push("purchasing");
         PURCHASE_MARKUP = builder.comment("Surcharge a company pays on the market price when it buys goods, as a fraction (0.10 = 10 %). Raise it to make buying products and reselling them to customers less attractive")
-                .defineInRange("purchaseMarkup", 0.10, 0.0, 10.0);
+                .defineInRange("purchaseMarkup", 0.125, 0.0, 10.0);
 
         builder.pop();
 
