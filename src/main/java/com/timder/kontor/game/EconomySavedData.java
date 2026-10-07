@@ -79,6 +79,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toMacroParams(),
                         EconomyConfig.toProgressParams(),
                         EconomyConfig.toPriceProcessParams(),
+                        EconomyConfig.toMarketDynamicsParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
                 EconomyConfig.toReputationParams(),
@@ -108,6 +109,7 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toMacroParams(),
                         EconomyConfig.toProgressParams(),
                         EconomyConfig.toPriceProcessParams(),
+                        EconomyConfig.toMarketDynamicsParams(),
                         new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
                 ),
                 EconomyConfig.toReputationParams(),

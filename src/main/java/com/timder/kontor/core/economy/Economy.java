@@ -332,6 +332,7 @@ public final class Economy {
     }
 
     private void runTradingTick() {
+        MarketDynamicsParams dynamics = this.params.marketDynamics();
         for (MarketDefinition def : marketDefinitions) {
             MarketState state = marketStates.get(def.id());
             MarketParams params = marketParamsMap.get(def.id());
@@ -341,7 +342,7 @@ public final class Economy {
             double purchased = state.getPurchasedThisTick();
             double expected = expectedTickDelivery(def.id(), state, params);
 
-            MarketRules.advanceTradingTick(state, actual, purchased, expected, demandPerTick);
+            MarketRules.advanceTradingTick(state, actual, purchased, expected, demandPerTick, dynamics);
 
             recordMarketHistory(def.id(), state, actual);
         }
@@ -490,7 +491,7 @@ public final class Economy {
             MarketState state = marketStates.get(def.id());
             MarketParams marketParams = marketParamsMap.get(def.id());
 
-            DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()));
+            DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()), params.marketDynamics());
             lastDayResults.put(def.id(), result);
 
             if (result.competitorClosed()) {

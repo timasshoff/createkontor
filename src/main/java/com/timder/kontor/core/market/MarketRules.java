@@ -2,26 +2,7 @@ package com.timder.kontor.core.market;
 
 public final class MarketRules {
 
-    public static final double MAX_PRICE_FACTOR = 2.0;
-    public static final double MIN_COMPANIES = 1.0;
-    public static final double MAX_COMPANIES = 8.0;
-
     public static final int TRADING_TICKS_PER_DAY = 12;
-
-    /**
-     * How much deviation survives from one trading tick to another
-     */
-    public static final double DEVIATION_DECAY = 0.96;
-
-    /**
-     * How strongly a surprise moves the deviation
-     */
-    public static final double DEVIATION_STRENGTH = 0.05;
-
-    /**
-     * Max movement a deviation can cause
-     */
-    public static final double DEVIATION_BOUND = 0.75; // Max movement that deviation can cause
 
     /**
      * How appealing a supplier is to customers.
@@ -95,7 +76,11 @@ public final class MarketRules {
     }
 
     public static void advanceTradingTick(MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
-        advanceTradingTick(state, actualDelivered, 0.0, expectedDelivered, demandThisTick);
+        advanceTradingTick(state, actualDelivered, 0.0, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
+    }
+
+    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick) {
+        advanceTradingTick(state, actualDelivered, actualPurchased, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
     }
 
     /**
@@ -106,18 +91,22 @@ public final class MarketRules {
      * @param expectedDelivered The expected amount of delivered product by all competitors and concurrence, based on their market shared
      * @param demandThisTick The demand for this tick
      */
-    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick) {
+    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick, MarketDynamicsParams params) {
         double surprise = actualDelivered - expectedDelivered - actualPurchased;
         double reference = demandThisTick > 0 ? demandThisTick : 1.0;
 
-        double deviation = DEVIATION_DECAY * state.getDeviation() - DEVIATION_STRENGTH * surprise / reference;
+        double deviation = params.deviationDecay() * state.getDeviation() - params.deviationStrength() * surprise / reference;
 
-        state.setDeviation(clamp(deviation, -DEVIATION_BOUND, DEVIATION_BOUND));
+        state.setDeviation(clamp(deviation, -params.deviationBound(), params.deviationBound()));
         state.clearDeliveredThisTick();
         state.clearPurchasedThisTick();
     }
 
     public static DayResult advanceDay(MarketState state, MarketParams params, double demand) {
+        return advanceDay(state, params, demand, MarketDynamicsParams.standard());
+    }
+
+    public static DayResult advanceDay(MarketState state, MarketParams params, double demand, MarketDynamicsParams dynamicsParams) {
         double priceBefore = state.getPriceLevel();
         double competitorsBefore = state.getCompetitors();
 
@@ -137,7 +126,7 @@ public final class MarketRules {
 
         // Adapt price level
         double price = priceBefore * (1.0 + params.priceResponse() * (utilisation - params.targetUtilisation()));
-        price = clamp(price, params.referenceCost(), params.referenceCost() * MAX_PRICE_FACTOR);
+        price = clamp(price, params.referenceCost(), params.referenceCost() * dynamicsParams.maxPriceFactor());
         state.setPriceLevel(price);
 
         // Profitability
@@ -147,7 +136,7 @@ public final class MarketRules {
         double relative = clamp((profitability - target) / target, -1.0, 1.0);
 
         // Adapt amount of competitors
-        double competitors = clamp(competitorsBefore * (1.0 + params.capacityResponse() * relative), MIN_COMPANIES, MAX_COMPANIES);
+        double competitors = clamp(competitorsBefore * (1.0 + params.capacityResponse() * relative), dynamicsParams.minCompetitors(), dynamicsParams.maxCompetitors());
         state.setCompetitors(competitors);
 
         // Clearing counters

@@ -5,6 +5,7 @@ import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.macro.MacroParams;
 import com.timder.kontor.core.macro.PolicyRateParams;
 import com.timder.kontor.core.macro.ProgressParams;
+import com.timder.kontor.core.market.MarketDynamicsParams;
 import com.timder.kontor.core.raw.PriceProcessParams;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -63,6 +64,13 @@ public class EconomyConfig {
     public static final ModConfigSpec.DoubleValue MAX_FACTOR;
 
     public static final ModConfigSpec.DoubleValue DEFAULT_TARGET_UTILISATION;
+    public static final ModConfigSpec.DoubleValue DEVIATION_DECAY;
+    public static final ModConfigSpec.DoubleValue DEVIATION_STRENGTH;
+    public static final ModConfigSpec.DoubleValue DEVIATION_BOUND;
+    public static final ModConfigSpec.DoubleValue PURCHASE_IMPACT;
+    public static final ModConfigSpec.DoubleValue MAX_PRICE_FACTOR;
+    public static final ModConfigSpec.DoubleValue MIN_COMPETITORS;
+    public static final ModConfigSpec.DoubleValue MAX_COMPETITORS;
 
     public static final ModConfigSpec.DoubleValue DEFAULT_PROCESS_COST;
 
@@ -181,6 +189,27 @@ public class EconomyConfig {
         DEFAULT_TARGET_UTILISATION = builder
                 .comment("Fallback for the target utilisation of competitors")
                 .defineInRange("defaultTargetUtilisation", 0.80, 1.0E-6, 1.0);
+        DEVIATION_DECAY = builder
+                .comment("How much of the short-term price deviation survives from one trading tick (100 s) to the next")
+                .defineInRange("deviationDecay", 0.94, 0.0, 0.999999);
+        DEVIATION_STRENGTH = builder
+                .comment("How strongly a surprise (delivered - expected - weighted purchases, relative to the tick demand) moves the deviation")
+                .defineInRange("deviationStrength", 0.02, 0.0, Double.MAX_VALUE);
+        DEVIATION_BOUND = builder
+                .comment("Largest short-term deviation of the displayed price from the price level, as a fraction")
+                .defineInRange("deviationBound",0.5, 1.0E-6, 0.999999);
+        PURCHASE_IMPACT = builder
+                .comment("How much one purchased unit weighs in the short-term price compared to one delivered unit. 1.0 = equal, 2.5 = purchases move the price 2.5 times as strongly. Does not affect the daily price level")
+                .defineInRange("purchaseImpact", 1.5, 0.0, Double.MAX_VALUE);
+        MAX_PRICE_FACTOR = builder
+                .comment("Ceiling of the daily price level relative to the reference cost")
+                .defineInRange("maxPriceFactor", 2.5, 1.0001, Double.MAX_VALUE);
+        MIN_COMPETITORS = builder
+                .comment("Lowest number of competitors a market can fall to")
+                .defineInRange("minCompetitors", 2.0, 1.0E-6, Double.MAX_VALUE);
+        MAX_COMPETITORS = builder
+                .comment("Highest number of competitors a market can grow to")
+                .defineInRange("maxCompetitors", 9.0, 1.0E-6, Double.MAX_VALUE);
         builder.pop();
 
         builder.comment("Processing cost").push("processCosts");
@@ -234,6 +263,17 @@ public class EconomyConfig {
 
     public static PriceProcessParams toPriceProcessParams() {
         return new PriceProcessParams(MEAN_REVERSION.get(), PURCHASE_PRESSURE.get(), MIN_FACTOR.get(), MAX_FACTOR.get());
+    }
+
+    public static MarketDynamicsParams toMarketDynamicsParams() {
+        return new MarketDynamicsParams(
+                DEVIATION_DECAY.get(),
+                DEVIATION_STRENGTH.get(),
+                DEVIATION_BOUND.get(),
+                PURCHASE_IMPACT.get(),
+                MAX_PRICE_FACTOR.get(),
+                MIN_COMPETITORS.get(),
+                MAX_COMPETITORS.get());
     }
 
     public static RequestParams toRequestParams() {
