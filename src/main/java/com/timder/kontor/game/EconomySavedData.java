@@ -1,5 +1,6 @@
 package com.timder.kontor.game;
 
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.economy.Economy;
@@ -65,6 +66,7 @@ public class EconomySavedData extends SavedData {
     private static EconomySavedData create(MinecraftServer server) {
         Economy economy = buildFreshEconomy(server);
         economy.advanceTicksQuietly(WARMUP_TICKS);
+        CreateKontor.LOGGER.info("CREATE Market dynamics params: {}", EconomyConfig.toMarketDynamicsParams());
         return new EconomySavedData(economy, server.overworld().getGameTime());
     }
 
@@ -89,6 +91,8 @@ public class EconomySavedData extends SavedData {
         long lastSyncedGameTime = tag.contains("LastSyncedGameTime")
                 ? tag.getLong("LastSyncedGameTime")
                 : economy.ticksElapsed();
+
+        CreateKontor.LOGGER.info("LOAD Market dynamics params: {}", EconomyConfig.toMarketDynamicsParams());
         return new EconomySavedData(economy, lastSyncedGameTime);
     }
 

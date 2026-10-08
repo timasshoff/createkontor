@@ -1,5 +1,6 @@
 package com.timder.kontor.config;
 
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.macro.MacroParams;
