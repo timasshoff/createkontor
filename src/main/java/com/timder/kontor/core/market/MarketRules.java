@@ -103,18 +103,19 @@ public final class MarketRules {
     }
 
     /**
-     * Passes a rise of the reference cost on to the price level
+     * Passes a change of the reference cost on to the price level
      * @param state The market state
      * @param previousCost The reference cost before recalculation
      * @param newCost The reference cost after recalculation
      * @param dynamics The dynamic market parameters
      */
-    public static void passCostIncrease(MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
-        if (previousCost <= 0 || newCost <= previousCost) {
+    public static void passCostChange(MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
+        if (previousCost <= 0 || newCost <= 0 || newCost == previousCost) {
             return;
         }
         double ratio = newCost / previousCost;
-        state.setPriceLevel(state.getPriceLevel() * (1.0 + dynamics.costPassThrough() * (ratio - 1.0)));
+        double passThrough = ratio > 1.0 ? dynamics.costPassThrough() : dynamics.costPassThroughDown();
+        state.setPriceLevel(state.getPriceLevel() * (1.0 + passThrough * (ratio - 1.0)));
     }
 
     public static DayResult advanceDay(MarketState state, MarketParams params, double demand) {
