@@ -178,7 +178,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.own_price.tooltip", "§7Your current list price. §6Price and reputation §7determine your share.");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.reputation", "Your Reputation: %s");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.reputation.tooltip", "§7Your reputation in this market. Competitors have a reputation of §63.0§7. §6Price and reputation §7determine your share.");
-        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.lost_requests", "Lost Requests Today: %s");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.lost_requests", "Lost Requests Today: %s (open requests: %s/%s)");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.lost_requests.tooltip", "§7How many requests you already §6lost §7today because your request board was full.");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");

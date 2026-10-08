@@ -136,11 +136,13 @@ public class CompanyCharts {
     }
 
     public static SegmentBarSpec share(MarketShareBreakdown breakdown) {
-        return SegmentBarSpec.builder(Component.translatable("chart.createkontor.market_share.title").getString())
+        SegmentBarSpec.Builder builder = SegmentBarSpec.builder(Component.translatable("chart.createkontor.market_share.title").getString())
                 .segment(Component.translatable("chart.createkontor.market_share.series.you").getString(), ChartColors.BLUE, breakdown.own(), Component.translatable("chart.createkontor.market_share.series.you.description").getString())
-                .segment(Component.translatable("chart.createkontor.market_share.series.other_companies").getString(), ChartColors.ORANGE, breakdown.otherCompanies(), Component.translatable("chart.createkontor.market_share.series.other_companies.description").getString())
-                .segment(Component.translatable("chart.createkontor.market_share.series.competition").getString(), ChartColors.TEAL, breakdown.competition(), Component.translatable("chart.createkontor.market_share.series.competition.description").getString())
-                .decimals(2)
-                .build();
+                .decimals(2);
+        if (breakdown.otherCompanies() > 0) {
+            builder.segment(Component.translatable("chart.createkontor.market_share.series.other_companies").getString(), ChartColors.ORANGE, breakdown.otherCompanies(), Component.translatable("chart.createkontor.market_share.series.other_companies.description").getString());
+        }
+        builder.segment(Component.translatable("chart.createkontor.market_share.series.competition").getString(), ChartColors.TEAL, breakdown.competition(), Component.translatable("chart.createkontor.market_share.series.competition.description").getString());
+        return builder.build();
     }
 }

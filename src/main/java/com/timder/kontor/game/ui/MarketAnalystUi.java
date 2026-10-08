@@ -236,14 +236,17 @@ public class MarketAnalystUi {
                         shareTab.addScrollViewChildren(
                                 UiLabels.secondary(Component.translatable(
                                         "ui.createkontor.market_analyst_desk.lost_requests",
-                                        Component.literal(String.valueOf(lostRequests)).withStyle(lostRequests > 0 ? ChatFormatting.RED : ChatFormatting.GREEN)
+                                        Component.literal(String.valueOf(lostRequests)).withStyle(lostRequests > 0 ? ChatFormatting.RED : ChatFormatting.GREEN),
+                                        data.getInt("OpenRequests"),
+                                        data.getInt("RequestsLimit")
                                 ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.lost_requests.tooltip")))
                         );
+
                     } else {
                         shareTab.clearAllScrollViewChildren();
                         shareTab.addScrollViewChild(UiLabels.secondary(
                                 Component.translatable("ui.createkontor.market_analyst_desk.no_participation"),
-                                Horizontal.CENTER));
+                                Horizontal.LEFT));
                     }
 
                     currentPrice.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_price", ComponentFormatting.moneyColored(Money.fromDollar(history.getLast().displayedPrice())), ComponentFormatting.percentColored(MarketAnalystUi.marketPriceChange(history))));
@@ -435,6 +438,9 @@ public class MarketAnalystUi {
             tag.putDouble("CompetitionShare", breakdown.competition());
             tag.putDouble("OwnExpectedQuantity", context.economy().expectedDailyQuantity(id, context.company().id()));
             tag.putInt("LostRequestsToday", context.company().requestBoard().lostRequestsToday(id));
+            tag.putInt("OpenRequests", context.company().requestBoard().openRequestsForProduct(id));
+            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+            tag.putInt("RequestsLimit", context.company().legalForm(params).maxOpenRequestsPerProduct());
         } catch (IllegalArgumentException ignored) { }
 
         Optional<MarketParticipant> participant = context.economy().storedParticipant(id, context.company().id());
