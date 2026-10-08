@@ -203,7 +203,7 @@ public class MarketAnalystUi {
                     double ownPrice = data.getDouble("CurrentListPrice");
                     double marketPrice = history.getLast().displayedPrice();
 
-                    if (data.contains("OwnShare")) {
+                    if (data.contains("OwnShare")) { // = company participates in market (or it would not have a share)
                         shareTab.clearAllScrollViewChildren();
                         MarketShareBreakdown breakdown = new MarketShareBreakdown(data.getDouble("OwnShare"), data.getDouble("OtherCompaniesShare"), data.getDouble("CompetitionShare"));
                         SegmentBarElement bar = SegmentBarElement.from(CompanyCharts.share(breakdown));
