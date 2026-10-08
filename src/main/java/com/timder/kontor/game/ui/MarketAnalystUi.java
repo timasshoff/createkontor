@@ -6,10 +6,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.ItemSlot;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.SearchComponent;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.TabView;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import com.timder.kontor.config.CompanyConfig;
@@ -19,15 +16,17 @@ import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseHoldingRules;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketHistoryEntry;
+import com.timder.kontor.core.market.MarketParticipant;
 import com.timder.kontor.core.market.MarketRules;
+import com.timder.kontor.core.market.MarketShareBreakdown;
 import com.timder.kontor.core.raw.RawMaterialHistoryEntry;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.MarketAnalystActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
-import com.timder.kontor.game.ui.chart.ChartHost;
-import com.timder.kontor.game.ui.chart.MarketCharts;
-import com.timder.kontor.game.ui.chart.RawMaterialCharts;
+import com.timder.kontor.game.ui.chart.*;
+import com.timder.kontor.game.ui.chart.classic.ChartHost;
+import com.timder.kontor.game.ui.chart.segment.SegmentBarElement;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
 import com.timder.kontor.util.ComponentFormatting;
@@ -46,10 +45,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class MarketAnalystUi {
 
@@ -178,15 +174,18 @@ public class MarketAnalystUi {
                 .minHeight(0));
         demandOverflowChartHost.setDisplay(false);
 
+        ScrollerView shareTab = (ScrollerView) UiContainer.tabScroller().layout(layout -> layout.gapAll(4));
+
         TabView chartTabs = (TabView) UiContainer.largeTabView().layout(layout -> layout
                 .widthPercent(100)
                 .flexGrow(1)
                 .flexBasis(0));
         chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.price_tab")), priceChartHost);
         chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.demand_overflow_tab")), demandOverflowChartHost);
+        chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.participation_tab")), shareTab);
         chartTabs.setDisplay(false);
 
-        SimpleBinding<Tag> historyBinding = DataBindingBuilder.tagS2C(() -> marketHistoryToTag(context.economy(), selected[0]))
+        SimpleBinding<Tag> historyBinding = DataBindingBuilder.tagS2C(() -> marketHistoryToTag(context, selected[0]))
                 .onRemoteSyncReceived(tag -> {
                     CompoundTag data = (CompoundTag) tag;
                     boolean hasMarket = data.contains("Market");
@@ -201,10 +200,56 @@ public class MarketAnalystUi {
                         return;
                     }
 
+                    double ownPrice = data.getDouble("CurrentListPrice");
+                    double marketPrice = history.getLast().displayedPrice();
+
+                    if (data.contains("OwnShare")) {
+                        shareTab.clearAllScrollViewChildren();
+                        MarketShareBreakdown breakdown = new MarketShareBreakdown(data.getDouble("OwnShare"), data.getDouble("OtherCompaniesShare"), data.getDouble("CompetitionShare"));
+                        SegmentBarElement bar = SegmentBarElement.from(CompanyCharts.share(breakdown));
+                        bar.layout(layout -> layout.widthPercent(100));
+                        shareTab.addScrollViewChildren(bar);
+                        shareTab.addScrollViewChildren(
+                                UiLabels.secondary(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.expected_daily_quantity",
+                                        ComponentFormatting.highlightStandard(String.valueOf(Math.round(data.getDouble("OwnExpectedQuantity"))))
+                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.expected_daily_quantity.tooltip")))
+                        );
+
+                        double difference = marketPrice > 0.0 ? ownPrice / marketPrice - 1.0 : 0.0;
+                        shareTab.addScrollViewChildren(
+                                UiLabels.secondary(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.own_price",
+                                        ComponentFormatting.moneyColored(Money.fromDollar(data.getDouble("CurrentListPrice"))),
+                                        ComponentFormatting.percentColored(difference)
+                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.own_price.tooltip")))
+                        );
+
+                        shareTab.addScrollViewChildren(
+                                UiLabels.secondary(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.reputation",
+                                        ComponentFormatting.starsWithValue(data.getDouble("ReputationStars"))
+                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.reputation.tooltip")))
+                        );
+
+                        int lostRequests = data.getInt("LostRequestsToday");
+                        shareTab.addScrollViewChildren(
+                                UiLabels.secondary(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.lost_requests",
+                                        Component.literal(String.valueOf(lostRequests)).withStyle(lostRequests > 0 ? ChatFormatting.RED : ChatFormatting.GREEN)
+                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.lost_requests.tooltip")))
+                        );
+                    } else {
+                        shareTab.clearAllScrollViewChildren();
+                        shareTab.addScrollViewChild(UiLabels.secondary(
+                                Component.translatable("ui.createkontor.market_analyst_desk.no_participation"),
+                                Horizontal.CENTER));
+                    }
+
                     currentPrice.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_price", ComponentFormatting.moneyColored(Money.fromDollar(history.getLast().displayedPrice())), ComponentFormatting.percentColored(MarketAnalystUi.marketPriceChange(history))));
                     currentCompetitors.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", Component.literal(String.valueOf((int) Math.round(history.getLast().competitors()))).withStyle(ChatFormatting.RED)));
                     currentDemand.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_demand", Component.literal(String.valueOf((int) Math.round(history.getLast().demand()))).withStyle(ChatFormatting.GOLD)));
-                    priceChartHost.show(MarketCharts.priceCompetitors(history));
+                    priceChartHost.show(MarketCharts.priceCompetitors(history, ownPrice));
                     demandOverflowChartHost.show(MarketCharts.demandOverflow(history));
                 })
                 .build();
@@ -359,11 +404,11 @@ public class MarketAnalystUi {
         return candidates;
     }
 
-    private static Tag marketHistoryToTag(Economy economy, @Nullable ItemId id) {
+    private static Tag marketHistoryToTag(EmployeeDeskContext context, @Nullable ItemId id) {
         CompoundTag tag = new CompoundTag();
         if (id == null) return tag;
 
-        List<MarketHistoryEntry> history = economy.marketHistory(id);
+        List<MarketHistoryEntry> history = context.economy().marketHistory(id);
         int wanted = 360 * MarketRules.TRADING_TICKS_PER_DAY;
         ListTag list = new ListTag();
         for (MarketHistoryEntry e : history.subList(Math.max(0, history.size() - wanted), history.size())) {
@@ -380,8 +425,24 @@ public class MarketAnalystUi {
             list.add(entry);
         }
         tag.putString("Market", id.value());
-        tag.putDouble("ReferenceCost", economy.marketSnapshot(id).referenceCost());
+        tag.putDouble("ReferenceCost", context.economy().marketSnapshot(id).referenceCost());
         tag.put("History", list);
+
+        try {
+            MarketShareBreakdown breakdown = context.economy().marketShare(id, context.company().id());
+            tag.putDouble("OwnShare", breakdown.own());
+            tag.putDouble("OtherCompaniesShare", breakdown.otherCompanies());
+            tag.putDouble("CompetitionShare", breakdown.competition());
+            tag.putDouble("OwnExpectedQuantity", context.economy().expectedDailyQuantity(id, context.company().id()));
+            tag.putInt("LostRequestsToday", context.company().requestBoard().lostRequestsToday(id));
+        } catch (IllegalArgumentException ignored) { }
+
+        Optional<MarketParticipant> participant = context.economy().storedParticipant(id, context.company().id());
+        participant.ifPresent(p -> {
+            tag.putDouble("CurrentListPrice", p.listPrice());
+            tag.putDouble("ReputationStars", p.reputationInStars());
+        });
+
         return tag;
     }
 

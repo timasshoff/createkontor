@@ -164,12 +164,22 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.licensed_candidate", "%s §7(Licensed)");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.price_tab", "Price & Competitors");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.demand_overflow_tab", "Demand & Overflow");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.participation_tab", "Participation");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.no_participation", "You do not participate in this market.");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_price", "Current Price: %s §7(%s§7)");
-        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_price.tooltip", "The current market price of this item");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_price.tooltip", "§7The current market price of this item");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors", "Current Competitors: %s");
-        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors.tooltip", "The amount of simulated competitors.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors.tooltip", "§7The amount of simulated competitors.");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand", "Current Demand: %s §7units");
-        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand.tooltip", "The current units per day that are being sold on the market.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand.tooltip", "§7The current units per day that are being sold on the market.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.expected_daily_quantity", "Expected daily quantity: %s units");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.expected_daily_quantity.tooltip", "§7How many items you will be §6requested §7to deliver on average per day.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.own_price", "Your Price: %s §7(%s §7compared to market price)");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.own_price.tooltip", "§7Your current list price. §6Price and reputation §7determine your share.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.reputation", "Your Reputation: %s");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.reputation.tooltip", "§7Your reputation in this market. Competitors have a reputation of §63.0§7. §6Price and reputation §7determine your share.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.lost_requests", "Lost Requests Today: %s");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.lost_requests.tooltip", "§7How many requests you already §6lost §7today because your request board was full.");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
@@ -268,10 +278,19 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.revenue", "Revenue");
         REGISTRATE.addRawLang("chart.createkontor.revenue_result.series.result", "Result");
 
+        REGISTRATE.addRawLang("chart.createkontor.market_share.title", "Market Share");
+        REGISTRATE.addRawLang("chart.createkontor.market_share.series.you", "You");
+        REGISTRATE.addRawLang("chart.createkontor.market_share.series.you.description", "Expected share of the daily demand, based on your price and reputation.");
+        REGISTRATE.addRawLang("chart.createkontor.market_share.series.other_companies", "Other Companies");
+        REGISTRATE.addRawLang("chart.createkontor.market_share.series.other_companies.description", "Expected share of the daily demand of all other player-run companies, based on their price and reputation.");
+        REGISTRATE.addRawLang("chart.createkontor.market_share.series.competition", "Competition");
+        REGISTRATE.addRawLang("chart.createkontor.market_share.series.competition.description", "Excpected share of the daily demand of all other simulated competitors.");
+
         REGISTRATE.addRawLang("chart.createkontor.market_price_competitors.title", "Market History");
         REGISTRATE.addRawLang("chart.createkontor.market_price_competitors.series.price", "Price");
         REGISTRATE.addRawLang("chart.createkontor.market_price_competitors.series.competitors", "Competitors");
         REGISTRATE.addRawLang("chart.createkontor.market_price_competitors.series.demand", "Demand");
+        REGISTRATE.addRawLang("chart.createkontor.market_price_competitors.reference.list_price", "Your list price");
 
         REGISTRATE.addRawLang("chart.createkontor.market_demand_overflow.title", "Market History");
         REGISTRATE.addRawLang("chart.createkontor.market_demand_overflow.series.demand", "Demand");

@@ -71,6 +71,23 @@ public final class MarketRules {
         return total > 0 ? ownAttractiveness / total : 0.0;
     }
 
+    /**
+     * Splits the daily demand into a share breakdown.
+     * Shows the share of own company, other companies and competitors.
+     *
+     * @param ownAttractiveness Attractiveness of the company
+     * @param otherCompaniesAttractiveness Summed attractiveness of all other player companies
+     * @param state The current state of the market
+     * @param params The parameters of the market
+     * @return The three shares, adding up to one
+     */
+    public static MarketShareBreakdown shareBreakdown(double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
+        double own = shareFrom(ownAttractiveness, otherCompaniesAttractiveness, state, params);
+        double others = shareFrom(otherCompaniesAttractiveness, ownAttractiveness, state, params);
+        double competition = competitorShare(ownAttractiveness + otherCompaniesAttractiveness, state, params);
+        return new MarketShareBreakdown(own, others, competition);
+    }
+
     public static double share(double price, double reputation, MarketState state, MarketParams params) {
         return shareFrom(attractiveness(price, reputation, state, params), 0.0, state, params);
     }

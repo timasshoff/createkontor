@@ -3,7 +3,7 @@ package com.timder.kontor.game.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.timder.kontor.game.ui.chart.ChartSpec;
+import com.timder.kontor.game.ui.chart.classic.ChartSpec;
 import com.timder.kontor.game.ui.chart.EconomyCharts;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;

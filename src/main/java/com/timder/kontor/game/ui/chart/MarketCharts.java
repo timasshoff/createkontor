@@ -2,7 +2,8 @@ package com.timder.kontor.game.ui.chart;
 
 import com.timder.kontor.core.market.MarketHistoryEntry;
 import com.timder.kontor.core.market.MarketRules;
-import net.minecraft.core.registries.BuiltInRegistries;
+import com.timder.kontor.game.ui.chart.classic.ChartSeries;
+import com.timder.kontor.game.ui.chart.classic.ChartSpec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -38,7 +39,7 @@ public final class MarketCharts {
                 .build();
     }
 
-    public static ChartSpec priceCompetitors(List<MarketHistoryEntry> history) {
+    public static ChartSpec priceCompetitors(List<MarketHistoryEntry> history, double currentListPrice) {
         int count = history.size();
         double[] x = new double[count];
         double[] price = new double[count];
@@ -53,14 +54,17 @@ public final class MarketCharts {
             pointLabels.add(Component.translatable("chart.createkontor.day").getString() + entry.day());
         }
 
-        return ChartSpec.builder(Component.translatable("chart.createkontor.market_price_competitors.title").getString())
+        ChartSpec.Builder builder = ChartSpec.builder(Component.translatable("chart.createkontor.market_price_competitors.title").getString())
                 .series(new ChartSeries(Component.translatable("chart.createkontor.market_price_competitors.series.price").getString(), ChartColors.GREEN, x, price))
                 .series(new ChartSeries(Component.translatable("chart.createkontor.market_price_competitors.series.competitors").getString(), ChartColors.RED, x, competitors))
                 .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
                 .xRangeOptions(List.of(5, 10, 30, 100, 360), 30)
                 .xRangePointsPerUnit(MarketRules.TRADING_TICKS_PER_DAY)
-                .pointLabels(pointLabels)
-                .build();
+                .pointLabels(pointLabels);
+        if (currentListPrice > 0.0) {
+            builder.referenceLine(Component.translatable("chart.createkontor.market_price_competitors.reference.list_price").getString(), currentListPrice, ChartColors.BLUE);
+        }
+        return builder.build();
     }
 
     public static ChartSpec demandOverflow(List<MarketHistoryEntry> history) {

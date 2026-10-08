@@ -1,8 +1,8 @@
 package com.timder.kontor.game.ui.chart;
 
-import com.timder.kontor.core.market.MarketHistoryEntry;
-import com.timder.kontor.core.market.MarketRules;
 import com.timder.kontor.core.raw.RawMaterialHistoryEntry;
+import com.timder.kontor.game.ui.chart.classic.ChartSeries;
+import com.timder.kontor.game.ui.chart.classic.ChartSpec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 

@@ -1,4 +1,4 @@
-package com.timder.kontor.game.ui.chart;
+package com.timder.kontor.game.ui.chart.classic;
 
 import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
@@ -8,6 +8,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
+import com.timder.kontor.game.ui.chart.ChartColors;
 import dev.vfyjxf.taffy.style.TaffyPosition;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,17 +60,6 @@ public class ChartElement extends UIElement {
             return px >= x && px <= x + width && py >= y && py <= y + height;
         }
     }
-
-    private static final int PANEL_BACKGROUND = 0xFF1B1B1B;
-    private static final int PLOT_BACKGROUND = 0xFF262626;
-    private static final int GRID = 0xFF3A3A3A;
-    private static final int AXIS = 0xFF8A8A8A;
-    private static final int TEXT = 0xFFE0E0E0;
-    private static final int TEXT_DIM = 0xFFA0A0A0;
-    private static final int CURSOR = 0x80FFFFFF;
-    private static final int DOT_OUTLINE = 0xFF000000;
-    private static final int TOOLTIP_BACKGROUND = 0xFF212121;
-    private static final int TOOLTIP_BORDER = 0xFFFFFFFF;
 
     private static final float PAD = 6f;
     private static final float MIN_PLOT_SIZE = 20f;
@@ -386,7 +376,7 @@ public class ChartElement extends UIElement {
         float height = getContentHeight();
         float lineHeight = font.lineHeight;
 
-        DrawerHelper.drawSolidRect(g, left, top, width, height, PANEL_BACKGROUND);
+        DrawerHelper.drawSolidRect(g, left, top, width, height, ChartColors.PANEL_BACKGROUND);
         legendHits.clear();
 
         double[] range = dataRange();
@@ -398,7 +388,7 @@ public class ChartElement extends UIElement {
             float textY = top + (height - lines.size() * lineHeight) / 2f;
             for (FormattedCharSequence line : lines) {
                 float textX = left + (width - font.width(line)) / 2f;
-                LDLibFonts.drawText(g, font, line, textX, textY, TEXT_DIM, false);
+                LDLibFonts.drawText(g, font, line, textX, textY, ChartColors.TEXT_DIM, false);
                 textY += lineHeight;
             }
             return;
@@ -418,7 +408,7 @@ public class ChartElement extends UIElement {
 
         float y = top + PAD;
         if (title != null) {
-            LDLibFonts.drawText(g, font, title, Math.round(left + PAD), Math.round(y), TEXT, false);
+            LDLibFonts.drawText(g, font, title, Math.round(left + PAD), Math.round(y), ChartColors.TEXT, false);
             y += lineHeight + 4f;
         }
         if (!series.isEmpty()) {
@@ -443,11 +433,11 @@ public class ChartElement extends UIElement {
             return; // too small to draw
         }
 
-        DrawerHelper.drawSolidRect(g, plot.left(), plot.top(), plot.width(), plot.height(), PLOT_BACKGROUND);
+        DrawerHelper.drawSolidRect(g, plot.left(), plot.top(), plot.width(), plot.height(), ChartColors.PLOT_BACKGROUND);
         for (int i = 0; i < yTicks.length; i++) {
             float py = Math.round(plot.y(yTicks[i]));
-            DrawerHelper.drawSolidRect(g, plot.left(), py, plot.width(), 1f, GRID);
-            drawText(g, font, yLabels[i], plot.left() - 4f - font.width(yLabels[i]), py - lineHeight / 2f + 1f, TEXT_DIM);
+            DrawerHelper.drawSolidRect(g, plot.left(), py, plot.width(), 1f, ChartColors.GRID);
+            drawText(g, font, yLabels[i], plot.left() - 4f - font.width(yLabels[i]), py - lineHeight / 2f + 1f, ChartColors.TEXT_DIM);
         }
 
         for (double tick : xTicks) {
@@ -456,14 +446,14 @@ public class ChartElement extends UIElement {
                 continue;
             }
             float px = Math.round(exactX);
-            DrawerHelper.drawSolidRect(g, px, plot.top(), 1f, plot.height(), GRID);
+            DrawerHelper.drawSolidRect(g, px, plot.top(), 1f, plot.height(), ChartColors.GRID);
             String label = xFormatter.format(tick, xScale.decimals());
             float textWidth = font.width(label);
             float labelX = Math.max(plot.left(), Math.min(px - textWidth / 2f, plot.right() - textWidth));
-            drawText(g, font, label, labelX, plot.bottom() + 4f, TEXT_DIM);
+            drawText(g, font, label, labelX, plot.bottom() + 4f, ChartColors.TEXT_DIM);
         }
-        DrawerHelper.drawSolidRect(g, plot.left(), plot.top(), 1f, plot.height(), AXIS);
-        DrawerHelper.drawSolidRect(g, plot.left(), plot.bottom(), plot.width(),1f, AXIS);
+        DrawerHelper.drawSolidRect(g, plot.left(), plot.top(), 1f, plot.height(), ChartColors.AXIS);
+        DrawerHelper.drawSolidRect(g, plot.left(), plot.bottom(), plot.width(),1f, ChartColors.AXIS);
         g.flush();
 
         for (ReferenceLine line : referenceLines) {
@@ -661,11 +651,11 @@ public class ChartElement extends UIElement {
             return;
         }
 
-        DrawerHelper.drawSolidRect(g, Math.round(cursorX), plot.top(), 1f, plot.height(), CURSOR);
+        DrawerHelper.drawSolidRect(g, Math.round(cursorX), plot.top(), 1f, plot.height(), ChartColors.CURSOR);
         for (Dot dot : dots) {
             float dx = Math.round(dot.x());
             float dy = Math.round(dot.y());
-            DrawerHelper.drawSolidRect(g, dx - 3f, dy - 3f, 7f, 7f, DOT_OUTLINE);
+            DrawerHelper.drawSolidRect(g, dx - 3f, dy - 3f, 7f, 7f, ChartColors.DOT_OUTLINE);
             DrawerHelper.drawSolidRect(g, dx - 2f, dy - 2f, 5f, 5f, dot.color());
         }
 
@@ -691,15 +681,15 @@ public class ChartElement extends UIElement {
         bx = Math.round(bx);
         by = Math.round(by);
 
-        DrawerHelper.drawSolidRect(g, bx - 1f, by - 1f, boxWidth + 2f, boxHeight + 2f, TOOLTIP_BORDER);
-        DrawerHelper.drawSolidRect(g, bx, by, boxWidth, boxHeight, TOOLTIP_BACKGROUND);
+        DrawerHelper.drawSolidRect(g, bx - 1f, by - 1f, boxWidth + 2f, boxHeight + 2f, ChartColors.TOOLTIP_BORDER);
+        DrawerHelper.drawSolidRect(g, bx, by, boxWidth, boxHeight, ChartColors.TOOLTIP_BACKGROUND);
 
         float ty = by + TOOLTIP_PAD;
-        drawText(g, font, header, bx + TOOLTIP_PAD, ty, TEXT_DIM);
+        drawText(g, font, header, bx + TOOLTIP_PAD, ty, ChartColors.TEXT_DIM);
         for (TipLine line : lines) {
             ty += lineHeight + 1f;
             DrawerHelper.drawSolidRect(g, Math.round(bx + TOOLTIP_PAD), Math.round(ty + (lineHeight - SWATCH) / 2f), SWATCH, SWATCH, line.color());
-            drawText(g, font, line.text(), bx + TOOLTIP_PAD + SWATCH + 4f, ty, TEXT);
+            drawText(g, font, line.text(), bx + TOOLTIP_PAD + SWATCH + 4f, ty, ChartColors.TEXT);
         }
     }
 
@@ -751,17 +741,17 @@ public class ChartElement extends UIElement {
             int swatchColor = hidden ? faded(s.color()) : s.color();
             DrawerHelper.drawSolidRect(g, Math.round(x), Math.round(y + lineHeight / 2f - 1f), LEGEND_SWATCH, 2f, swatchColor);
             float textX = x + LEGEND_SWATCH + LEGEND_GAP;
-            drawText(g, font, label, textX, y, hidden ? TEXT_DIM : TEXT);
+            drawText(g, font, label, textX, y, hidden ? ChartColors.TEXT_DIM : ChartColors.TEXT);
             if (hidden) {
-                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight / 2f), textWidth, 1f, TEXT_DIM);
+                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight / 2f), textWidth, 1f, ChartColors.TEXT_DIM);
             }
             if (hovered) {
-                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight), textWidth, 1f, TEXT);
+                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight), textWidth, 1f, ChartColors.TEXT);
             }
             x += entryWidth + LEGEND_ENTRY_GAP;
         }
         if (shown < count) {
-            drawText(g, font, "+" + (count - shown), x, y, TEXT_DIM);
+            drawText(g, font, "+" + (count - shown), x, y, ChartColors.TEXT_DIM);
         }
     }
 
