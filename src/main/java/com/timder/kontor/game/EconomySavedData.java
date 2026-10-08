@@ -66,8 +66,9 @@ public class EconomySavedData extends SavedData {
     private static EconomySavedData create(MinecraftServer server) {
         Economy economy = buildFreshEconomy(server);
         economy.advanceTicksQuietly(WARMUP_TICKS);
-        CreateKontor.LOGGER.info("CREATE Market dynamics params: {}", EconomyConfig.toMarketDynamicsParams());
-        return new EconomySavedData(economy, server.overworld().getGameTime());
+        EconomySavedData data = new EconomySavedData(economy, server.overworld().getGameTime());
+        data.setDirty();
+        return data;
     }
 
     private static EconomySavedData load(CompoundTag tag, MinecraftServer server) {
@@ -92,7 +93,6 @@ public class EconomySavedData extends SavedData {
                 ? tag.getLong("LastSyncedGameTime")
                 : economy.ticksElapsed();
 
-        CreateKontor.LOGGER.info("LOAD Market dynamics params: {}", EconomyConfig.toMarketDynamicsParams());
         return new EconomySavedData(economy, lastSyncedGameTime);
     }
 
