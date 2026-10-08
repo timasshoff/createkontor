@@ -34,6 +34,8 @@
   "chart.createkontor.market_price_competitors.series.price": "Price",
   "chart.createkontor.market_price_competitors.title": "Market History",
   "chart.createkontor.other": "Other",
+  "chart.createkontor.raw_material_price.series.price": "Price",
+  "chart.createkontor.raw_material_price.title": "Price History",
   "chart.createkontor.revenue_result.series.result": "Result",
   "chart.createkontor.revenue_result.series.revenue": "Revenue",
   "chart.createkontor.revenue_result.title": "Daily Revenue & Daily Result",
@@ -261,8 +263,10 @@
   "ui.createkontor.market_analyst_desk.current_price": "Current Price: %s §7(%s§7)",
   "ui.createkontor.market_analyst_desk.current_price.tooltip": "The current market price of this item",
   "ui.createkontor.market_analyst_desk.demand_overflow_tab": "Demand & Overflow",
+  "ui.createkontor.market_analyst_desk.licensed_candidate": "%s §7(Licensed)",
   "ui.createkontor.market_analyst_desk.markets": "Markets",
   "ui.createkontor.market_analyst_desk.price_tab": "Price & Competitors",
   "ui.createkontor.market_analyst_desk.raw_materials": "Raw Materials",
-  "ui.createkontor.market_analyst_desk.select_market": "Select a market"
+  "ui.createkontor.market_analyst_desk.select_market": "Select a market",
+  "ui.createkontor.market_analyst_desk.select_raw_market": "Select a raw material"
 }

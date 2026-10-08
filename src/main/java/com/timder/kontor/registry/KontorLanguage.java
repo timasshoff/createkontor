@@ -160,6 +160,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.markets", "Markets");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.raw_materials", "Raw Materials");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.select_market", "Select a market");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.select_raw_market", "Select a raw material");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.licensed_candidate", "%s §7(Licensed)");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.price_tab", "Price & Competitors");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.demand_overflow_tab", "Demand & Overflow");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_price", "Current Price: %s §7(%s§7)");
@@ -274,6 +276,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.market_demand_overflow.title", "Market History");
         REGISTRATE.addRawLang("chart.createkontor.market_demand_overflow.series.demand", "Demand");
         REGISTRATE.addRawLang("chart.createkontor.market_demand_overflow.series.overflow", "Unserved Demand");
+
+        REGISTRATE.addRawLang("chart.createkontor.raw_material_price.title", "Price History");
+        REGISTRATE.addRawLang("chart.createkontor.raw_material_price.series.price", "Price");
 
         REGISTRATE.addRawLang("chart.createkontor.cost_structure.title", "Cost Structure");
 

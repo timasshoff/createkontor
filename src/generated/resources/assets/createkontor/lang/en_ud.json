@@ -34,6 +34,8 @@
   "chart.createkontor.market_price_competitors.series.price": "ǝɔıɹԀ",
   "chart.createkontor.market_price_competitors.title": "ʎɹoʇsıH ʇǝʞɹɐW",
   "chart.createkontor.other": "ɹǝɥʇO",
+  "chart.createkontor.raw_material_price.series.price": "ǝɔıɹԀ",
+  "chart.createkontor.raw_material_price.title": "ʎɹoʇsıH ǝɔıɹԀ",
   "chart.createkontor.revenue_result.series.result": "ʇןnsǝᴚ",
   "chart.createkontor.revenue_result.series.revenue": "ǝnuǝʌǝᴚ",
   "chart.createkontor.revenue_result.title": "ʇןnsǝᴚ ʎןıɐᗡ & ǝnuǝʌǝᴚ ʎןıɐᗡ",
@@ -261,8 +263,10 @@
   "ui.createkontor.market_analyst_desk.current_price": ")ㄥ§%s(ㄥ§ %s :ǝɔıɹԀ ʇuǝɹɹnƆ",
   "ui.createkontor.market_analyst_desk.current_price.tooltip": "ɯǝʇı sıɥʇ ɟo ǝɔıɹd ʇǝʞɹɐɯ ʇuǝɹɹnɔ ǝɥ⟘",
   "ui.createkontor.market_analyst_desk.demand_overflow_tab": "ʍoןɟɹǝʌO & puɐɯǝᗡ",
+  "ui.createkontor.market_analyst_desk.licensed_candidate": ")pǝsuǝɔıꞀ(ㄥ§ %s",
   "ui.createkontor.market_analyst_desk.markets": "sʇǝʞɹɐW",
   "ui.createkontor.market_analyst_desk.price_tab": "sɹoʇıʇǝdɯoƆ & ǝɔıɹԀ",
   "ui.createkontor.market_analyst_desk.raw_materials": "sןɐıɹǝʇɐW ʍɐᴚ",
-  "ui.createkontor.market_analyst_desk.select_market": "ʇǝʞɹɐɯ ɐ ʇɔǝןǝS"
+  "ui.createkontor.market_analyst_desk.select_market": "ʇǝʞɹɐɯ ɐ ʇɔǝןǝS",
+  "ui.createkontor.market_analyst_desk.select_raw_market": "ןɐıɹǝʇɐɯ ʍɐɹ ɐ ʇɔǝןǝS"
 }
