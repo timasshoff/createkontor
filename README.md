@@ -1,6 +1,5 @@
 This work is licensed under 
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
-<img width="470" height="161" alt="image" src="https://github.com/user-attachments/assets/3d86ebb5-ee29-4aca-b218-9dda7a008ca9" />
 
 ![Create: Kontor](https://cdn.modrinth.com/data/cached_images/82d1e08058c794b1b6e4bfafeee89079638c4a8f.png)
 
