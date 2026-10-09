@@ -89,7 +89,7 @@ public final class Account {
 
         Iterator<Long> iterator = bookingDays.descendingIterator();
         long firstKept = iterator.next();
-        for (int i = 0; i < retentionDays; i++) {
+        for (int i = 1; i < retentionDays; i++) {
             firstKept = iterator.next();
         }
         long cutoff = firstKept;
