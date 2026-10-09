@@ -164,7 +164,6 @@ public class MarketAnalystUi {
                 .flexBasis(0)
                 .flexGrow(1)
                 .minHeight(0));
-        priceChartHost.setDisplay(false);
 
         ChartHost demandOverflowChartHost = new ChartHost();
         demandOverflowChartHost.layout(layout -> layout
@@ -172,7 +171,6 @@ public class MarketAnalystUi {
                 .flexBasis(0)
                 .flexGrow(1)
                 .minHeight(0));
-        demandOverflowChartHost.setDisplay(false);
 
         ScrollerView shareTab = (ScrollerView) UiContainer.tabScroller().layout(layout -> layout.gapAll(4));
 
@@ -540,7 +538,7 @@ public class MarketAnalystUi {
 
     public static double rawMaterialPriceChange(List<RawMaterialHistoryEntry> history) {
         int size = history.size();
-        int previousIndex = size - 1 - MarketRules.TRADING_TICKS_PER_DAY;
+        int previousIndex = size - 2;
         if (previousIndex < 0) {
             return 0.0;
         }

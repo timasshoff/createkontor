@@ -171,7 +171,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors", "Current Competitors: %s");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_competitors.tooltip", "§7The amount of simulated competitors.");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand", "Current Demand: %s §7units");
-        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand.tooltip", "§7The current units per day that are being sold on the market.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.current_demand.tooltip", "§7The current daily demand for this market.");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.expected_daily_quantity", "Expected daily quantity: %s units");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.expected_daily_quantity.tooltip", "§7How many items you will be §6requested §7to deliver on average per day.");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.own_price", "Your Price: %s §7(%s §7compared to market price)");
@@ -284,7 +284,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.market_share.series.other_companies", "Other Companies");
         REGISTRATE.addRawLang("chart.createkontor.market_share.series.other_companies.description", "Expected share of the daily demand of all other player-run companies, based on their price and reputation.");
         REGISTRATE.addRawLang("chart.createkontor.market_share.series.competition", "Competition");
-        REGISTRATE.addRawLang("chart.createkontor.market_share.series.competition.description", "Excpected share of the daily demand of all other simulated competitors.");
+        REGISTRATE.addRawLang("chart.createkontor.market_share.series.competition.description", "Expected share of the daily demand of all other simulated competitors.");
 
         REGISTRATE.addRawLang("chart.createkontor.market_price_competitors.title", "Market History");
         REGISTRATE.addRawLang("chart.createkontor.market_price_competitors.series.price", "Price");
