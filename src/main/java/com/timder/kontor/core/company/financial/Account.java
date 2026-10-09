@@ -73,13 +73,27 @@ public final class Account {
 
     /**
      * Removes individual bookings that are too old. Daily sum remains the same.
-     * @param today The current day
+     * Only considers days on which at least one booking occurred
      * @param retentionDays How many days of bookings stay
      */
-    public void prune(long today, int retentionDays) {
+    public void prune(int retentionDays) {
         if (retentionDays < 1) throw new IllegalArgumentException("retentionDays must be at least 1.");
-        long firstKept = today - retentionDays + 1;
-        bookings.removeIf(booking -> booking.day() < firstKept);
+
+        NavigableSet<Long> bookingDays = new TreeSet<>();
+        for (Booking booking : bookings) {
+            bookingDays.add(booking.day());
+        }
+
+        if (bookingDays.size() <= retentionDays)
+            return;
+
+        Iterator<Long> iterator = bookingDays.descendingIterator();
+        long firstKept = iterator.next();
+        for (int i = 1; i < retentionDays; i++) {
+            firstKept = iterator.next();
+        }
+        long cutoff = firstKept;
+        bookings.removeIf(booking -> booking.day() < cutoff);
     }
 
     /**
