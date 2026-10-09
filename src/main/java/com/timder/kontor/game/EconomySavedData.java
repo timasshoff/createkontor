@@ -1,5 +1,6 @@
 package com.timder.kontor.game;
 
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.economy.Economy;
@@ -65,7 +66,9 @@ public class EconomySavedData extends SavedData {
     private static EconomySavedData create(MinecraftServer server) {
         Economy economy = buildFreshEconomy(server);
         economy.advanceTicksQuietly(WARMUP_TICKS);
-        return new EconomySavedData(economy, server.overworld().getGameTime());
+        EconomySavedData data = new EconomySavedData(economy, server.overworld().getGameTime());
+        data.setDirty();
+        return data;
     }
 
     private static EconomySavedData load(CompoundTag tag, MinecraftServer server) {
@@ -89,6 +92,7 @@ public class EconomySavedData extends SavedData {
         long lastSyncedGameTime = tag.contains("LastSyncedGameTime")
                 ? tag.getLong("LastSyncedGameTime")
                 : economy.ticksElapsed();
+
         return new EconomySavedData(economy, lastSyncedGameTime);
     }
 
@@ -308,7 +312,9 @@ public class EconomySavedData extends SavedData {
                     entryTag.getDouble("Deviation"),
                     entryTag.getDouble("DisplayedPrice"),
                     entryTag.getDouble("Competitors"),
-                    entryTag.getDouble("DeliveredThisTick")));
+                    entryTag.getDouble("DeliveredThisTick"),
+                    entryTag.getDouble("Demand"),
+                    entryTag.contains("Overflow", Tag.TAG_DOUBLE) ? entryTag.getDouble("Overflow") : Double.NaN));
         }
         return history;
     }
@@ -324,6 +330,8 @@ public class EconomySavedData extends SavedData {
             entryTag.putDouble("DisplayedPrice", entry.displayedPrice());
             entryTag.putDouble("Competitors", entry.competitors());
             entryTag.putDouble("DeliveredThisTick", entry.deliveredThisTick());
+            entryTag.putDouble("Demand", entry.demand());
+            entryTag.putDouble("Overflow", entry.overflow());
             historyTag.add(entryTag);
         }
         return historyTag;

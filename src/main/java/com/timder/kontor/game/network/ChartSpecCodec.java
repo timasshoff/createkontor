@@ -1,9 +1,9 @@
 package com.timder.kontor.game.network;
 
-import com.timder.kontor.game.ui.chart.ChartKind;
-import com.timder.kontor.game.ui.chart.ChartReferenceLine;
-import com.timder.kontor.game.ui.chart.ChartSeries;
-import com.timder.kontor.game.ui.chart.ChartSpec;
+import com.timder.kontor.game.ui.chart.classic.ChartKind;
+import com.timder.kontor.game.ui.chart.classic.ChartReferenceLine;
+import com.timder.kontor.game.ui.chart.classic.ChartSeries;
+import com.timder.kontor.game.ui.chart.classic.ChartSpec;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
@@ -54,6 +54,7 @@ final class ChartSpecCodec {
         }
         buf.writeVarInt(spec.defaultTimeRangeDays());
         buf.writeUtf(spec.xRangeUnit(), ChartSpec.MAX_UNIT_LENGTH);
+        buf.writeVarInt(spec.pointsPerRangeUnit());
         buf.writeBoolean(spec.showXAxis());
     }
 
@@ -102,6 +103,7 @@ final class ChartSpecCodec {
         }
         int defaultTimeRangeDays = buf.readVarInt();
         String xRangeUnit = buf.readUtf(ChartSpec.MAX_UNIT_LENGTH);
+        int pointsPerRangeUnit = buf.readVarInt();
         boolean showXAxis = buf.readBoolean();
 
         return new ChartSpec(
@@ -118,6 +120,7 @@ final class ChartSpecCodec {
                 timeRangeOptionsDays,
                 defaultTimeRangeDays,
                 xRangeUnit,
+                pointsPerRangeUnit,
                 showXAxis
         );
     }

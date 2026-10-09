@@ -1,4 +1,4 @@
-package com.timder.kontor.game.ui.chart;
+package com.timder.kontor.game.ui.chart.classic;
 
 public enum ChartKind {
     LINE,

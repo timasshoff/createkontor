@@ -1,5 +1,6 @@
 package com.timder.kontor.config;
 
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.macro.MacroParams;
@@ -72,6 +73,7 @@ public class EconomyConfig {
     public static final ModConfigSpec.DoubleValue MIN_COMPETITORS;
     public static final ModConfigSpec.DoubleValue MAX_COMPETITORS;
     public static final ModConfigSpec.DoubleValue COST_PASS_THROUGH;
+    public static final ModConfigSpec.DoubleValue COST_PASS_THROUGH_DOWN;
 
     public static final ModConfigSpec.DoubleValue DEFAULT_PROCESS_COST;
 
@@ -212,8 +214,11 @@ public class EconomyConfig {
                 .comment("Highest number of competitors a market can grow to")
                 .defineInRange("maxCompetitors", 9.0, 1.0E-6, Double.MAX_VALUE);
         COST_PASS_THROUGH = builder
-                .comment("How much of a rise of a product's reference cost (checked once per day) is passed on to its price level. 0 = none, 1 = fully. Falling costs are not passed on")
+                .comment("How much of a rise of a product's reference cost (checked once per day) is passed on to its price level. 0 = none, 1 = fully")
                 .defineInRange("costPassThrough", 0.5, 0.0, 1.0);
+        COST_PASS_THROUGH_DOWN = builder
+                .comment("How much of a fall of a product's reference cost is passed on to its price level. 0 = none, 1 = fully. Values below costPassThrough make prices sticky downwards; the gap lets prices drift upwards over time")
+                .defineInRange("costPassThroughDown", 0.3, 0.0, 1.0);
         builder.pop();
 
         builder.comment("Processing cost").push("processCosts");
@@ -278,7 +283,8 @@ public class EconomyConfig {
                 MAX_PRICE_FACTOR.get(),
                 MIN_COMPETITORS.get(),
                 MAX_COMPETITORS.get(),
-                COST_PASS_THROUGH.get());
+                COST_PASS_THROUGH.get(),
+                COST_PASS_THROUGH_DOWN.get());
     }
 
     public static RequestParams toRequestParams() {

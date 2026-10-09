@@ -2,6 +2,8 @@ package com.timder.kontor.game.ui.chart;
 
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.core.macro.MacroRules;
+import com.timder.kontor.game.ui.chart.classic.ChartSeries;
+import com.timder.kontor.game.ui.chart.classic.ChartSpec;
 
 import java.util.ArrayList;
 import java.util.List;

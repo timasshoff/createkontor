@@ -381,6 +381,31 @@ public final class Economy {
         return dailyQuantityOf(market, participant);
     }
 
+    /**
+     * How the daily demand of a market is split
+     *
+     * @param market The market
+     * @param company The company
+     * @return The share of the company, of all other companies and of the competition
+     */
+    public MarketShareBreakdown marketShare(ItemId market, CompanyId company) {
+        Objects.requireNonNull(market, "market must not be null.");
+        Objects.requireNonNull(company, "company must not be null.");
+        if (!isParticipant(market, company)) {
+            throw new IllegalArgumentException(company + " is not a registered participant of market " + market + ".");
+        }
+        MarketState state = stateOf(market);
+        MarketParams marketParams = marketParamsMap.get(market);
+        MarketParticipant participant = participantsOf(market).get(company);
+        Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
+
+        double own = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+        Double counted = attractiveness.byCompany().get(company);
+        double others = counted == null ? attractiveness.total() : attractiveness.total() - counted;
+
+        return MarketRules.shareBreakdown(own, Math.max(0.0, others), state, marketParams);
+    }
+
     private double dailyQuantityOf(ItemId market, MarketParticipant participant) {
         MarketState state = stateOf(market);
         MarketParams marketParams = marketParamsMap.get(market);
@@ -493,6 +518,7 @@ public final class Economy {
 
             DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()), params.marketDynamics());
             lastDayResults.put(def.id(), result);
+            backfillOverflow(def.id(), day, result.overflow());
 
             if (result.competitorClosed()) {
                 events.add(new CompetitorExitedEvent(def.id()));
@@ -539,7 +565,7 @@ public final class Economy {
             double plantSize = def.params().plantSize() * trend; // Grows plant size with trend & therefor with demand
             MarketParams updated = new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
             marketParamsMap.put(def.id(), updated);
-            MarketRules.passCostIncrease(marketStates.get(def.id()), previous.referenceCost(), referenceCost, params.marketDynamics());
+            MarketRules.passCostChange(marketStates.get(def.id()), previous.referenceCost(), referenceCost, params.marketDynamics());
 
             Integer depth = result.depth().get(def.id());
             if (depth != null) {
@@ -584,10 +610,23 @@ public final class Economy {
                 state.getDeviation(),
                 state.getDisplayedPrice(),
                 state.getCompetitors(),
-                delivered
+                delivered,
+                currentDemand.get(id),
+                Double.NaN
         ));
         if (history.size() > HISTORY_LENGTH_TICKS) {
             history.removeFirst();
+        }
+    }
+
+    private void backfillOverflow(ItemId id, long day, double overflow) {
+        Deque<MarketHistoryEntry> history = marketHistory.get(id);
+        List<MarketHistoryEntry> ofDay = new ArrayList<>();
+        while (!history.isEmpty() && history.peekLast().day() == day) {
+            ofDay.add(history.removeLast());
+        }
+        for (int i = ofDay.size() - 1; i >= 0; i--) {
+            history.addLast(ofDay.get(i).withOverflow(overflow));
         }
     }
 

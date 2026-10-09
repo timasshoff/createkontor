@@ -71,6 +71,23 @@ public final class MarketRules {
         return total > 0 ? ownAttractiveness / total : 0.0;
     }
 
+    /**
+     * Splits the daily demand into a share breakdown.
+     * Shows the share of own company, other companies and competitors.
+     *
+     * @param ownAttractiveness Attractiveness of the company
+     * @param otherCompaniesAttractiveness Summed attractiveness of all other player companies
+     * @param state The current state of the market
+     * @param params The parameters of the market
+     * @return The three shares, adding up to one
+     */
+    public static MarketShareBreakdown shareBreakdown(double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
+        double own = shareFrom(ownAttractiveness, otherCompaniesAttractiveness, state, params);
+        double others = shareFrom(otherCompaniesAttractiveness, ownAttractiveness, state, params);
+        double competition = competitorShare(ownAttractiveness + otherCompaniesAttractiveness, state, params);
+        return new MarketShareBreakdown(own, others, competition);
+    }
+
     public static double share(double price, double reputation, MarketState state, MarketParams params) {
         return shareFrom(attractiveness(price, reputation, state, params), 0.0, state, params);
     }
@@ -103,18 +120,19 @@ public final class MarketRules {
     }
 
     /**
-     * Passes a rise of the reference cost on to the price level
+     * Passes a change of the reference cost on to the price level
      * @param state The market state
      * @param previousCost The reference cost before recalculation
      * @param newCost The reference cost after recalculation
      * @param dynamics The dynamic market parameters
      */
-    public static void passCostIncrease(MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
-        if (previousCost <= 0 || newCost <= previousCost) {
+    public static void passCostChange(MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
+        if (previousCost <= 0 || newCost <= 0 || newCost == previousCost) {
             return;
         }
         double ratio = newCost / previousCost;
-        state.setPriceLevel(state.getPriceLevel() * (1.0 + dynamics.costPassThrough() * (ratio - 1.0)));
+        double passThrough = ratio > 1.0 ? dynamics.costPassThrough() : dynamics.costPassThroughDown();
+        state.setPriceLevel(state.getPriceLevel() * (1.0 + passThrough * (ratio - 1.0)));
     }
 
     public static DayResult advanceDay(MarketState state, MarketParams params, double demand) {

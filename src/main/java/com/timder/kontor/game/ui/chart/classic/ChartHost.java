@@ -1,4 +1,4 @@
-package com.timder.kontor.game.ui.chart;
+package com.timder.kontor.game.ui.chart.classic;
 
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 

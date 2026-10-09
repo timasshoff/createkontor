@@ -4,9 +4,11 @@ import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.financial.Booking;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import com.timder.kontor.core.market.MarketShareBreakdown;
+import com.timder.kontor.game.ui.chart.classic.ChartKind;
+import com.timder.kontor.game.ui.chart.classic.ChartSeries;
+import com.timder.kontor.game.ui.chart.classic.ChartSpec;
+import com.timder.kontor.game.ui.chart.segment.SegmentBarSpec;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
@@ -133,4 +135,14 @@ public class CompanyCharts {
         return builder.build();
     }
 
+    public static SegmentBarSpec share(MarketShareBreakdown breakdown) {
+        SegmentBarSpec.Builder builder = SegmentBarSpec.builder(Component.translatable("chart.createkontor.market_share.title").getString())
+                .segment(Component.translatable("chart.createkontor.market_share.series.you").getString(), ChartColors.BLUE, breakdown.own(), Component.translatable("chart.createkontor.market_share.series.you.description").getString())
+                .decimals(2);
+        if (breakdown.otherCompanies() > 0) {
+            builder.segment(Component.translatable("chart.createkontor.market_share.series.other_companies").getString(), ChartColors.ORANGE, breakdown.otherCompanies(), Component.translatable("chart.createkontor.market_share.series.other_companies.description").getString());
+        }
+        builder.segment(Component.translatable("chart.createkontor.market_share.series.competition").getString(), ChartColors.TEAL, breakdown.competition(), Component.translatable("chart.createkontor.market_share.series.competition.description").getString());
+        return builder.build();
+    }
 }
