@@ -77,7 +77,7 @@ public final class CompanyRules {
         company.appendHistory(historyEntry, params.historyLengthDays());
 
         // Step 6: Clean booking history
-        account.prune(day, params.bookingRetentionDays());
+        account.prune(params.bookingRetentionDays());
 
         return historyEntry;
     }
