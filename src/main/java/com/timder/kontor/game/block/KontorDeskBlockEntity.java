@@ -35,10 +35,25 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
 
 public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
+
+    // This is necessary to fix an exploit where a player can add himself as a manager of a company
+    private static final byte[] INVITE_KEY = new byte[32];
+    static {
+        new SecureRandom().nextBytes(INVITE_KEY);
+    }
+    private static final long INVITE_VALID_MILLIS = 10 * 60 * 1000L;
+
 
     public KontorDeskBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -227,7 +242,8 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
             return S2CActionResult.error(Component.translatable("message.createkontor.manager_invite.in_company", ComponentFormatting.highlightError(playerName)));
         }
 
-        String command = "/kontorinvite accept " + company.id().value() + " " + inviter.getUUID();
+        long issuedAt = System.currentTimeMillis();
+        String command = "/kontorinvite accept " + company.id().value() + " " + inviter.getUUID() + " " + issuedAt + " " + inviteToken(company.id().value(), inviter.getUUID(), target.getUUID(), issuedAt);
         Component accept = Component.translatable("message.createkontor.manager_invite.accept")
                 .withStyle(style -> style
                         .withColor(ChatFormatting.GREEN)
@@ -245,14 +261,20 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         return S2CActionResult.success(Component.translatable("message.createkontor.manager_invite.sent", ComponentFormatting.highlightStandard(playerName)));
     }
 
-    public static Optional<S2CActionResult> acceptManagerInvitation(ServerPlayer invitee, int companyId, UUID inviterId) {
+    public static Optional<S2CActionResult> acceptManagerInvitation(ServerPlayer invitee, int companyId, UUID inviterId, long issuedAt, String token) {
+        byte[] expected = inviteToken(companyId, inviterId, invitee.getUUID(), issuedAt).getBytes(StandardCharsets.UTF_8);
+        boolean validToken = MessageDigest.isEqual(expected, token.getBytes(StandardCharsets.UTF_8));
+        if (!validToken || System.currentTimeMillis() - issuedAt > INVITE_VALID_MILLIS) {
+            return S2CActionResult.error(ComponentFormatting.errorTranslatable("message.createkontor.manager_invite.invalid"));
+        }
+
         MinecraftServer server = invitee.server;
         CompanySavedData data = CompanySavedData.get(server);
         CompanyRegistry registry = data.getRegistry();
 
         Company company = registry.get(new CompanyId(companyId)).orElse(null);
         if (company == null || !company.isOwner(inviterId)) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable("message.createkontor.manager_invite.invalid"));
+            return S2CActionResult.error(ComponentFormatting.error("Invalid invite."));
         }
         if (registry.companyOf(invitee.getUUID()).isPresent()) {
             return S2CActionResult.error(ComponentFormatting.errorTranslatable("message.createkontor.manager_invite.already_in_company"));
@@ -313,5 +335,16 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         PlayerNotifications.sendMessageToAllMembers(company, server, Component.translatable("message.createkontor.leave.left", ComponentFormatting.highlightStandard(player.getGameProfile().getName())));
         player.closeContainer();
         return S2CActionResult.success(Component.translatable("message.createkontor.leave.done", ComponentFormatting.highlightStandard(company.name())));
+    }
+
+    private static String inviteToken(int companyId, UUID inviterId, UUID inviteeId, long issuedAt) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(INVITE_KEY, "HmacSHA256"));
+            byte[] hash = mac.doFinal((companyId + "|" + inviterId + "|" + inviteeId + "|" + issuedAt).getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

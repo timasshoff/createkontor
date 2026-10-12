@@ -169,6 +169,7 @@ public class KontorDeskBoundUi {
         UIElement leaveBox = new UIElement().layout(layout -> layout.marginVertical(8)).addSyncValue(isManagerBinding.getSyncValue());
         leaveBox.onMessage("c2s_leave_company", (tag) -> ToastPayload.send(leaveBox.getModularUI().player, be.leaveCompany((ServerPlayer) leaveBox.getModularUI().player)));
         isManager.addListener(() -> {
+            leaveBox.clearAllChildren();
             if (!isManager.get()) return;
             Button leave = UiButtons.critical(Component.translatable("ui.createkontor.kontor_desk.tab.managers.leave"));
             leave.setOnClick(e -> {
@@ -842,15 +843,15 @@ public class KontorDeskBoundUi {
                 Toggle toggle = UiToggles.wrappingToggle(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.toggle"));
                 bankruptcyBox.addChild(toggle);
 
-                Button bancruptcyButton = UiButtons.critical(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.button"));
-                bancruptcyButton.setActive(false);
-                toggle.setOnToggleChanged(bancruptcyButton::setActive);
-                bancruptcyButton.setOnClick(e -> {
+                Button bankruptcyButton = UiButtons.critical(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.button"));
+                bankruptcyButton.setActive(false);
+                toggle.setOnToggleChanged(bankruptcyButton::setActive);
+                bankruptcyButton.setOnClick(e -> {
                     CompoundTag tag = new CompoundTag();
                     tag.putBoolean("Confirmed", toggle.getValue());
                     content.sendMessage("c2s_declare_bankruptcy", tag);
                 });
-                bankruptcyBox.addChild(bancruptcyButton);
+                bankruptcyBox.addChild(bankruptcyButton);
             } else {
                 bankruptcyBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.not_insolvent"), Horizontal.LEFT));
             }
