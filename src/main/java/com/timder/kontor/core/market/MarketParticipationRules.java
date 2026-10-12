@@ -230,6 +230,20 @@ public final class MarketParticipationRules {
         return result;
     }
 
+    public static List<ItemId> withdrawFromAll(Company company, Economy economy) {
+        Objects.requireNonNull(company, "company must not be null.");
+        Objects.requireNonNull(economy, "economy must not be null.");
+
+        List<ItemId> withdrawn = new ArrayList<>();
+        for (ItemId market : economy.marketIds()) {
+            if (economy.storedParticipant(market, company.id()).isPresent()) {
+                economy.withdrawParticipant(market, company.id());
+                withdrawn.add(market);
+            }
+        }
+        return withdrawn;
+    }
+
     private static void requireMarket(Economy economy, ItemId market) {
         if (!economy.marketIds().contains(market)) {
             throw new IllegalArgumentException("There is no market for " + market + ".");

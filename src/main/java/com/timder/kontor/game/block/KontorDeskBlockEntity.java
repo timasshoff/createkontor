@@ -163,4 +163,38 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         economyData.setDirty();
         return S2CActionResult.empty();
     }
+
+    public Optional<S2CActionResult> declareBankruptcy(ServerPlayer player, boolean confirmed) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return S2CActionResult.illegalEnvironment();
+        }
+        if (!confirmed) {
+            return S2CActionResult.error(Component.translatable("message.createkontor.bankruptcy.not_confirmed"));
+        }
+
+        MinecraftServer server = serverLevel.getServer();
+        CompanySavedData companyData = CompanySavedData.get(server);
+        Company company = companyData.getRegistry().get(getCompanyId()).orElse(null);
+        if (company == null) {
+            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+        }
+        if (!company.isOwner(player.getUUID())) {
+            return S2CActionResult.error(Component.literal("This action can only be taken by the owner of this company."));
+        }
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        if (!company.isInsolvent(params)) {
+            return S2CActionResult.error(Component.literal("Company is not insolvent."));
+        }
+
+        EconomySavedData economyData = EconomySavedData.get(server);
+        String name = company.name();
+        MarketParticipationRules.withdrawFromAll(company, economyData.getEconomy());
+        companyData.getRegistry().delete(company.id());
+        economyData.setDirty();
+        companyData.setDirty();
+
+        setCompanyId(null);
+        player.closeContainer();
+        return S2CActionResult.success(Component.translatable("message.createkontor.bankruptcy.declared", ComponentFormatting.highlightStandard(name)));
+    }
 }

@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Booking;
@@ -54,6 +55,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -69,12 +71,27 @@ public class KontorDeskBoundUi {
                 .onRemoteSyncReceived(tag -> companyHistory.set(tagToHistory(tag)))
                 .build();
 
+        ObservableValue<Boolean> isOwner = new ObservableValue<>(false);
+        SimpleBinding<Boolean> isOwnerBinding = DataBindingBuilder.boolS2C(() -> company.isOwner(holder.player.getUUID()))
+                .onRemoteSyncReceived(isOwner::set)
+                .build();
+
+        ObservableValue<Component> liquidity = new ObservableValue<>(Component.empty());
+        SimpleBinding<Component> liquidityBinding = DataBindingBuilder.componentS2C(() -> Component.translatable("enum.createkontor.liquidity." + company.liquidity().toString().toLowerCase()))
+                .onRemoteSyncReceived(liquidity::set)
+                .build();
+
         var tabView = UiContainer.largeTabView();
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.overview")), overviewTab(company, economy, companyHistory, companyHistoryBinding));
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")), accountTab(company, companyHistory, companyHistoryBinding));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")), accountTab(company, companyHistory, companyHistoryBinding, liquidity, liquidityBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.requests_orders")), requestsOrdersTab(company, be));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.markets")), marketsTab(company, be));
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.manage")), manageTab(company, be));
+
+        Tab manageTabHeader = UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.manage"));
+        manageTabHeader.setDisplay(false);
+        tabView.addTab(manageTabHeader, manageTab(company, be, liquidity, liquidityBinding));
+        tabView.addSyncValue(isOwnerBinding.getSyncValue());
+        isOwner.addListener(() -> manageTabHeader.setDisplay(isOwner.get()));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(company, economy));
         return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
@@ -144,7 +161,7 @@ public class KontorDeskBoundUi {
         return overviewContent;
     }
 
-    public static UIElement accountTab(Company company, ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding) {
+    public static UIElement accountTab(Company company, ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding, ObservableValue<Component> liquidity, SimpleBinding<Component> liquidityBinding) {
         UIElement content = new UIElement()
                 .layout(layout -> layout
                         .widthPercent(100)
@@ -170,11 +187,9 @@ public class KontorDeskBoundUi {
                 .build().getSyncValue()
         );
 
-        Label liquidity = UiLabels.primary(Component.empty(), Horizontal.CENTER);
-        liquidity.addSyncValue(DataBindingBuilder.componentS2C(() -> Component.translatable("enum.createkontor.liquidity." + company.liquidity().toString().toLowerCase()))
-                .onRemoteSyncReceived(liquidity::setText)
-                .build().getSyncValue()
-        );
+        Label liquidityLabel = UiLabels.primary(Component.empty(), Horizontal.CENTER);
+        liquidityLabel.addSyncValue(liquidityBinding.getSyncValue());
+        liquidity.addListener(() -> liquidityLabel.setText(liquidity.get()));
 
         Label netWorth = UiLabels.primary(Component.empty(), Horizontal.CENTER);
         netWorth.addSyncValue(DataBindingBuilder.componentS2C(() -> Component.translatable("ui.createkontor.kontor_desk.net_worth", company.netWorth().toString()))
@@ -188,7 +203,7 @@ public class KontorDeskBoundUi {
 
         content.addChild(UiContainer.headerWithSubtitle(
                 balance,
-                UiLabels.seperatedLabelRow(List.of(liquidity, overdraftLimitLabel, netWorth))
+                UiLabels.seperatedLabelRow(List.of(liquidityLabel, overdraftLimitLabel, netWorth))
         ));
 
         TabView tabView = (TabView) UiContainer.largeTabView().layout(layout -> layout
@@ -663,8 +678,82 @@ public class KontorDeskBoundUi {
         return content;
     }
 
-    public static UIElement manageTab(Company company, KontorDeskBlockEntity be) {
+    public static UIElement manageTab(Company company, KontorDeskBlockEntity be, ObservableValue<Component> liquidity, SimpleBinding<Component> liquidityBinding) {
+        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+
+        content.addChild(UiLabels.h1(Component.translatable("ui.createkontor.kontor_desk.tab.manage_title"), Horizontal.LEFT));
+
+        TabView tabView = (TabView) UiContainer.largeTabView().layout(layout -> layout
+                .widthPercent(100)
+                .flexGrow(1)
+                .flexBasis(0));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.managers")), managersTab());
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.rewards")), rewardsTab());
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy")), bankruptcyTab(company, be, liquidity, liquidityBinding));
+        content.addChild(tabView);
+        return content;
+    }
+
+    public static UIElement managersTab() {
         return new UIElement();
+    }
+
+    public static UIElement rewardsTab() {
+        return new UIElement();
+    }
+
+    public static UIElement bankruptcyTab(Company company, KontorDeskBlockEntity be, ObservableValue<Component> liquidity, SimpleBinding<Component> liquidityBinding) {
+        ScrollerView content = UiContainer.tabScroller();
+
+        content.addScrollViewChildren(UiLabels.h2(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy"), Horizontal.LEFT));
+        content.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable(
+                "ui.createkontor.kontor_desk.tab.bankruptcy.explanation",
+                CompanyConfig.INSOLVENCY_DAYS.get()
+                ), Horizontal.LEFT));
+
+        Label liquidityLabel = UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.status", Component.literal("--")), Horizontal.LEFT);
+        liquidityLabel.addSyncValue(liquidityBinding.getSyncValue());
+        liquidity.addListener(() -> liquidityLabel.setText(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.status", liquidity.get())));
+        content.addScrollViewChildren(liquidityLabel);
+
+        content.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.disclaimer"), Horizontal.LEFT));
+
+        UIElement bankruptcyBox = new UIElement()
+                .style(style -> style.background(Sprites.BORDER_DARK))
+                .layout(layout -> layout.paddingAll(8));
+
+        ObservableValue<Boolean> isInsolvent = new ObservableValue<>(false);
+        SimpleBinding<Boolean> isInsolventBinding = DataBindingBuilder.boolS2C(() -> company.isInsolvent(CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()))))
+                .onRemoteSyncReceived(isInsolvent::set)
+                .build();
+        bankruptcyBox.addSyncValue(isInsolventBinding.getSyncValue());
+
+        content.onMessage("c2s_declare_bankruptcy", tag -> ToastPayload.send(content.getModularUI().player, be.declareBankruptcy((ServerPlayer) content.getModularUI().player, tag.getBoolean("Confirmed"))));
+
+        isInsolvent.addListener(() -> {
+            bankruptcyBox.clearAllChildren();
+            if (isInsolvent.get()) {
+                Toggle toggle = UiToggles.wrappingToggle(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.toggle"));
+                bankruptcyBox.addChild(toggle);
+
+                Button bancruptcyButton = UiButtons.critical(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.button"));
+                bancruptcyButton.setActive(false);
+                toggle.setOnToggleChanged(bancruptcyButton::setActive);
+                bancruptcyButton.setOnClick(e -> {
+                    CompoundTag tag = new CompoundTag();
+                    tag.putBoolean("Confirmed", toggle.getValue());
+                    content.sendMessage("c2s_declare_bankruptcy", tag);
+                });
+                bankruptcyBox.addChild(bancruptcyButton);
+            } else {
+                bankruptcyBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.not_insolvent"), Horizontal.LEFT));
+            }
+        });
+
+        content.addScrollViewChildren(bankruptcyBox);
+        isInsolvent.runListenersOnce();
+
+        return content;
     }
 
     private static List<Booking> tagToBookings(Tag tag) {

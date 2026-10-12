@@ -22,6 +22,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.shipping_exit.limit", "§cLimit reached: Legal form allows at most %s §cbound shipping exits.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.limit", "§cThis company already has a Kontor Desk.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.request_accepting_failed", "§cAccepting request %s §cfailed: %s");
+        REGISTRATE.addRawLang("message.createkontor.bankruptcy.not_confirmed", "§cUnderstanding of bankruptcy not confirmed.");
+        REGISTRATE.addRawLang("message.createkontor.bankruptcy.declared", "Bankruptcy declared. The company %s has been deleted.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.completed", "§7The company %s §7has advanced to %s§7.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.resting", "§7The application of %s §7for %s §7is being processed, but the net worth is too low. It rests for up to %s §7day(s). Raise the net worth to at least %s§7.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.cancelled", "§cThe application of %s §cfor %s §cwas cancelled because the company has no lawyer anymore. The fee of %s §cwas refunded.");
@@ -65,6 +67,16 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.open_loans", "Open Loans");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.markets", "Markets");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.manage", "Manage");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.manage_title", "Manage Company");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers", "Managers");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.rewards", "Rewards");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy", "Bankruptcy");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.explanation", "When your company is §4illiquid §rfor %s days and thus §cinsolvent§r, you can declare bankruptcy.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.status", "Current Liquidity: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.disclaimer", "Declaring bankruptcy will permanently §cdelete §ryour company and allow you to start over with a new company. It is §cnot possible §rto reverse this or restore a deleted company. A new company will start at the zero exactly like this company did (lowest legal level, founders deposit + option of taking founders loan).");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.toggle", "I understand what bankruptcy means and know that the effects are not reversible.");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.button", "Declare bankruptcy and delete company");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.not_insolvent", "Your company is not insolvent and you cannot declare bankruptcy.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.open_orders", "Open Orders: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.total_bookings_visible", "Visible Bookings: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.current_overdraft_limit", "Overdraft Limit: %s");
