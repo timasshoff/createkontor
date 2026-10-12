@@ -212,6 +212,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.lost_requests", "Lost Requests Today: %s (open requests: %s/%s)");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.lost_requests.tooltip", "§7How many requests you already §6lost §7today because your request board was full.");
 
+        REGISTRATE.addRawLang("ui.createkontor.consultant_desk.wiki", "Wiki");
+        REGISTRATE.addRawLang("ui.createkontor.consultant_desk.select_page", "Select a page on the left.");
+        REGISTRATE.addRawLang("ui.createkontor.consultant_desk.no_pages", "No wiki pages are available.");
+        REGISTRATE.addRawLang("ui.createkontor.consultant_desk.page_error", "This page could not be displayed. The log has details.");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -288,6 +293,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("employee_role.createkontor.lawyer", "Lawyer");
         REGISTRATE.addRawLang("employee_role.createkontor.buyer", "Buyer");
         REGISTRATE.addRawLang("employee_role.createkontor.market_analyst", "Market Analyst");
+        REGISTRATE.addRawLang("employee_role.createkontor.consultant", "Consultant");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
 
@@ -336,6 +342,60 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");
         REGISTRATE.addRawLang("toast.createkontor.success.title", "Success:");
 
+        REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
+        REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");
+        REGISTRATE.addRawLang("wiki.createkontor.category.employees", "Employees");
+        REGISTRATE.addRawLang("wiki.createkontor.category.blocks", "Blocks");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.shipping_exit.p1", "The shipping exit allows you to fulfill orders. When powered it will try to fulfill as many orders as possible sorted by urgency. To fulfill an order, all required items need to be present in an adjacent inventory. The items will then be pulled form those inventories.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.shipping_exit.scene1", "A basic shipping exit setup. The pulse timer powers the shipping exit regularly.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.shipping_exit.p2", "Orders that are in their grace period (= deadline expired) have the highest priority and will be fulfilled first. All other orders come next sorted by their remaining time until the deadline is reached.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.shipping_exit.p3", "A comparator can be used to check whether an order has been completed or not. If an order has been completed it will output a power level of 15.");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.getting_started.title", "Getting started");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.daily_settlement.title", "Daily Settlement");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.company_activity.title", "Company Activity");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.chunk_loading.title", "Chunk Loading");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.finances.title", "Finances");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.legal_forms.title", "Legal Forms");
+        REGISTRATE.addRawLang("wiki.createkontor.page.legal_forms.p1", "Legal forms are the legal foundation of a company. They define what a company can do and what it cannot do. You can see your current legal form in the Kontor Desk. A lawyer can tell you the exact limits of your current legal form.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.legal_forms.b1", "Upgrading legal forms");
+        REGISTRATE.addRawLang("wiki.createkontor.page.legal_forms.p2", "A lawyer can upgrade the legal form of your company. To upgrade a legal form, several requirements must be met:");
+        REGISTRATE.addRawLang("wiki.createkontor.page.legal_forms.requirements", "Minimum net worth\nMinimum amount of fulfilled orders\nMinimum reputation\nNo current payment difficulties");
+        REGISTRATE.addRawLang("wiki.createkontor.page.legal_forms.p3", "The exact requirements depend on the legal form that you want to upgrade to. A lawyer can tell you the exact requirements. Additionally an application fee must be paid.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.legal_forms.p4", "The upgrade application takes some time to process. During this processing time your company needs a lawyer at all times or the application will be cancelled and the fee refunded. If your company gets in payment trouble while the upgrade is processing the application wil start to rest on the next day. It will rest for a few days depending on the applied legal form. After that the application will be rejected and the fee is lost.");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.markets.title", "Markets");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.licenses.title", "Licenses");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.market_participation.title", "Market Participation");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.requests_orders.title", "Requests & Orders");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.reputation.title", "Reputation");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.market_share.title", "Market Share");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.managers.title", "Managers");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.economic_cycle.title", "Economic Cycle");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.policy_rate.title", "Policy Rate");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.employees.title", "Employees");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.lawyer.title", "Lawyer");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.market_analyst.title", "Market Analyst");
+
+        REGISTRATE.addRawLang("wiki.createkontor.page.buyer.title", "Buyer");
+
         REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.summary", "Allows _founding_ or _management_ of a company.");
         REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.control1", "When R-Clicked");
         REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.action1", "Opens the _Kontor Desk_ interface.");
@@ -353,6 +413,18 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action1", "Opens the _Buyer's Desk_ interface.");
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control2", "When R-Clicked with a Postbox");
         REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action2", "The next _Postbox_ you place nearby is _connected_ to this desk. Bought goods arrive there.");
+
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.summary", "Staffs the company with a _market analyst_. A market allows you to get detailed info and charts about markets.");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.behaviour1", "The villager is _hired_ as a market analyst. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.action1", "Opens the _Market Analyst's Desk_ interface.");
+
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.summary", "Staffs the company with a _consultant_. A consultant explains how your company and its _systems_ work.");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.behaviour1", "The villager is _hired_ as a consultant. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.action1", "Opens the _Consultant's Desk_ interface.");
     }
 
     static void touch() {

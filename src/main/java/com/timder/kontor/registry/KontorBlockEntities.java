@@ -24,7 +24,8 @@ public final class KontorBlockEntities {
             .blockEntity("employee_desk", EmployeeDeskBlockEntity::new)
             .validBlocks(
                     KontorBlocks.LAWYER_DESK,
-                    KontorBlocks.MARKET_ANALYST_DESK
+                    KontorBlocks.MARKET_ANALYST_DESK,
+                    KontorBlocks.CONSULTANT_DESK
             ).register();
 
     public static final BlockEntityEntry<BuyerDeskBlockEntity> BUYER_DESK = REGISTRATE

@@ -11,6 +11,7 @@ import com.timder.kontor.game.block.employee.EmployeeDeskInteraction;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.command.*;
 import com.timder.kontor.game.network.KontorNetwork;
+import com.timder.kontor.game.wiki.KontorWikiPages;
 import com.timder.kontor.registry.KontorRegistries;
 import net.minecraft.data.DataGenerator;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -42,6 +43,7 @@ public class CreateKontor {
         modEventBus.addListener(KontorChunkLoading::registerTicketControllers);
 
         KontorRegistries.register(modEventBus);
+        KontorWikiPages.register();
 
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(KontorTickHandler.class);

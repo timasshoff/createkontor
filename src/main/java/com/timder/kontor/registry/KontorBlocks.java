@@ -2,11 +2,9 @@ package com.timder.kontor.registry;
 
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TooltipModifier;
-import com.timder.kontor.game.block.KontorDeskBlock;
-import com.timder.kontor.game.block.MarketAnalystDeskBlock;
-import com.timder.kontor.game.block.ShippingExitBlock;
-import com.timder.kontor.game.block.LawyerDeskBlock;
+import com.timder.kontor.game.block.*;
 import com.timder.kontor.game.block.buyer.BuyerDeskBlock;
+import com.timder.kontor.game.block.consultant.ConsultantDeskBlock;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.core.registries.Registries;
@@ -105,6 +103,23 @@ public final class KontorBlocks {
                     .add(LootItem.lootTableItem(block))
                     .when(ExplosionCondition.survivesExplosion()))))
             .lang("Market Analyst's Desk")
+            .onRegisterAfter(Registries.ITEM, KontorBlocks::tooltip)
+            .simpleItem()
+            .register();
+
+    public static final BlockEntry<ConsultantDeskBlock> CONSULTANT_DESK = REGISTRATE
+            .block("consultant_desk", ConsultantDeskBlock::new)
+            .properties(p -> p
+                    .mapColor(MapColor.STONE)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.STONE))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
+            .loot((loot, block) -> loot.add(block, LootTable.lootTable().withPool(LootPool.lootPool()
+                    .setRolls(ConstantValue.exactly(1))
+                    .add(LootItem.lootTableItem(block))
+                    .when(ExplosionCondition.survivesExplosion()))))
+            .lang("Consultant's Desk")
             .onRegisterAfter(Registries.ITEM, KontorBlocks::tooltip)
             .simpleItem()
             .register();

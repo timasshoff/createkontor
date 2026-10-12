@@ -4,6 +4,7 @@
     "createkontor:kontor_desk",
     "createkontor:lawyer_desk",
     "createkontor:buyer_desk",
-    "createkontor:market_analyst_desk"
+    "createkontor:market_analyst_desk",
+    "createkontor:consultant_desk"
   ]
 }

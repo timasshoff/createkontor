@@ -1,0 +1,120 @@
+package com.timder.kontor.game.ui.element;
+
+import com.lowdragmc.lowdraglib2.LDLib2;
+import com.lowdragmc.lowdraglib2.gui.texture.ColorBorderTexture;
+import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture;
+import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Scene;
+import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.lowdragmc.lowdraglib2.utils.data.BlockInfo;
+import com.lowdragmc.lowdraglib2.utils.virtuallevel.DummyWorld;
+import com.lowdragmc.lowdraglib2.utils.virtuallevel.TrackedDummyWorld;
+import dev.vfyjxf.taffy.style.AlignItems;
+import dev.vfyjxf.taffy.style.FlexDirection;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Collections;
+
+public final class WikiElements {
+
+    public static final float SCENE_DEFAULT_HEIGHT = 100;
+    public static final float SCENE_DEFAULT_WIDTH_PERCENT = 75;
+
+    public static UIElement paragraph(Component component) {
+        return new Label()
+                .setText(component)
+                .textStyle(style -> style
+                        .textAlignHorizontal(Horizontal.LEFT)
+                        .textWrap(TextWrap.WRAP)
+                        .adaptiveHeight(true))
+                .layout(layout -> layout.widthPercent(100));
+    }
+
+    public static UIElement bold(Component component) {
+        return new Label()
+                .setText(Component.empty().append(component).withStyle(ChatFormatting.BOLD))
+                .textStyle(style -> style
+                        .textAlignHorizontal(Horizontal.LEFT)
+                        .textWrap(TextWrap.WRAP)
+                        .adaptiveHeight(true))
+                .layout(layout -> layout.widthPercent(100));
+    }
+
+    public static UIElement bulletList(Component component) {
+        UIElement list = new UIElement().layout(layout -> layout.widthPercent(100).gapAll(2));
+        for (String item : component.getString().split("\n")) {
+            if (item.isBlank()) {
+                continue;
+            }
+            UIElement row = new UIElement().layout(layout -> layout
+                    .widthPercent(100)
+                    .flexDirection(FlexDirection.ROW)
+                    .gapAll(4));
+            UIElement bullet = new Label()
+                    .setText(Component.literal("•"))
+                    .textStyle(style -> style.adaptiveWidth(true).adaptiveHeight(true));
+            UIElement text = paragraph(Component.literal(item.trim())).layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).flexShrink(1).minWidth(0));
+            row.addChildren(bullet, text);
+            list.addChild(row);
+        }
+        return list;
+    }
+
+    public static UIElement blockScene(BlockState state) {
+        if (!LDLib2.isClient()) {
+            return new UIElement();
+        }
+
+        var level = new TrackedDummyWorld();
+        level.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(state));
+
+        var scene = new Scene();
+        scene.setRenderFacing(false);
+        scene.setRenderSelect(false);
+        scene.setScalable(false);
+        scene.setShowHoverBlockTips(true);
+        scene.xeiLookup();
+        scene.createScene(level);
+        scene.setRenderedCore(Collections.singleton(BlockPos.ZERO), null);
+        scene.setTickWorld(false);
+        scene.layout(layout -> layout.widthPercent(SCENE_DEFAULT_WIDTH_PERCENT).height(SCENE_DEFAULT_HEIGHT).paddingAll(3).alignSelf(AlignItems.CENTER));
+        return scene;
+    }
+
+    public static UIElement scene(TrackedDummyWorld level, float height, boolean tickWorld) {
+        if (!LDLib2.isClient()) {
+            return new UIElement();
+        }
+
+        var scene = new Scene();
+        scene.setRenderFacing(false);
+        scene.setRenderSelect(false);
+        scene.setScalable(true);
+        scene.setShowHoverBlockTips(true);
+        scene.xeiLookup();
+        scene.createScene(level);
+        var blocks = level.getFilledBlocks().longStream().mapToObj(BlockPos::of).toList();
+        scene.setRenderedCore(blocks);
+        scene.setTickWorld(tickWorld);
+        scene.layout(layout -> layout.widthPercent(SCENE_DEFAULT_WIDTH_PERCENT).height(height).paddingAll(3).alignSelf(AlignItems.CENTER));
+        return scene;
+    }
+
+    public static UIElement scene(TrackedDummyWorld level, float height, boolean tickWorld, Component caption) {
+        Scene scene = (Scene) scene(level, height, tickWorld);
+        if (LDLib2.isClient()) {
+            scene.style(style -> style
+                    .background(new ColorRectTexture(0x40000000))
+                    .overlay(new ColorBorderTexture(-1, 0x55FFFFFF)));
+        }
+        return new UIElement()
+                .layout(layout -> layout.widthPercent(SCENE_DEFAULT_WIDTH_PERCENT).alignSelf(AlignItems.CENTER).gapAll(2))
+                .addChildren(scene, UiLabels.paragraphSecondary(caption, Horizontal.LEFT));
+    }
+}
