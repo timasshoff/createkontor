@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.mojang.authlib.GameProfile;
 import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.CompanyHistoryEntry;
 import com.timder.kontor.core.company.CompanyParams;
@@ -54,8 +55,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -89,7 +92,7 @@ public class KontorDeskBoundUi {
 
         Tab manageTabHeader = UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.manage"));
         manageTabHeader.setDisplay(false);
-        tabView.addTab(manageTabHeader, manageTab(company, be, liquidity, liquidityBinding));
+        tabView.addTab(manageTabHeader, manageTab(holder, company, be, liquidity, liquidityBinding));
         tabView.addSyncValue(isOwnerBinding.getSyncValue());
         isOwner.addListener(() -> manageTabHeader.setDisplay(isOwner.get()));
 
@@ -678,7 +681,7 @@ public class KontorDeskBoundUi {
         return content;
     }
 
-    public static UIElement manageTab(Company company, KontorDeskBlockEntity be, ObservableValue<Component> liquidity, SimpleBinding<Component> liquidityBinding) {
+    public static UIElement manageTab(BlockUIMenuType.BlockUIHolder holder, Company company, KontorDeskBlockEntity be, ObservableValue<Component> liquidity, SimpleBinding<Component> liquidityBinding) {
         UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         content.addChild(UiLabels.h1(Component.translatable("ui.createkontor.kontor_desk.tab.manage_title"), Horizontal.LEFT));
@@ -687,15 +690,102 @@ public class KontorDeskBoundUi {
                 .widthPercent(100)
                 .flexGrow(1)
                 .flexBasis(0));
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.managers")), managersTab());
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.managers")), managersTab(holder, be, company));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.rewards")), rewardsTab());
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy")), bankruptcyTab(company, be, liquidity, liquidityBinding));
         content.addChild(tabView);
         return content;
     }
 
-    public static UIElement managersTab() {
-        return new UIElement();
+    public static UIElement managersTab(BlockUIMenuType.BlockUIHolder holder, KontorDeskBlockEntity be, Company company) {
+        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+
+        UIElement inviteBox = new UIElement()
+                .layout(layout -> layout
+                        .widthPercent(100)
+                        .flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .marginBottom(4)
+                        .gapAll(4));
+        inviteBox.onMessage("c2s_invite_manager", tag -> {
+            if (!(holder.player instanceof ServerPlayer player)) return;
+            ToastPayload.send(player, be.inviteManager(player, tag.getString("Name")));
+        });
+
+        TextField field = new TextField();
+        field.textFieldStyle(style -> style.placeholder(Component.translatable("ui.createkontor.kontor_desk.tab.managers.name")));
+        field.layout(layout -> layout
+                .widthAuto()
+                .flexBasis(0)
+                .flexGrow(1)
+                .minWidth(0)
+                .height(20));
+        inviteBox.addChild(field);
+
+        Button button = UiButtons.primary(Component.translatable("ui.createkontor.kontor_desk.tab.managers.invite"));
+        button.layout(layout -> layout
+                .flexShrink(0)
+                .height(20));
+        button.setOnClick(e -> {
+            CompoundTag tag = new CompoundTag();
+            tag.putString("Name", field.getValue().trim());
+            inviteBox.sendMessage("c2s_invite_manager", tag);
+        });
+        inviteBox.addChild(button);
+        content.addChild(inviteBox);
+
+        ObservableList<MemberEntry> members = new ObservableList<>();
+        SimpleBinding<Tag> membersBinding = DataBindingBuilder.tagS2C(() -> membersToTag(company, be.getLevel().getServer()))
+                .onRemoteSyncReceived(tag -> members.set(tagToMembers(tag)))
+                .build();
+
+        ScrollerView membersBox = UiContainer.tabScroller();
+        membersBox.addSyncValue(membersBinding.getSyncValue());
+        membersBox.onMessage("c2s_fire_manager", tag ->
+                ToastPayload.send(membersBox.getModularUI().player, be.fireManager((ServerPlayer) membersBox.getModularUI().player, tag.getUUID("Id"))));
+        members.addListener(() -> {
+            membersBox.clearAllScrollViewChildren();
+            for (MemberEntry member : members.get()) {
+                UIElement row = new UIElement()
+                        .style(style -> style.background(Sprites.BORDER_DARK))
+                        .layout(layout -> layout
+                                .flexDirection(FlexDirection.ROW)
+                                .gapAll(4)
+                                .paddingAll(8)
+                                .widthPercent(100));
+
+                row.addChild(UiLabels.seperatedLabelRow(List.of(
+                        UiLabels.primary(Component.literal(member.name()).withStyle(ChatFormatting.GOLD), Horizontal.CENTER),
+                        member.owner
+                                ? UiLabels.secondary(Component.translatable("ui.createkontor.kontor_desk.tab.managers.owner"), Horizontal.CENTER)
+                                : UiLabels.secondary(Component.translatable("ui.createkontor.kontor_desk.tab.managers.manager"), Horizontal.CENTER)
+                )).layout(layout -> layout
+                        .widthAuto()
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .flexShrink(1)
+                        .minWidth(0)
+                        .alignSelf(AlignItems.CENTER)
+                        .justifyContent(AlignContent.FLEX_START)
+                        .gapAll(0)));
+
+                if (!member.owner()) {
+                    row.addChild(UiButtons.critical(Component.translatable("ui.createkontor.kontor_desk.tab.managers.fire"))
+                            .setOnClick(e -> {
+                                CompoundTag tag = new CompoundTag();
+                                tag.putUUID("Id", member.id());
+                                membersBox.sendMessage("c2s_fire_manager", tag);
+                            })
+                            .layout(layout -> layout.flexShrink(0).alignSelf(AlignItems.CENTER)));
+                }
+
+                membersBox.addScrollViewChildren(row);
+            }
+        });
+        members.runListenersOnce();
+
+        content.addChild(membersBox);
+        return content;
     }
 
     public static UIElement rewardsTab() {
@@ -705,7 +795,6 @@ public class KontorDeskBoundUi {
     public static UIElement bankruptcyTab(Company company, KontorDeskBlockEntity be, ObservableValue<Component> liquidity, SimpleBinding<Component> liquidityBinding) {
         ScrollerView content = UiContainer.tabScroller();
 
-        content.addScrollViewChildren(UiLabels.h2(Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy"), Horizontal.LEFT));
         content.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable(
                 "ui.createkontor.kontor_desk.tab.bankruptcy.explanation",
                 CompanyConfig.INSOLVENCY_DAYS.get()
@@ -1001,5 +1090,49 @@ public class KontorDeskBoundUi {
                     entry.contains("ListPriceCents") ? Money.ofCents(entry.getLong("ListPriceCents")) : null));
         }
         return entries;
+    }
+
+    private record MemberEntry(UUID id, String name, boolean owner) { }
+
+    private static Tag membersToTag(Company company, MinecraftServer server) {
+        ListTag list = new ListTag();
+        list.add(memberToTag(company.owner(), true, server));
+        for (UUID manager : company.managers()) {
+            list.add(memberToTag(manager, false, server));
+        }
+        return list;
+    }
+
+    private static CompoundTag memberToTag(UUID id, boolean owner, MinecraftServer server) {
+        CompoundTag tag = new CompoundTag();
+        tag.putUUID("Id", id);
+        tag.putString("Name", memberName(server, id));
+        tag.putBoolean("Owner", owner);
+        return tag;
+    }
+
+    private static List<MemberEntry> tagToMembers(Tag tag) {
+        ListTag list = (ListTag) tag;
+        List<MemberEntry> members = new ArrayList<>(list.size());
+        for (Tag t : list) {
+            CompoundTag memberTag = (CompoundTag) t;
+            members.add(new MemberEntry(memberTag.getUUID("Id"), memberTag.getString("Name"), memberTag.getBoolean("Owner")));
+        }
+        return members;
+    }
+
+    private static String memberName(MinecraftServer server, UUID id) {
+        ServerPlayer online = server.getPlayerList().getPlayer(id);
+        if (online != null) {
+            return online.getGameProfile().getName();
+        }
+        GameProfileCache cache = server.getProfileCache();
+        if (cache != null) {
+            Optional<GameProfile> profile = cache.get(id);
+            if (profile.isPresent()) {
+                return profile.get().getName();
+            }
+        }
+        return id.toString();
     }
 }

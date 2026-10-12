@@ -29,6 +29,16 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.upgrade.cancelled", "§cThe application of %s §cfor %s §cwas cancelled because the company has no lawyer anymore. The fee of %s §cwas refunded.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.rejected", "§cThe application of %s §cfor %s §cwas rejected: the net worth was below %s§c for too long. The fee of %s §cis lost.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.buy.success", "%s package(s) are being delivered!");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.offline", "§cThe player %s §cis offline or does not exist.");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.in_company", "§c%s is already member of a company.");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.accept", "[Accept]");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.accept_hover", "Click to accept invitation.");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.text", "%s invites you to become a manager of %s.");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.sent", "Invitation sent to %s");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.joined", "%s is now a manager of %s.");
+        REGISTRATE.addRawLang("message.createkontor.manager_invite.already_in_company", "You are already member of a company.");
+        REGISTRATE.addRawLang("message.createkontor.manager_fire.fired", "%s §chas fired you. You are not longer a member of the company.");
+        REGISTRATE.addRawLang("message.createkontor.manager_fire.done", "Successfully fired.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -69,6 +79,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.manage", "Manage");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.manage_title", "Manage Company");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers", "Managers");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.name", "Player name");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.invite", "Invite");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.owner", "Owner");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.manager", "Manager");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.fire", "Fire");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.rewards", "Rewards");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy", "Bankruptcy");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.explanation", "When your company is §4illiquid §rfor %s days and thus §cinsolvent§r, you can declare bankruptcy.");
