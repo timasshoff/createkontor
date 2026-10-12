@@ -39,6 +39,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.manager_invite.already_in_company", "You are already member of a company.");
         REGISTRATE.addRawLang("message.createkontor.manager_fire.fired", "%s §chas fired you. You are not longer a member of the company.");
         REGISTRATE.addRawLang("message.createkontor.manager_fire.done", "Successfully fired.");
+        REGISTRATE.addRawLang("message.createkontor.leave.left", "%s left the company.");
+        REGISTRATE.addRawLang("message.createkontor.leave.done", "Successfully left %s.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -84,6 +86,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.owner", "Owner");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.manager", "Manager");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.fire", "Fire");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.managers.leave", "Leave Company");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.rewards", "Rewards");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy", "Bankruptcy");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bankruptcy.explanation", "When your company is §4illiquid §rfor %s days and thus §cinsolvent§r, you can declare bankruptcy.");

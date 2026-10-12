@@ -280,7 +280,7 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
             return S2CActionResult.error(Component.literal("This action can only be taken by the owner of this company."));
         }
         if (!company.removeManager(managerId)) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable("This player is not a manager."));
+            return S2CActionResult.error(ComponentFormatting.error("This player is not a manager."));
         }
         data.setDirty();
 
@@ -289,5 +289,29 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
             fired.sendSystemMessage(Component.translatable("message.createkontor.manager_fire.fired", ComponentFormatting.highlightError(company.name())));
         }
         return S2CActionResult.success(Component.translatable("message.createkontor.manager_fire.done"));
+    }
+
+    public Optional<S2CActionResult> leaveCompany(ServerPlayer player) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return S2CActionResult.illegalEnvironment();
+        }
+
+        MinecraftServer server = serverLevel.getServer();
+        CompanySavedData data = CompanySavedData.get(server);
+        Company company = data.getRegistry().get(getCompanyId()).orElse(null);
+        if (company == null) {
+            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+        }
+        if (company.isOwner(player.getUUID())) {
+            return S2CActionResult.error(ComponentFormatting.error("The owner cannot leave the company."));
+        }
+        if (!company.removeManager(player.getUUID())) {
+            return S2CActionResult.error(ComponentFormatting.error("You are not a manager."));
+        }
+        data.setDirty();
+
+        PlayerNotifications.sendMessageToAllMembers(company, server, Component.translatable("message.createkontor.leave.left", ComponentFormatting.highlightStandard(player.getGameProfile().getName())));
+        player.closeContainer();
+        return S2CActionResult.success(Component.translatable("message.createkontor.leave.done", ComponentFormatting.highlightStandard(company.name())));
     }
 }

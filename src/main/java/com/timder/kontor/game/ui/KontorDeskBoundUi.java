@@ -85,7 +85,7 @@ public class KontorDeskBoundUi {
                 .build();
 
         var tabView = UiContainer.largeTabView();
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.overview")), overviewTab(company, economy, companyHistory, companyHistoryBinding));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.overview")), overviewTab(company, be, economy, companyHistory, companyHistoryBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")), accountTab(company, companyHistory, companyHistoryBinding, liquidity, liquidityBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.requests_orders")), requestsOrdersTab(company, be));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.markets")), marketsTab(company, be));
@@ -100,7 +100,7 @@ public class KontorDeskBoundUi {
         return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
     }
 
-    public static UIElement overviewTab(Company company, Economy economy, ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding) {
+    public static UIElement overviewTab(Company company, KontorDeskBlockEntity be, Economy economy, ObservableList<CompanyHistoryEntry> companyHistory, SimpleBinding<Tag> companyHistoryBinding) {
         ScrollerView overviewContent = UiContainer.tabScroller();
 
         Label title = (Label) UiLabels.h1(Component.empty(), Horizontal.CENTER).layout(layout -> layout.alignSelf(AlignItems.CENTER));
@@ -160,6 +160,23 @@ public class KontorDeskBoundUi {
         companyHistory.addListener(() -> dayResultChartBox.show(CompanyCharts.revenueResultSpecFromHistory(companyHistory.get())));
         dayResultChartBox.addSyncValue(companyHistoryBinding.getSyncValue());
         overviewContent.addScrollViewChildren(dayResultChartBox);
+
+        ObservableValue<Boolean> isManager = new ObservableValue<>(false);
+        SimpleBinding<Boolean> isManagerBinding = DataBindingBuilder
+                .boolS2C(() -> company.managers().contains(overviewContent.getModularUI().player.getUUID()))
+                .onRemoteSyncReceived(isManager::set).build();
+
+        UIElement leaveBox = new UIElement().layout(layout -> layout.marginVertical(8)).addSyncValue(isManagerBinding.getSyncValue());
+        leaveBox.onMessage("c2s_leave_company", (tag) -> ToastPayload.send(leaveBox.getModularUI().player, be.leaveCompany((ServerPlayer) leaveBox.getModularUI().player)));
+        isManager.addListener(() -> {
+            if (!isManager.get()) return;
+            Button leave = UiButtons.critical(Component.translatable("ui.createkontor.kontor_desk.tab.managers.leave"));
+            leave.setOnClick(e -> {
+                leaveBox.sendMessage("c2s_leave_company");
+            });
+            leaveBox.addChild(leave);
+        });
+        overviewContent.addScrollViewChildren(leaveBox);
 
         return overviewContent;
     }
