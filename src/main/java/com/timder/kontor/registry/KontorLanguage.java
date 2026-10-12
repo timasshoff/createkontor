@@ -64,6 +64,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.bookings", "Bookings");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.open_loans", "Open Loans");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.markets", "Markets");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.tab.manage", "Manage");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.open_orders", "Open Orders: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.total_bookings_visible", "Visible Bookings: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.current_overdraft_limit", "Overdraft Limit: %s");

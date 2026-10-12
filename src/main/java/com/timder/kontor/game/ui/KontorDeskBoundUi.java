@@ -74,6 +74,7 @@ public class KontorDeskBoundUi {
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")), accountTab(company, companyHistory, companyHistoryBinding));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.requests_orders")), requestsOrdersTab(company, be));
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.markets")), marketsTab(company, be));
+        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.manage")), manageTab(company, be));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(company, economy));
         return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
@@ -660,6 +661,10 @@ public class KontorDeskBoundUi {
         ));
 
         return content;
+    }
+
+    public static UIElement manageTab(Company company, KontorDeskBlockEntity be) {
+        return new UIElement();
     }
 
     private static List<Booking> tagToBookings(Tag tag) {
