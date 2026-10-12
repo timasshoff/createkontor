@@ -18,6 +18,12 @@ public final class ObservableList<T> {
         }
     }
 
+    public void runListenersOnce() {
+        for (Runnable listener : listeners) {
+            listener.run();
+        }
+    }
+
     public void addListener(Runnable listener) {
         listeners.add(listener);
     }
