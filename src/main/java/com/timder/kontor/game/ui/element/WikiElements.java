@@ -8,52 +8,35 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Scene;
+import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.utils.data.BlockInfo;
+import com.lowdragmc.lowdraglib2.utils.virtuallevel.DummyWorld;
 import com.lowdragmc.lowdraglib2.utils.virtuallevel.TrackedDummyWorld;
-import com.simibubi.create.AllBlocks;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collections;
 
-public final class WikiUtils {
+public final class WikiElements {
 
     public static final float SCENE_DEFAULT_HEIGHT = 100;
     public static final float SCENE_DEFAULT_WIDTH_PERCENT = 75;
-
-    private static final double SEAT_RIDER_OFFSET_Y = 1.0 / 16 + 0.35;
 
     public static UIElement paragraph(Component component) {
         return new Label()
                 .setText(component)
                 .textStyle(style -> style
-                        .textColor(0xAAAAAA)
                         .textAlignHorizontal(Horizontal.LEFT)
                         .textWrap(TextWrap.WRAP)
                         .adaptiveHeight(true))
                 .layout(layout -> layout.widthPercent(100));
     }
 
-    public static UIElement secondaryParagraph(Component component) {
-        return new Label()
-                .setText(component)
-                .textStyle(style -> style
-                        .textColor(0x555555)
-                        .textAlignHorizontal(Horizontal.LEFT)
-                        .textWrap(TextWrap.WRAP)
-                        .adaptiveHeight(true))
-                .layout(layout -> layout.widthPercent(100));
-    }
-
-    public static UIElement heading(Component component) {
+    public static UIElement bold(Component component) {
         return new Label()
                 .setText(Component.empty().append(component).withStyle(ChatFormatting.BOLD))
                 .textStyle(style -> style
@@ -75,7 +58,7 @@ public final class WikiUtils {
                     .gapAll(4));
             UIElement bullet = new Label()
                     .setText(Component.literal("•"))
-                    .textStyle(style -> style.adaptiveWidth(true).adaptiveHeight(true).textColor(0xAAAAAA));
+                    .textStyle(style -> style.adaptiveWidth(true).adaptiveHeight(true));
             UIElement text = paragraph(Component.literal(item.trim())).layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).flexShrink(1).minWidth(0));
             row.addChildren(bullet, text);
             list.addChild(row);
@@ -123,27 +106,8 @@ public final class WikiUtils {
         return scene;
     }
 
-    public static UIElement scene(TrackedDummyWorld level, float widthPercent, float height, boolean tickWorld) {
-        if (!LDLib2.isClient()) {
-            return new UIElement();
-        }
-
-        var scene = new Scene();
-        scene.setRenderFacing(false);
-        scene.setRenderSelect(false);
-        scene.setScalable(true);
-        scene.setShowHoverBlockTips(true);
-        scene.xeiLookup();
-        scene.createScene(level);
-        var blocks = level.getFilledBlocks().longStream().mapToObj(BlockPos::of).toList();
-        scene.setRenderedCore(blocks);
-        scene.setTickWorld(tickWorld);
-        scene.layout(layout -> layout.widthPercent(widthPercent).height(height).paddingAll(3).alignSelf(AlignItems.CENTER));
-        return scene;
-    }
-
     public static UIElement scene(TrackedDummyWorld level, float height, boolean tickWorld, Component caption) {
-        Scene scene = (Scene) scene(level, 100, height, tickWorld);
+        Scene scene = (Scene) scene(level, height, tickWorld);
         if (LDLib2.isClient()) {
             scene.style(style -> style
                     .background(new ColorRectTexture(0x40000000))
@@ -151,27 +115,6 @@ public final class WikiUtils {
         }
         return new UIElement()
                 .layout(layout -> layout.widthPercent(SCENE_DEFAULT_WIDTH_PERCENT).alignSelf(AlignItems.CENTER).gapAll(2))
-                .addChildren(scene, secondaryParagraph(caption));
-    }
-
-    public static void addSeatedVillager(TrackedDummyWorld level, BlockPos seatPos, Direction facing, DyeColor color) {
-        level.addBlock(seatPos, BlockInfo.fromBlockState(AllBlocks.SEATS.get(color).getDefaultState()));
-
-        Villager villager = EntityType.VILLAGER.create(level);
-        if (villager == null) {
-            return;
-        }
-        villager.setPos(seatPos.getX() + 0.5, seatPos.getY() + SEAT_RIDER_OFFSET_Y, seatPos.getZ() + 0.5);
-
-        float yaw = facing.toYRot();
-        villager.setYRot(yaw);
-        villager.yRotO = yaw;
-        villager.yBodyRot = yaw;
-        villager.yBodyRotO = yaw;
-        villager.yHeadRot = yaw;
-        villager.yHeadRotO = yaw;
-
-        villager.setNoGravity(true);
-        level.addEntity(villager);
+                .addChildren(scene, UiLabels.paragraphSecondary(caption, Horizontal.LEFT));
     }
 }
