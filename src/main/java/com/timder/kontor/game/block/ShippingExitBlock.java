@@ -13,7 +13,7 @@ import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.company.AbstractCompanyBlock;
 import com.timder.kontor.game.block.company.CompanyBindGate;
 import com.timder.kontor.game.block.consultant.ConsultantWiki;
-import com.timder.kontor.game.ui.element.WikiElements;
+import com.timder.kontor.game.ui.element.WikiUtils;
 import com.timder.kontor.game.wiki.WikiCategory;
 import com.timder.kontor.registry.KontorBlockEntities;
 import com.timder.kontor.util.ComponentFormatting;
@@ -22,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -100,16 +99,16 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
     }
 
     private void buildWikiPage(UIElement page) {
-        page.addChild(WikiElements.blockScene(defaultBlockState()));
-        page.addChild(WikiElements.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p1")));
+        page.addChild(WikiUtils.blockScene(defaultBlockState()));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p1")));
 
         var level = new TrackedDummyWorld();
         level.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(defaultBlockState()));
         level.addBlock(new BlockPos(1, 0, 0), BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState()));
         level.addBlock(new BlockPos(-1, 0, 0), BlockInfo.fromBlockState(AllBlocks.PULSE_TIMER.getDefaultState().rotate(Rotation.COUNTERCLOCKWISE_90)));
-        page.addChild(WikiElements.scene(level, WikiElements.SCENE_DEFAULT_HEIGHT, false, Component.translatable("wiki.createkontor.page.shipping_exit.scene1")));
+        page.addChild(WikiUtils.scene(level, WikiUtils.SCENE_DEFAULT_HEIGHT, false, Component.translatable("wiki.createkontor.page.shipping_exit.scene1")));
 
-        page.addChild(WikiElements.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p2")));
-        page.addChild(WikiElements.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p3")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p2")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p3")));
     }
 }
