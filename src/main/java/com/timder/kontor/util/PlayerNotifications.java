@@ -1,11 +1,11 @@
-package com.timder.kontor.game;
+package com.timder.kontor.util;
 
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
-import com.timder.kontor.util.ComponentFormatting;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,6 +52,20 @@ public final class PlayerNotifications {
                 ComponentFormatting.highlightError(company.name()),
                 legalFormName(params, targetLevel),
                 ComponentFormatting.highlightError(refund.toString()));
+        sendMessageToAllMembers(company, server, message);
+    }
+
+    public static void sendLogisticsConnectedNotification(MinecraftServer server, Company company) {
+        Component message = Component.translatable("message.createkontor.logistics.connected",
+                ComponentFormatting.highlightStandard(company.name()));
+        sendMessageToAllMembers(company, server, message);
+    }
+
+    public static void sendLogisticsDisconnectedNotification(MinecraftServer server, Company company, Component reason, Money booked) {
+        Component message = Component.translatable("message.createkontor.logistics.disconnected",
+                ComponentFormatting.highlightError(company.name()),
+                Component.empty().append(reason).withStyle(ChatFormatting.DARK_RED),
+                ComponentFormatting.highlightError(booked.toString()));
         sendMessageToAllMembers(company, server, message);
     }
 

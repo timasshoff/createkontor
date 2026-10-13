@@ -31,6 +31,7 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue BUYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CONSULTANT_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue LOGISTICS_MANAGER_SALARY_IN_DOLLARS;
 
     public static final ModConfigSpec.DoubleValue PURCHASE_MARKUP;
 
@@ -82,15 +83,17 @@ public class CompanyConfig {
         CONTRACT_CHECK_MIN_ACTIVE_TICKS = builder.comment("Contracts are only checked at the end of a day on which the company was active for at least this many ticks, so its desks had time to report")
                 .defineInRange("contractCheckMinActiveTicks", 200, 0, 24_000);
         LAWYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a lawyer per day. Fixed when the lawyer is hired")
-                .defineInRange("lawyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
+                .defineInRange("lawyerSalaryInDollars", 100, 0, Integer.MAX_VALUE);
         CALCULATOR_SALARY_IN_DOLLARS = builder.comment("Base salary of a calculator per day. Fixed when the calculator is hired")
-                .defineInRange("calculatorSalaryInDollars", 60, 0, Integer.MAX_VALUE);
+                .defineInRange("calculatorSalaryInDollars", 80, 0, Integer.MAX_VALUE);
         MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment("Base salary of a market analyst per day. Fixed when the market analyst is hired")
                 .defineInRange("marketAnalystSalaryInDollars", 90, 0, Integer.MAX_VALUE);
         BUYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a buyer per day. Fixed when the buyer is hired")
-                .defineInRange("buyerSalaryInDollars", 60, 0, Integer.MAX_VALUE);
+                .defineInRange("buyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
         CONSULTANT_SALARY_IN_DOLLARS = builder.comment("Base salary of a consultant per day. Fixed when the consultant is hired")
-                .defineInRange("consultantSalaryInDollars", 20, 0, Integer.MAX_VALUE);
+                .defineInRange("consultantSalaryInDollars", 40, 0, Integer.MAX_VALUE);
+        LOGISTICS_MANAGER_SALARY_IN_DOLLARS = builder.comment("Base salary of a logistics manager per day. Fixed when the logistics manager is hired")
+                .defineInRange("logisticsManagerSalaryInDollars", 90, 0, Integer.MAX_VALUE);
 
         builder.pop();
 
@@ -102,7 +105,7 @@ public class CompanyConfig {
 
         builder.comment("Logistics network").push("logistics");
         STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS = builder.comment("Dollars a company pays per day for each item stored in its logistics network (0.002 = 0.2 cents). The stock is sampled once per trading tick and billed at the end of the day, and when the connection ends")
-                .defineInRange("storageFeePerItemDayInDollars", 0.002, 0.0, 1_000.0);
+                .defineInRange("storageFeePerItemDayInDollars", 0.025, 0.0, 1_000.0);
 
         builder.pop();
 

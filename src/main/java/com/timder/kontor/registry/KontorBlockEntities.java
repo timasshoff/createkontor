@@ -1,6 +1,7 @@
 package com.timder.kontor.registry;
 
 import com.timder.kontor.game.block.KontorDeskBlockEntity;
+import com.timder.kontor.game.block.LogisticsManagerDeskBlockEntity;
 import com.timder.kontor.game.block.ShippingExitBlockEntity;
 import com.timder.kontor.game.block.buyer.BuyerDeskBlockEntity;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
@@ -31,6 +32,11 @@ public final class KontorBlockEntities {
     public static final BlockEntityEntry<BuyerDeskBlockEntity> BUYER_DESK = REGISTRATE
             .blockEntity("buyer_desk", BuyerDeskBlockEntity::new)
             .validBlocks(KontorBlocks.BUYER_DESK)
+            .register();
+
+    public static final BlockEntityEntry<LogisticsManagerDeskBlockEntity> LOGISTICS_MANAGER_DESK = REGISTRATE
+            .blockEntity("logistics_manager_desk", LogisticsManagerDeskBlockEntity::new)
+            .validBlocks(KontorBlocks.LOGISTICS_MANAGER_DESK)
             .register();
 
     static void touch() {

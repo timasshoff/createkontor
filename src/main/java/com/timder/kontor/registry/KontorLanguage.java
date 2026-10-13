@@ -22,6 +22,17 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.shipping_exit.limit", "§cLimit reached: Legal form allows at most %s §cbound shipping exits.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.limit", "§cThis company already has a Kontor Desk.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.request_accepting_failed", "§cAccepting request %s §cfailed: %s");
+        REGISTRATE.addRawLang("message.createkontor.logistics_manager_desk.limit", "§cThis company already has a Logistics Manager's Desk.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.connected", "§7%s §7is connected to a logistics network. Stored goods cost a daily storage fee.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.disconnected", "§c%s §cis no longer connected to a logistics network: %s §cStorage fee booked: %s");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.no_employee", "The logistics manager's desk is not staffed.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.no_link", "No Stock Link is attached to the desk.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.several_links", "More than one Stock Link is attached to the desk.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.link_changed", "The Stock Link was tuned to another network.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.legal_form_not_allowed", "The legal form does not allow a logistics network.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.network_used_by_other_company", "Another company uses this network.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.network_owner_not_member", "The owner of the network is not a member of the company.");
+        REGISTRATE.addRawLang("message.createkontor.logistics.reason.desk_removed", "The desk was removed.");
         REGISTRATE.addRawLang("message.createkontor.bankruptcy.not_confirmed", "§cUnderstanding of bankruptcy not confirmed.");
         REGISTRATE.addRawLang("message.createkontor.bankruptcy.declared", "Bankruptcy declared. The company %s has been deleted.");
         REGISTRATE.addRawLang("message.createkontor.upgrade.completed", "§7The company %s §7has advanced to %s§7.");
@@ -59,6 +70,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.no_postbox", "No postbox connected");
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.connect_hint", "R-Click the desk with a postbox, then place it nearby");
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.pending", "Packages waiting: %s");
+        REGISTRATE.addRawLang("goggle.createkontor.logistics_manager_desk.status", "Logistics network: %s");
 
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.detailed", "There is no data for the chart \"%s\" yet. You can try again later.");
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.short", "There is no data for this chart yet. You can try again later.");
@@ -262,6 +274,16 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.purchase_status.not_operational", "Company is in payment difficulties.");
         REGISTRATE.addRawLang("enum.createkontor.purchase_status.insufficient_funds", "Company cannot afford this delivery.");
 
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.waiting", "Waiting");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.connected", "Connected");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.no_employee", "Not staffed");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.no_link", "Missing Stock Link");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.several_links", "Too many Stock Links");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.legal_form_not_allowed", "Legal Level too low");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.company_has_other_network", "Company has another network");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.network_used_by_other_company", "Network used by another company");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk:status.network_owner_not_member", "Network owner is not a member");
+
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
@@ -294,6 +316,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("employee_role.createkontor.buyer", "Buyer");
         REGISTRATE.addRawLang("employee_role.createkontor.market_analyst", "Market Analyst");
         REGISTRATE.addRawLang("employee_role.createkontor.consultant", "Consultant");
+        REGISTRATE.addRawLang("employee_role.createkontor.logistics_manager", "Logistics Manager");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
 
@@ -341,6 +364,42 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("toast.createkontor.error.title", "An error occurred:");
         REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");
         REGISTRATE.addRawLang("toast.createkontor.success.title", "Success:");
+
+        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.summary", "Allows _founding_ or _management_ of a company.");
+        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.control1", "When R-Clicked");
+        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.action1", "Opens the _Kontor Desk_ interface.");
+
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.summary", "Staffs the company with a _lawyer_. A lawyer handles _legal matters_ like licensing or legal form upgrades for your company.");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.behaviour1", "The villager is _hired_ as a lawyer. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.action1", "Opens the _Lawyer's Desk_ interface.");
+
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.summary", "Staffs the company with a _buyer_. A buyer allows you to _buy goods_ from markets.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.behaviour1", "The villager is _hired_ as a buyer. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action1", "Opens the _Buyer's Desk_ interface.");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control2", "When R-Clicked with a Postbox");
+        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action2", "The next _Postbox_ you place nearby is _connected_ to this desk. Bought goods arrive there.");
+
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.summary", "Staffs the company with a _market analyst_. A market allows you to get detailed info and charts about markets.");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.behaviour1", "The villager is _hired_ as a market analyst. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.action1", "Opens the _Market Analyst's Desk_ interface.");
+
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.summary", "Staffs the company with a _consultant_. A consultant explains how your company and its _systems_ work.");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.behaviour1", "The villager is _hired_ as a consultant. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.action1", "Opens the _Consultant's Desk_ interface.");
+
+        REGISTRATE.addRawLang("block.createkontor.logistics_manager_desk.tooltip.summary", "Staffs the company with a _logistics manager_. The manager connects the company to the _logistics network_ of a _Stock Link_ attached to this desk.");
+        REGISTRATE.addRawLang("block.createkontor.logistics_manager_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang("block.createkontor.logistics_manager_desk.tooltip.behaviour1", "The villager is _hired_ as a logistics manager. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.logistics_manager_desk.tooltip.condition2", "When a Stock Link is attached to it");
+        REGISTRATE.addRawLang("block.createkontor.logistics_manager_desk.tooltip.behaviour2", "The company is _connected_ to the network of the link. The goods stored in the network cost a _daily storage fee_.");
 
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
         REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");
@@ -451,36 +510,6 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("wiki.createkontor.page.market_analyst.title", "Market Analyst");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.buyer.title", "Buyer");
-
-        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.summary", "Allows _founding_ or _management_ of a company.");
-        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.control1", "When R-Clicked");
-        REGISTRATE.addRawLang("block.createkontor.kontor_desk.tooltip.action1", "Opens the _Kontor Desk_ interface.");
-
-        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.summary", "Staffs the company with a _lawyer_. A lawyer handles _legal matters_ like licensing or legal form upgrades for your company.");
-        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.condition1", "When a Villager sits next to it");
-        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.behaviour1", "The villager is _hired_ as a lawyer. You need to pay a one-time _hiring bonus_.");
-        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.control1", "When R-Clicked on Employee");
-        REGISTRATE.addRawLang("block.createkontor.lawyer_desk.tooltip.action1", "Opens the _Lawyer's Desk_ interface.");
-
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.summary", "Staffs the company with a _buyer_. A buyer allows you to _buy goods_ from markets.");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.condition1", "When a Villager sits next to it");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.behaviour1", "The villager is _hired_ as a buyer. You need to pay a one-time _hiring bonus_.");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control1", "When R-Clicked on Employee");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action1", "Opens the _Buyer's Desk_ interface.");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.control2", "When R-Clicked with a Postbox");
-        REGISTRATE.addRawLang("block.createkontor.buyer_desk.tooltip.action2", "The next _Postbox_ you place nearby is _connected_ to this desk. Bought goods arrive there.");
-
-        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.summary", "Staffs the company with a _market analyst_. A market allows you to get detailed info and charts about markets.");
-        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.condition1", "When a Villager sits next to it");
-        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.behaviour1", "The villager is _hired_ as a market analyst. You need to pay a one-time _hiring bonus_.");
-        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.control1", "When R-Clicked on Employee");
-        REGISTRATE.addRawLang("block.createkontor.market_analyst_desk.tooltip.action1", "Opens the _Market Analyst's Desk_ interface.");
-
-        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.summary", "Staffs the company with a _consultant_. A consultant explains how your company and its _systems_ work.");
-        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.condition1", "When a Villager sits next to it");
-        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.behaviour1", "The villager is _hired_ as a consultant. You need to pay a one-time _hiring bonus_.");
-        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.control1", "When R-Clicked on Employee");
-        REGISTRATE.addRawLang("block.createkontor.consultant_desk.tooltip.action1", "Opens the _Consultant's Desk_ interface.");
     }
 
     static void touch() {

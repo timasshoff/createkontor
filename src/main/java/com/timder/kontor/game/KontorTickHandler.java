@@ -15,6 +15,7 @@ import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
+import com.timder.kontor.util.PlayerNotifications;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -52,6 +53,9 @@ public class KontorTickHandler {
 
         if (tradingTickPassed) {
             economyData.setDirty();
+            if (LogisticsSampling.sampleAll(registry, economy, activeNow)) {
+                companyData.setDirty();
+            }
         }
 
         if (economy.currentDay() != dayBefore) {

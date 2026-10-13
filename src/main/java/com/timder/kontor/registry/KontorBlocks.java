@@ -124,6 +124,23 @@ public final class KontorBlocks {
             .simpleItem()
             .register();
 
+    public static final BlockEntry<LogisticsManagerDeskBlock> LOGISTICS_MANAGER_DESK = REGISTRATE
+            .block("logistics_manager_desk", LogisticsManagerDeskBlock::new)
+            .properties(p -> p
+                    .mapColor(MapColor.STONE)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.STONE))
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
+            .loot((loot, block) -> loot.add(block, LootTable.lootTable().withPool(LootPool.lootPool()
+                    .setRolls(ConstantValue.exactly(1))
+                    .add(LootItem.lootTableItem(block))
+                    .when(ExplosionCondition.survivesExplosion()))))
+            .lang("Logistics Manager's Desk")
+            .onRegisterAfter(Registries.ITEM, KontorBlocks::tooltip)
+            .simpleItem()
+            .register();
+
     static void touch() {
     }
 

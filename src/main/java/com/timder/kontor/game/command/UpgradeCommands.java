@@ -11,7 +11,7 @@ import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.KontorTickHandler;
-import com.timder.kontor.game.PlayerNotifications;
+import com.timder.kontor.util.PlayerNotifications;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
