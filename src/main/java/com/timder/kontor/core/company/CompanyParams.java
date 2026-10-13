@@ -24,6 +24,7 @@ import java.util.Objects;
  * @param historyLengthDays The amount of days that a daily history is saved per company
  * @param hireBonusSalaryMultiple The multiple of the salary that is paid as a hiring bonus
  * @param purchaseMarkup Surcharge on the market price when a company buys goods, as a fraction (0.10 is 10 %)
+ * @param storageFeePerItemDay Dollars a company pays per day for each stored item in the logistics network
  */
 public record CompanyParams(
         LegalForms legalForms,
@@ -39,7 +40,8 @@ public record CompanyParams(
         int bookingRetentionDays,
         int historyLengthDays,
         double hireBonusSalaryMultiple,
-        double purchaseMarkup
+        double purchaseMarkup,
+        double storageFeePerItemDay
 ) {
 
     public CompanyParams {
@@ -60,6 +62,7 @@ public record CompanyParams(
         if (historyLengthDays < 1) throw new IllegalArgumentException("historyLengthDays must be at least 1.");
         if (!(hireBonusSalaryMultiple >= 0.0) || Double.isInfinite(hireBonusSalaryMultiple)) throw new IllegalArgumentException("hireBonusSalaryMultiple must be a finite number, not negative.");
         if (!(purchaseMarkup >= 0.0) || Double.isInfinite(purchaseMarkup)) throw new IllegalArgumentException("purchaseMarkup must be a finite number, not negative.");
+        if (!(storageFeePerItemDay >= 0.0) || Double.isInfinite(storageFeePerItemDay)) throw new IllegalArgumentException("storageFeePerItemDay must be a finite number, not negative.");
     }
 
     public boolean insolvencyEnabled() {
@@ -85,8 +88,8 @@ public record CompanyParams(
                 30,
                 360,
                 3.0,
-                0.1
+                0.1,
+                0.002
         );
     }
-
 }

@@ -9,6 +9,7 @@ import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.license.LicenseHolding;
 import com.timder.kontor.core.company.license.LicenseKey;
+import com.timder.kontor.core.company.logistics.LogisticsState;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.RequestOrigin;
@@ -58,6 +59,8 @@ public final class Company {
     private final Deque<CompanyHistoryEntry> history = new ArrayDeque<>();
 
     private final Map<String, Integer> boundResourceCounts = new LinkedHashMap<>();
+
+    private LogisticsState logistics = LogisticsState.disconnected();
 
     private long lastActiveDay = NEVER_ACTIVE;
     private boolean active = false;
@@ -606,6 +609,21 @@ public final class Company {
         boundResourceCounts.computeIfPresent(resourceKey, (key, count) -> count <= 1 ? null : count - 1);
     }
 
+    /**
+     * @return The logistics network connection and its settings
+     */
+    public LogisticsState logistics() {
+        return logistics;
+    }
+
+    /**
+     * Replaces the logistics network connection and its settings.
+     * @param logistics The new state
+     */
+    public void setLogistics(LogisticsState logistics) {
+        this.logistics = Objects.requireNonNull(logistics, "logistics must not be null.");
+    }
+
     void setLiquidity(Liquidity liquidity) {
         this.liquidity = Objects.requireNonNull(liquidity, "liquidity must not be null.");
     }
@@ -654,7 +672,8 @@ public final class Company {
             long nextEmployeeNumber,
             List<Employee> employees,
             long lastActiveDay,
-            List<Departure> departures
+            List<Departure> departures,
+            LogisticsState logistics
     ) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
@@ -702,6 +721,8 @@ public final class Company {
                     throw new IllegalArgumentException("employee " + departure.employee().number() + " is both employed and departed.");
                 }
             }
+
+            logistics = logistics == null ? LogisticsState.disconnected() : logistics;
         }
     }
 
@@ -733,7 +754,8 @@ public final class Company {
                 nextEmployeeNumber,
                 List.copyOf(employees.values()),
                 lastActiveDay,
-                List.copyOf(departures));
+                List.copyOf(departures),
+                logistics);
     }
 
     public static Company restore(SaveState saveState) {
@@ -767,6 +789,7 @@ public final class Company {
         }
         company.lastActiveDay = saveState.lastActiveDay();
         company.departures.addAll(saveState.departures());
+        company.logistics = saveState.logistics();
         return company;
     }
 }

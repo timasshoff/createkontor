@@ -11,6 +11,7 @@ import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.license.LicenseHolding;
 import com.timder.kontor.core.company.license.LicenseKeyCodec;
+import com.timder.kontor.core.company.logistics.LogisticsState;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.OrderPhase;
@@ -178,6 +179,8 @@ public class CompanySavedData extends SavedData {
         }
         tag.put("Departures", departures);
 
+        tag.put("Logistics", writeLogistics(state.logistics()));
+
         return tag;
     }
 
@@ -245,6 +248,10 @@ public class CompanySavedData extends SavedData {
             departures.add(new Departure(readEmployee(departureTag.getCompound("Employee")), departureTag.getLong("Day")));
         }
 
+        LogisticsState logistics = tag.contains("Logistics", Tag.TAG_COMPOUND)
+                ? readLogistics(tag.getCompound("Logistics"))
+                : LogisticsState.disconnected();
+
         return new Company.SaveState(
                 id,
                 name,
@@ -268,7 +275,8 @@ public class CompanySavedData extends SavedData {
                 nextEmployeeNumber,
                 employees,
                 lastActiveDay,
-                departures
+                departures,
+                logistics
         );
     }
 
@@ -521,5 +529,25 @@ public class CompanySavedData extends SavedData {
                 tag.getLong("HiredDay"),
                 tag.getBoolean("Present"),
                 tag.getLong("LastReportDay"));
+    }
+
+    private static CompoundTag writeLogistics(LogisticsState state) {
+        CompoundTag tag = new CompoundTag();
+        if (state.networkId() != null) {
+            tag.putUUID("NetworkId", state.networkId());
+        }
+        tag.putLong("UnbilledItemTicks", state.unbilledItemTicks());
+        tag.putLong("LastSampleItems", state.lastSampleItems());
+        tag.putLong("LastSampleTick", state.lastSampleTick());
+        return tag;
+    }
+
+    private static LogisticsState readLogistics(CompoundTag tag) {
+        UUID networkId = tag.hasUUID("NetworkId") ? tag.getUUID("NetworkId") : null;
+        return new LogisticsState(
+                networkId,
+                tag.getLong("UnbilledItemTicks"),
+                tag.getLong("LastSampleItems"),
+                tag.getLong("LastSampleTick"));
     }
 }

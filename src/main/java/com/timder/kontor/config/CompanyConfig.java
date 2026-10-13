@@ -34,6 +34,8 @@ public class CompanyConfig {
 
     public static final ModConfigSpec.DoubleValue PURCHASE_MARKUP;
 
+    public static final ModConfigSpec.DoubleValue STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -98,6 +100,12 @@ public class CompanyConfig {
 
         builder.pop();
 
+        builder.comment("Logistics network").push("logistics");
+        STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS = builder.comment("Dollars a company pays per day for each item stored in its logistics network (0.002 = 0.2 cents). The stock is sampled once per trading tick and billed at the end of the day, and when the connection ends")
+                .defineInRange("storageFeePerItemDayInDollars", 0.002, 0.0, 1_000.0);
+
+        builder.pop();
+
         SPEC = builder.build();
     }
 
@@ -120,7 +128,8 @@ public class CompanyConfig {
                 BOOKING_RETENTION_DAYS.get(),
                 HISTORY_LENGTH_DAYS.get(),
                 HIRE_BONUS_SALARY_MULTIPLE.get(),
-                PURCHASE_MARKUP.get()
+                PURCHASE_MARKUP.get(),
+                STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS.get()
         );
     }
 }

@@ -8,6 +8,7 @@ import com.timder.kontor.core.company.license.HeldLicense;
 import com.timder.kontor.core.company.license.LicenseDef;
 import com.timder.kontor.core.company.license.LicenseHolding;
 import com.timder.kontor.core.company.license.LicenseHoldingRules;
+import com.timder.kontor.core.company.logistics.LogisticsStorageRules;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ public final class CompanyRules {
         }
         bookLicenseFees(company, day, params);
         bookSalaries(company, day, params);
+        LogisticsStorageRules.bookUnbilled(company, day, params);
         for (Map.Entry<BookingKind, Money> entry : otherCosts.entrySet()) {
             account.book(day, entry.getKey(), entry.getValue().negate(), "");
         }
@@ -120,6 +122,7 @@ public final class CompanyRules {
                     || kind == BookingKind.FLAT_LICENSE
                     || kind == BookingKind.TURNOVER_LICENSE
                     || kind == BookingKind.INTEREST
+                    || kind == BookingKind.STORAGE
                     || kind == BookingKind.SALARY) {
                 throw new IllegalArgumentException(kind + " is booked by settleDay itself, it must not be in otherCosts.");
             }
