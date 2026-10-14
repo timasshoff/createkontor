@@ -9,6 +9,7 @@ import com.timder.kontor.game.block.company.CompanyBindGate;
 import com.timder.kontor.game.block.employee.AbstractEmployeeDeskBlock;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.ui.LogisticsManagerUi;
 import com.timder.kontor.registry.KontorBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -53,12 +54,7 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
     }
 
     @Override
-    protected boolean mayOpenUi(ServerPlayer player, ServerLevel level, EmployeeDeskBlockEntity desk) {
-        return false;
-    }
-
-    @Override
     protected ModularUI createEmployeeUi(EmployeeDeskContext context) {
-        return new ModularUI(UI.empty(), context.player());
+        return LogisticsManagerUi.create(context);
     }
 }

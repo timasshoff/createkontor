@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SegmentBarElement extends UIElement {
-    private record LegendEntry(int index, String text, float x, float y, float width, float height) {
+    private record LegendEntry(int index, int row, String text, float x, float y, float width, float height) {
         boolean contains(float px, float py) {
             return px >= x && px < x + width && py >= y && py < y + height;
         }
@@ -33,6 +33,7 @@ public class SegmentBarElement extends UIElement {
     private static final float LEGEND_GAP = 4f;
     private static final float LEGEND_ENTRY_GAP = 10f;
     private static final float LEGEND_HIT_PAD = 2f;
+    private static final float LEGEND_ROW_STEP = 12f;
 
     private static final float SWATCH = 5f;
     private static final float TOOLTIP_PAD = 4f;
@@ -41,6 +42,7 @@ public class SegmentBarElement extends UIElement {
     @Nullable
     private SegmentBarSpec spec;
     private float appliedHeight = -1f;
+    private int legendRows = 1;
 
     public SegmentBarElement() {
         style(s -> s.overflowVisible(false));
@@ -54,16 +56,25 @@ public class SegmentBarElement extends UIElement {
 
     public SegmentBarElement update(SegmentBarSpec spec) {
         this.spec = Objects.requireNonNull(spec, "spec must not be null.");
-        float height = heightFor(!spec.title().isEmpty());
+        applyHeight(legendRows);
+        return this;
+    }
+
+    private void applyHeight(int rows) {
+        legendRows = rows;
+        float height = heightFor(spec != null && !spec.title().isEmpty(), rows);
         if (height != appliedHeight) {
             appliedHeight = height;
             layout(layout -> layout.height(height));
         }
-        return this;
     }
 
     public static float heightFor(boolean hasTitle) {
-        return PAD + (hasTitle ? ROW_HEIGHT + GAP : 0f) + BAR_HEIGHT + GAP + ROW_HEIGHT + PAD;
+        return heightFor(hasTitle, 1);
+    }
+
+    public static float heightFor(boolean hasTitle, int legendRows) {
+        return PAD + (hasTitle ? ROW_HEIGHT + GAP : 0f) + BAR_HEIGHT + GAP + ROW_HEIGHT + (Math.max(1, legendRows) - 1) * LEGEND_ROW_STEP + PAD;
     }
 
     @Override
@@ -105,6 +116,7 @@ public class SegmentBarElement extends UIElement {
         }
         float[] edges = SegmentBarMath.edges(values, barLeft, barWidth);
         List<LegendEntry> legend = layoutLegend(font, barLeft, legendTop, barWidth);
+        applyHeight(legend.isEmpty() ? 1 : legend.get(legend.size() - 1).row() + 1);
 
         int hovered = -1;
         float mx = 0f;
@@ -163,31 +175,26 @@ public class SegmentBarElement extends UIElement {
         }
     }
 
-    private List<LegendEntry> layoutLegend(Font font, float x0, float y, float maxWidth) {
+    private List<LegendEntry> layoutLegend(Font font, float x0, float y0, float maxWidth) {
         List<SegmentBarSegment> segments = spec.segments();
-        int count = segments.size();
-        String[] labels = new String[count];
-        String[] values = new String[count];
-        float total = (count - 1) * LEGEND_ENTRY_GAP;
-        for (int i = 0; i < count; i++) {
-            labels[i] = segments.get(i).label();
-            values[i] = " " + spec.valueText(i);
-            total += LEGEND_SWATCH + LEGEND_GAP + font.width(labels[i] + values[i]);
-        }
-
-        if (total > maxWidth) {
-            float budget = (maxWidth - (count - 1) * LEGEND_ENTRY_GAP) / count - LEGEND_SWATCH - LEGEND_GAP;
-            for (int i = 0; i < count; i++) {
-                labels[i] = fitLabel(font, labels[i], budget - font.width(values[i]));
-            }
-        }
-
-        List<LegendEntry> entries = new ArrayList<>(count);
+        List<LegendEntry> entries = new ArrayList<>(segments.size());
         float x = x0;
-        for (int i = 0; i < count; i++) {
-            String text = labels[i] + values[i];
+        int row = 0;
+        for (int i = 0; i < segments.size(); i++) {
+            String label = segments.get(i).label();
+            String value = spec.valueText(i);
+            if (LEGEND_SWATCH + LEGEND_GAP + font.width(label + value) > maxWidth) {
+                label = fitLabel(font, label, maxWidth - LEGEND_SWATCH - LEGEND_GAP - font.width(value));
+            }
+            String text = label + " (" + value + ")";
             float entryWidth = LEGEND_SWATCH + LEGEND_GAP + font.width(text);
-            entries.add(new LegendEntry(i, text,
+
+            if (x > x0 && x + entryWidth > x0 + maxWidth) {
+                row++;
+                x = x0;
+            }
+            float y = y0 + row * LEGEND_ROW_STEP;
+            entries.add(new LegendEntry(i, row, text,
                     x - LEGEND_HIT_PAD, y - LEGEND_HIT_PAD,
                     entryWidth + 2f * LEGEND_HIT_PAD, font.lineHeight + 2f * LEGEND_HIT_PAD));
             x += entryWidth + LEGEND_ENTRY_GAP;

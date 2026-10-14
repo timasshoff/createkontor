@@ -31,6 +31,7 @@ import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
+import com.timder.kontor.game.ui.element.UiProgressBars;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.ObservableList;
@@ -237,12 +238,7 @@ public final class LawyerUi {
                 ), Horizontal.LEFT));
             }
 
-            parent.addChild(
-                    new ProgressBar()
-                            .setRange(0, 100)
-                            .setProgress(status.progressPercent())
-                            .label(label -> label.setText(Component.literal(status.progressPercent() + " %").withStyle(ChatFormatting.GOLD)))
-            );
+            parent.addChild(UiProgressBars.ofPercent(status.progressPercent()));
         }
     }
 

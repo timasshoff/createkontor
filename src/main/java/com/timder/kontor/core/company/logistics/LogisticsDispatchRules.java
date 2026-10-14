@@ -8,7 +8,7 @@ import com.timder.kontor.core.value.ItemId;
 
 import java.util.*;
 
-public final class LogisticDispatchRules {
+public final class LogisticsDispatchRules {
 
     public record Line(ItemId product, int quantity, long orderNumber) {
         public Line {
@@ -22,12 +22,15 @@ public final class LogisticDispatchRules {
      * @param company The company
      * @param economy The economy
      * @param stock The stock of each product in the network
+     * @param alreadyOrdered The quantity that was already ordered for each order
+     * @param minimumStock Minimum amount of one item to keep in storage
      * @return The lines in the order they were planned
      */
-    public static List<Line> plan(Company company, Economy economy, Map<ItemId, Integer> stock) {
+    public static List<Line> plan(Company company, Economy economy, Map<ItemId, Integer> stock, Map<Long, Integer> alreadyOrdered, int minimumStock) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(stock, "stock must not be null.");
+        Objects.requireNonNull(alreadyOrdered, "alreadyOrdered must not be null.");
 
         if (!company.logistics().isConnected() || !company.isActive()) {
             return List.of();
@@ -40,17 +43,17 @@ public final class LogisticDispatchRules {
 
         List<Line> lines = new ArrayList<>();
         for (ItemId product : products) {
-            int available = Math.max(0, stock.getOrDefault(product, 0));
+            int available = (int) Math.max(0L, (long) stock.getOrDefault(product, 0) - Math.max(0, minimumStock));
             for (Order order : DeliveryRules.getOrdersByPriority(company, economy, product)) {
                 if (available < 1) {
                     break;
                 }
-
-                int remaining = order.remainingQuantity();
-                if (remaining < 1) {
+                int ordered = Math.max(0, alreadyOrdered.getOrDefault(order.getNumber(), 0));
+                int missing = Math.min(order.remainingQuantity(), order.getQuantity() - ordered);
+                if (missing < 1) {
                     continue;
                 }
-                int quantity = Math.min(remaining, available);
+                int quantity = Math.min(missing, available);
                 lines.add(new Line(product, quantity, order.getNumber()));
                 available -= quantity;
             }

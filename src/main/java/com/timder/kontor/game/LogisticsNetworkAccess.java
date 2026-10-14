@@ -109,6 +109,19 @@ public final class LogisticsNetworkAccess {
         return stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof PackagerLinkBlock;
     }
 
+    public static List<Map.Entry<ItemId, Long>> stockByItem(UUID networkId) {
+        Objects.requireNonNull(networkId, "networkId must not be null.");
+        Map<ItemId, Long> totals = new HashMap<>();
+        for (BigItemStack big : LogisticsManager.getSummaryOfNetwork(networkId, false).getStacks()) {
+            if (big.count < 1 || big.stack.isEmpty()) continue;
+            ItemId id = new ItemId(BuiltInRegistries.ITEM.getKey(big.stack.getItem()).toString());
+            totals.merge(id, (long) big.count, Long::sum);
+        }
+        List<Map.Entry<ItemId, Long>> sorted = new ArrayList<>(totals.entrySet());
+        sorted.sort(Map.Entry.<ItemId, Long>comparingByValue().reversed().thenComparing(e -> e.getKey().value()));
+        return sorted;
+    }
+
     @Nullable
     private static Item itemOf(ItemId product) {
         ResourceLocation location = ResourceLocation.tryParse(product.value());

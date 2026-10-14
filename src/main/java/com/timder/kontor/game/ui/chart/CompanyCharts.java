@@ -5,11 +5,17 @@ import com.timder.kontor.core.company.financial.Booking;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.market.MarketShareBreakdown;
+import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.ui.chart.classic.ChartKind;
 import com.timder.kontor.game.ui.chart.classic.ChartSeries;
 import com.timder.kontor.game.ui.chart.classic.ChartSpec;
 import com.timder.kontor.game.ui.chart.segment.SegmentBarSpec;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
 
@@ -143,6 +149,22 @@ public class CompanyCharts {
             builder.segment(Component.translatable("chart.createkontor.market_share.series.other_companies").getString(), ChartColors.ORANGE, breakdown.otherCompanies(), Component.translatable("chart.createkontor.market_share.series.other_companies.description").getString());
         }
         builder.segment(Component.translatable("chart.createkontor.market_share.series.competition").getString(), ChartColors.TEAL, breakdown.competition(), Component.translatable("chart.createkontor.market_share.series.competition.description").getString());
+        return builder.build();
+    }
+
+    public static SegmentBarSpec stock(List<Map.Entry<ItemId, Long>> top, long others) {
+        SegmentBarSpec.Builder builder = SegmentBarSpec.builder(Component.translatable("chart.createkontor.stock.title").getString()).display(SegmentBarSpec.Display.VALUE).decimals(0);
+
+        for (int i = 0; i < top.size(); i++) {
+            Map.Entry<ItemId, Long> entry = top.get(i);
+            String name = BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry.getKey().value())).getDescription().getString();
+            builder.segment(name, ChartColors.STACK[i], entry.getValue());
+        }
+
+        if (others > 0) {
+            builder.segment(Component.translatable("chart.createkontor.other").getString(), ChartColors.STACK[top.size()], others);
+        }
+
         return builder.build();
     }
 }

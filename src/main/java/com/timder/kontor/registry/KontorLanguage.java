@@ -71,6 +71,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.connect_hint", "R-Click the desk with a postbox, then place it nearby");
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.pending", "Packages waiting: %s");
         REGISTRATE.addRawLang("goggle.createkontor.logistics_manager_desk.status", "Logistics network: %s");
+        REGISTRATE.addRawLang("goggle.createkontor.logistics_manager_desk.ordering", "Ordering: %s");
 
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.detailed", "There is no data for the chart \"%s\" yet. You can try again later.");
         REGISTRATE.addRawLang("ui.createkontor.chart.no_data.short", "There is no data for this chart yet. You can try again later.");
@@ -229,6 +230,38 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.consultant_desk.no_pages", "No wiki pages are available.");
         REGISTRATE.addRawLang("ui.createkontor.consultant_desk.page_error", "This page could not be displayed. The log has details.");
 
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.network_overview", "Network Overview");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.no_network", "§cNo logistics network connected");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.connected_network", "Logistics Network connected");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.total_items", "Total items in stock: %s");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.expected_cost", "Expected cost per day: %s");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.unloaded_links", "Warning: %s link(s) are currently not loaded. §7This might happen because a chunk that contains a link is currently not loaded.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.orders", "Automatic Order Delivery");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_delivery_settings", "Settings");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.ordering_enabled", "Automatic Ordering");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.address", "Address");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.address.tooltip", "Packages will be sent to this address.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.minimum_stock", "Minimum stock to keep");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.minimum_stock.tooltip", "The logistics manager keeps this many items of each product in the network and does not order them. 0 means no minimum.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.ordering_explanation", "When enabled, the logistics manager will check your order book periodically and send missing items from the order book to a set address. He will keep track of already ordered items to avoid overflow at the target address.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status", "Status:");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status.off", "Automatic order delivery is currently switched off.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status.not_connected", "§cThere is no storage network currently connected.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status.no_address", "§cThere is no address set.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status.waiting", "§aSwitched on and waiting for the next order book check.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status.nothing_to_order", "§eNothing to order: no open order, everything already covered or not enough items in stock. Trying again automatically.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status.ordered", "§aThe last attempt ordered items to the set address.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.status.busy", "§cThe last attempt could not order items because the network was too busy.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_delivery_overview", "Delivery Overview");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_delivery_overview_count", "Delivery Overview (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_missing", "Missing items: %s");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_progress.tooltip", "%s%% of the items of this order have been sent to the target address.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_reset", "Reset tracked progress");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_reset.tooltip", "Resets the tracked delivery progress of this order back to 0%.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_reset_all", "Reset tracked progress of all orders");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.order_reset_all.tooltip", "Resets the tracked delivery progress of all orders back to 0%.");
+        REGISTRATE.addRawLang("ui.createkontor.logistics_manager_desk.no_orders", "The Logistics Manager does not keep track of any orders right now.");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -282,7 +315,15 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.legal_form_not_allowed", "Legal Level too low");
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.company_has_other_network", "Company has another network");
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.network_used_by_other_company", "Network used by another company");
-        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk:status.network_owner_not_member", "Network owner is not a member");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.network_owner_not_member", "Network owner is not a member");
+
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.off", "Off");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.not_connected", "Not connected");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.no_address", "No address");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.waiting", "Waiting");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.nothing_to_order", "No orders");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.ordered", "Ordered");
+        REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.busy", "Busy");
 
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
@@ -360,6 +401,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.raw_material_price.series.price", "Price");
 
         REGISTRATE.addRawLang("chart.createkontor.cost_structure.title", "Cost Structure");
+
+        REGISTRATE.addRawLang("chart.createkontor.stock.title", "Stock Overview");
 
         REGISTRATE.addRawLang("toast.createkontor.error.title", "An error occurred:");
         REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");
