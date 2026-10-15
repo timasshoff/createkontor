@@ -85,10 +85,10 @@ public class LogisticsManagerUi {
         Label expectedCostLabel = UiLabels.secondary(Component.empty(), Horizontal.CENTER);
         expectedCostLabel.addSyncValue(
                 DataBindingBuilder.componentS2C(() -> {
-                            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
                             if (!context.company().logistics().isConnected()) {
                                 return Component.empty();
                             }
+                            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
                             long itemsTicks = LogisticsNetworkAccess.totalItemCount(context.company().logistics().networkId()) * Economy.DAY_LENGTH;
                             return Component.translatable("ui.createkontor.logistics_manager_desk.expected_cost", ComponentFormatting.moneyNegative(LogisticsStorageRules.storageCost(itemsTicks, params)));
                         })
@@ -109,11 +109,8 @@ public class LogisticsManagerUi {
                 .onRemoteSyncReceived(unloadedLinks::set)
                 .build();
         connected.addSyncValue(unloadedLinksBinding.getSyncValue());
-        unloadedLinks.addListener(() -> {
-            if (unloadedLinks.get() > 0) {
-                connected.addChild(UiLabels.paragraphError(Component.translatable("ui.createkontor.logistics_manager_desk.unloaded_links", ComponentFormatting.highlightError(String.valueOf(unloadedLinks.get()))), Horizontal.LEFT));
-            }
-        });
+        Label unloadedLinksLabel = UiLabels.paragraphError(Component.translatable("ui.createkontor.logistics_manager_desk.unloaded_links", ComponentFormatting.highlightError(String.valueOf(unloadedLinks.get()))), Horizontal.LEFT);
+        unloadedLinks.addListener(() -> unloadedLinksLabel.setDisplay(unloadedLinks.get() > 0));
         unloadedLinks.runListenersOnce();
 
         SegmentBarElement stockBar = SegmentBarElement.from(SegmentBarSpec.builder("").build());
@@ -173,7 +170,7 @@ public class LogisticsManagerUi {
         statusBox.addChild(UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.logistics_manager_desk.status"), Horizontal.LEFT));
         Label statusLabel = UiLabels.paragraphSecondary(Component.empty(), Horizontal.LEFT);
         statusLabel.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> Component.translatable("ui.createkontor.logistics_manager_desk.status." + be.getOrderingStatus().name().toLowerCase()))
+                DataBindingBuilder.componentS2C(() -> Component.translatable("ui.createkontor.logistics_manager_desk.status." + be.getOrderingStatus().name().toLowerCase(Locale.ROOT)))
                         .onRemoteSyncReceived(statusLabel::setText)
                         .build().getSyncValue());
         statusBox.addChild(statusLabel);
@@ -216,7 +213,13 @@ public class LogisticsManagerUi {
                 String.valueOf(be.getMinimumStock()),
                 text -> {
                     CompoundTag tag = new CompoundTag();
-                    tag.putInt("MinimumStock", Integer.parseInt(text));
+                    int value;
+                    try {
+                        value = Integer.parseInt(text);
+                    } catch (NumberFormatException e) {
+                        value = 0;
+                    }
+                    tag.putInt("MinimumStock", value);
                     content.sendMessage("c2s_set_minimum_stock", tag);
                 });
         minimumStock.getTextField().setNumbersOnlyInt(0, LogisticsManagerDeskBlockEntity.MAX_MINIMUM_STOCK);
@@ -234,7 +237,7 @@ public class LogisticsManagerUi {
         ScrollerView content = (ScrollerView) UiContainer.tabScroller().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
 
         ObservableList<OrderEntry> orderedQuantities = new ObservableList<>();
-        SimpleBinding<Tag> orderedQuantitiesBinding = DataBindingBuilder.tagS2C(() -> orderedQuantitiesToTag(be.getOrderedQuantitiesPercent()))
+        SimpleBinding<Tag> orderedQuantitiesBinding = DataBindingBuilder.tagS2C(() -> orderedQuantitiesToTag(be.getOrderedQuantitiesFractions()))
                 .onRemoteSyncReceived(tag -> orderedQuantities.set(tagToOrderedQuantities(tag)))
                 .build();
 
@@ -291,7 +294,7 @@ public class LogisticsManagerUi {
                                 CompoundTag order = new CompoundTag();
                                 order.putLong("Number", entry.number());
                                 ordersBox.sendMessage("c2s_reset_order", order);
-                            }).style(style -> style.tooltips(Component.translatable("ui.createkontor.logistics_manager_desk.order_reset.tooltip"))).layout(layout -> layout.height(14)));
+                            }).style(style -> style.tooltips(Component.translatable("ui.createkontor.logistics_manager_desk.order_reset.tooltip"))).layout(layout -> layout.minHeight(14).paddingVertical(2)));
                 }
 
                 ordersBox.addChild(orderElement);

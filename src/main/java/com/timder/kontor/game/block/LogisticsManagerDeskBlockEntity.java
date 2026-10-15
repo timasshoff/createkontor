@@ -139,13 +139,13 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         notifyUpdate();
     }
 
-    public Map<Order, Double> getOrderedQuantitiesPercent() {
+    public Map<Order, Double> getOrderedQuantitiesFractions() {
         if (!(level instanceof ServerLevel serverLevel)) {
-            return null;
+            return Map.of();
         }
         Company company = CompanySavedData.get(serverLevel.getServer()).getRegistry().get(getCompanyId()).orElse(null);
         if (company == null) {
-            return null;
+            return Map.of();
         }
 
         Map<Order, Double> percentMap = new LinkedHashMap<>();
@@ -153,7 +153,7 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
             Order order;
             try {
                 order = company.orderBook().get(orderNumber);
-            } catch (Exception e) {
+            } catch (NoSuchElementException e) {
                 continue;
             }
             if (order.getQuantity() > 0) {
@@ -299,6 +299,7 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         Map<ItemId, Integer> totals = LogisticsDispatchRules.totalsByProduct(plan);
         if (!LogisticsNetworkAccess.requestPackages(network, orderAddress, totals)) {
             updateOrderingStatus(OrderingStatus.BUSY);
+            ticksUntilOrder = 0;
             return;
         }
         for (LogisticsDispatchRules.Line line : plan) {
@@ -413,7 +414,7 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         Money booked = LogisticsConnectionRules.disconnect(company, economy.currentDay(), economy.ticksElapsed(), params);
         data.setDirty();
-        PlayerNotifications.sendLogisticsDisconnectedNotification(server, company, Component.translatable("message.createkontor.logistics.reason." + reason.name().toLowerCase()), booked);
+        PlayerNotifications.sendLogisticsDisconnectedNotification(server, company, Component.translatable("message.createkontor.logistics.reason." + reason.name().toLowerCase(Locale.ROOT)), booked);
     }
 
     private boolean allNeighborsLoaded(ServerLevel level) {

@@ -1,20 +1,13 @@
 package com.timder.kontor.game.ui.element;
 
-import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
-import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Switch;
-import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 public final class UiSwitches {
     public static final class LabeledSwitch extends UIElement {

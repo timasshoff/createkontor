@@ -19,11 +19,6 @@ public class UiProgressBars {
     }
 
     public static ProgressBar ofPercent(int percent) {
-        ProgressBar bar = new ProgressBar();
-        bar.setRange(0, 100);
-        bar.setProgress(percent);
-        bar.label(label -> label.setText(Component.literal(percent + " %").withStyle(ChatFormatting.GOLD)));
-        bar.layout(layout -> layout.height(HEIGHT));
-        return bar;
+        return ofFraction(percent / 100.0);
     }
 }
