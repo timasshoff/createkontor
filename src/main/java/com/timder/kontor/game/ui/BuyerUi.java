@@ -6,18 +6,16 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
-import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
-import com.timder.kontor.core.company.license.AcquireResult;
-import com.timder.kontor.core.company.license.LicenseKeyCodec;
 import com.timder.kontor.core.company.purchase.PurchaseKind;
 import com.timder.kontor.core.company.purchase.PurchaseOffer;
 import com.timder.kontor.core.company.purchase.PurchaseOffers;
@@ -32,13 +30,13 @@ import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
 import com.timder.kontor.util.ComponentFormatting;
-import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
+import java.util.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -50,27 +48,49 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
-
-
 public final class BuyerUi {
-    public static ModularUI create(EmployeeDeskContext context) {
+    public static ModularUI create(EmployeeDeskContext context, List<List<ClipboardEntry>> materialList) {
         BuyerDeskBlockEntity be = (BuyerDeskBlockEntity) context.desk();
+        ObservableValue<Map<ItemId, Integer>> quote = new ObservableValue<>(Map.of());
 
         var tabView = UiContainer.largeTabView();
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.buyer_desk.catalog")), catalogTab(context, be));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.buyer_desk.catalog")),
+                catalogTab(context, be, quote));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
+
+        if (materialList != null && !materialList.isEmpty()) {
+            for (List<ClipboardEntry> subList : materialList) {
+                for (ClipboardEntry entry : subList) {
+                    if (entry.itemAmount < 1 || entry.icon.isEmpty()) {
+                        continue;
+                    }
+                    ItemId id = new ItemId(
+                            BuiltInRegistries.ITEM.getKey(entry.icon.getItem()).toString());
+                    addToQuote(
+                            quote,
+                            id,
+                            entry.itemAmount); // Items that do not have offers will be caught in buildQuote()
+                }
+            }
+        }
+
         return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
     }
 
-    public static UIElement catalogTab(EmployeeDeskContext context, BuyerDeskBlockEntity be) {
-        ObservableValue<Map<ItemId, Integer>> quote = new ObservableValue<>(Map.of());
+    public static UIElement catalogTab(
+            EmployeeDeskContext context, BuyerDeskBlockEntity be, ObservableValue<Map<ItemId, Integer>> quote) {
         ObservableList<PurchaseOffer> offers = new ObservableList<>();
         SimpleBinding<Tag> offersBinding = DataBindingBuilder.tagS2C(() -> offersToTag(context))
-                .onRemoteSyncReceived(tag -> offers.set(tagToOffers(tag)
-                        .stream()
-                        .sorted(Comparator.comparing(offer -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(offer.item().value())).asItem().getDescription().getString(), String.CASE_INSENSITIVE_ORDER))
+                .onRemoteSyncReceived(tag -> offers.set(tagToOffers(tag).stream()
+                        .sorted(Comparator.comparing(
+                                offer -> BuiltInRegistries.ITEM
+                                        .get(ResourceLocation.parse(offer.item().value()))
+                                        .asItem()
+                                        .getDescription()
+                                        .getString(),
+                                String.CASE_INSENSITIVE_ORDER))
                         .toList()))
                 .build();
 
@@ -86,12 +106,20 @@ public final class BuyerUi {
         return split;
     }
 
-    public static UIElement offers(ObservableList<PurchaseOffer> offers, SimpleBinding<Tag> offersBinding, ObservableValue<Map<ItemId, Integer>> quote) {
-        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100)).style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
+    public static UIElement offers(
+            ObservableList<PurchaseOffer> offers,
+            SimpleBinding<Tag> offersBinding,
+            ObservableValue<Map<ItemId, Integer>> quote) {
+        UIElement content = new UIElement()
+                .layout(layout -> layout.widthPercent(100).heightPercent(100))
+                .style(style -> style.background(Sprites.BORDER_DARK))
+                .layout(layout -> layout.paddingAll(8));
         content.addSyncValue(offersBinding.getSyncValue());
 
-        Label title = (Label) UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.catalog"), Horizontal.LEFT).textStyle(style -> style.adaptiveWidth(false));
-        offers.addListener(() -> title.setText(Component.translatable("ui.createkontor.buyer_desk.catalog_count", offers.get().size())));
+        Label title = (Label) UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.catalog"), Horizontal.LEFT)
+                .textStyle(style -> style.adaptiveWidth(false));
+        offers.addListener(() -> title.setText(Component.translatable(
+                "ui.createkontor.buyer_desk.catalog_count", offers.get().size())));
         content.addChild(title);
 
         content.addChild(UiContainer.searchableGrid(
@@ -102,38 +130,49 @@ public final class BuyerUi {
                             .layout(layout -> layout.paddingAll(8));
 
                     if (offer.kind() == PurchaseKind.RAW_MATERIAL) {
-                        element.addChild(UiLabels.paragraphTertiary(Component.translatable("ui.createkontor.buyer_desk.catalog.raw_material"), Horizontal.LEFT));
+                        element.addChild(UiLabels.paragraphTertiary(
+                                Component.translatable("ui.createkontor.buyer_desk.catalog.raw_material"),
+                                Horizontal.LEFT));
                     } else {
-                        element.addChild(UiLabels.paragraphTertiary(Component.translatable("ui.createkontor.buyer_desk.catalog.product"), Horizontal.LEFT));
+                        element.addChild(UiLabels.paragraphTertiary(
+                                Component.translatable("ui.createkontor.buyer_desk.catalog.product"), Horizontal.LEFT));
                     }
 
                     UIElement titleRow = new UIElement()
-                            .layout(layout -> layout
-                                    .flexDirection(FlexDirection.ROW)
+                            .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                                     .flexWrap(FlexWrap.WRAP)
                                     .justifyContent(AlignContent.FLEX_START)
                                     .alignItems(AlignItems.CENTER)
                                     .gapAll(4)
                                     .marginBottom(4)
                                     .widthPercent(100));
-                    titleRow.addChild(new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(offer.item().value())), 1)));
-                    titleRow.addChild(UiLabels.paragraphPrimary(Component.empty().append(BuiltInRegistries.ITEM.get(ResourceLocation.parse(offer.item().value())).asItem().getDescription()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT)
+                    titleRow.addChild(new ItemSlot()
+                            .setItem(new ItemStack(
+                                    BuiltInRegistries.ITEM.get(
+                                            ResourceLocation.parse(offer.item().value())),
+                                    1)));
+                    titleRow.addChild(UiLabels.paragraphPrimary(
+                                    Component.empty()
+                                            .append(BuiltInRegistries.ITEM
+                                                    .get(ResourceLocation.parse(
+                                                            offer.item().value()))
+                                                    .asItem()
+                                                    .getDescription())
+                                            .withStyle(ChatFormatting.GOLD),
+                                    Horizontal.LEFT)
                             .textStyle(style -> style.textAlignVertical(Vertical.CENTER))
-                            .layout(layout -> layout
-                                    .widthAuto()
-                                    .flexBasis(0)
-                                    .flexGrow(1)));
+                            .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1)));
                     element.addChild(titleRow);
 
-                    element.addChild(UiLabels.paragraphPrimary(Component.translatable(
-                            "ui.createkontor.buyer_desk.catalog.price",
-                            ComponentFormatting.moneyColored(offer.unitPrice())
-                    ), Horizontal.LEFT));
+                    element.addChild(UiLabels.paragraphPrimary(
+                            Component.translatable(
+                                    "ui.createkontor.buyer_desk.catalog.price",
+                                    ComponentFormatting.moneyColored(offer.unitPrice())),
+                            Horizontal.LEFT));
 
                     int[] quantity = {1};
                     UIElement buyRow = new UIElement()
-                            .layout(layout -> layout
-                                    .flexDirection(FlexDirection.ROW)
+                            .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                                     .alignItems(AlignItems.CENTER)
                                     .gapAll(4)
                                     .widthPercent(100)
@@ -144,26 +183,35 @@ public final class BuyerUi {
                     quantityField.setText("1", false);
                     quantityField.setTextResponder(text -> {
                         try {
-                            quantity[0] = Math.max(1, Math.min(Integer.parseInt(text.trim()), BuyerDeskBlockEntity.MAX_GOOD_SIZE));
+                            quantity[0] = Math.max(
+                                    1, Math.min(Integer.parseInt(text.trim()), BuyerDeskBlockEntity.MAX_GOOD_SIZE));
                         } catch (NumberFormatException e) {
                             quantity[0] = 1;
                         }
                     });
-                    quantityField.addEventListener(UIEvents.BLUR, event -> quantityField.setText(String.valueOf(quantity[0]), false));
+                    quantityField.addEventListener(
+                            UIEvents.BLUR, event -> quantityField.setText(String.valueOf(quantity[0]), false));
                     quantityField.layout(layout -> layout.width(40));
 
-                    Button add = (Button) UiButtons.primary(Component.translatable("ui.createkontor.buyer_desk.catalog.add"))
-                            .setOnClick(e -> addToCart(quote, offer.item(), Math.max(1, Math.min(quantity[0], BuyerDeskBlockEntity.MAX_GOOD_SIZE))))
-                            .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).height(14));
+                    Button add = (Button) UiButtons.primary(
+                                    Component.translatable("ui.createkontor.buyer_desk.catalog.add"))
+                            .setOnClick(e -> addToQuote(
+                                    quote,
+                                    offer.item(),
+                                    Math.max(1, Math.min(quantity[0], BuyerDeskBlockEntity.MAX_GOOD_SIZE))))
+                            .layout(layout ->
+                                    layout.widthAuto().flexBasis(0).flexGrow(1).height(14));
 
                     buyRow.addChildren(quantityField, add);
                     element.addChild(buyRow);
 
                     return element;
                 },
-                (PurchaseOffer offer) -> List.of(
-                        BuiltInRegistries.ITEM.get(ResourceLocation.parse(offer.item().value())).asItem().getDescription().getString()
-                ),
+                (PurchaseOffer offer) -> List.of(BuiltInRegistries.ITEM
+                        .get(ResourceLocation.parse(offer.item().value()))
+                        .asItem()
+                        .getDescription()
+                        .getString()),
                 Component.translatable("ui.createkontor.buyer_desk.catalog.search"),
                 Component.translatable("ui.createkontor.buyer_desk.catalog.no_result"),
                 4,
@@ -172,9 +220,17 @@ public final class BuyerUi {
         return content;
     }
 
-    public static UIElement quote(EmployeeDeskContext context, BuyerDeskBlockEntity be, ObservableList<PurchaseOffer> offers, SimpleBinding<Tag> offersBinding, ObservableValue<Map<ItemId, Integer>> quote) {
+    public static UIElement quote(
+            EmployeeDeskContext context,
+            BuyerDeskBlockEntity be,
+            ObservableList<PurchaseOffer> offers,
+            SimpleBinding<Tag> offersBinding,
+            ObservableValue<Map<ItemId, Integer>> quote) {
         UIElement content = new UIElement()
-                .layout(layout -> layout.widthPercent(100).heightPercent(100).paddingAll(8).gapAll(4))
+                .layout(layout -> layout.widthPercent(100)
+                        .heightPercent(100)
+                        .paddingAll(8)
+                        .gapAll(4))
                 .style(style -> style.background(Sprites.BORDER_DARK));
 
         int[] purchases = {0}; // Server sided
@@ -199,16 +255,19 @@ public final class BuyerUi {
                                 quote.set(Map.of());
                             }
                         })
-                        .build().getSyncValue()
-        );
+                        .build()
+                        .getSyncValue());
 
-        Label title = (Label) UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.quote"), Horizontal.LEFT).textStyle(style -> style.adaptiveWidth(false));
+        Label title = (Label) UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.quote"), Horizontal.LEFT)
+                .textStyle(style -> style.adaptiveWidth(false));
         content.addChild(title);
         content.addSyncValue(offersBinding.getSyncValue());
 
         ScrollerView linesScroller = UiContainer.tabScroller();
-        linesScroller.layout(layout -> layout.heightAuto().flexBasis(0).flexGrow(1).minHeight(0));
-        linesScroller.viewContainer.layout(layout -> layout.flexDirection(FlexDirection.COLUMN).gapAll(10));
+        linesScroller.layout(
+                layout -> layout.heightAuto().flexBasis(0).flexGrow(1).minHeight(0));
+        linesScroller.viewContainer.layout(
+                layout -> layout.flexDirection(FlexDirection.COLUMN).gapAll(10));
 
         float[] appliedWidth = {0};
         linesScroller.addEventListener(UIEvents.LAYOUT_CHANGED, event -> {
@@ -219,7 +278,8 @@ public final class BuyerUi {
         });
 
         UIElement linesBox = new UIElement()
-                .layout(layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0))
+                .layout(layout ->
+                        layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0))
                 .addChildren(linesScroller);
         content.addChild(linesBox);
 
@@ -232,8 +292,10 @@ public final class BuyerUi {
 
         String[] address = {be.getAddress()};
         TextField addressField = new TextField();
-        addressField.textFieldStyle(style -> style.placeholder(Component.translatable("ui.createkontor.buyer_desk.quote.address")));
-        addressField.style(style -> style.tooltips(Component.translatable("ui.createkontor.buyer_desk.quote.address.tooltip")));
+        addressField.textFieldStyle(
+                style -> style.placeholder(Component.translatable("ui.createkontor.buyer_desk.quote.address")));
+        addressField.style(
+                style -> style.tooltips(Component.translatable("ui.createkontor.buyer_desk.quote.address.tooltip")));
         addressField.layout(layout -> layout.widthPercent(100));
         addressField.setText(address[0], false);
         addressField.setTextResponder(text -> address[0] = text.trim());
@@ -248,7 +310,8 @@ public final class BuyerUi {
         buy.setActive(false);
         quote.addListener(() -> buy.setActive(!quote.get().isEmpty()));
         buy.layout(layout -> layout.widthPercent(100));
-        buy.setOnClick(e -> buildQuote(quote.get(), offers.get()).ifPresent(current -> content.sendMessage("c2s_buy", quoteToTag(current, address[0]))));
+        buy.setOnClick(e -> buildQuote(quote.get(), offers.get())
+                .ifPresent(current -> content.sendMessage("c2s_buy", quoteToTag(current, address[0]))));
         content.addChild(buy);
 
         return content;
@@ -312,10 +375,10 @@ public final class BuyerUi {
         return cart;
     }
 
-    private static void addToCart(ObservableValue<Map<ItemId, Integer>> cart, ItemId item, int quantity) {
-        Map<ItemId, Integer> next = new LinkedHashMap<>(cart.get());
+    private static void addToQuote(ObservableValue<Map<ItemId, Integer>> quote, ItemId item, int quantity) {
+        Map<ItemId, Integer> next = new LinkedHashMap<>(quote.get());
         next.merge(item, quantity, Integer::sum);
-        cart.set(next);
+        quote.set(next);
     }
 
     private static Optional<PurchaseQuote> buildQuote(Map<ItemId, Integer> cart, List<PurchaseOffer> offers) {
@@ -333,35 +396,40 @@ public final class BuyerUi {
         return lines.isEmpty() ? Optional.empty() : Optional.of(new PurchaseQuote(lines));
     }
 
-    private static void buildQuoteElement(ScrollerView parent, Label total, ObservableValue<Map<ItemId, Integer>> quote, List<PurchaseOffer> offers) {
+    private static void buildQuoteElement(
+            ScrollerView parent, Label total, ObservableValue<Map<ItemId, Integer>> quote, List<PurchaseOffer> offers) {
         parent.clearAllScrollViewChildren();
         Optional<PurchaseQuote> purchaseQuote = buildQuote(quote.get(), offers);
         if (purchaseQuote.isEmpty()) {
-            parent.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.buyer_desk.quote.empty"), Horizontal.LEFT));
+            parent.addScrollViewChildren(UiLabels.paragraphSecondary(
+                    Component.translatable("ui.createkontor.buyer_desk.quote.empty"), Horizontal.LEFT));
             total.setText(Component.empty());
             return;
         }
 
         for (PurchaseQuote.Line line : purchaseQuote.get().lines()) {
-            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(line.item().value()));
+            Item item = BuiltInRegistries.ITEM.get(
+                    ResourceLocation.parse(line.item().value()));
             UIElement element = new UIElement();
 
             element.addChild(UiLabels.labelValueNoWrap(
-                    Component.translatable("ui.createkontor.buyer_desk.quote.line", Component.literal(String.valueOf(line.quantity())).withStyle(ChatFormatting.GRAY), item.getDescription()),
-                    ComponentFormatting.moneyColored(line.lineTotal())
-            ));
-            element.addChild(
-                    UiButtons.critical(Component.translatable("ui.createkontor.buyer_desk.quote.remove"))
-                            .setOnClick((e) -> {
-                                Map<ItemId, Integer> next = new LinkedHashMap<>(quote.get());
-                                next.remove(line.item());
-                                quote.set(next);
-                            })
-                            .layout(layout -> layout.height(14))
-            );
+                    Component.translatable(
+                            "ui.createkontor.buyer_desk.quote.line",
+                            Component.literal(String.valueOf(line.quantity())).withStyle(ChatFormatting.GRAY),
+                            item.getDescription()),
+                    ComponentFormatting.moneyColored(line.lineTotal())));
+            element.addChild(UiButtons.critical(Component.translatable("ui.createkontor.buyer_desk.quote.remove"))
+                    .setOnClick((e) -> {
+                        Map<ItemId, Integer> next = new LinkedHashMap<>(quote.get());
+                        next.remove(line.item());
+                        quote.set(next);
+                    })
+                    .layout(layout -> layout.height(14)));
 
             parent.addScrollViewChildren(element);
         }
-        total.setText(Component.translatable("ui.createkontor.buyer_desk.quote.total", ComponentFormatting.moneyColored(purchaseQuote.get().total())));
+        total.setText(Component.translatable(
+                "ui.createkontor.buyer_desk.quote.total",
+                ComponentFormatting.moneyColored(purchaseQuote.get().total())));
     }
 }

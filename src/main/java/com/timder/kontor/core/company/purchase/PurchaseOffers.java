@@ -4,7 +4,6 @@ import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -44,11 +43,16 @@ public final class PurchaseOffers {
     }
 
     public static Money unitPrice(double marketPrice, double markup) {
-        if (!(marketPrice > 0.0) || Double.isInfinite(marketPrice)) throw new IllegalArgumentException("marketPrice must be a finite, positive number.");
-        if (!(markup >= 0.0) || Double.isInfinite(markup)) throw new IllegalArgumentException("markup must be a finite number, not negative.");
+        if (!(marketPrice > 0.0) || Double.isInfinite(marketPrice))
+            throw new IllegalArgumentException("marketPrice must be a finite, positive number.");
+        if (!(markup >= 0.0) || Double.isInfinite(markup))
+            throw new IllegalArgumentException("markup must be a finite number, not negative.");
 
-        BigDecimal factor = BigDecimal.ONE.add(BigDecimal.valueOf(markup));
-        BigDecimal cents = BigDecimal.valueOf(marketPrice).multiply(factor).movePointRight(2).setScale(0, RoundingMode.HALF_UP);
+        BigDecimal factor = BigDecimal.valueOf(markup);
+        BigDecimal cents = BigDecimal.valueOf(marketPrice)
+                .multiply(factor)
+                .movePointRight(2)
+                .setScale(0, RoundingMode.HALF_UP);
         return Money.max(Money.ofCents(cents.longValueExact()), MINIMUM_UNIT_PRICE);
     }
 
