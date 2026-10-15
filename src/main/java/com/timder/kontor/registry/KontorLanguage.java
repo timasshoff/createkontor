@@ -90,6 +90,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.manager_fire.done", "Successfully fired.");
         REGISTRATE.addRawLang("message.createkontor.leave.left", "%s left the company.");
         REGISTRATE.addRawLang("message.createkontor.leave.done", "Successfully left %s.");
+        REGISTRATE.addRawLang("message.createkontor.buyer_desk.auto_stock.added", "%s added.");
+        REGISTRATE.addRawLang("message.createkontor.buyer_desk.auto_stock.already_added", "%s is already added.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.buyer_desk.auto_stock.limit_reached", "This buyer can handle at most %s items.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -295,6 +299,31 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.buy", "Buy");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.remove", "Remove");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.no_postbox", "No connected postbox");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock", "Automatic Restock");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.no_network", "Check your Logistics Manager");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.settings", "Settings");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.targets", "Refill Targets");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.buyer_desk.auto_stock.explanation",
+                "The Buyer will buy missing items from markets to keep a minimum amount of those items in stock. Set items to restock on the right.");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.refill_address", "Address");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.buyer_desk.auto_stock.refill_address.tooltip",
+                "Restock packages will be addressed to this value. Make sure they get routed to the company's Logistics Network.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.buyer_desk.auto_stock.no_postbox",
+                "There is no postbox connected to this Buyer's Desk.");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.unit_price", " §7(Current Offer: %s§7)");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.add", "Add");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.promised", "(Promised: %s)");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.reset_promised", "Reset Promised");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.remove", "Remove");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.buyer_desk.auto_stock.status.not_enough",
+                "§eNot enough items promised to reach minimum amount for item.");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.status.enough", "§aMinimum amount reached.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.buyer_desk.auto_stock.status.disabled", "§7Disabled (minimum amount set to 0).");
 
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.markets", "Markets");
         REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.raw_materials", "Raw Materials");
@@ -874,6 +903,22 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p3",
                 "You can optionally set an address that the delivered packages will be addressed to. This way you can automatically route incoming deliveries e.g. to your storage. Tip: Set the Address value of your postbox to * to make the postbox eject incoming packages.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.buyer.b2", "Automatic Restock");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.p4",
+                "If you have a Logistics Manager with a connected Logistics Network, you can tell the Buyer to auto-restock items. If an item falls below a configured minimum, the buyer will buy enough items to reach the minimum. Bought items will be delivered to a connected postbox. Your own logistics will have to deliver them to the company's Logistics Network from there.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.p5",
+                "The Buyer uses Create's Promise system to track bought items. He will buy enough items that, together with the promised items, the minimum is reached. This way, promised items from e.g. factory gauges are accounted for. If some items get lost, you can reset the Promises for this item.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.p6",
+                "The color of an item in the Automatic Restock menu informs you about the status of this restock:");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.restock_status",
+                "§aGreen: §rEnough items are in stock\n§fWhite: §rNot enough stock, but enough items are promised to reach the minimum amount.\n§eYellow: §rNot enough items could be promised to reach the minimum. Check your bank account.\nGray: Minimum amount is set to 0, the Automatic Restocking for this item is disabled.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.p7",
+                "§cWarning: §rUse the Automatic Restocking with care. Bought items cannot be refunded. When telling the Buyer to restock large amounts of items, §ccheck your balance before!");
 
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.logistics_manager.p1",

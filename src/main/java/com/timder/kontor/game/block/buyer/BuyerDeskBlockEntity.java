@@ -3,10 +3,11 @@ package com.timder.kontor.game.block.buyer;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.packagePort.PackagePortBlockEntity;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
+import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
-import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.purchase.PurchaseOffers;
 import com.timder.kontor.core.company.purchase.PurchaseQuote;
@@ -17,9 +18,12 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.LogisticsNetworkAccess;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
 import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.util.ComponentFormatting;
+import java.util.*;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -36,21 +40,25 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
-import javax.annotation.Nullable;
-import java.util.*;
-
 public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
     private static final int MAX_STACK_IN_PACKAGE = 64;
     public static final int MAX_GOOD_SIZE = 9999;
     public static final int MAX_ADDRESS_LENGTH = 25;
+    public static final int MAX_REFILL_ENTRIES = 32;
 
     private static final String TAG_PORT_COUNT = "ConnectedPorts";
     private static final String TAG_PENDING = "PendingPackages";
     private static final String TAG_PENDING_COUNT = "PendingCount";
     private static final String TAG_ADDRESS = "Address";
+    private static final String TAG_REFILL_ADDRESS = "RefillAddress";
+    private static final String TAG_REFILL = "RefillTargets";
+    private static final String TAG_REFILL_ITEM = "Item";
+    private static final String TAG_REFILL_MIN = "MinStock";
 
     private String address = "";
+    private String refillAddress = "";
+    private final Map<ItemId, Integer> refillTargets = new LinkedHashMap<>();
 
     public record Goods(Item item, int quantity) {
         public Goods {
@@ -86,6 +94,48 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         notifyUpdate();
     }
 
+    public Map<ItemId, Integer> getRefillTargets() {
+        return Collections.unmodifiableMap(refillTargets);
+    }
+
+    public boolean setRefillTarget(ItemId item, int minStock) {
+        if (level == null || level.isClientSide()) return false;
+        Objects.requireNonNull(item, "item must not be null.");
+        if (minStock < 0 || minStock > MAX_GOOD_SIZE) return false;
+        if (!refillTargets.containsKey(item) && refillTargets.size() >= MAX_REFILL_ENTRIES) return false;
+        Integer previous = refillTargets.put(item, minStock);
+        if (previous == null || previous != minStock) {
+            setChanged();
+        }
+        return true;
+    }
+
+    public boolean removeRefillTarget(ItemId item) {
+        if (level == null || level.isClientSide()) return false;
+        if (refillTargets.remove(item) == null) return false;
+        setChanged();
+        return true;
+    }
+
+    public String getRefillAddress() {
+        return refillAddress;
+    }
+
+    public void setRefillAddress(String value) {
+        if (level == null || level.isClientSide()) {
+            return;
+        }
+        String cleaned = value == null ? "" : value.trim();
+        if (cleaned.length() > MAX_ADDRESS_LENGTH) {
+            cleaned = cleaned.substring(0, MAX_ADDRESS_LENGTH);
+        }
+        if (cleaned.equals(address)) {
+            return;
+        }
+        refillAddress = cleaned;
+        notifyUpdate();
+    }
+
     public void attachPort(PackagePortBlockEntity port) {
         if (level == null || level.isClientSide()) {
             return;
@@ -113,6 +163,12 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         return result;
     }
 
+    @Override
+    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
+        refillTargets.clear();
+        super.onCompanyChanged(oldId, newId);
+    }
+
     @Nullable
     private PackagePortBlockEntity portAt(BlockPos pos) {
         if (!level.isLoaded(pos)) {
@@ -129,7 +185,8 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
     public Optional<S2CActionResult> buy(Map<ItemId, Integer> quote, long expectedTotalCents) {
         if (!(level instanceof ServerLevel serverLevel)) return S2CActionResult.illegalEnvironment();
         if (quote.isEmpty()) return S2CActionResult.error(Component.literal("Quote is empty"));
-        if (connectedPorts().isEmpty()) return S2CActionResult.error(Component.translatable("ui.createkontor.buyer_desk.no_postbox"));
+        if (connectedPorts().isEmpty())
+            return S2CActionResult.error(Component.translatable("ui.createkontor.buyer_desk.no_postbox"));
 
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         EconomySavedData economyData = EconomySavedData.get(serverLevel.getServer());
@@ -147,10 +204,12 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
             ResourceLocation id = ResourceLocation.tryParse(entry.getKey().value());
             Optional<Item> item = id == null ? Optional.empty() : BuiltInRegistries.ITEM.getOptional(id);
 
-            if (quantity < 1 || quantity > MAX_GOOD_SIZE || item.isEmpty()) return S2CActionResult.error(Component.literal("Quantity invalid."));
+            if (quantity < 1 || quantity > MAX_GOOD_SIZE || item.isEmpty())
+                return S2CActionResult.error(Component.literal("Quantity invalid."));
 
             try {
-                lines.add(PurchaseOffers.offerFor(economy, params, entry.getKey()).lineFor(quantity));
+                lines.add(
+                        PurchaseOffers.offerFor(economy, params, entry.getKey()).lineFor(quantity));
             } catch (IllegalArgumentException e) {
                 return S2CActionResult.error(Component.literal("Failed: " + e.getMessage()));
             }
@@ -158,11 +217,13 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         }
 
         PurchaseQuote purchaseQuote = new PurchaseQuote(lines);
-        if (purchaseQuote.total().cents() != expectedTotalCents) return S2CActionResult.error(Component.literal("Prices changed. Try again."));
+        if (purchaseQuote.total().cents() != expectedTotalCents)
+            return S2CActionResult.error(Component.literal("Prices changed. Try again."));
 
         PurchaseStatus status = PurchaseRules.preview(company, purchaseQuote, params);
         if (status != PurchaseStatus.AFFORDABLE) {
-            return S2CActionResult.error(Component.translatable("enum.createkontor.purchase_status." + status.toString().toLowerCase()));
+            return S2CActionResult.error(Component.translatable(
+                    "enum.createkontor.purchase_status." + status.toString().toLowerCase()));
         }
 
         try {
@@ -190,7 +251,8 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         }
         int packages = 0;
         for (int from = 0; from < stacks.size(); from += PackageItem.SLOTS) {
-            ItemStack box = PackageItem.containing(stacks.subList(from, Math.min(from + PackageItem.SLOTS, stacks.size())));
+            ItemStack box =
+                    PackageItem.containing(stacks.subList(from, Math.min(from + PackageItem.SLOTS, stacks.size())));
             if (address.isBlank()) {
                 address = "";
             }
@@ -215,6 +277,9 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
     public void lazyTick() {
         super.lazyTick();
         update();
+        if (level instanceof ServerLevel serverLevel) {
+            refill(serverLevel);
+        }
     }
 
     private void update() {
@@ -241,6 +306,79 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         return false;
     }
 
+    private void refill(ServerLevel serverLevel) {
+        CompanyId companyId = getCompanyId();
+        if (refillTargets.isEmpty() || companyId == null || !hasEmployee()) {
+            return;
+        }
+        CompanySavedData companyData = CompanySavedData.get(serverLevel.getServer());
+        Company company = companyData.getRegistry().get(companyId).orElse(null);
+        if (company == null || !company.isActive() || !company.isOperational()) {
+            return;
+        }
+        UUID network = company.logistics().networkId();
+        if (network == null || connectedPorts().isEmpty()) {
+            return;
+        }
+
+        EconomySavedData economyData = EconomySavedData.get(serverLevel.getServer());
+        Economy economy = economyData.getEconomy();
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        Map<ItemId, Integer> stock = LogisticsNetworkAccess.stockOf(network, refillTargets.keySet());
+
+        List<PurchaseQuote.Line> lines = new ArrayList<>();
+        List<Goods> goods = new ArrayList<>();
+        for (Map.Entry<ItemId, Integer> target : refillTargets.entrySet()) {
+            ItemId id = target.getKey();
+            ResourceLocation location = ResourceLocation.tryParse(id.value());
+            Optional<Item> item = location == null ? Optional.empty() : BuiltInRegistries.ITEM.getOptional(location);
+            if (item.isEmpty()) {
+                continue;
+            }
+
+            int effective = stock.getOrDefault(id, 0) + LogisticsNetworkAccess.promisedOf(network, id);
+            int missing = target.getValue() - effective;
+            if (missing < 1) {
+                continue;
+            }
+
+            // int quantity = Math.min(MAX_GOOD_SIZE, Math.max(missing, new ItemStack(item.get()).getMaxStackSize()));
+            int quantity = Math.min(MAX_GOOD_SIZE, missing);
+            try {
+                lines.add(PurchaseOffers.offerFor(economy, params, id).lineFor(quantity));
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+
+            if (PurchaseRules.preview(company, new PurchaseQuote(lines), params) != PurchaseStatus.AFFORDABLE) {
+                lines.remove(lines.size() - 1);
+                continue;
+            }
+
+            goods.add(new Goods(item.get(), quantity));
+        }
+
+        if (lines.isEmpty()) {
+            return;
+        }
+
+        PurchaseQuote quote = new PurchaseQuote(lines);
+        try {
+            PurchaseRules.buy(company, economy, quote, economy.currentDay(), params);
+        } catch (IllegalStateException e) {
+            CreateKontor.LOGGER.warn("Buyer refill of {} failed: {}", company.name(), e.getMessage());
+            return;
+        }
+
+        economyData.setDirty();
+        companyData.setDirty();
+
+        queueDelivery(goods, refillAddress);
+        for (PurchaseQuote.Line line : lines) {
+            LogisticsNetworkAccess.promise(network, line.item(), line.quantity());
+        }
+    }
+
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);
@@ -254,24 +392,28 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
                     .forGoggles(tooltip, 2);
         } else {
             CreateLang.builder()
-                    .add(Component.translatable("goggle.createkontor.buyer_desk.postboxes",
-                            ComponentFormatting.highlightStandard(String.valueOf(portCount))).withStyle(ComponentFormatting.DEFAULT))
+                    .add(Component.translatable(
+                                    "goggle.createkontor.buyer_desk.postboxes",
+                                    ComponentFormatting.highlightStandard(String.valueOf(portCount)))
+                            .withStyle(ComponentFormatting.DEFAULT))
                     .forGoggles(tooltip, 1);
         }
         if (pendingCount > 0) {
             CreateLang.builder()
-                    .add(Component.translatable("goggle.createkontor.buyer_desk.pending",
-                            ComponentFormatting.highlightError(String.valueOf(pendingCount))).withStyle(ComponentFormatting.ERROR))
+                    .add(Component.translatable(
+                                    "goggle.createkontor.buyer_desk.pending",
+                                    ComponentFormatting.highlightError(String.valueOf(pendingCount)))
+                            .withStyle(ComponentFormatting.ERROR))
                     .forGoggles(tooltip, 1);
         }
         return true;
     }
 
-
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         tag.putString(TAG_ADDRESS, address);
+        tag.putString(TAG_REFILL_ADDRESS, refillAddress);
         if (clientPacket) {
             tag.putInt(TAG_PORT_COUNT, portCount);
             tag.putInt(TAG_PENDING_COUNT, pendingCount);
@@ -282,12 +424,21 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
             list.add(box.saveOptional(registries));
         }
         tag.put(TAG_PENDING, list);
+        ListTag targets = new ListTag();
+        for (Map.Entry<ItemId, Integer> entry : refillTargets.entrySet()) {
+            CompoundTag targetTag = new CompoundTag();
+            targetTag.putString(TAG_REFILL_ITEM, entry.getKey().value());
+            targetTag.putInt(TAG_REFILL_MIN, entry.getValue());
+            targets.add(targetTag);
+        }
+        tag.put(TAG_REFILL, targets);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
         address = tag.getString(TAG_ADDRESS);
+        refillAddress = tag.getString(TAG_REFILL_ADDRESS);
         if (clientPacket) {
             portCount = tag.getInt(TAG_PORT_COUNT);
             pendingCount = tag.getInt(TAG_PENDING_COUNT);
@@ -302,5 +453,14 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
             }
         }
         pendingCount = pendingPackages.size();
+        refillTargets.clear();
+        ListTag targets = tag.getList(TAG_REFILL, Tag.TAG_COMPOUND);
+        for (int i = 0; i < targets.size() && refillTargets.size() < MAX_REFILL_ENTRIES; i++) {
+            CompoundTag targetTag = targets.getCompound(i);
+            String raw = targetTag.getString(TAG_REFILL_ITEM);
+            int min = Math.max(0, Math.min(MAX_GOOD_SIZE, targetTag.getInt(TAG_REFILL_MIN)));
+            if (raw.isBlank()) continue;
+            refillTargets.put(new ItemId(raw), min);
+        }
     }
 }

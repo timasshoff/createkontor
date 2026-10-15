@@ -87,5 +87,12 @@ public class BuyerDeskBlock extends AbstractEmployeeDeskBlock {
 
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.buyer.p2")));
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.buyer.p3")));
+
+        page.addChild(WikiUtils.heading(Component.translatable("wiki.createkontor.page.buyer.b2")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.buyer.p4")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.buyer.p5")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.buyer.p6")));
+        page.addChild(WikiUtils.bulletList(Component.translatable("wiki.createkontor.page.buyer.restock_status")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.buyer.p7")));
     }
 }

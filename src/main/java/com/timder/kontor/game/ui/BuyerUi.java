@@ -11,8 +11,10 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.timder.kontor.config.CompanyConfig;
+import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
@@ -20,15 +22,15 @@ import com.timder.kontor.core.company.purchase.PurchaseKind;
 import com.timder.kontor.core.company.purchase.PurchaseOffer;
 import com.timder.kontor.core.company.purchase.PurchaseOffers;
 import com.timder.kontor.core.company.purchase.PurchaseQuote;
+import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
+import com.timder.kontor.game.LogisticsNetworkAccess;
 import com.timder.kontor.game.block.buyer.BuyerDeskBlockEntity;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.game.network.ToastPayload;
-import com.timder.kontor.game.ui.element.UiButtons;
-import com.timder.kontor.game.ui.element.UiContainer;
-import com.timder.kontor.game.ui.element.UiLabels;
+import com.timder.kontor.game.ui.element.*;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
@@ -39,14 +41,12 @@ import dev.vfyjxf.taffy.style.FlexWrap;
 import java.util.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public final class BuyerUi {
     public static ModularUI create(EmployeeDeskContext context, List<List<ClipboardEntry>> materialList) {
@@ -57,6 +57,9 @@ public final class BuyerUi {
         tabView.addTab(
                 UiContainer.tab(Component.translatable("ui.createkontor.buyer_desk.catalog")),
                 catalogTab(context, be, quote));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.buyer_desk.auto_stock")),
+                autoStock(context, be));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
 
@@ -317,6 +320,379 @@ public final class BuyerUi {
         return content;
     }
 
+    public static UIElement autoStock(EmployeeDeskContext context, BuyerDeskBlockEntity be) {
+        ObservableValue<Boolean> networkConnected = new ObservableValue<>(false);
+        SimpleBinding<Boolean> networkConnectedBinding = DataBindingBuilder.boolS2C(
+                        () -> context.company().logistics().isConnected())
+                .onRemoteSyncReceived(networkConnected::set)
+                .build();
+
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+        content.addSyncValue(networkConnectedBinding.getSyncValue());
+
+        UIElement notConnected = UiContainer.headerWithSubtitle(
+                UiLabels.h2(
+                        Component.translatable("ui.createkontor.logistics_manager_desk.no_network"), Horizontal.CENTER),
+                UiLabels.error(
+                        Component.translatable("ui.createkontor.buyer_desk.no_network")
+                                .withStyle(ChatFormatting.DARK_RED),
+                        Horizontal.CENTER));
+        UIElement connected = new UIElement().layout(layout -> layout.gapAll(4).heightPercent(100));
+
+        content.addChildren(connected, notConnected);
+        networkConnected.addListener(() -> {
+            boolean isConnected = networkConnected.get();
+            notConnected.setDisplay(!isConnected);
+            connected.setDisplay(isConnected);
+        });
+
+        SplitView.Horizontal split = new SplitView.Horizontal();
+        split.layout(layout -> layout.widthPercent(100).heightPercent(100));
+        split.setMinPercentage(40);
+        split.setMaxPercentage(70);
+        split.setPercentage(30);
+
+        split.left(autoStockSettings(be));
+        split.right(autoStockTargets(context, be));
+        connected.addChild(split);
+
+        networkConnected.runListenersOnce();
+
+        return content;
+    }
+
+    public static UIElement autoStockSettings(BuyerDeskBlockEntity be) {
+        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
+                .style(style -> style.background(Sprites.BORDER_DARK))
+                .layout(layout -> layout.paddingAll(8));
+
+        content.addScrollViewChildren(
+                UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.auto_stock.settings"), Horizontal.LEFT));
+        content.addScrollViewChildren(UiLabels.paragraphSecondary(
+                Component.translatable("ui.createkontor.buyer_desk.auto_stock.explanation"), Horizontal.LEFT));
+
+        UiTextFields.LabeledTextField address = UiTextFields.labeled(
+                Component.translatable("ui.createkontor.buyer_desk.auto_stock.refill_address"),
+                Component.translatable("ui.createkontor.buyer_desk.auto_stock.refill_address"),
+                Component.translatable("ui.createkontor.buyer_desk.auto_stock.refill_address.tooltip"),
+                be.getRefillAddress(),
+                text -> {
+                    CompoundTag tag = new CompoundTag();
+                    tag.putString("RefillAddress", text);
+                    content.sendMessage("c2s_set_refill_address", tag);
+                });
+        address.addSyncValue(DataBindingBuilder.stringS2C(be::getRefillAddress)
+                .onRemoteSyncReceived(value -> address.getTextField().setText(value, false))
+                .build()
+                .getSyncValue());
+        content.addScrollViewChildren(address);
+        content.onMessage("c2s_set_refill_address", tag -> be.setRefillAddress(tag.getString("RefillAddress")));
+
+        ObservableValue<Boolean> postboxConnected = new ObservableValue<>(false);
+        SimpleBinding<Boolean> postboxConnectedBinding = DataBindingBuilder.boolS2C(
+                        () -> !be.connectedPorts().isEmpty())
+                .onRemoteSyncReceived(postboxConnected::set)
+                .build();
+
+        Label postboxMissingLabel = UiLabels.paragraphError(
+                Component.translatable("ui.createkontor.buyer_desk.auto_stock.no_postbox"), Horizontal.LEFT);
+        postboxMissingLabel.addSyncValue(postboxConnectedBinding.getSyncValue());
+        postboxConnected.addListener(() -> postboxMissingLabel.setDisplay(!postboxConnected.get()));
+        content.addScrollViewChildren(postboxMissingLabel);
+        postboxConnected.runListenersOnce();
+
+        return content;
+    }
+
+    public static UIElement autoStockTargets(EmployeeDeskContext context, BuyerDeskBlockEntity be) {
+        UIElement content = new UIElement()
+                .style(style -> style.background(Sprites.BORDER_DARK))
+                .layout(layout -> layout.heightPercent(100).paddingAll(8));
+
+        content.addChild(
+                UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.auto_stock.targets"), Horizontal.LEFT));
+
+        ObservableList<ItemId> purchasable = new ObservableList<>();
+        SimpleBinding<Tag> purchasableBinding = DataBindingBuilder.tagS2C(() -> purchasableToTag(context))
+                .onRemoteSyncReceived(tag -> purchasable.set(tagToItemIds(tag).stream()
+                        .sorted(Comparator.comparing(
+                                id -> BuiltInRegistries.ITEM
+                                        .get(ResourceLocation.parse(id.value()))
+                                        .getDescription()
+                                        .getString(),
+                                String.CASE_INSENSITIVE_ORDER))
+                        .toList()))
+                .build();
+        content.addSyncValue(purchasableBinding.getSyncValue());
+
+        SearchComponent<ItemId> search = new SearchComponent<>();
+        search.setSearchUI(new SearchComponent.ISearchUI<>() {
+            @Override
+            public String resultText(ItemId id) {
+                return BuiltInRegistries.ITEM
+                        .get(ResourceLocation.parse(id.value()))
+                        .getDescription()
+                        .getString();
+            }
+
+            @Override
+            public void onResultSelected(@Nullable ItemId value) {}
+
+            @Override
+            public void search(String word, IResultHandler<ItemId> searchHandler) {
+                String needle = word.trim().toLowerCase(Locale.ROOT);
+                for (ItemId id : purchasable.get()) {
+                    if (Thread.currentThread().isInterrupted()) return;
+                    if (needle.isEmpty()
+                            || BuiltInRegistries.ITEM
+                                    .get(ResourceLocation.parse(id.value()))
+                                    .getDescription()
+                                    .getString()
+                                    .toLowerCase(Locale.ROOT)
+                                    .contains(needle)) {
+                        searchHandler.acceptResult(id);
+                    }
+                }
+            }
+        });
+
+        search.setCandidateUIProvider(id -> new UIElement()
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .gapAll(4))
+                .addChildren(
+                        new ItemSlot()
+                                .setItem(new ItemStack(
+                                        BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())), 1)),
+                        UiLabels.paragraphPrimary(
+                                BuiltInRegistries.ITEM
+                                        .get(ResourceLocation.parse(id.value()))
+                                        .getDescription(),
+                                Horizontal.LEFT)));
+        search.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).height(22));
+        search.searchStyle(style -> style.maxItemCount(8).scrollerViewHeight(148));
+
+        Button add = UiButtons.primary(Component.translatable("ui.createkontor.buyer_desk.auto_stock.add"));
+        add.setActive(false);
+        add.layout(layout -> layout.height(22));
+
+        ItemId[] selected = {null};
+        search.setOnValueChanged(id -> {
+            selected[0] = id;
+            add.setActive(id != null);
+        });
+        add.setOnClick(e -> {
+            if (selected[0] == null) return;
+            CompoundTag tag = new CompoundTag();
+            tag.putString("Item", selected[0].value());
+            content.sendMessage("c2s_add_refill_target", tag);
+            search.setValue(null);
+        });
+
+        UIElement searchRow = new UIElement()
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .gapAll(4)
+                        .widthPercent(100));
+        searchRow.addChildren(search, add);
+        content.addChild(searchRow);
+
+        content.onMessage("c2s_add_refill_target", tag -> {
+            String raw = tag.getString("Item");
+            ResourceLocation location = raw.isBlank() ? null : ResourceLocation.tryParse(raw);
+            Economy economy = context.economy();
+            if (location == null || economy == null || !BuiltInRegistries.ITEM.containsKey(location)) return;
+            ItemId id = new ItemId(raw);
+            if (!economy.isMarket(id) && !economy.isRawMaterial(id)) return;
+
+            Component name = BuiltInRegistries.ITEM
+                    .get(ResourceLocation.parse(id.value()))
+                    .getDescription();
+            if (be.getRefillTargets().containsKey(id)) {
+                ToastPayload.sendInfo(
+                        context.player(),
+                        Component.translatable("message.createkontor.buyer_desk.auto_stock.already_added", name));
+            } else if (!be.setRefillTarget(id, 0)) {
+                ToastPayload.sendError(
+                        context.player(),
+                        Component.translatable(
+                                "message.createkontor.buyer_desk.auto_stock.limit_reached",
+                                BuyerDeskBlockEntity.MAX_REFILL_ENTRIES));
+            } else {
+                ToastPayload.sendSuccess(
+                        context.player(),
+                        Component.translatable("message.createkontor.buyer_desk.auto_stock.added", name));
+            }
+        });
+
+        ScrollerView refillTargets = (ScrollerView) UiContainer.tabScroller()
+                .layout(layout -> layout.heightAuto()
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .minHeight(0)
+                        .marginTop(4));
+        ObservableList<RefillTargetEntry> targets = new ObservableList<>();
+        SimpleBinding<Tag> targetsBinding = DataBindingBuilder.tagS2C(
+                        () -> refillTargetsToTag(context.company(), context.economy(), be))
+                .onRemoteSyncReceived(tag -> targets.set(tagToRefillTargets(tag)))
+                .build();
+        refillTargets.addSyncValue(targetsBinding.getSyncValue());
+
+        targets.addListener(() -> {
+            refillTargets.clearAllScrollViewChildren();
+            for (RefillTargetEntry entry : targets.get()) {
+                UIElement element = new UIElement()
+                        .style(style -> style.background(Sprites.BORDER_DARK))
+                        .layout(layout -> layout.paddingAll(8).gapAll(4));
+
+                UIElement titleRow = new UIElement()
+                        .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                                .flexWrap(FlexWrap.WRAP)
+                                .justifyContent(AlignContent.FLEX_START)
+                                .alignItems(AlignItems.CENTER)
+                                .gapAll(4)
+                                .marginBottom(4)
+                                .widthPercent(100));
+                titleRow.addChild(new ItemSlot()
+                        .setItem(new ItemStack(
+                                BuiltInRegistries.ITEM.get(
+                                        ResourceLocation.tryParse(entry.item().value())),
+                                1)));
+                int color = 0xFFFFFF;
+                Component tooltip = Component.empty();
+                if (entry.minStock > entry.currentStock + entry.promised) {
+                    color = 0xFFFF55;
+                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.not_enough");
+                }
+                if (entry.currentStock + entry.promised() >= entry.minStock) {
+                    color = 0x55FF55;
+                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough");
+                }
+                if (entry.minStock == 0) {
+                    color = 0xAAAAAA;
+                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.disabled");
+                }
+                final int finalColor = color;
+                final Component finalTooltip = tooltip;
+                titleRow.addChild(UiLabels.paragraphPrimary(
+                                Component.empty()
+                                        .append(BuiltInRegistries.ITEM
+                                                .get(ResourceLocation.tryParse(
+                                                        entry.item().value()))
+                                                .getDescription())
+                                        .append(Component.translatable(
+                                                "ui.createkontor.buyer_desk.auto_stock.unit_price",
+                                                ComponentFormatting.moneyColored(entry.unitPrice()))),
+                                Horizontal.LEFT)
+                        .textStyle(style ->
+                                style.textAlignVertical(Vertical.CENTER).textColor(finalColor))
+                        .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1))
+                        .style(style -> style.tooltips(finalTooltip)));
+                element.addChild(titleRow);
+
+                UIElement valueRow = new UIElement()
+                        .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                                .flexWrap(FlexWrap.WRAP)
+                                .alignItems(AlignItems.CENTER)
+                                .gapAll(4)
+                                .widthPercent(100));
+
+                UIElement infoGroup = new UIElement()
+                        .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                                .flexWrap(FlexWrap.WRAP)
+                                .alignItems(AlignItems.CENTER)
+                                .gapAll(4)
+                                .flexShrink(1)
+                                .minWidth(0));
+
+                Label stock =
+                        UiLabels.secondary(Component.literal(String.valueOf(entry.currentStock())), Horizontal.RIGHT);
+                stock.layout(layout -> layout.width(32));
+
+                Label slash = UiLabels.secondary(Component.literal("/"), Horizontal.LEFT);
+
+                int[] committed = {entry.minStock()};
+                int[] current = {entry.minStock()};
+                TextField minField = new TextField();
+                minField.setNumbersOnlyInt(0, BuyerDeskBlockEntity.MAX_GOOD_SIZE);
+                minField.setText(String.valueOf(entry.minStock()), false);
+                minField.layout(layout -> layout.width(40));
+                minField.setTextResponder(text -> {
+                    try {
+                        current[0] = Math.max(
+                                0, Math.min(Integer.parseInt(text.trim()), BuyerDeskBlockEntity.MAX_GOOD_SIZE));
+                    } catch (NumberFormatException e) {
+                        current[0] = 0;
+                    }
+                });
+                minField.addEventListener(UIEvents.BLUR, event -> {
+                    if (current[0] != committed[0]) {
+                        committed[0] = current[0];
+                        CompoundTag tag = new CompoundTag();
+                        tag.putString("Item", entry.item().value());
+                        tag.putInt("MinStock", current[0]);
+                        content.sendMessage("c2s_set_refill_min", tag);
+                    }
+                });
+
+                Label promised = UiLabels.secondary(
+                        Component.translatable("ui.createkontor.buyer_desk.auto_stock.promised", entry.promised()),
+                        Horizontal.LEFT);
+
+                infoGroup.addChildren(stock, slash, minField, promised);
+
+                Button reset = UiButtons.critical(
+                        Component.translatable("ui.createkontor.buyer_desk.auto_stock.reset_promised"));
+                reset.layout(layout -> layout.height(14));
+                reset.setOnClick(e -> {
+                    CompoundTag tag = new CompoundTag();
+                    tag.putString("Item", entry.item().value());
+                    content.sendMessage("c2s_reset_promises", tag);
+                });
+
+                Button remove =
+                        UiButtons.critical(Component.translatable("ui.createkontor.buyer_desk.auto_stock.remove"));
+                remove.layout(layout -> layout.height(14));
+                remove.setOnClick(e -> {
+                    CompoundTag tag = new CompoundTag();
+                    tag.putString("Item", entry.item().value());
+                    content.sendMessage("c2s_remove_refill_target", tag);
+                });
+
+                UIElement buttonGroup = new UIElement()
+                        .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                                .flexWrap(FlexWrap.WRAP)
+                                .justifyContent(AlignContent.FLEX_END)
+                                .alignItems(AlignItems.CENTER)
+                                .gapAll(4)
+                                .widthAuto()
+                                .flexGrow(1)
+                                .flexShrink(1)
+                                .minWidth(0));
+                buttonGroup.addChildren(reset, remove);
+
+                valueRow.addChildren(infoGroup, buttonGroup);
+                element.addChild(valueRow);
+
+                refillTargets.addScrollViewChildren(element);
+            }
+        });
+        content.onMessage(
+                "c2s_set_refill_min",
+                tag -> be.setRefillTarget(new ItemId(tag.getString("Item")), tag.getInt("MinStock")));
+        content.onMessage("c2s_remove_refill_target", tag -> be.removeRefillTarget(new ItemId(tag.getString("Item"))));
+        content.onMessage(
+                "c2s_reset_promises",
+                tag -> LogisticsNetworkAccess.clearPromises(
+                        context.company().logistics().networkId(), new ItemId(tag.getString("Item"))));
+        targets.runListenersOnce();
+
+        content.addChild(refillTargets);
+
+        return content;
+    }
+
     private static Tag offersToTag(EmployeeDeskContext context) {
         ListTag list = new ListTag();
         if (context.economy() == null) {
@@ -373,6 +749,81 @@ public final class BuyerUi {
             cart.merge(new ItemId(entry.getString("Item")), entry.getInt("Quantity"), Integer::sum);
         }
         return cart;
+    }
+
+    private static Tag purchasableToTag(EmployeeDeskContext context) {
+        ListTag list = new ListTag();
+        Economy economy = context.economy();
+        if (economy == null) {
+            return list;
+        }
+        Set<ItemId> ids = new LinkedHashSet<>(economy.marketIds());
+        ids.addAll(economy.rawMaterialIds());
+        for (ItemId id : ids) {
+            list.add(StringTag.valueOf(id.value()));
+        }
+        return list;
+    }
+
+    private static List<ItemId> tagToItemIds(Tag tag) {
+        List<ItemId> ids = new ArrayList<>();
+        if (!(tag instanceof ListTag list)) {
+            return ids;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            String raw = list.getString(i);
+            if (!raw.isBlank()) {
+                ids.add(new ItemId(raw));
+            }
+        }
+        return ids;
+    }
+
+    private static Tag refillTargetsToTag(Company company, Economy economy, BuyerDeskBlockEntity be) {
+        ListTag list = new ListTag();
+        for (Map.Entry<ItemId, Integer> target : be.getRefillTargets().entrySet()) {
+            CompoundTag entry = new CompoundTag();
+            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+            entry.putString("Item", target.getKey().value());
+            entry.putInt("MinStock", target.getValue());
+            entry.putInt(
+                    "CurrentStock",
+                    LogisticsNetworkAccess.stockOf(company.logistics().networkId(), List.of(target.getKey()))
+                            .getOrDefault(target.getKey(), 0));
+            entry.putInt(
+                    "Promised",
+                    LogisticsNetworkAccess.promisedOf(company.logistics().networkId(), target.getKey()));
+            entry.putDouble(
+                    "UnitPrice",
+                    PurchaseOffers.offerFor(economy, params, target.getKey())
+                            .unitPrice()
+                            .toDollars());
+            list.add(entry);
+        }
+        return list;
+    }
+
+    public record RefillTargetEntry(ItemId item, int minStock, int currentStock, int promised, Money unitPrice) {}
+
+    private static List<RefillTargetEntry> tagToRefillTargets(Tag tag) {
+        List<RefillTargetEntry> targets = new ArrayList<>();
+        if (!(tag instanceof ListTag list)) {
+            return targets;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag entry = list.getCompound(i);
+            String raw = entry.getString("Item");
+            if (raw.isBlank()) {
+                continue;
+            }
+            targets.add(new RefillTargetEntry(
+                    new ItemId(raw),
+                    entry.getInt("MinStock"),
+                    entry.getInt("CurrentStock"),
+                    entry.getInt("Promised"),
+                    Money.fromDollar(entry.getDouble("UnitPrice"))));
+        }
+        return targets;
     }
 
     private static void addToQuote(ObservableValue<Map<ItemId, Integer>> quote, ItemId item, int quantity) {
