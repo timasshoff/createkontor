@@ -6,6 +6,7 @@ import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.*;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.timder.kontor.core.value.ItemId;
+import java.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,11 +19,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-
 public final class LogisticsNetworkAccess {
 
-    private static final LogisticallyLinkedBehaviour.RequestType REQUEST_TYPE = LogisticallyLinkedBehaviour.RequestType.REDSTONE;
+    private static final LogisticallyLinkedBehaviour.RequestType REQUEST_TYPE =
+            LogisticallyLinkedBehaviour.RequestType.REDSTONE;
 
     public static List<UUID> networksOfLinksAttachedTo(ServerLevel level, BlockPos attachedTo) {
         Objects.requireNonNull(level, "level must not be null.");
@@ -63,7 +63,8 @@ public final class LogisticsNetworkAccess {
 
     public static long totalItemCount(UUID networkId) {
         Objects.requireNonNull(networkId, "networkId must not be null.");
-        return Math.max(0, LogisticsManager.getSummaryOfNetwork(networkId, false).getTotalCount());
+        return Math.max(
+                0, LogisticsManager.getSummaryOfNetwork(networkId, false).getTotalCount());
     }
 
     public static Map<ItemId, Integer> stockOf(UUID networkId, Collection<ItemId> products) {
@@ -101,7 +102,8 @@ public final class LogisticsNetworkAccess {
         if (stacks.isEmpty()) {
             return false;
         }
-        return LogisticsManager.broadcastPackageRequest(networkId, REQUEST_TYPE, PackageOrderWithCrafts.simple(stacks), null, address);
+        return LogisticsManager.broadcastPackageRequest(
+                networkId, REQUEST_TYPE, PackageOrderWithCrafts.simple(stacks), null, address);
     }
 
     public static boolean isStockLink(ItemStack stack) {
@@ -112,13 +114,17 @@ public final class LogisticsNetworkAccess {
     public static List<Map.Entry<ItemId, Long>> stockByItem(UUID networkId) {
         Objects.requireNonNull(networkId, "networkId must not be null.");
         Map<ItemId, Long> totals = new HashMap<>();
-        for (BigItemStack big : LogisticsManager.getSummaryOfNetwork(networkId, false).getStacks()) {
+        for (BigItemStack big :
+                LogisticsManager.getSummaryOfNetwork(networkId, false).getStacks()) {
             if (big.count < 1 || big.stack.isEmpty()) continue;
-            ItemId id = new ItemId(BuiltInRegistries.ITEM.getKey(big.stack.getItem()).toString());
+            ItemId id = new ItemId(
+                    BuiltInRegistries.ITEM.getKey(big.stack.getItem()).toString());
             totals.merge(id, (long) big.count, Long::sum);
         }
         List<Map.Entry<ItemId, Long>> sorted = new ArrayList<>(totals.entrySet());
-        sorted.sort(Map.Entry.<ItemId, Long>comparingByValue().reversed().thenComparing(e -> e.getKey().value()));
+        sorted.sort(Map.Entry.<ItemId, Long>comparingByValue()
+                .reversed()
+                .thenComparing(e -> e.getKey().value()));
         return sorted;
     }
 

@@ -5,18 +5,18 @@ import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 public final class PlayerNotifications {
 
-    public static void sendUpgradeEventNotifications(MinecraftServer server, CompanyRegistry registry, List<UpgradeEvent> events, CompanyParams params) {
+    public static void sendUpgradeEventNotifications(
+            MinecraftServer server, CompanyRegistry registry, List<UpgradeEvent> events, CompanyParams params) {
         for (UpgradeEvent event : events) {
             Company company = registry.get(event.companyId()).orElse(null);
             if (company == null) {
@@ -24,31 +24,43 @@ public final class PlayerNotifications {
             }
 
             Component message = switch (event) {
-                case UpgradeEvent.Completed completed -> Component.translatable("message.createkontor.upgrade.completed",
-                        ComponentFormatting.highlightStandard(company.name()),
-                        legalFormName(params, completed.newLevel()));
-                case UpgradeEvent.Resting resting -> Component.translatable("message.createkontor.upgrade.resting",
-                        ComponentFormatting.highlightStandard(company.name()),
-                        legalFormName(params, resting.targetLevel()),
-                        ComponentFormatting.highlightStandard(String.valueOf(resting.restingDays())),
-                        ComponentFormatting.highlightStandard(minimumNetWorth(params, resting.targetLevel()).toString()));
-                case UpgradeEvent.Rejected rejected -> Component.translatable("message.createkontor.upgrade.rejected",
-                        ComponentFormatting.highlightError(company.name()),
-                        legalFormName(params, rejected.targetLevel()),
-                        ComponentFormatting.highlightError(minimumNetWorth(params, rejected.targetLevel()).toString()),
-                        ComponentFormatting.highlightError(rejected.feeLost().toString()));
+                case UpgradeEvent.Completed completed ->
+                    Component.translatable(
+                            "message.createkontor.upgrade.completed",
+                            ComponentFormatting.highlightStandard(company.name()),
+                            legalFormName(params, completed.newLevel()));
+                case UpgradeEvent.Resting resting ->
+                    Component.translatable(
+                            "message.createkontor.upgrade.resting",
+                            ComponentFormatting.highlightStandard(company.name()),
+                            legalFormName(params, resting.targetLevel()),
+                            ComponentFormatting.highlightStandard(String.valueOf(resting.restingDays())),
+                            ComponentFormatting.highlightStandard(minimumNetWorth(params, resting.targetLevel())
+                                    .toString()));
+                case UpgradeEvent.Rejected rejected ->
+                    Component.translatable(
+                            "message.createkontor.upgrade.rejected",
+                            ComponentFormatting.highlightError(company.name()),
+                            legalFormName(params, rejected.targetLevel()),
+                            ComponentFormatting.highlightError(minimumNetWorth(params, rejected.targetLevel())
+                                    .toString()),
+                            ComponentFormatting.highlightError(
+                                    rejected.feeLost().toString()));
             };
             sendMessageToAllMembers(company, server, message);
         }
     }
 
     public static void sendNewDayNotification(MinecraftServer server, long day) {
-        Component message = Component.translatable("message.createkontor.new_day", ComponentFormatting.highlightStandard(String.valueOf(day)));
+        Component message = Component.translatable(
+                "message.createkontor.new_day", ComponentFormatting.highlightStandard(String.valueOf(day)));
         server.getPlayerList().broadcastSystemMessage(message, false);
     }
 
-    public static void sendUpgradeCancelledNotification(MinecraftServer server, Company company, int targetLevel, Money refund, CompanyParams params) {
-        Component message = Component.translatable("message.createkontor.upgrade.cancelled",
+    public static void sendUpgradeCancelledNotification(
+            MinecraftServer server, Company company, int targetLevel, Money refund, CompanyParams params) {
+        Component message = Component.translatable(
+                "message.createkontor.upgrade.cancelled",
                 ComponentFormatting.highlightError(company.name()),
                 legalFormName(params, targetLevel),
                 ComponentFormatting.highlightError(refund.toString()));
@@ -56,13 +68,15 @@ public final class PlayerNotifications {
     }
 
     public static void sendLogisticsConnectedNotification(MinecraftServer server, Company company) {
-        Component message = Component.translatable("message.createkontor.logistics.connected",
-                ComponentFormatting.highlightStandard(company.name()));
+        Component message = Component.translatable(
+                "message.createkontor.logistics.connected", ComponentFormatting.highlightStandard(company.name()));
         sendMessageToAllMembers(company, server, message);
     }
 
-    public static void sendLogisticsDisconnectedNotification(MinecraftServer server, Company company, Component reason, Money booked) {
-        Component message = Component.translatable("message.createkontor.logistics.disconnected",
+    public static void sendLogisticsDisconnectedNotification(
+            MinecraftServer server, Company company, Component reason, Money booked) {
+        Component message = Component.translatable(
+                "message.createkontor.logistics.disconnected",
                 ComponentFormatting.highlightError(company.name()),
                 Component.empty().append(reason).withStyle(ChatFormatting.DARK_RED),
                 ComponentFormatting.highlightError(booked.toString()));
@@ -94,11 +108,11 @@ public final class PlayerNotifications {
     }
 
     private static Component legalFormName(CompanyParams params, int level) {
-        return Component.translatable("legal_forms.createkontor." + params.legalForms().get(level).id());
+        return Component.translatable(
+                "legal_forms.createkontor." + params.legalForms().get(level).id());
     }
 
     private static Money minimumNetWorth(CompanyParams params, int level) {
         return params.legalForms().get(level).entryRequirements().minNetWorth();
     }
-
 }
