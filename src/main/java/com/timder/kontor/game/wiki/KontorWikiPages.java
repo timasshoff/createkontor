@@ -93,10 +93,5 @@ public final class KontorWikiPages {
                 WikiCategory.EMPLOYEES,
                 Component.translatable("wiki.createkontor.page.lawyer.title"),
                 (e) -> {});
-        ConsultantWiki.register(
-                "market_analyst",
-                WikiCategory.EMPLOYEES,
-                Component.translatable("wiki.createkontor.page.market_analyst.title"),
-                (e) -> {});
     }
 }

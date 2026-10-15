@@ -34,6 +34,7 @@ import com.timder.kontor.util.ObservableList;
 import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
+import java.util.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -45,29 +46,38 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-
 public class MarketAnalystUi {
 
     public static ModularUI create(EmployeeDeskContext context, MarketAnalystActions actions) {
         var tabView = UiContainer.largeTabView();
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.markets")), marketsTab(context));
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.raw_materials")), rawMaterialsTab(context));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.markets")),
+                marketsTab(context));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.raw_materials")),
+                rawMaterialsTab(context));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
         return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
     }
 
     public static UIElement marketsTab(EmployeeDeskContext context) {
-        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         ObservableList<MarketCandidate> markets = new ObservableList<>();
         SimpleBinding<Tag> marketsBinding = DataBindingBuilder.tagS2C(() -> marketsToTag(context))
                 .onRemoteSyncReceived(tag -> markets.set(tagToMarketCandidates(tag).stream()
-                        .sorted(Comparator
-                                .comparing((MarketCandidate candidate) -> !candidate.licensed())
-                                .thenComparing((MarketCandidate candidate) -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(candidate.market().value())).asItem().getDescription().getString(), String.CASE_INSENSITIVE_ORDER)
-                        ).toList()))
+                        .sorted(Comparator.comparing((MarketCandidate candidate) -> !candidate.licensed())
+                                .thenComparing(
+                                        (MarketCandidate candidate) -> BuiltInRegistries.ITEM
+                                                .get(ResourceLocation.parse(
+                                                        candidate.market().value()))
+                                                .asItem()
+                                                .getDescription()
+                                                .getString(),
+                                        String.CASE_INSENSITIVE_ORDER))
+                        .toList()))
                 .build();
         content.addSyncValue(marketsBinding.getSyncValue());
 
@@ -75,50 +85,75 @@ public class MarketAnalystUi {
         search.setSearchUI(new SearchComponent.ISearchUI<>() {
             @Override
             public String resultText(MarketCandidate candidate) {
-                return BuiltInRegistries.ITEM.get(ResourceLocation.parse(candidate.market().value())).asItem().getDescription().getString();
+                return BuiltInRegistries.ITEM
+                        .get(ResourceLocation.parse(candidate.market().value()))
+                        .asItem()
+                        .getDescription()
+                        .getString();
             }
 
             @Override
-            public void onResultSelected(@Nullable MarketCandidate value) {
-            }
+            public void onResultSelected(@Nullable MarketCandidate value) {}
 
             @Override
             public void search(String word, IResultHandler<MarketCandidate> searchHandler) {
                 String needle = word.trim().toLowerCase(Locale.ROOT);
                 for (MarketCandidate candidate : markets.get()) {
                     if (Thread.currentThread().isInterrupted()) return;
-                    if (needle.isEmpty() || BuiltInRegistries.ITEM.get(ResourceLocation.parse(candidate.market().value())).asItem().getDescription().getString().toLowerCase(Locale.ROOT).contains(needle)) {
+                    if (needle.isEmpty()
+                            || BuiltInRegistries.ITEM
+                                    .get(ResourceLocation.parse(
+                                            candidate.market().value()))
+                                    .asItem()
+                                    .getDescription()
+                                    .getString()
+                                    .toLowerCase(Locale.ROOT)
+                                    .contains(needle)) {
                         searchHandler.acceptResult(candidate);
                     }
                 }
             }
         });
         search.setCandidateUIProvider(candidate -> new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.ROW)
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                         .alignItems(AlignItems.CENTER)
                         .gapAll(4))
                 .addChildren(
-                        new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(candidate.market().value())), 1)),
+                        new ItemSlot()
+                                .setItem(new ItemStack(
+                                        BuiltInRegistries.ITEM.get(ResourceLocation.parse(
+                                                candidate.market().value())),
+                                        1)),
                         candidate.licensed()
-                                ? UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.market_analyst_desk.licensed_candidate", BuiltInRegistries.ITEM.get(ResourceLocation.parse(candidate.market().value())).asItem().getDescription()), Horizontal.LEFT)
-                                : UiLabels.paragraphPrimary(BuiltInRegistries.ITEM.get(ResourceLocation.parse(candidate.market().value())).asItem().getDescription(), Horizontal.LEFT)
-                ));
-        search.layout(layout -> layout
-                .widthPercent(100)
-                .height(22));
-        search.searchStyle(style -> style
-                .maxItemCount(8)
-                .scrollerViewHeight(148));
+                                ? UiLabels.paragraphPrimary(
+                                        Component.translatable(
+                                                "ui.createkontor.market_analyst_desk.licensed_candidate",
+                                                BuiltInRegistries.ITEM
+                                                        .get(ResourceLocation.parse(candidate
+                                                                .market()
+                                                                .value()))
+                                                        .asItem()
+                                                        .getDescription()),
+                                        Horizontal.LEFT)
+                                : UiLabels.paragraphPrimary(
+                                        BuiltInRegistries.ITEM
+                                                .get(ResourceLocation.parse(
+                                                        candidate.market().value()))
+                                                .asItem()
+                                                .getDescription(),
+                                        Horizontal.LEFT)));
+        search.layout(layout -> layout.widthPercent(100).height(22));
+        search.searchStyle(style -> style.maxItemCount(8).scrollerViewHeight(148));
         content.addChild(search);
 
-        Label hintLabel = UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.select_market"), Horizontal.CENTER);
-        UIElement hintBox = new UIElement().layout(layout -> layout
-                .widthPercent(100)
-                .flexBasis(0)
-                .flexGrow(1)
-                .justifyContent(AlignContent.CENTER)
-                .alignItems(AlignItems.CENTER));
+        Label hintLabel = UiLabels.secondary(
+                Component.translatable("ui.createkontor.market_analyst_desk.select_market"), Horizontal.CENTER);
+        UIElement hintBox = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .justifyContent(AlignContent.CENTER)
+                        .alignItems(AlignItems.CENTER));
         hintBox.addChild(hintLabel);
         content.addChild(hintBox);
 
@@ -135,52 +170,56 @@ public class MarketAnalystUi {
             selected[0] = id != null && context.economy().isMarket(id) ? id : null;
         });
 
-        UIElement marketBox = new UIElement().layout(layout -> layout
-                .widthPercent(100)
-                .flexBasis(0)
-                .flexGrow(1)
-                .gapAll(4)
-                .marginTop(4)
-                .minHeight(0));
+        UIElement marketBox = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .gapAll(4)
+                        .marginTop(4)
+                        .minHeight(0));
 
-        Label currentPrice = (Label) UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_price", "-", "-"), Horizontal.LEFT)
-                .style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.current_price.tooltip")));
-        Label currentCompetitors = (Label) UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", "-"), Horizontal.LEFT)
-                .style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors.tooltip")));
-        Label currentDemand = (Label) UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_demand", "-"), Horizontal.LEFT)
-                .style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.current_demand.tooltip")));
+        Label currentPrice = (Label) UiLabels.secondary(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_price", "-", "-"),
+                        Horizontal.LEFT)
+                .style(style -> style.tooltips(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_price.tooltip")));
+        Label currentCompetitors = (Label) UiLabels.secondary(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", "-"),
+                        Horizontal.LEFT)
+                .style(style -> style.tooltips(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_competitors.tooltip")));
+        Label currentDemand = (Label) UiLabels.secondary(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_demand", "-"),
+                        Horizontal.LEFT)
+                .style(style -> style.tooltips(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_demand.tooltip")));
 
-        UIElement labelRow = UiLabels.seperatedLabelRow(List.of(
-                currentPrice,
-                currentCompetitors,
-                currentDemand
-        )).layout(layout -> layout.justifyContent(AlignContent.FLEX_START));
+        UIElement labelRow = UiLabels.seperatedLabelRow(List.of(currentPrice, currentCompetitors, currentDemand))
+                .layout(layout -> layout.justifyContent(AlignContent.FLEX_START));
         labelRow.setDisplay(false);
         marketBox.addChild(labelRow);
 
         ChartHost priceChartHost = new ChartHost();
-        priceChartHost.layout(layout -> layout
-                .widthPercent(100)
-                .flexBasis(0)
-                .flexGrow(1)
-                .minHeight(0));
+        priceChartHost.layout(
+                layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0));
 
         ChartHost demandOverflowChartHost = new ChartHost();
-        demandOverflowChartHost.layout(layout -> layout
-                .widthPercent(100)
-                .flexBasis(0)
-                .flexGrow(1)
-                .minHeight(0));
+        demandOverflowChartHost.layout(
+                layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0));
 
         ScrollerView shareTab = (ScrollerView) UiContainer.tabScroller().layout(layout -> layout.gapAll(4));
 
-        TabView chartTabs = (TabView) UiContainer.largeTabView().layout(layout -> layout
-                .widthPercent(100)
-                .flexGrow(1)
-                .flexBasis(0));
-        chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.price_tab")), priceChartHost);
-        chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.demand_overflow_tab")), demandOverflowChartHost);
-        chartTabs.addTab(UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.participation_tab")), shareTab);
+        TabView chartTabs = (TabView) UiContainer.largeTabView()
+                .layout(layout -> layout.widthPercent(100).flexGrow(1).flexBasis(0));
+        chartTabs.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.price_tab")),
+                priceChartHost);
+        chartTabs.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.demand_overflow_tab")),
+                demandOverflowChartHost);
+        chartTabs.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.market_analyst_desk.participation_tab")),
+                shareTab);
         chartTabs.setDisplay(false);
 
         SimpleBinding<Tag> historyBinding = DataBindingBuilder.tagS2C(() -> marketHistoryToTag(context, selected[0]))
@@ -203,42 +242,67 @@ public class MarketAnalystUi {
 
                     if (data.contains("OwnShare")) { // = company participates in market (or it would not have a share)
                         shareTab.clearAllScrollViewChildren();
-                        MarketShareBreakdown breakdown = new MarketShareBreakdown(data.getDouble("OwnShare"), data.getDouble("OtherCompaniesShare"), data.getDouble("CompetitionShare"));
+                        MarketShareBreakdown breakdown = new MarketShareBreakdown(
+                                data.getDouble("OwnShare"),
+                                data.getDouble("OtherCompaniesShare"),
+                                data.getDouble("CompetitionShare"));
                         SegmentBarElement bar = SegmentBarElement.from(CompanyCharts.share(breakdown));
                         bar.layout(layout -> layout.widthPercent(100));
                         shareTab.addScrollViewChildren(bar);
-                        shareTab.addScrollViewChildren(
-                                UiLabels.secondary(Component.translatable(
-                                        "ui.createkontor.market_analyst_desk.expected_daily_quantity",
-                                        ComponentFormatting.highlightStandard(String.valueOf(Math.round(data.getDouble("OwnExpectedQuantity"))))
-                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.expected_daily_quantity.tooltip")))
-                        );
+
+                        double expectedQuantity = data.getDouble("OwnExpectedQuantity");
+                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                                        Component.translatable(
+                                                "ui.createkontor.market_analyst_desk.expected_daily_quantity",
+                                                ComponentFormatting.highlightStandard(
+                                                        String.valueOf(Math.round(expectedQuantity)))),
+                                        Horizontal.LEFT)
+                                .style(style -> style.tooltips(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.expected_daily_quantity.tooltip"))));
 
                         double difference = marketPrice > 0.0 ? ownPrice / marketPrice - 1.0 : 0.0;
-                        shareTab.addScrollViewChildren(
-                                UiLabels.secondary(Component.translatable(
-                                        "ui.createkontor.market_analyst_desk.own_price",
-                                        ComponentFormatting.moneyColored(Money.fromDollar(data.getDouble("CurrentListPrice"))),
-                                        ComponentFormatting.percentColored(difference)
-                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.own_price.tooltip")))
-                        );
+                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                                        Component.translatable(
+                                                "ui.createkontor.market_analyst_desk.own_price",
+                                                ComponentFormatting.moneyColored(
+                                                        Money.fromDollar(data.getDouble("CurrentListPrice"))),
+                                                ComponentFormatting.percentColored(difference)),
+                                        Horizontal.LEFT)
+                                .style(style -> style.tooltips(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.own_price.tooltip"))));
 
-                        shareTab.addScrollViewChildren(
-                                UiLabels.secondary(Component.translatable(
-                                        "ui.createkontor.market_analyst_desk.reputation",
-                                        ComponentFormatting.starsWithValue(data.getDouble("ReputationStars"))
-                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.reputation.tooltip")))
-                        );
+                        double expectedRevenue = ownPrice * expectedQuantity;
+                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                                        Component.translatable(
+                                                "ui.createkontor.market_analyst_desk.expected_revenue",
+                                                ComponentFormatting.moneyColored(
+                                                        Money.fromDollar(Math.round(expectedRevenue)))),
+                                        Horizontal.LEFT)
+                                .style(style -> style.tooltips(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.expected_revenue.tooltip"))));
+
+                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                                        Component.translatable(
+                                                "ui.createkontor.market_analyst_desk.reputation",
+                                                ComponentFormatting.starsWithValue(data.getDouble("ReputationStars"))),
+                                        Horizontal.LEFT)
+                                .style(style -> style.tooltips(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.reputation.tooltip"))));
 
                         int lostRequests = data.getInt("LostRequestsToday");
-                        shareTab.addScrollViewChildren(
-                                UiLabels.secondary(Component.translatable(
-                                        "ui.createkontor.market_analyst_desk.lost_requests",
-                                        Component.literal(String.valueOf(lostRequests)).withStyle(lostRequests > 0 ? ChatFormatting.RED : ChatFormatting.GREEN),
-                                        data.getInt("OpenRequests"),
-                                        data.getInt("RequestsLimit")
-                                ), Horizontal.LEFT).style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.lost_requests.tooltip")))
-                        );
+                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                                        Component.translatable(
+                                                "ui.createkontor.market_analyst_desk.lost_requests",
+                                                Component.literal(String.valueOf(lostRequests))
+                                                        .withStyle(
+                                                                lostRequests > 0
+                                                                        ? ChatFormatting.RED
+                                                                        : ChatFormatting.GREEN),
+                                                data.getInt("OpenRequests"),
+                                                data.getInt("RequestsLimit")),
+                                        Horizontal.LEFT)
+                                .style(style -> style.tooltips(Component.translatable(
+                                        "ui.createkontor.market_analyst_desk.lost_requests.tooltip"))));
 
                     } else {
                         shareTab.clearAllScrollViewChildren();
@@ -247,9 +311,21 @@ public class MarketAnalystUi {
                                 Horizontal.LEFT));
                     }
 
-                    currentPrice.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_price", ComponentFormatting.moneyColored(Money.fromDollar(history.getLast().displayedPrice())), ComponentFormatting.percentColored(MarketAnalystUi.marketPriceChange(history))));
-                    currentCompetitors.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_competitors", Component.literal(String.valueOf((int) Math.round(history.getLast().competitors()))).withStyle(ChatFormatting.RED)));
-                    currentDemand.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_demand", Component.literal(String.valueOf((int) Math.round(history.getLast().demand()))).withStyle(ChatFormatting.GOLD)));
+                    currentPrice.setText(Component.translatable(
+                            "ui.createkontor.market_analyst_desk.current_price",
+                            ComponentFormatting.moneyColored(
+                                    Money.fromDollar(history.getLast().displayedPrice())),
+                            ComponentFormatting.percentColored(MarketAnalystUi.marketPriceChange(history))));
+                    currentCompetitors.setText(Component.translatable(
+                            "ui.createkontor.market_analyst_desk.current_competitors",
+                            Component.literal(String.valueOf(
+                                            (int) Math.round(history.getLast().competitors())))
+                                    .withStyle(ChatFormatting.RED)));
+                    currentDemand.setText(Component.translatable(
+                            "ui.createkontor.market_analyst_desk.current_demand",
+                            Component.literal(String.valueOf(
+                                            (int) Math.round(history.getLast().demand())))
+                                    .withStyle(ChatFormatting.GOLD)));
                     priceChartHost.show(MarketCharts.priceCompetitors(history, ownPrice));
                     demandOverflowChartHost.show(MarketCharts.demandOverflow(history));
                 })
@@ -262,13 +338,20 @@ public class MarketAnalystUi {
     }
 
     public static UIElement rawMaterialsTab(EmployeeDeskContext context) {
-        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         ObservableList<ItemId> rawMaterials = new ObservableList<>();
         SimpleBinding<Tag> rawMaterialsBinding = DataBindingBuilder.tagS2C(() -> rawMaterialsToTag(context))
                 .onRemoteSyncReceived(tag -> rawMaterials.set(tagToRawMaterials(tag).stream()
-                        .sorted(Comparator.comparing(id -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())).asItem().getDescription().getString(), String.CASE_INSENSITIVE_ORDER)
-                        ).toList()))
+                        .sorted(Comparator.comparing(
+                                id -> BuiltInRegistries.ITEM
+                                        .get(ResourceLocation.parse(id.value()))
+                                        .asItem()
+                                        .getDescription()
+                                        .getString(),
+                                String.CASE_INSENSITIVE_ORDER))
+                        .toList()))
                 .build();
         content.addSyncValue(rawMaterialsBinding.getSyncValue());
 
@@ -276,48 +359,60 @@ public class MarketAnalystUi {
         search.setSearchUI(new SearchComponent.ISearchUI<>() {
             @Override
             public String resultText(ItemId id) {
-                return BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())).asItem().getDescription().getString();
+                return BuiltInRegistries.ITEM
+                        .get(ResourceLocation.parse(id.value()))
+                        .asItem()
+                        .getDescription()
+                        .getString();
             }
 
             @Override
-            public void onResultSelected(@Nullable ItemId value) {
-            }
+            public void onResultSelected(@Nullable ItemId value) {}
 
             @Override
             public void search(String word, IResultHandler<ItemId> searchHandler) {
                 String needle = word.trim().toLowerCase(Locale.ROOT);
                 for (ItemId id : rawMaterials.get()) {
                     if (Thread.currentThread().isInterrupted()) return;
-                    if (needle.isEmpty() || BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())).asItem().getDescription().getString().toLowerCase(Locale.ROOT).contains(needle)) {
+                    if (needle.isEmpty()
+                            || BuiltInRegistries.ITEM
+                                    .get(ResourceLocation.parse(id.value()))
+                                    .asItem()
+                                    .getDescription()
+                                    .getString()
+                                    .toLowerCase(Locale.ROOT)
+                                    .contains(needle)) {
                         searchHandler.acceptResult(id);
                     }
                 }
             }
         });
         search.setCandidateUIProvider(id -> new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.ROW)
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                         .alignItems(AlignItems.CENTER)
                         .gapAll(4))
                 .addChildren(
-                        new ItemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())), 1)),
-                        UiLabels.paragraphPrimary(BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())).asItem().getDescription(), Horizontal.LEFT)
-                ));
-        search.layout(layout -> layout
-                .widthPercent(100)
-                .height(22));
-        search.searchStyle(style -> style
-                .maxItemCount(8)
-                .scrollerViewHeight(148));
+                        new ItemSlot()
+                                .setItem(new ItemStack(
+                                        BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())), 1)),
+                        UiLabels.paragraphPrimary(
+                                BuiltInRegistries.ITEM
+                                        .get(ResourceLocation.parse(id.value()))
+                                        .asItem()
+                                        .getDescription(),
+                                Horizontal.LEFT)));
+        search.layout(layout -> layout.widthPercent(100).height(22));
+        search.searchStyle(style -> style.maxItemCount(8).scrollerViewHeight(148));
         content.addChild(search);
 
-        Label hintLabel = UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.select_raw_market"), Horizontal.CENTER);
-        UIElement hintBox = new UIElement().layout(layout -> layout
-                .widthPercent(100)
-                .flexBasis(0)
-                .flexGrow(1)
-                .justifyContent(AlignContent.CENTER)
-                .alignItems(AlignItems.CENTER));
+        Label hintLabel = UiLabels.secondary(
+                Component.translatable("ui.createkontor.market_analyst_desk.select_raw_market"), Horizontal.CENTER);
+        UIElement hintBox = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .justifyContent(AlignContent.CENTER)
+                        .alignItems(AlignItems.CENTER));
         hintBox.addChild(hintLabel);
         content.addChild(hintBox);
 
@@ -334,29 +429,30 @@ public class MarketAnalystUi {
             selected[0] = id != null && context.economy().isRawMaterial(id) ? id : null;
         });
 
-        UIElement rawMaterialBox = new UIElement().layout(layout -> layout
-                .widthPercent(100)
-                .flexBasis(0)
-                .flexGrow(1)
-                .gapAll(4)
-                .marginTop(4)
-                .minHeight(0));
+        UIElement rawMaterialBox = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .gapAll(4)
+                        .marginTop(4)
+                        .minHeight(0));
 
-        Label currentPrice = (Label) UiLabels.secondary(Component.translatable("ui.createkontor.market_analyst_desk.current_price", "-", "-"), Horizontal.LEFT)
-                .style(style -> style.tooltips(Component.translatable("ui.createkontor.market_analyst_desk.current_price.tooltip")));
+        Label currentPrice = (Label) UiLabels.secondary(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_price", "-", "-"),
+                        Horizontal.LEFT)
+                .style(style -> style.tooltips(
+                        Component.translatable("ui.createkontor.market_analyst_desk.current_price.tooltip")));
         currentPrice.setDisplay(false);
         rawMaterialBox.addChild(currentPrice);
 
         ChartHost priceChartHost = new ChartHost();
-        priceChartHost.layout(layout -> layout
-                .widthPercent(100)
-                .flexBasis(0)
-                .flexGrow(1)
-                .minHeight(0));
+        priceChartHost.layout(
+                layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0));
         priceChartHost.setDisplay(false);
         rawMaterialBox.addChild(priceChartHost);
 
-        SimpleBinding<Tag> historyBinding = DataBindingBuilder.tagS2C(() -> rawMaterialHistoryToTag(context.economy(), selected[0]))
+        SimpleBinding<Tag> historyBinding = DataBindingBuilder.tagS2C(
+                        () -> rawMaterialHistoryToTag(context.economy(), selected[0]))
                 .onRemoteSyncReceived(tag -> {
                     CompoundTag data = (CompoundTag) tag;
                     boolean hasRawMaterial = data.contains("RawMaterial");
@@ -371,7 +467,11 @@ public class MarketAnalystUi {
                         return;
                     }
 
-                    currentPrice.setText(Component.translatable("ui.createkontor.market_analyst_desk.current_price", ComponentFormatting.moneyColored(Money.fromDollar(history.getLast().price())), ComponentFormatting.percentColored(rawMaterialPriceChange(history))));
+                    currentPrice.setText(Component.translatable(
+                            "ui.createkontor.market_analyst_desk.current_price",
+                            ComponentFormatting.moneyColored(
+                                    Money.fromDollar(history.getLast().price())),
+                            ComponentFormatting.percentColored(rawMaterialPriceChange(history))));
                     priceChartHost.show(RawMaterialCharts.price(history));
                 })
                 .build();
@@ -430,18 +530,24 @@ public class MarketAnalystUi {
         tag.put("History", list);
 
         try {
-            MarketShareBreakdown breakdown = context.economy().marketShare(id, context.company().id());
+            MarketShareBreakdown breakdown =
+                    context.economy().marketShare(id, context.company().id());
             tag.putDouble("OwnShare", breakdown.own());
             tag.putDouble("OtherCompaniesShare", breakdown.otherCompanies());
             tag.putDouble("CompetitionShare", breakdown.competition());
-            tag.putDouble("OwnExpectedQuantity", context.economy().expectedDailyQuantity(id, context.company().id()));
+            tag.putDouble(
+                    "OwnExpectedQuantity",
+                    context.economy()
+                            .expectedDailyQuantity(id, context.company().id()));
             tag.putInt("LostRequestsToday", context.company().requestBoard().lostRequestsToday(id));
             tag.putInt("OpenRequests", context.company().requestBoard().openRequestsForProduct(id));
             CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
             tag.putInt("RequestsLimit", context.company().legalForm(params).maxOpenRequestsPerProduct());
-        } catch (IllegalArgumentException ignored) { }
+        } catch (IllegalArgumentException ignored) {
+        }
 
-        Optional<MarketParticipant> participant = context.economy().storedParticipant(id, context.company().id());
+        Optional<MarketParticipant> participant =
+                context.economy().storedParticipant(id, context.company().id());
         participant.ifPresent(p -> {
             tag.putDouble("CurrentListPrice", p.listPrice());
             tag.putDouble("ReputationStars", p.reputationInStars());
@@ -466,8 +572,7 @@ public class MarketAnalystUi {
                     e.getDouble("Competitors"),
                     e.getDouble("Delivered"),
                     e.getDouble("Demand"),
-                    e.contains("Overflow", Tag.TAG_DOUBLE) ? e.getDouble("Overflow") : Double.NaN)
-            );
+                    e.contains("Overflow", Tag.TAG_DOUBLE) ? e.getDouble("Overflow") : Double.NaN));
         }
         return history;
     }
@@ -512,11 +617,7 @@ public class MarketAnalystUi {
         List<RawMaterialHistoryEntry> history = new ArrayList<>();
         for (Tag t : tag.getList("History", Tag.TAG_COMPOUND)) {
             CompoundTag e = (CompoundTag) t;
-            history.add(new RawMaterialHistoryEntry(
-                    id,
-                    e.getLong("Day"),
-                    e.getDouble("Price"))
-            );
+            history.add(new RawMaterialHistoryEntry(id, e.getLong("Day"), e.getDouble("Price")));
         }
         return history;
     }
