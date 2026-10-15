@@ -15,11 +15,11 @@ import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
+import com.timder.kontor.util.PlayerNotifications;
+import java.util.*;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-
-import java.util.*;
 
 public class KontorTickHandler {
 
@@ -52,6 +52,9 @@ public class KontorTickHandler {
 
         if (tradingTickPassed) {
             economyData.setDirty();
+            if (LogisticsSampling.sampleAll(registry, economy, activeNow)) {
+                companyData.setDirty();
+            }
         }
 
         if (economy.currentDay() != dayBefore) {
@@ -67,7 +70,8 @@ public class KontorTickHandler {
         boolean upgradeEventOccurred = false;
         boolean requestArrived = false;
         if (registry.size() > 0) {
-            CompanyParams companyParams = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+            CompanyParams companyParams =
+                    CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
             List<CompanyRegistry.BurstOrder> bursts = registry.advance(1, economy.currentDay());
             orderBurstOccurred = !bursts.isEmpty();
             if (orderBurstOccurred) {
@@ -76,7 +80,8 @@ public class KontorTickHandler {
                 // TODO once notifications exist: tell the company's members an order burst.
             }
 
-            List<UpgradeEvent> upgradeEvents = registry.advanceUpgrades(1, KontorTickHandler::canProcessUpgrade, companyParams);
+            List<UpgradeEvent> upgradeEvents =
+                    registry.advanceUpgrades(1, KontorTickHandler::canProcessUpgrade, companyParams);
             upgradeEventOccurred = !upgradeEvents.isEmpty();
             if (upgradeEventOccurred) {
                 PlayerNotifications.sendUpgradeEventNotifications(server, registry, upgradeEvents, companyParams);
@@ -85,7 +90,10 @@ public class KontorTickHandler {
             requestArrived = letRequestsArrive(server, companyData, economy, tradingTickPassed);
         }
 
-        if (orderBurstOccurred || requestArrived || upgradeEventOccurred || (tradingTickPassed && registry.size() > 0)) {
+        if (orderBurstOccurred
+                || requestArrived
+                || upgradeEventOccurred
+                || (tradingTickPassed && registry.size() > 0)) {
             companyData.setDirty();
         }
     }
@@ -93,7 +101,8 @@ public class KontorTickHandler {
     public static Set<CompanyId> activeCompanies(MinecraftServer server, CompanyRegistry registry) {
         Set<CompanyId> active = new HashSet<>();
         for (Company company : registry.all()) {
-            if (isOnline(server, company.owner()) || company.managers().stream().anyMatch(manager -> isOnline(server, manager))) {
+            if (isOnline(server, company.owner())
+                    || company.managers().stream().anyMatch(manager -> isOnline(server, manager))) {
                 active.add(company.id());
             }
         }
@@ -127,15 +136,24 @@ public class KontorTickHandler {
         return newActiveDay;
     }
 
-    private static boolean letRequestsArrive(MinecraftServer server, CompanySavedData companyData, Economy economy, boolean tradingTickPassed) {
-        CompanyParams companyParams = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+    private static boolean letRequestsArrive(
+            MinecraftServer server, CompanySavedData companyData, Economy economy, boolean tradingTickPassed) {
+        CompanyParams companyParams =
+                CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         RequestParams requestParams = EconomyConfig.toRequestParams();
 
-        List<RequestArrivals.Arrival> arrivals = companyData.getArrivals(server).advance(companyData.getRegistry(), economy, companyParams, requestParams, 1, tradingTickPassed);
+        List<RequestArrivals.Arrival> arrivals = companyData
+                .getArrivals(server)
+                .advance(companyData.getRegistry(), economy, companyParams, requestParams, 1, tradingTickPassed);
         return !arrivals.isEmpty();
     }
 
-    public static void settleCompanies(MinecraftServer server, CompanySavedData companyData, EconomySavedData economyData, long lastHistoryDayBefore, Set<CompanyId> activeNow) {
+    public static void settleCompanies(
+            MinecraftServer server,
+            CompanySavedData companyData,
+            EconomySavedData economyData,
+            long lastHistoryDayBefore,
+            Set<CompanyId> activeNow) {
         Economy economy = economyData.getEconomy();
         CompanyRegistry registry = companyData.getRegistry();
         if (registry.size() == 0) {
@@ -161,8 +179,9 @@ public class KontorTickHandler {
 
             for (EmployeeEvent event : registry.endContracts(day, orphanDays, minActiveTicks)) {
                 if (event instanceof EmployeeEvent.ContractEnded ended) {
-                    registry.get(ended.companyId()).ifPresent(company ->
-                            EmployeeContracts.ended(server, company, ended.employee(), day, params));
+                    registry.get(ended.companyId())
+                            .ifPresent(
+                                    company -> EmployeeContracts.ended(server, company, ended.employee(), day, params));
                 }
             }
 

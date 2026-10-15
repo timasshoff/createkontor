@@ -5,13 +5,15 @@ import com.timder.kontor.core.company.financial.Booking;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.market.MarketShareBreakdown;
+import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.ui.chart.classic.ChartKind;
 import com.timder.kontor.game.ui.chart.classic.ChartSeries;
 import com.timder.kontor.game.ui.chart.classic.ChartSpec;
 import com.timder.kontor.game.ui.chart.segment.SegmentBarSpec;
-import net.minecraft.network.chat.Component;
-
 import java.util.*;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class CompanyCharts {
 
@@ -30,12 +32,25 @@ public class CompanyCharts {
             pointLabels.add(Component.translatable("chart.createkontor.day").getString() + entry.day());
         }
 
-        return ChartSpec.builder(Component.translatable("chart.createkontor.revenue_result.title").getString())
-                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.revenue").getString(), ChartColors.GREEN, x, revenue))
-                .series(new ChartSeries(Component.translatable("chart.createkontor.revenue_result.series.result").getString(), ChartColors.BLUE, x, result))
+        return ChartSpec.builder(Component.translatable("chart.createkontor.revenue_result.title")
+                        .getString())
+                .series(new ChartSeries(
+                        Component.translatable("chart.createkontor.revenue_result.series.revenue")
+                                .getString(),
+                        ChartColors.GREEN,
+                        x,
+                        revenue))
+                .series(new ChartSeries(
+                        Component.translatable("chart.createkontor.revenue_result.series.result")
+                                .getString(),
+                        ChartColors.BLUE,
+                        x,
+                        result))
                 .referenceLine("0", 0, ChartColors.WHITE)
                 .includeZero(true)
-                .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
+                .xAxis(
+                        Component.translatable("chart.createkontor.d").getString(),
+                        Component.translatable("chart.createkontor.today").getString())
                 .pointLabels(pointLabels)
                 .xRangeOptions(List.of(5, 10, 30, 100, 360), 30)
                 .build();
@@ -66,14 +81,27 @@ public class CompanyCharts {
             }
         }
 
-        return ChartSpec.builder(Component.translatable("chart.createkontor.balance.title").getString())
-                .series(new ChartSeries(Component.translatable("chart.createkontor.balance.series.balance").getString(), ChartColors.BLUE, x, balance))
-                .referenceLine(Component.translatable("chart.createkontor.balance.reference.overdraft").getString(), overdraftLimit, ChartColors.RED)
+        return ChartSpec.builder(Component.translatable("chart.createkontor.balance.title")
+                        .getString())
+                .series(new ChartSeries(
+                        Component.translatable("chart.createkontor.balance.series.balance")
+                                .getString(),
+                        ChartColors.BLUE,
+                        x,
+                        balance))
+                .referenceLine(
+                        Component.translatable("chart.createkontor.balance.reference.overdraft")
+                                .getString(),
+                        overdraftLimit,
+                        ChartColors.RED)
                 .includeZero(true)
-                .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
+                .xAxis(
+                        Component.translatable("chart.createkontor.d").getString(),
+                        Component.translatable("chart.createkontor.today").getString())
                 .pointLabels(pointLabels)
                 .xRangeOptions(List.of(10, 25, 50, 100, 250), 25)
-                .xRangeUnit(Component.translatable("chart.createkontor.balance.bookings").getString())
+                .xRangeUnit(Component.translatable("chart.createkontor.balance.bookings")
+                        .getString())
                 .build();
     }
 
@@ -83,7 +111,8 @@ public class CompanyCharts {
         List<String> pointLabels = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             x[i] = -(double) (count - 1 - i);
-            pointLabels.add(Component.translatable("chart.createkontor.day").getString() + history.get(i).day());
+            pointLabels.add(Component.translatable("chart.createkontor.day").getString()
+                    + history.get(i).day());
         }
 
         Map<BookingKind, Long> totalCentsByKind = new EnumMap<>(BookingKind.class);
@@ -96,14 +125,15 @@ public class CompanyCharts {
         List<BookingKind> byTotalDesc = new ArrayList<>(totalCentsByKind.keySet());
         byTotalDesc.sort(Comparator.comparingLong(totalCentsByKind::get));
 
-        int namedCount = byTotalDesc.size() <= ChartSpec.MAX_SERIES
-                ? byTotalDesc.size()
-                : ChartSpec.MAX_SERIES - 1;
+        int namedCount = byTotalDesc.size() <= ChartSpec.MAX_SERIES ? byTotalDesc.size() : ChartSpec.MAX_SERIES - 1;
         List<BookingKind> namedKinds = byTotalDesc.subList(0, namedCount);
 
-        ChartSpec.Builder builder = ChartSpec.builder(Component.translatable("chart.createkontor.cost_structure.title").getString())
+        ChartSpec.Builder builder = ChartSpec.builder(Component.translatable("chart.createkontor.cost_structure.title")
+                        .getString())
                 .kind(ChartKind.STACKED_BAR)
-                .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
+                .xAxis(
+                        Component.translatable("chart.createkontor.d").getString(),
+                        Component.translatable("chart.createkontor.today").getString())
                 .hideXAxis()
                 .pointLabels(pointLabels)
                 .xRangeOptions(List.of(5, 10, 30, 100, 360), 30);
@@ -112,9 +142,16 @@ public class CompanyCharts {
             BookingKind kind = namedKinds.get(k);
             double[] y = new double[count];
             for (int i = 0; i < count; i++) {
-                y[i] = history.get(i).costsByKind().getOrDefault(kind, Money.ZERO).negate().cents() / 100.0;
+                y[i] = history.get(i)
+                                .costsByKind()
+                                .getOrDefault(kind, Money.ZERO)
+                                .negate()
+                                .cents()
+                        / 100.0;
             }
-            String label = Component.translatable("enum.createkontor.booking_kind." + kind.toString().toLowerCase()).getString();
+            String label = Component.translatable(
+                            "enum.createkontor.booking_kind." + kind.toString().toLowerCase())
+                    .getString();
             builder.series(new ChartSeries(label, ChartColors.STACK[k], x, y));
         }
 
@@ -122,27 +159,77 @@ public class CompanyCharts {
             double[] y = new double[count];
             for (int i = 0; i < count; i++) {
                 double sum = 0.0;
-                for (Map.Entry<BookingKind, Money> cost : history.get(i).costsByKind().entrySet()) {
+                for (Map.Entry<BookingKind, Money> cost :
+                        history.get(i).costsByKind().entrySet()) {
                     if (!namedKinds.contains(cost.getKey())) {
                         sum += cost.getValue().negate().cents() / 100.0;
                     }
                 }
                 y[i] = sum;
             }
-            builder.series(new ChartSeries(Component.translatable("chart.createkontor.other").getString(), ChartColors.STACK[namedKinds.size()], x, y));
+            builder.series(new ChartSeries(
+                    Component.translatable("chart.createkontor.other").getString(),
+                    ChartColors.STACK[namedKinds.size()],
+                    x,
+                    y));
         }
 
         return builder.build();
     }
 
     public static SegmentBarSpec share(MarketShareBreakdown breakdown) {
-        SegmentBarSpec.Builder builder = SegmentBarSpec.builder(Component.translatable("chart.createkontor.market_share.title").getString())
-                .segment(Component.translatable("chart.createkontor.market_share.series.you").getString(), ChartColors.BLUE, breakdown.own(), Component.translatable("chart.createkontor.market_share.series.you.description").getString())
+        SegmentBarSpec.Builder builder = SegmentBarSpec.builder(
+                        Component.translatable("chart.createkontor.market_share.title")
+                                .getString())
+                .segment(
+                        Component.translatable("chart.createkontor.market_share.series.you")
+                                .getString(),
+                        ChartColors.BLUE,
+                        breakdown.own(),
+                        Component.translatable("chart.createkontor.market_share.series.you.description")
+                                .getString())
                 .decimals(2);
         if (breakdown.otherCompanies() > 0) {
-            builder.segment(Component.translatable("chart.createkontor.market_share.series.other_companies").getString(), ChartColors.ORANGE, breakdown.otherCompanies(), Component.translatable("chart.createkontor.market_share.series.other_companies.description").getString());
+            builder.segment(
+                    Component.translatable("chart.createkontor.market_share.series.other_companies")
+                            .getString(),
+                    ChartColors.ORANGE,
+                    breakdown.otherCompanies(),
+                    Component.translatable("chart.createkontor.market_share.series.other_companies.description")
+                            .getString());
         }
-        builder.segment(Component.translatable("chart.createkontor.market_share.series.competition").getString(), ChartColors.TEAL, breakdown.competition(), Component.translatable("chart.createkontor.market_share.series.competition.description").getString());
+        builder.segment(
+                Component.translatable("chart.createkontor.market_share.series.competition")
+                        .getString(),
+                ChartColors.TEAL,
+                breakdown.competition(),
+                Component.translatable("chart.createkontor.market_share.series.competition.description")
+                        .getString());
+        return builder.build();
+    }
+
+    public static SegmentBarSpec stock(List<Map.Entry<ItemId, Long>> top, long others) {
+        SegmentBarSpec.Builder builder = SegmentBarSpec.builder(
+                        Component.translatable("chart.createkontor.stock.title").getString())
+                .display(SegmentBarSpec.Display.VALUE)
+                .decimals(0);
+
+        for (int i = 0; i < top.size(); i++) {
+            Map.Entry<ItemId, Long> entry = top.get(i);
+            String name = BuiltInRegistries.ITEM
+                    .get(ResourceLocation.parse(entry.getKey().value()))
+                    .getDescription()
+                    .getString();
+            builder.segment(name, ChartColors.STACK[i], entry.getValue());
+        }
+
+        if (others > 0) {
+            builder.segment(
+                    Component.translatable("chart.createkontor.other").getString(),
+                    ChartColors.STACK[top.size()],
+                    others);
+        }
+
         return builder.build();
     }
 }

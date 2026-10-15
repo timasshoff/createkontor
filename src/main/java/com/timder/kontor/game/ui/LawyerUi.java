@@ -9,20 +9,15 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
-import com.lowdragmc.lowdraglib2.gui.ui.elements.ProgressBar;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.*;
 import com.timder.kontor.core.company.license.*;
-import com.timder.kontor.core.company.order.Order;
-import com.timder.kontor.core.company.order.OrderPhase;
-import com.timder.kontor.core.company.order.RequestOrigin;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.LawyerActions;
@@ -31,12 +26,17 @@ import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
+import com.timder.kontor.game.ui.element.UiProgressBars;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -47,16 +47,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
-import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-
 public final class LawyerUi {
 
     public static ModularUI create(EmployeeDeskContext context, LawyerActions actions) {
         var tabView = UiContainer.largeTabView();
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.lawyer_desk.legal_form")), legalFormTab(context, actions));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.lawyer_desk.legal_form")),
+                legalFormTab(context, actions));
         tabView.addTab(UiContainer.tab(Component.literal("Licenses")), licensesTab(context, actions));
         tabView.addTab(UiContainer.tab(Component.literal("License Catalog")), licenseCatalogTab(context, actions));
 
@@ -68,29 +65,39 @@ public final class LawyerUi {
         ScrollerView content = UiContainer.tabScroller();
 
         Label legalFormLabel = UiLabels.h2(Component.empty(), Horizontal.CENTER);
-        legalFormLabel.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> Component.translatable("legal_forms.createkontor." + context.company().legalForm(CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()))).toString()))
-                        .onRemoteSyncReceived(legalFormLabel::setText)
-                        .build().getSyncValue()
-        );
+        legalFormLabel.addSyncValue(DataBindingBuilder.componentS2C(() ->
+                        Component.translatable("legal_forms.createkontor."
+                                + context.company()
+                                        .legalForm(CompanyConfig.toCompanyParams(
+                                                new LegalForms(KontorData.getLegalFormDefinitions())))
+                                        .toString()))
+                .onRemoteSyncReceived(legalFormLabel::setText)
+                .build()
+                .getSyncValue());
 
         Label runningUpgrade = UiLabels.primary(Component.empty(), Horizontal.CENTER);
-        runningUpgrade.addSyncValue(
-                DataBindingBuilder.boolS2C(() -> context.company().upgradeApplication().isPresent())
-                        .onRemoteSyncReceived((applicationPresent) -> {
-                            if (applicationPresent) {
-                                runningUpgrade.setText(Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_in_progress"));
-                            } else {
-                                runningUpgrade.setText(Component.translatable("ui.createkontor.lawyer_desk.legal_form.no_upgrade"));
-                            }
-                        }).build().getSyncValue()
-        );
+        runningUpgrade.addSyncValue(DataBindingBuilder.boolS2C(
+                        () -> context.company().upgradeApplication().isPresent())
+                .onRemoteSyncReceived((applicationPresent) -> {
+                    if (applicationPresent) {
+                        runningUpgrade.setText(
+                                Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_in_progress"));
+                    } else {
+                        runningUpgrade.setText(
+                                Component.translatable("ui.createkontor.lawyer_desk.legal_form.no_upgrade"));
+                    }
+                })
+                .build()
+                .getSyncValue());
 
         content.addScrollViewChildren(UiContainer.headerWithSubtitle(legalFormLabel, runningUpgrade));
 
         ObservableValue<LegalFormDef> currentLegalForm = new ObservableValue<>(null);
-        SimpleBinding<Tag> currentLegalFormBinding = DataBindingBuilder.tagS2C(() -> legalFormToTag(context.company().legalForm(CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())))))
-                .onRemoteSyncReceived(tag -> currentLegalForm.set(tagToLegalForm(tag).get()))
+        SimpleBinding<Tag> currentLegalFormBinding = DataBindingBuilder.tagS2C(() -> legalFormToTag(context.company()
+                        .legalForm(
+                                CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())))))
+                .onRemoteSyncReceived(
+                        tag -> currentLegalForm.set(tagToLegalForm(tag).get()))
                 .build();
 
         UIElement currentLegalFormStatsElement = new UIElement()
@@ -105,23 +112,27 @@ public final class LawyerUi {
 
         ObservableValue<LegalFormDef> nextLegalForm = new ObservableValue<>(null);
         SimpleBinding<Tag> nextLegalFormBinding = DataBindingBuilder.tagS2C(() -> {
-                    CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+                    CompanyParams params =
+                            CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
                     LegalForms forms = params.legalForms();
                     if (!forms.hasNext(context.company().legalLevel())) return new CompoundTag();
                     return legalFormToTag(forms.next(context.company().legalLevel()));
                 })
-                .onRemoteSyncReceived(tag -> nextLegalForm.set(tagToLegalForm(tag).orElse(null)))
+                .onRemoteSyncReceived(
+                        tag -> nextLegalForm.set(tagToLegalForm(tag).orElse(null)))
                 .build();
 
         ObservableValue<UpgradeChecklist> checklist = new ObservableValue<>(null);
         SimpleBinding<Tag> checklistBinding = DataBindingBuilder.tagS2C(() -> {
-                    CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+                    CompanyParams params =
+                            CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
                     LegalForms forms = params.legalForms();
                     if (!forms.hasNext(context.company().legalLevel())) return new CompoundTag();
                     return checklistToTag(UpgradeRules.checkApplication(
                             context.company(),
                             forms.next(context.company().legalLevel()),
-                            context.economy().overallReputationInStars(context.company().id())));
+                            context.economy()
+                                    .overallReputationInStars(context.company().id())));
                 })
                 .onRemoteSyncReceived(tag -> checklist.set(tagToChecklist(tag).orElse(null)))
                 .build();
@@ -139,110 +150,171 @@ public final class LawyerUi {
                 .addSyncValue(nextLegalFormBinding.getSyncValue())
                 .addSyncValue(checklistBinding.getSyncValue())
                 .addSyncValue(applicationBinding.getSyncValue());
-        upgradeContainer.onMessage("c2s_apply_upgrade", tag -> ToastPayload.send(context.player(), actions.applyForUpgrade()));
+        upgradeContainer.onMessage(
+                "c2s_apply_upgrade", tag -> ToastPayload.send(context.player(), actions.applyForUpgrade()));
 
-        nextLegalForm.addListener(() -> buildUpgradeContainer(currentLegalForm.get(), nextLegalForm.get(), checklist.get(), applicationStatus.get(), upgradeContainer));
-        currentLegalForm.addListener(() -> buildUpgradeContainer(currentLegalForm.get(), nextLegalForm.get(), checklist.get(), applicationStatus.get(), upgradeContainer));
-        checklist.addListener(() -> buildUpgradeContainer(currentLegalForm.get(), nextLegalForm.get(), checklist.get(), applicationStatus.get(), upgradeContainer));
-        applicationStatus.addListener(() -> buildUpgradeContainer(currentLegalForm.get(), nextLegalForm.get(), checklist.get(), applicationStatus.get(), upgradeContainer));
+        nextLegalForm.addListener(() -> buildUpgradeContainer(
+                currentLegalForm.get(),
+                nextLegalForm.get(),
+                checklist.get(),
+                applicationStatus.get(),
+                upgradeContainer));
+        currentLegalForm.addListener(() -> buildUpgradeContainer(
+                currentLegalForm.get(),
+                nextLegalForm.get(),
+                checklist.get(),
+                applicationStatus.get(),
+                upgradeContainer));
+        checklist.addListener(() -> buildUpgradeContainer(
+                currentLegalForm.get(),
+                nextLegalForm.get(),
+                checklist.get(),
+                applicationStatus.get(),
+                upgradeContainer));
+        applicationStatus.addListener(() -> buildUpgradeContainer(
+                currentLegalForm.get(),
+                nextLegalForm.get(),
+                checklist.get(),
+                applicationStatus.get(),
+                upgradeContainer));
 
         content.addScrollViewChildren(upgradeContainer);
 
         return content;
     }
 
-    public static void buildUpgradeContainer(LegalFormDef current, LegalFormDef next, UpgradeChecklist checklist, ApplicationStatus status, UIElement parent) {
+    public static void buildUpgradeContainer(
+            LegalFormDef current,
+            LegalFormDef next,
+            UpgradeChecklist checklist,
+            ApplicationStatus status,
+            UIElement parent) {
         parent.clearAllChildren();
         if (current == null) {
             return;
         }
         if (next == null) {
-            parent.addChild(UiLabels.secondary(Component.translatable("ui.createkontor.lawyer_desk.legal_form.no_next_legal_form"), Horizontal.CENTER));
+            parent.addChild(UiLabels.secondary(
+                    Component.translatable("ui.createkontor.lawyer_desk.legal_form.no_next_legal_form"),
+                    Horizontal.CENTER));
             return;
         }
 
         parent.addChild(UiContainer.headerWithSubtitle(
-                UiLabels.h2(Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_to"), Horizontal.CENTER),
-                UiLabels.h2(Component.translatable("legal_forms.createkontor." + next), Horizontal.CENTER)
-        ));
+                UiLabels.h2(
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_to"), Horizontal.CENTER),
+                UiLabels.h2(Component.translatable("legal_forms.createkontor." + next), Horizontal.CENTER)));
 
-        parent.addChild(UiLabels.h2(Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats"), Horizontal.LEFT).layout(layout -> layout.marginTop(12)));
-        parent.addChild(new UIElement()
-                .layout(layout -> layout.marginBottom(12))
-                .addChild(statsElement(current, next)));
+        parent.addChild(
+                UiLabels.h2(Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats"), Horizontal.LEFT)
+                        .layout(layout -> layout.marginTop(12)));
+        parent.addChild(
+                new UIElement().layout(layout -> layout.marginBottom(12)).addChild(statsElement(current, next)));
 
         if (checklist != null && status == null) {
-            parent.addChild(UiLabels.h2(Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_requirements"), Horizontal.LEFT));
+            parent.addChild(UiLabels.h2(
+                    Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_requirements"),
+                    Horizontal.LEFT));
             for (UpgradeChecklist.Row row : checklist.rows()) {
                 switch (row) {
                     case UpgradeChecklist.MoneyRow moneyRow:
                         parent.addChild(UiLabels.labelValue(
-                                Component.translatable("enum.createkontor.upgrade_criterion." + moneyRow.criterion().name().toLowerCase()),
-                                ComponentFormatting.progress(moneyRow.actual().toString(), moneyRow.required().toString(), moneyRow.met()))
-                        );
+                                Component.translatable("enum.createkontor.upgrade_criterion."
+                                        + moneyRow.criterion().name().toLowerCase()),
+                                ComponentFormatting.progress(
+                                        moneyRow.actual().toString(),
+                                        moneyRow.required().toString(),
+                                        moneyRow.met())));
                         break;
                     case UpgradeChecklist.FlagRow flagRow:
                         parent.addChild(UiLabels.labelValue(
-                                Component.translatable("enum.createkontor.upgrade_criterion." + flagRow.criterion().name().toLowerCase()),
-                                ComponentFormatting.check(flagRow.fulfilled()))
-                        );
+                                Component.translatable("enum.createkontor.upgrade_criterion."
+                                        + flagRow.criterion().name().toLowerCase()),
+                                ComponentFormatting.check(flagRow.fulfilled())));
                         break;
                     case UpgradeChecklist.StarsRow starsRow:
-                        double floored = Math.floor((starsRow.actual() + UpgradeChecklist.StarsRow.TOLERANCE) * 100) / 100;
+                        double floored =
+                                Math.floor((starsRow.actual() + UpgradeChecklist.StarsRow.TOLERANCE) * 100) / 100;
                         parent.addChild(UiLabels.labelValue(
-                                Component.translatable("enum.createkontor.upgrade_criterion." + starsRow.criterion().name().toLowerCase()),
-                                ComponentFormatting.progress(String.format(Locale.ROOT, "%.2f", floored), String.valueOf(starsRow.required()), starsRow.met()))
-                        );
+                                Component.translatable("enum.createkontor.upgrade_criterion."
+                                        + starsRow.criterion().name().toLowerCase()),
+                                ComponentFormatting.progress(
+                                        String.format(Locale.ROOT, "%.2f", floored),
+                                        String.valueOf(starsRow.required()),
+                                        starsRow.met())));
                         break;
                     case UpgradeChecklist.CountRow countRow:
                         parent.addChild(UiLabels.labelValue(
-                                Component.translatable("enum.createkontor.upgrade_criterion." + countRow.criterion().name().toLowerCase()),
-                                ComponentFormatting.progress(String.valueOf(countRow.actual()), String.valueOf(countRow.required()), countRow.met()))
-                        );
+                                Component.translatable("enum.createkontor.upgrade_criterion."
+                                        + countRow.criterion().name().toLowerCase()),
+                                ComponentFormatting.progress(
+                                        String.valueOf(countRow.actual()),
+                                        String.valueOf(countRow.required()),
+                                        countRow.met())));
                         break;
                 }
             }
 
             if (checklist.allMet()) {
-                parent.addChild(UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.lawyer_desk.legal_form.all_requirements_met").withStyle(ChatFormatting.GREEN), Horizontal.LEFT));
+                parent.addChild(UiLabels.paragraphPrimary(
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.all_requirements_met")
+                                .withStyle(ChatFormatting.GREEN),
+                        Horizontal.LEFT));
             } else {
-                parent.addChild(UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.lawyer_desk.legal_form.not_all_requirements_met").withStyle(ChatFormatting.RED), Horizontal.LEFT));
+                parent.addChild(UiLabels.paragraphPrimary(
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.not_all_requirements_met")
+                                .withStyle(ChatFormatting.RED),
+                        Horizontal.LEFT));
             }
 
             parent.addChild(UiLabels.paragraphPrimary(
-                    Component.translatable("ui.createkontor.lawyer_desk.legal_form.application_fee",
-                    ComponentFormatting.moneyNegative(next.entryRequirements().fee())), Horizontal.LEFT).layout(layout -> layout.marginTop(12)));
+                            Component.translatable(
+                                    "ui.createkontor.lawyer_desk.legal_form.application_fee",
+                                    ComponentFormatting.moneyNegative(
+                                            next.entryRequirements().fee())),
+                            Horizontal.LEFT)
+                    .layout(layout -> layout.marginTop(12)));
 
-            parent.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_info"), Horizontal.LEFT).layout(layout -> layout.marginTop(4)));
-            parent.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_lawyer_lost"), Horizontal.LEFT).layout(layout -> layout.marginTop(4)));
+            parent.addChild(UiLabels.paragraphSecondary(
+                            Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_info"),
+                            Horizontal.LEFT)
+                    .layout(layout -> layout.marginTop(4)));
+            parent.addChild(UiLabels.paragraphSecondary(
+                            Component.translatable("ui.createkontor.lawyer_desk.legal_form.upgrade_lawyer_lost"),
+                            Horizontal.LEFT)
+                    .layout(layout -> layout.marginTop(4)));
 
-            parent.addChild(UiButtons.primary(Component.translatable("ui.createkontor.lawyer_desk.legal_form.apply_for_upgrade", ComponentFormatting.moneyNegative(next.entryRequirements().fee())))
-                            .setOnClick((e) -> parent.sendMessage("c2s_apply_upgrade")).layout(layout -> layout.marginTop(4)).setActive(checklist.allMet()));
+            parent.addChild(UiButtons.primary(Component.translatable(
+                            "ui.createkontor.lawyer_desk.legal_form.apply_for_upgrade",
+                            ComponentFormatting.moneyNegative(
+                                    next.entryRequirements().fee())))
+                    .setOnClick((e) -> parent.sendMessage("c2s_apply_upgrade"))
+                    .layout(layout -> layout.marginTop(4))
+                    .setActive(checklist.allMet()));
         }
 
         if (status != null) {
             if (!status.processing()) {
-                parent.addChild(UiLabels.paragraphError(Component.translatable(
-                        "ui.createkontor.lawyer_desk.legal_form.waiting_for_net_worth",
-                        ComponentFormatting.moneyNegative(next.entryRequirements().minNetWorth())
-                ), Horizontal.LEFT));
-                parent.addChild(UiLabels.paragraphError(Component.translatable(
-                        "ui.createkontor.lawyer_desk.legal_form.resting_days_remaining",
-                        ComponentFormatting.highlightError(String.valueOf(status.restingDaysLeft))
-                ), Horizontal.LEFT));
+                parent.addChild(UiLabels.paragraphError(
+                        Component.translatable(
+                                "ui.createkontor.lawyer_desk.legal_form.waiting_for_net_worth",
+                                ComponentFormatting.moneyNegative(
+                                        next.entryRequirements().minNetWorth())),
+                        Horizontal.LEFT));
+                parent.addChild(UiLabels.paragraphError(
+                        Component.translatable(
+                                "ui.createkontor.lawyer_desk.legal_form.resting_days_remaining",
+                                ComponentFormatting.highlightError(String.valueOf(status.restingDaysLeft))),
+                        Horizontal.LEFT));
             } else {
-                parent.addChild(UiLabels.paragraphPrimary(Component.translatable(
-                        "ui.createkontor.lawyer_desk.legal_form.upgrade_to_in_progress",
-                        Component.translatable("legal_forms.createkontor." + status.targetId)
-                ), Horizontal.LEFT));
+                parent.addChild(UiLabels.paragraphPrimary(
+                        Component.translatable(
+                                "ui.createkontor.lawyer_desk.legal_form.upgrade_to_in_progress",
+                                Component.translatable("legal_forms.createkontor." + status.targetId)),
+                        Horizontal.LEFT));
             }
 
-            parent.addChild(
-                    new ProgressBar()
-                            .setRange(0, 100)
-                            .setProgress(status.progressPercent())
-                            .label(label -> label.setText(Component.literal(status.progressPercent() + " %").withStyle(ChatFormatting.GOLD)))
-            );
+            parent.addChild(UiProgressBars.ofPercent(status.progressPercent()));
         }
     }
 
@@ -256,16 +328,21 @@ public final class LawyerUi {
 
         Label title = UiLabels.h1(Component.translatable("ui.createkontor.lawyer_desk.licenses"), Horizontal.LEFT);
         title.addSyncValue(heldLicensesBinding.getSyncValue());
-        heldLicenses.addListener(() -> title.setText(Component.translatable("ui.createkontor.lawyer_desk.licenses_count", heldLicenses.get().size())));
+        heldLicenses.addListener(() -> title.setText(Component.translatable(
+                "ui.createkontor.lawyer_desk.licenses_count", heldLicenses.get().size())));
         content.addScrollViewChildren(title);
 
         UIElement licensesBox = new UIElement().addSyncValue(heldLicensesBinding.getSyncValue());
-        licensesBox.onMessage("c2s_cancel_license", tag -> ToastPayload.send(context.player(), actions.cancelLicense(LicenseKeyCodec.decode(tag.getString("Key")))));
+        licensesBox.onMessage(
+                "c2s_cancel_license",
+                tag -> ToastPayload.send(
+                        context.player(), actions.cancelLicense(LicenseKeyCodec.decode(tag.getString("Key")))));
         heldLicenses.addListener(() -> {
             licensesBox.clearAllChildren();
 
             if (heldLicenses.get().isEmpty()) {
-                licensesBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.lawyer_desk.licenses.empty"), Horizontal.LEFT));
+                licensesBox.addChild(UiLabels.paragraphSecondary(
+                        Component.translatable("ui.createkontor.lawyer_desk.licenses.empty"), Horizontal.LEFT));
                 return;
             }
 
@@ -274,9 +351,16 @@ public final class LawyerUi {
                         .style(style -> style.background(Sprites.BORDER_DARK))
                         .layout(layout -> layout.paddingAll(8));
 
-                element.addChild(UiLabels.paragraphTertiary(Component.literal(license.key().toString()), Horizontal.LEFT));
-                element.addChild(UiLabels.paragraphPrimary(LicenseNames.of(license.key()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT));
-                element.addChild(UiContainer.itemSlotRow(license.markets().stream().map((id) -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())).asItem().getDefaultInstance()).toList())
+                element.addChild(UiLabels.paragraphTertiary(
+                        Component.literal(license.key().toString()), Horizontal.LEFT));
+                element.addChild(UiLabels.paragraphPrimary(
+                        LicenseNames.of(license.key()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT));
+                element.addChild(UiContainer.itemSlotRow(license.markets().stream()
+                                .map((id) -> BuiltInRegistries.ITEM
+                                        .get(ResourceLocation.parse(id.value()))
+                                        .asItem()
+                                        .getDefaultInstance())
+                                .toList())
                         .layout(layout -> layout.marginBottom(2)));
 
                 double revenueShare;
@@ -286,22 +370,31 @@ public final class LawyerUi {
                     revenueShare = 0.0;
                 }
                 element.addChild(UiLabels.seperatedLabelRow(List.of(
-                        UiLabels.primary(Component.translatable("ui.createkontor.lawyer_desk.licenses.daily_fee", license.dailyFee().toString()), Horizontal.CENTER),
-                        UiLabels.primary(Component.translatable("ui.createkontor.lawyer_desk.licenses.revenue_share", revenueShare * 100 + "%"), Horizontal.CENTER)
-                )).layout(layout -> layout.justifyContent(AlignContent.FLEX_START).gapAll(0)));
+                                UiLabels.primary(
+                                        Component.translatable(
+                                                "ui.createkontor.lawyer_desk.licenses.daily_fee",
+                                                license.dailyFee().toString()),
+                                        Horizontal.CENTER),
+                                UiLabels.primary(
+                                        Component.translatable(
+                                                "ui.createkontor.lawyer_desk.licenses.revenue_share",
+                                                revenueShare * 100 + "%"),
+                                        Horizontal.CENTER)))
+                        .layout(layout ->
+                                layout.justifyContent(AlignContent.FLEX_START).gapAll(0)));
 
                 if (!license.cancelled()) {
-                    element.addChild(
-                            UiButtons.critical(Component.translatable("ui.createkontor.lawyer_desk.licenses.cancel"))
-                                    .setOnClick((e) -> {
-                                        CompoundTag tag = new CompoundTag();
-                                        tag.putString("Key", LicenseKeyCodec.encode(license.key()));
-                                        licensesBox.sendMessage("c2s_cancel_license", tag);
-                                    })
-                                    .layout(layout -> layout.widthPercent(30))
-                    );
+                    element.addChild(UiButtons.critical(
+                                    Component.translatable("ui.createkontor.lawyer_desk.licenses.cancel"))
+                            .setOnClick((e) -> {
+                                CompoundTag tag = new CompoundTag();
+                                tag.putString("Key", LicenseKeyCodec.encode(license.key()));
+                                licensesBox.sendMessage("c2s_cancel_license", tag);
+                            })
+                            .layout(layout -> layout.widthPercent(30)));
                 } else {
-                    element.addChild(UiLabels.paragraphError(Component.translatable("ui.createkontor.lawyer_desk.licenses.cancelled"), Horizontal.LEFT));
+                    element.addChild(UiLabels.paragraphError(
+                            Component.translatable("ui.createkontor.lawyer_desk.licenses.cancelled"), Horizontal.LEFT));
                 }
 
                 licensesBox.addChild(element);
@@ -313,25 +406,31 @@ public final class LawyerUi {
     }
 
     public static UIElement licenseCatalogTab(EmployeeDeskContext context, LawyerActions actions) {
-        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         ObservableList<LicenseCard> catalog = new ObservableList<>();
         SimpleBinding<Tag> catalogBinding = DataBindingBuilder.tagS2C(() -> licenseOffersToTag(context))
-                .onRemoteSyncReceived(tag -> catalog.set(tagToLicenseCards(tag)
-                        .stream()
-                        .sorted(Comparator
-                                .comparing((LicenseCard card) -> !isPurchasable(card))
-                                .thenComparing(card -> LicenseNames.of(card.key()).getString(), String.CASE_INSENSITIVE_ORDER))
+                .onRemoteSyncReceived(tag -> catalog.set(tagToLicenseCards(tag).stream()
+                        .sorted(Comparator.comparing((LicenseCard card) -> !isPurchasable(card))
+                                .thenComparing(
+                                        card -> LicenseNames.of(card.key()).getString(), String.CASE_INSENSITIVE_ORDER))
                         .toList()))
                 .build();
 
-        Label title = UiLabels.h1(Component.translatable("ui.createkontor.lawyer_desk.license_catalog"), Horizontal.LEFT);
+        Label title =
+                UiLabels.h1(Component.translatable("ui.createkontor.lawyer_desk.license_catalog"), Horizontal.LEFT);
         title.addSyncValue(catalogBinding.getSyncValue());
-        catalog.addListener(() -> title.setText(Component.translatable("ui.createkontor.lawyer_desk.license_catalog_count", catalog.get().size())));
+        catalog.addListener(() -> title.setText(Component.translatable(
+                "ui.createkontor.lawyer_desk.license_catalog_count",
+                catalog.get().size())));
         content.addChild(title);
 
         content.addSyncValue(catalogBinding.getSyncValue());
-        content.onMessage("c2s_buy_license", tag -> ToastPayload.send(context.player(), actions.buyLicense(LicenseKeyCodec.decode(tag.getString("Key")))));
+        content.onMessage(
+                "c2s_buy_license",
+                tag -> ToastPayload.send(
+                        context.player(), actions.buyLicense(LicenseKeyCodec.decode(tag.getString("Key")))));
         content.addChild(UiContainer.searchableGrid(
                 catalog,
                 (LicenseCard offer) -> {
@@ -339,22 +438,40 @@ public final class LawyerUi {
                             .style(style -> style.background(Sprites.BORDER_DARK))
                             .layout(layout -> layout.paddingAll(8));
 
-                    element.addChild(UiLabels.paragraphTertiary(Component.literal(offer.key().toString()), Horizontal.LEFT));
-                    element.addChild(UiLabels.paragraphPrimary(LicenseNames.of(offer.key()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT));
-                    element.addChild(UiContainer.itemSlotRow(offer.markets().stream().map((id) -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(id.value())).asItem().getDefaultInstance()).toList())
+                    element.addChild(UiLabels.paragraphTertiary(
+                            Component.literal(offer.key().toString()), Horizontal.LEFT));
+                    element.addChild(UiLabels.paragraphPrimary(
+                            LicenseNames.of(offer.key()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT));
+                    element.addChild(UiContainer.itemSlotRow(offer.markets().stream()
+                                    .map((id) -> BuiltInRegistries.ITEM
+                                            .get(ResourceLocation.parse(id.value()))
+                                            .asItem()
+                                            .getDefaultInstance())
+                                    .toList())
                             .layout(layout -> layout.marginBottom(2)));
 
-                    element.addChild(UiLabels.labelValueNoWrap(Component.translatable("ui.createkontor.lawyer_desk.license_catalog.daily_fee"), Component.literal(offer.dailyFee().toString())));
-                    element.addChild(UiLabels.labelValueNoWrap(Component.translatable("ui.createkontor.lawyer_desk.license_catalog.revenue_share"), Component.literal(offer.revenueShare() * 100 + "%")));
-                    element.addChild(UiLabels.labelValueNoWrap(Component.translatable("ui.createkontor.lawyer_desk.license_catalog.application_fee"), Component.literal(offer.applicationFee().toString())));
+                    element.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.lawyer_desk.license_catalog.daily_fee"),
+                            Component.literal(offer.dailyFee().toString())));
+                    element.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.lawyer_desk.license_catalog.revenue_share"),
+                            Component.literal(offer.revenueShare() * 100 + "%")));
+                    element.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.lawyer_desk.license_catalog.application_fee"),
+                            Component.literal(offer.applicationFee().toString())));
 
                     element.addChild(new UIElement().layout(layout -> layout.flexGrow(1))); // Spacer
 
-                    if (offer.status() != AcquireResult.Status.ACQUIRED && offer.status() != AcquireResult.Status.REACTIVATED) {
-                        element.addChild(UiLabels.paragraphError(Component.translatable("ui.createkontor.lawyer_desk.license_catalog." + offer.status().toString().toLowerCase()), Horizontal.LEFT));
+                    if (offer.status() != AcquireResult.Status.ACQUIRED
+                            && offer.status() != AcquireResult.Status.REACTIVATED) {
+                        element.addChild(UiLabels.paragraphError(
+                                Component.translatable("ui.createkontor.lawyer_desk.license_catalog."
+                                        + offer.status().toString().toLowerCase()),
+                                Horizontal.LEFT));
                     } else {
                         List<Component> lines = new ArrayList<>();
-                        lines.add(Component.translatable("ui.createkontor.lawyer_desk.license_catalog.covered_markets").withStyle(ChatFormatting.GRAY));
+                        lines.add(Component.translatable("ui.createkontor.lawyer_desk.license_catalog.covered_markets")
+                                .withStyle(ChatFormatting.GRAY));
                         for (ItemId market : offer.coveredMarkets()) {
                             Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(market.value()));
                             lines.add(Component.literal("• ").append(item.getDescription()));
@@ -363,17 +480,20 @@ public final class LawyerUi {
                                 ? Component.translatable("ui.createkontor.lawyer_desk.license_catalog.buy")
                                 : Component.translatable("ui.createkontor.lawyer_desk.license_catalog.reactivate");
                         Button button = UiButtons.primary(label).setOnClick((e) -> {
-                                    CompoundTag tag = new CompoundTag();
-                                    tag.putString("Key", LicenseKeyCodec.encode(offer.key()));
-                                    content.sendMessage("c2s_buy_license", tag);
-                                });
-                        button.layout(layout -> layout.heightAuto().minHeight(20).marginTopAuto()
-                                .alignItems(AlignItems.CENTER).paddingVertical(4));
-                        button.textStyle(style -> style
-                                .adaptiveWidth(false)
+                            CompoundTag tag = new CompoundTag();
+                            tag.putString("Key", LicenseKeyCodec.encode(offer.key()));
+                            content.sendMessage("c2s_buy_license", tag);
+                        });
+                        button.layout(layout -> layout.heightAuto()
+                                .minHeight(20)
+                                .marginTopAuto()
+                                .alignItems(AlignItems.CENTER)
+                                .paddingVertical(4));
+                        button.textStyle(style -> style.adaptiveWidth(false)
                                 .textWrap(TextWrap.WRAP)
                                 .adaptiveHeight(true));
-                        button.text.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
+                        button.text.layout(
+                                layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
                         if (!offer.coveredMarkets().isEmpty()) {
                             button.style(style -> style.tooltips(lines.toArray(Component[]::new)));
                         }
@@ -386,7 +506,11 @@ public final class LawyerUi {
                     List<String> list = new ArrayList<>();
                     list.add(LicenseNames.of(offer.key).getString());
                     for (ItemId market : offer.markets()) {
-                        list.add(BuiltInRegistries.ITEM.get(ResourceLocation.parse(market.value())).asItem().getDescription().getString());
+                        list.add(BuiltInRegistries.ITEM
+                                .get(ResourceLocation.parse(market.value()))
+                                .asItem()
+                                .getDescription()
+                                .getString());
                     }
                     return list;
                 },
@@ -400,20 +524,44 @@ public final class LawyerUi {
 
     private static UIElement statsElement(LegalFormDef current, @Nullable LegalFormDef next) {
         List<UIElement> left = List.of(
-                statRow("Max. Employees", count(current.maxEmployees(), nextOf(next, LegalFormDef::maxEmployees), true)),
-                statRow("Employee Salary %", percent(current.employeeSalaryFactor(), nextOf(next, LegalFormDef::employeeSalaryFactor), false)),
-                statRow("Overdraft Limit", money(current.overdraftLimit(), nextOf(next, LegalFormDef::overdraftLimit), true)),
-                statRow("Bank Loan Limit", money(current.bankLoanLimit(), nextOf(next, LegalFormDef::bankLoanLimit), true)),
-                statRow("Logistics Network Integration", flag(current.logisticsNetwork(), nextOf(next, LegalFormDef::logisticsNetwork)))
-        );
+                statRow(
+                        "Max. Employees",
+                        count(current.maxEmployees(), nextOf(next, LegalFormDef::maxEmployees), true)),
+                statRow(
+                        "Employee Salary %",
+                        percent(
+                                current.employeeSalaryFactor(),
+                                nextOf(next, LegalFormDef::employeeSalaryFactor),
+                                false)),
+                statRow(
+                        "Overdraft Limit",
+                        money(current.overdraftLimit(), nextOf(next, LegalFormDef::overdraftLimit), true)),
+                statRow(
+                        "Bank Loan Limit",
+                        money(current.bankLoanLimit(), nextOf(next, LegalFormDef::bankLoanLimit), true)),
+                statRow(
+                        "Logistics Network Integration",
+                        flag(current.logisticsNetwork(), nextOf(next, LegalFormDef::logisticsNetwork))));
 
         List<UIElement> right = List.of(
-                statRow("Max. Licenses", count(current.maxProductLicenses(), nextOf(next, LegalFormDef::maxProductLicenses), true)),
-                statRow("Max. Open Requests Total", count(current.maxOpenRequestsTotal(), nextOf(next, LegalFormDef::maxOpenRequestsTotal), true)),
-                statRow("Max. Open Requests Per Product", count(current.maxOpenRequestsPerProduct(), nextOf(next, LegalFormDef::maxOpenRequestsPerProduct), true)),
-                statRow("Order Book Size", count(current.maxOpenOrders(), nextOf(next, LegalFormDef::maxOpenOrders), true)),
-                statRow("Max. Shipping Exits", count(current.maxShippingExits(), nextOf(next, LegalFormDef::maxShippingExits), true))
-        );
+                statRow(
+                        "Max. Licenses",
+                        count(current.maxProductLicenses(), nextOf(next, LegalFormDef::maxProductLicenses), true)),
+                statRow(
+                        "Max. Open Requests Total",
+                        count(current.maxOpenRequestsTotal(), nextOf(next, LegalFormDef::maxOpenRequestsTotal), true)),
+                statRow(
+                        "Max. Open Requests Per Product",
+                        count(
+                                current.maxOpenRequestsPerProduct(),
+                                nextOf(next, LegalFormDef::maxOpenRequestsPerProduct),
+                                true)),
+                statRow(
+                        "Order Book Size",
+                        count(current.maxOpenOrders(), nextOf(next, LegalFormDef::maxOpenOrders), true)),
+                statRow(
+                        "Max. Shipping Exits",
+                        count(current.maxShippingExits(), nextOf(next, LegalFormDef::maxShippingExits), true)));
 
         return UiContainer.twoColumns(left, right);
     }
@@ -427,18 +575,27 @@ public final class LawyerUi {
     }
 
     private static Component count(int current, @Nullable Integer next, boolean higherIsBetter) {
-        return compared(formatCount(current), next == null ? null : formatCount(next),
-                next == null ? 0 : Integer.compare(next, current), higherIsBetter);
+        return compared(
+                formatCount(current),
+                next == null ? null : formatCount(next),
+                next == null ? 0 : Integer.compare(next, current),
+                higherIsBetter);
     }
 
     private static Component money(Money current, @Nullable Money next, boolean higherIsBetter) {
-        return compared(current.toString(), next == null ? null : next.toString(),
-                next == null ? 0 : next.compareTo(current), higherIsBetter);
+        return compared(
+                current.toString(),
+                next == null ? null : next.toString(),
+                next == null ? 0 : next.compareTo(current),
+                higherIsBetter);
     }
 
     private static Component percent(double current, @Nullable Double next, boolean higherIsBetter) {
-        return compared(formatPercent(current), next == null ? null : formatPercent(next),
-                next == null ? 0 : Double.compare(next, current), higherIsBetter);
+        return compared(
+                formatPercent(current),
+                next == null ? null : formatPercent(next),
+                next == null ? 0 : Double.compare(next, current),
+                higherIsBetter);
     }
 
     private static Component flag(boolean current, @Nullable Boolean next) {
@@ -478,29 +635,27 @@ public final class LawyerUi {
         int level = t.getInt("Level");
         UpgradeRequirements requirements = level == 1 ? null : tagToRequirements(t.getCompound("Requirements"));
         return Optional.of(new LegalFormDef(
-                        level,
-                        t.getString("Id"),
-                        t.getInt("MaxEmployees"),
-                        t.getDouble("EmployeeSalaryFactor"),
-                        t.getInt("MaxProductLicenses"),
-                        t.getInt("MaxOpenRequestsPerProduct"),
-                        t.getInt("MaxOpenRequestsTotal"),
-                        t.getInt("MaxOpenOrders"),
-                        t.getInt("MaxOpenContracts"),
-                        t.getInt("MaxOrderQuantity"),
-                        t.getDouble("DeadlineFactor"),
-                        t.getInt("MaxGridConnection"),
-                        t.getInt("FeedInLicenseTier"),
-                        Money.ofCents(t.getLong("OverdraftLimitCents")),
-                        Money.ofCents(t.getLong("BankLoanLimitCents")),
-                        t.getBoolean("AutoAcceptRequests"),
-                        t.getBoolean("LogisticsNetwork"),
-                        Money.ofCents(t.getLong("FreeStorageCents")),
-                        t.getBoolean("FounderProtection"),
-                        t.getInt("MaxShippingExits"),
-                        requirements
-                )
-        );
+                level,
+                t.getString("Id"),
+                t.getInt("MaxEmployees"),
+                t.getDouble("EmployeeSalaryFactor"),
+                t.getInt("MaxProductLicenses"),
+                t.getInt("MaxOpenRequestsPerProduct"),
+                t.getInt("MaxOpenRequestsTotal"),
+                t.getInt("MaxOpenOrders"),
+                t.getInt("MaxOpenContracts"),
+                t.getInt("MaxOrderQuantity"),
+                t.getDouble("DeadlineFactor"),
+                t.getInt("MaxGridConnection"),
+                t.getInt("FeedInLicenseTier"),
+                Money.ofCents(t.getLong("OverdraftLimitCents")),
+                Money.ofCents(t.getLong("BankLoanLimitCents")),
+                t.getBoolean("AutoAcceptRequests"),
+                t.getBoolean("LogisticsNetwork"),
+                Money.ofCents(t.getLong("FreeStorageCents")),
+                t.getBoolean("FounderProtection"),
+                t.getInt("MaxShippingExits"),
+                requirements));
     }
 
     private static Tag legalFormToTag(LegalFormDef legalForm) {
@@ -598,26 +753,28 @@ public final class LawyerUi {
         for (Tag rowTag : t.getList("Rows", Tag.TAG_COMPOUND)) {
             CompoundTag r = (CompoundTag) rowTag;
             UpgradeCriterion criterion = UpgradeCriterion.valueOf(r.getString("Criterion"));
-            rows.add(switch (r.getString("Type")) {
-                case "MONEY" -> new UpgradeChecklist.MoneyRow(criterion,
-                        Money.ofCents(r.getLong("ActualCents")),
-                        Money.ofCents(r.getLong("RequiredCents")));
-                case "COUNT" -> new UpgradeChecklist.CountRow(criterion, r.getInt("Actual"), r.getInt("Required"));
-                case "STARS" -> new UpgradeChecklist.StarsRow(criterion, r.getDouble("Actual"), r.getDouble("Required"));
-                case "FLAG" -> new UpgradeChecklist.FlagRow(criterion, r.getBoolean("Fulfilled"));
-                default -> throw new IllegalArgumentException("Unknown checklist row type: " + r.getString("Type"));
-            });
+            rows.add(
+                    switch (r.getString("Type")) {
+                        case "MONEY" ->
+                            new UpgradeChecklist.MoneyRow(
+                                    criterion,
+                                    Money.ofCents(r.getLong("ActualCents")),
+                                    Money.ofCents(r.getLong("RequiredCents")));
+                        case "COUNT" ->
+                            new UpgradeChecklist.CountRow(criterion, r.getInt("Actual"), r.getInt("Required"));
+                        case "STARS" ->
+                            new UpgradeChecklist.StarsRow(criterion, r.getDouble("Actual"), r.getDouble("Required"));
+                        case "FLAG" -> new UpgradeChecklist.FlagRow(criterion, r.getBoolean("Fulfilled"));
+                        default ->
+                            throw new IllegalArgumentException("Unknown checklist row type: " + r.getString("Type"));
+                    });
         }
 
-        return Optional.of(new UpgradeChecklist(
-                UpgradeCheckMode.valueOf(t.getString("Mode")),
-                t.getInt("TargetLevel"),
-                rows
-        ));
+        return Optional.of(
+                new UpgradeChecklist(UpgradeCheckMode.valueOf(t.getString("Mode")), t.getInt("TargetLevel"), rows));
     }
 
-    private record ApplicationStatus(String targetId, boolean processing, int progressPercent, int restingDaysLeft) {
-    }
+    private record ApplicationStatus(String targetId, boolean processing, int progressPercent, int restingDaysLeft) {}
 
     private static Tag applicationToTag(Optional<UpgradeApplication> application) {
         CompoundTag tag = new CompoundTag();
@@ -627,7 +784,8 @@ public final class LawyerUi {
         UpgradeApplication a = application.get();
         LegalFormDef target = KontorData.getLegalFormDefinitions().stream()
                 .filter(form -> form.level() == a.targetLevel())
-                .findFirst().orElse(null);
+                .findFirst()
+                .orElse(null);
 
         tag.putInt("TargetLevel", a.targetLevel());
         tag.putString("TargetId", target == null ? "" : target.id());
@@ -661,7 +819,16 @@ public final class LawyerUi {
                 compound.getInt("RestingDaysLeft"));
     }
 
-    private record LicenseCard(LicenseKey key, List<ItemId> markets, List<ItemId> coveredMarkets, Money dailyFee, Money applicationFee, @Nullable Money lockedDailyFee, AcquireResult.Status status, int minLegalLevel, double revenueShare) {}
+    private record LicenseCard(
+            LicenseKey key,
+            List<ItemId> markets,
+            List<ItemId> coveredMarkets,
+            Money dailyFee,
+            Money applicationFee,
+            @Nullable Money lockedDailyFee,
+            AcquireResult.Status status,
+            int minLegalLevel,
+            double revenueShare) {}
 
     private static Tag licenseOffersToTag(EmployeeDeskContext context) {
         ListTag list = new ListTag();
@@ -718,7 +885,9 @@ public final class LawyerUi {
                     tagToItemIds(entry.getList("Covered", Tag.TAG_STRING)),
                     Money.ofCents(entry.getLong("DailyFeeCents")),
                     Money.ofCents(entry.getLong("ApplicationFeeCents")),
-                    entry.contains("LockedDailyFeeCents", Tag.TAG_LONG) ? Money.ofCents(entry.getLong("LockedDailyFeeCents")) : null,
+                    entry.contains("LockedDailyFeeCents", Tag.TAG_LONG)
+                            ? Money.ofCents(entry.getLong("LockedDailyFeeCents"))
+                            : null,
                     AcquireResult.Status.valueOf(entry.getString("Status")),
                     entry.getInt("MinLegalLevel"),
                     entry.getDouble("RevenueShare")));
@@ -735,8 +904,7 @@ public final class LawyerUi {
     }
 
     private static boolean isPurchasable(LicenseCard card) {
-        return card.status() == AcquireResult.Status.ACQUIRED
-                || card.status() == AcquireResult.Status.REACTIVATED;
+        return card.status() == AcquireResult.Status.ACQUIRED || card.status() == AcquireResult.Status.REACTIVATED;
     }
 
     private static Tag heldLicensesToTag(EmployeeDeskContext context) {
@@ -777,12 +945,12 @@ public final class LawyerUi {
                     entry.getBoolean("Cancelled"));
             Optional<LicenseDef> definition = entry.contains("Markets")
                     ? Optional.of(new LicenseDef(
-                    key,
-                    new LinkedHashSet<>(tagToItemIds(entry.getList("Markets", Tag.TAG_STRING))),
-                    entry.getDouble("FeeFactor"),
-                    entry.getDouble("DailyFraction"),
-                    entry.getDouble("RevenueShare"),
-                    entry.getInt("MinLegalLevel")))
+                            key,
+                            new LinkedHashSet<>(tagToItemIds(entry.getList("Markets", Tag.TAG_STRING))),
+                            entry.getDouble("FeeFactor"),
+                            entry.getDouble("DailyFraction"),
+                            entry.getDouble("RevenueShare"),
+                            entry.getInt("MinLegalLevel")))
                     : Optional.empty();
             held.add(new HeldLicense(holding, definition));
         }

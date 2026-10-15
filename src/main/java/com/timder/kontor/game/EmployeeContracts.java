@@ -7,10 +7,10 @@ import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.legalform.UpgradeRules;
 import com.timder.kontor.game.block.LawyerDeskBlock;
-import net.minecraft.server.MinecraftServer;
-
+import com.timder.kontor.util.PlayerNotifications;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.server.MinecraftServer;
 
 public class EmployeeContracts {
 
@@ -22,7 +22,8 @@ public class EmployeeContracts {
      * @param day The day
      * @param params The company parameters
      */
-    public static void ended(MinecraftServer server, Company company, Employee employee, long day, CompanyParams params) {
+    public static void ended(
+            MinecraftServer server, Company company, Employee employee, long day, CompanyParams params) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(employee, "employee must not be null.");
         if (!employee.role().equals(LawyerDeskBlock.ROLE) || hasLawyer(company)) {
@@ -32,7 +33,8 @@ public class EmployeeContracts {
         Optional<UpgradeApplication> application = company.upgradeApplication();
         Optional<Money> refund = UpgradeRules.cancel(company, day, params);
         if (refund.isPresent() && application.isPresent()) {
-            PlayerNotifications.sendUpgradeCancelledNotification(server, company, application.get().targetLevel(), refund.get(), params);
+            PlayerNotifications.sendUpgradeCancelledNotification(
+                    server, company, application.get().targetLevel(), refund.get(), params);
         }
     }
 

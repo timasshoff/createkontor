@@ -1,8 +1,8 @@
 package com.timder.kontor.config;
 
 import com.timder.kontor.core.company.CompanyParams;
-import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseParams;
 import com.timder.kontor.data.KontorData;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -31,8 +31,11 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue BUYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CONSULTANT_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue LOGISTICS_MANAGER_SALARY_IN_DOLLARS;
 
     public static final ModConfigSpec.DoubleValue PURCHASE_MARKUP;
+
+    public static final ModConfigSpec.DoubleValue STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -47,9 +50,11 @@ public class CompanyConfig {
                 .defineInRange("founderLoanFreeDays", 7, 0, Integer.MAX_VALUE);
         FOUNDER_LOAN_TERM_DAYS = builder.comment("Days over which the founder loan is repaid after the free days")
                 .defineInRange("founderLoanTermDays", 21, 1, Integer.MAX_VALUE);
-        FOUNDER_LOAN_SPREAD = builder.comment("Daily surcharge on the policy rate for the founder loan, as a fraction (e.g. 0.0010 is 0.10 %)")
+        FOUNDER_LOAN_SPREAD = builder.comment(
+                        "Daily surcharge on the policy rate for the founder loan, as a fraction (e.g. 0.0010 is 0.10 %)")
                 .defineInRange("founderLoanSpread", 0.0010, 0.0, Double.MAX_VALUE);
-        OVERDRAFT_SPREAD = builder.comment("Daily surcharge on the policy rate for a negative balance, as a fraction (e.g. 0.0050 is 0.50 %)")
+        OVERDRAFT_SPREAD = builder.comment(
+                        "Daily surcharge on the policy rate for a negative balance, as a fraction (e.g. 0.0050 is 0.50 %)")
                 .defineInRange("overdraftSpread", 0.0050, 0.0, Double.MAX_VALUE);
         BUSINESS_LICENSE_FEE_IN_DOLLARS = builder.comment("Daily fee of the business license")
                 .defineInRange("businessLicenseFeeInDollars", 20, 0, Integer.MAX_VALUE);
@@ -64,37 +69,58 @@ public class CompanyConfig {
 
         builder.comment("License fees").push("licenses");
 
-        LICENSE_REFERENCE_FEE_RATE = builder.comment("Reference fee rate: The daily reference fee of a market is this rate times its base demand times its reference cost")
+        LICENSE_REFERENCE_FEE_RATE = builder.comment(
+                        "Reference fee rate: The daily reference fee of a market is this rate times its base demand times its reference cost")
                 .defineInRange("referenceFeeRate", 0.009, 0.000001, 1.0);
-        LICENSE_APPLICATION_FEE_MULTIPLIER = builder.comment("The application fee of a license is this many times its reference fee")
+        LICENSE_APPLICATION_FEE_MULTIPLIER = builder.comment(
+                        "The application fee of a license is this many times its reference fee")
                 .defineInRange("applicationFeeMultiplier", 3, 1, 1_000);
 
         builder.pop();
 
-        builder.comment("Employees. The salaries are base salaries per day, the salary factor of the legal form is applied on top.").push("employees");
+        builder.comment(
+                        "Employees. The salaries are base salaries per day, the salary factor of the legal form is applied on top.")
+                .push("employees");
 
-        HIRE_BONUS_SALARY_MULTIPLE = builder.comment("One-time bonus a company pays when it hires an employee, as a multiple of the employee's daily salary (base salary times the salary factor of the legal form). 0 = no bonus")
+        HIRE_BONUS_SALARY_MULTIPLE = builder.comment(
+                        "One-time bonus a company pays when it hires an employee, as a multiple of the employee's daily salary (base salary times the salary factor of the legal form). 0 = no bonus")
                 .defineInRange("hireBonusSalaryMultiple", 3.0, 0.0, 100.0);
-        EMPLOYEE_ORPHAN_DAYS = builder.comment("An employee whose desk has not reported for this many days loses the contract (e.g. the desk sits in an unloaded chunk)")
+        EMPLOYEE_ORPHAN_DAYS = builder.comment(
+                        "An employee whose desk has not reported for this many days loses the contract (e.g. the desk sits in an unloaded chunk)")
                 .defineInRange("orphanDays", 3, 1, Integer.MAX_VALUE);
-        CONTRACT_CHECK_MIN_ACTIVE_TICKS = builder.comment("Contracts are only checked at the end of a day on which the company was active for at least this many ticks, so its desks had time to report")
+        CONTRACT_CHECK_MIN_ACTIVE_TICKS = builder.comment(
+                        "Contracts are only checked at the end of a day on which the company was active for at least this many ticks, so its desks had time to report")
                 .defineInRange("contractCheckMinActiveTicks", 200, 0, 24_000);
         LAWYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a lawyer per day. Fixed when the lawyer is hired")
-                .defineInRange("lawyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
-        CALCULATOR_SALARY_IN_DOLLARS = builder.comment("Base salary of a calculator per day. Fixed when the calculator is hired")
-                .defineInRange("calculatorSalaryInDollars", 60, 0, Integer.MAX_VALUE);
-        MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment("Base salary of a market analyst per day. Fixed when the market analyst is hired")
+                .defineInRange("lawyerSalaryInDollars", 100, 0, Integer.MAX_VALUE);
+        CALCULATOR_SALARY_IN_DOLLARS = builder.comment(
+                        "Base salary of a calculator per day. Fixed when the calculator is hired")
+                .defineInRange("calculatorSalaryInDollars", 80, 0, Integer.MAX_VALUE);
+        MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment(
+                        "Base salary of a market analyst per day. Fixed when the market analyst is hired")
                 .defineInRange("marketAnalystSalaryInDollars", 90, 0, Integer.MAX_VALUE);
         BUYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a buyer per day. Fixed when the buyer is hired")
-                .defineInRange("buyerSalaryInDollars", 60, 0, Integer.MAX_VALUE);
-        CONSULTANT_SALARY_IN_DOLLARS = builder.comment("Base salary of a consultant per day. Fixed when the consultant is hired")
-                .defineInRange("consultantSalaryInDollars", 20, 0, Integer.MAX_VALUE);
+                .defineInRange("buyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
+        CONSULTANT_SALARY_IN_DOLLARS = builder.comment(
+                        "Base salary of a consultant per day. Fixed when the consultant is hired")
+                .defineInRange("consultantSalaryInDollars", 40, 0, Integer.MAX_VALUE);
+        LOGISTICS_MANAGER_SALARY_IN_DOLLARS = builder.comment(
+                        "Base salary of a logistics manager per day. Fixed when the logistics manager is hired")
+                .defineInRange("logisticsManagerSalaryInDollars", 90, 0, Integer.MAX_VALUE);
 
         builder.pop();
 
         builder.comment("Purchasing").push("purchasing");
-        PURCHASE_MARKUP = builder.comment("Surcharge a company pays on the market price when it buys goods, as a fraction (0.10 = 10 %). Raise it to make buying products and reselling them to customers less attractive")
+        PURCHASE_MARKUP = builder.comment(
+                        "Surcharge a company pays on the market price when it buys goods, as a fraction (0.10 = 10 %). Raise it to make buying products and reselling them to customers less attractive")
                 .defineInRange("purchaseMarkup", 0.125, 0.0, 10.0);
+
+        builder.pop();
+
+        builder.comment("Logistics network").push("logistics");
+        STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS = builder.comment(
+                        "Dollars a company pays per day for each item stored in its logistics network (0.002 = 0.2 cents). The stock is sampled once per trading tick and billed at the end of the day, and when the connection ends")
+                .defineInRange("storageFeePerItemDayInDollars", 0.025, 0.0, 1_000.0);
 
         builder.pop();
 
@@ -102,10 +128,8 @@ public class CompanyConfig {
     }
 
     public static CompanyParams toCompanyParams(LegalForms legalForms) {
-        LicenseParams licenseParams = new LicenseParams(
-                LICENSE_REFERENCE_FEE_RATE.get(),
-                LICENSE_APPLICATION_FEE_MULTIPLIER.get()
-        );
+        LicenseParams licenseParams =
+                new LicenseParams(LICENSE_REFERENCE_FEE_RATE.get(), LICENSE_APPLICATION_FEE_MULTIPLIER.get());
         return new CompanyParams(
                 legalForms,
                 KontorData.getLicenseCatalog(legalForms, licenseParams),
@@ -120,7 +144,7 @@ public class CompanyConfig {
                 BOOKING_RETENTION_DAYS.get(),
                 HISTORY_LENGTH_DAYS.get(),
                 HIRE_BONUS_SALARY_MULTIPLE.get(),
-                PURCHASE_MARKUP.get()
-        );
+                PURCHASE_MARKUP.get(),
+                STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS.get());
     }
 }

@@ -9,6 +9,7 @@ import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.license.LicenseHolding;
 import com.timder.kontor.core.company.license.LicenseKey;
+import com.timder.kontor.core.company.logistics.LogisticsState;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.RequestOrigin;
@@ -16,7 +17,6 @@ import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.company.request.RequestBoard;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.company.request.RequestRules;
-
 import java.util.*;
 
 public final class Company {
@@ -59,11 +59,20 @@ public final class Company {
 
     private final Map<String, Integer> boundResourceCounts = new LinkedHashMap<>();
 
+    private LogisticsState logistics = LogisticsState.disconnected();
+
     private long lastActiveDay = NEVER_ACTIVE;
     private boolean active = false;
     private long activeTicks = 0;
 
-    private Company(CompanyId id, String name, long foundingDay, UUID owner, Account account, RequestBoard requestBoard, OrderBook orderBook) {
+    private Company(
+            CompanyId id,
+            String name,
+            long foundingDay,
+            UUID owner,
+            Account account,
+            RequestBoard requestBoard,
+            OrderBook orderBook) {
         this.id = id;
         this.name = name;
         this.foundingDay = foundingDay;
@@ -74,13 +83,21 @@ public final class Company {
         this.orderBook = orderBook;
     }
 
-    public static Company found(CompanyId id, String name, long day, UUID owner, boolean takeFounderLoan, double policyRate, CompanyParams params) {
+    public static Company found(
+            CompanyId id,
+            String name,
+            long day,
+            UUID owner,
+            boolean takeFounderLoan,
+            double policyRate,
+            CompanyParams params) {
         Objects.requireNonNull(id, "id must not be null.");
         Objects.requireNonNull(owner, "owner must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
         String validName = requireValidName(name);
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
-        if (takeFounderLoan && !params.founderLoan().isPositive()) throw new IllegalArgumentException("The settings do not offer a founder loan.");
+        if (takeFounderLoan && !params.founderLoan().isPositive())
+            throw new IllegalArgumentException("The settings do not offer a founder loan.");
 
         Company company = new Company(id, validName, day, owner, Account.empty(), new RequestBoard(), new OrderBook());
 
@@ -103,7 +120,8 @@ public final class Company {
         String stripped = name.strip();
         int length = stripped.codePointCount(0, stripped.length());
         if (length < MIN_NAME_LENGTH || length > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("name must have " + MIN_NAME_LENGTH + " to " + MAX_NAME_LENGTH + " characters.");
+            throw new IllegalArgumentException(
+                    "name must have " + MIN_NAME_LENGTH + " to " + MAX_NAME_LENGTH + " characters.");
         }
         if (stripped.codePoints().anyMatch(Character::isISOControl)) {
             throw new IllegalArgumentException("name must not contain control characters.");
@@ -163,7 +181,8 @@ public final class Company {
      */
     public void markActive(long day) {
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
-        if (day < lastActiveDay) throw new IllegalArgumentException("day " + day + " is before the last active day " + lastActiveDay + ".");
+        if (day < lastActiveDay)
+            throw new IllegalArgumentException("day " + day + " is before the last active day " + lastActiveDay + ".");
         if (day != lastActiveDay) {
             this.activeTicks = 0;
         }
@@ -228,7 +247,8 @@ public final class Company {
         Objects.requireNonNull(application, "application must not be null.");
         if (upgradeApplication != null) throw new IllegalStateException("The company already has an application.");
         if (application.targetLevel() != legalLevel + 1) {
-            throw new IllegalArgumentException("A company of level " + legalLevel + " can only apply for level " + (legalLevel + 1) + ", not " + application.targetLevel() + ".");
+            throw new IllegalArgumentException("A company of level " + legalLevel + " can only apply for level "
+                    + (legalLevel + 1) + ", not " + application.targetLevel() + ".");
         }
         this.upgradeApplication = application;
     }
@@ -373,7 +393,8 @@ public final class Company {
     public void addDeparture(Departure departure) {
         Objects.requireNonNull(departure, "departure must not be null.");
         if (employees.containsKey(departure.employee().number())) {
-            throw new IllegalStateException("The employee " + departure.employee().number() + " still works for the company.");
+            throw new IllegalStateException(
+                    "The employee " + departure.employee().number() + " still works for the company.");
         }
         departures.add(departure);
     }
@@ -487,7 +508,8 @@ public final class Company {
 
         Request request = requestBoard.accept(requestNumber);
         long gracePeriodTicks = RequestRules.gracePeriodTicks(request.getDeadlineTicks(), requestParams);
-        Order order = Order.fromRequest(nextOrderNumber, request, gracePeriodTicks, new RequestOrigin(request.getNumber()));
+        Order order =
+                Order.fromRequest(nextOrderNumber, request, gracePeriodTicks, new RequestOrigin(request.getNumber()));
         nextOrderNumber++;
         orderBook.add(order, legalForm);
         return order;
@@ -606,6 +628,21 @@ public final class Company {
         boundResourceCounts.computeIfPresent(resourceKey, (key, count) -> count <= 1 ? null : count - 1);
     }
 
+    /**
+     * @return The logistics network connection and its settings
+     */
+    public LogisticsState logistics() {
+        return logistics;
+    }
+
+    /**
+     * Replaces the logistics network connection and its settings.
+     * @param logistics The new state
+     */
+    public void setLogistics(LogisticsState logistics) {
+        this.logistics = Objects.requireNonNull(logistics, "logistics must not be null.");
+    }
+
     void setLiquidity(Liquidity liquidity) {
         this.liquidity = Objects.requireNonNull(liquidity, "liquidity must not be null.");
     }
@@ -628,7 +665,8 @@ public final class Company {
 
     @Override
     public String toString() {
-        return "Company[%s, \"%s\", level %d, balance=%s, status=%s]".formatted(id, name, legalLevel, account.getBalance(), liquidity);
+        return "Company[%s, \"%s\", level %d, balance=%s, status=%s]"
+                .formatted(id, name, legalLevel, account.getBalance(), liquidity);
     }
 
     public record SaveState(
@@ -654,8 +692,8 @@ public final class Company {
             long nextEmployeeNumber,
             List<Employee> employees,
             long lastActiveDay,
-            List<Departure> departures
-    ) {
+            List<Departure> departures,
+            LogisticsState logistics) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
             Objects.requireNonNull(name, "name must not be null.");
@@ -681,27 +719,34 @@ public final class Company {
             licenses = licenses == null ? List.of() : List.copyOf(licenses);
             Set<LicenseKey> keys = new HashSet<>();
             for (LicenseHolding holding : licenses) {
-                if (!keys.add(holding.key())) throw new IllegalArgumentException("licenses contains " + holding.key() + " twice.");
+                if (!keys.add(holding.key()))
+                    throw new IllegalArgumentException("licenses contains " + holding.key() + " twice.");
             }
 
             if (nextEmployeeNumber < 1) throw new IllegalArgumentException("nextEmployeeNumber must be at least 1.");
             employees = employees == null ? List.of() : List.copyOf(employees);
             Set<Long> numbers = new HashSet<>();
             for (Employee employee : employees) {
-                if (!numbers.add(employee.number())) throw new IllegalArgumentException("employees contains number " + employee.number() + " twice.");
+                if (!numbers.add(employee.number()))
+                    throw new IllegalArgumentException("employees contains number " + employee.number() + " twice.");
                 if (employee.number() >= nextEmployeeNumber) {
-                    throw new IllegalArgumentException("employee number " + employee.number() + " is not below nextEmployeeNumber.");
+                    throw new IllegalArgumentException(
+                            "employee number " + employee.number() + " is not below nextEmployeeNumber.");
                 }
             }
 
-            if (lastActiveDay < NEVER_ACTIVE) throw new IllegalArgumentException("lastActiveDay must be at least " + NEVER_ACTIVE + ".");
+            if (lastActiveDay < NEVER_ACTIVE)
+                throw new IllegalArgumentException("lastActiveDay must be at least " + NEVER_ACTIVE + ".");
 
             departures = departures == null ? List.of() : List.copyOf(departures);
             for (Departure departure : departures) {
                 if (numbers.contains(departure.employee().number())) {
-                    throw new IllegalArgumentException("employee " + departure.employee().number() + " is both employed and departed.");
+                    throw new IllegalArgumentException(
+                            "employee " + departure.employee().number() + " is both employed and departed.");
                 }
             }
+
+            logistics = logistics == null ? LogisticsState.disconnected() : logistics;
         }
     }
 
@@ -733,7 +778,8 @@ public final class Company {
                 nextEmployeeNumber,
                 List.copyOf(employees.values()),
                 lastActiveDay,
-                List.copyOf(departures));
+                List.copyOf(departures),
+                logistics);
     }
 
     public static Company restore(SaveState saveState) {
@@ -767,6 +813,7 @@ public final class Company {
         }
         company.lastActiveDay = saveState.lastActiveDay();
         company.departures.addAll(saveState.departures());
+        company.logistics = saveState.logistics();
         return company;
     }
 }

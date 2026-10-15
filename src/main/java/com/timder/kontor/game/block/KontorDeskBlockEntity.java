@@ -16,13 +16,23 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
-import com.timder.kontor.game.PlayerNotifications;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.game.ui.KontorDeskBoundUi;
 import com.timder.kontor.game.ui.KontorDeskUnboundUi;
 import com.timder.kontor.util.ComponentFormatting;
+import com.timder.kontor.util.PlayerNotifications;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.HexFormat;
+import java.util.Optional;
+import java.util.UUID;
+import javax.annotation.Nullable;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
@@ -34,26 +44,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.HexFormat;
-import java.util.Optional;
-import java.util.UUID;
-
 public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
     // This is necessary to fix an exploit where a player can add himself as a manager of a company
     private static final byte[] INVITE_KEY = new byte[32];
+
     static {
         new SecureRandom().nextBytes(INVITE_KEY);
     }
-    private static final long INVITE_VALID_MILLIS = 10 * 60 * 1000L;
 
+    private static final long INVITE_VALID_MILLIS = 10 * 60 * 1000L;
 
     public KontorDeskBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -81,7 +81,7 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
             return KontorDeskBoundUi.create(holder, this, company, economy);
         }
 
-        return KontorDeskUnboundUi.create(holder,this);
+        return KontorDeskUnboundUi.create(holder, this);
     }
 
     public Optional<S2CActionResult> foundNewCompany(ServerPlayer player, String name, boolean takeLoan) {
@@ -96,15 +96,18 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
         Company company;
         try {
-            company = registry.found(name, economy.currentDay(), player.getUUID(), takeLoan, economy.policyRate(), params);
+            company = registry.found(
+                    name, economy.currentDay(), player.getUUID(), takeLoan, economy.policyRate(), params);
         } catch (IllegalArgumentException e) {
             return S2CActionResult.error(ComponentFormatting.error("Founding failed: " + e.getMessage()));
         }
         data.setDirty();
         setCompanyId(company.id());
-        CompanyBlockSupport.message(player, CompanyBlockSupport.MESSAGE_BOUND, ComponentFormatting.highlightStandard(company.name()));
+        CompanyBlockSupport.message(
+                player, CompanyBlockSupport.MESSAGE_BOUND, ComponentFormatting.highlightStandard(company.name()));
         player.closeContainer();
-        return S2CActionResult.success(Component.translatable("ui.createkontor.kontor_desk.founded", ComponentFormatting.highlightStandard(company.name())));
+        return S2CActionResult.success(Component.translatable(
+                "ui.createkontor.kontor_desk.founded", ComponentFormatting.highlightStandard(company.name())));
     }
 
     public Optional<S2CActionResult> acceptRequest(long number) {
@@ -116,17 +119,20 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanyRegistry registry = data.getRegistry();
         Company company = registry.get(getCompanyId()).orElse(null);
         if (company == null) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
 
         try {
-            company.acceptRequest(number, CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())), EconomyConfig.toRequestParams());
+            company.acceptRequest(
+                    number,
+                    CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())),
+                    EconomyConfig.toRequestParams());
         } catch (IllegalStateException e) {
             return S2CActionResult.error(Component.translatable(
                     "message.createkontor.kontor_desk.request_accepting_failed",
                     ComponentFormatting.highlightError("#" + number),
-                    ComponentFormatting.error(e.getMessage())
-            ));
+                    ComponentFormatting.error(e.getMessage())));
         }
         return S2CActionResult.empty();
     }
@@ -139,7 +145,8 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanySavedData companyData = CompanySavedData.get(server);
         Company company = companyData.getRegistry().get(getCompanyId()).orElse(null);
         if (company == null) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
 
         EconomySavedData economyData = EconomySavedData.get(server);
@@ -165,19 +172,23 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
             return S2CActionResult.illegalEnvironment();
         }
         MinecraftServer server = serverLevel.getServer();
-        Company company = CompanySavedData.get(server).getRegistry().get(getCompanyId()).orElse(null);
+        Company company =
+                CompanySavedData.get(server).getRegistry().get(getCompanyId()).orElse(null);
         if (company == null) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
 
         EconomySavedData economyData = EconomySavedData.get(server);
         Economy economy = economyData.getEconomy();
         if (!economy.isParticipant(market, company.id())) {
-            return S2CActionResult.error(ComponentFormatting.error("The company does not actively take part in " + market + "."));
+            return S2CActionResult.error(
+                    ComponentFormatting.error("The company does not actively take part in " + market + "."));
         }
 
         try {
-            economy.updateListPrice(market, company.id(), Money.ofCents(priceCents).toDollars());
+            economy.updateListPrice(
+                    market, company.id(), Money.ofCents(priceCents).toDollars());
         } catch (IllegalArgumentException e) {
             return S2CActionResult.error(ComponentFormatting.error(e.getMessage()));
         }
@@ -197,10 +208,12 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanySavedData companyData = CompanySavedData.get(server);
         Company company = companyData.getRegistry().get(getCompanyId()).orElse(null);
         if (company == null) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
         if (!company.isOwner(player.getUUID())) {
-            return S2CActionResult.error(Component.literal("This action can only be taken by the owner of this company."));
+            return S2CActionResult.error(
+                    Component.literal("This action can only be taken by the owner of this company."));
         }
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         if (!company.isInsolvent(params)) {
@@ -216,7 +229,8 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
         setCompanyId(null);
         player.closeContainer();
-        return S2CActionResult.success(Component.translatable("message.createkontor.bankruptcy.declared", ComponentFormatting.highlightStandard(name)));
+        return S2CActionResult.success(Component.translatable(
+                "message.createkontor.bankruptcy.declared", ComponentFormatting.highlightStandard(name)));
     }
 
     public Optional<S2CActionResult> inviteManager(ServerPlayer inviter, String playerName) {
@@ -228,44 +242,55 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanyRegistry registry = CompanySavedData.get(server).getRegistry();
         Company company = registry.get(getCompanyId()).orElse(null);
         if (company == null) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
         if (!company.isOwner(inviter.getUUID())) {
-            return S2CActionResult.error(Component.literal("This action can only be taken by the owner of this company."));
+            return S2CActionResult.error(
+                    Component.literal("This action can only be taken by the owner of this company."));
         }
 
         ServerPlayer target = server.getPlayerList().getPlayerByName(playerName);
         if (target == null) {
-            return S2CActionResult.error(Component.translatable("message.createkontor.manager_invite.offline", ComponentFormatting.highlightError(playerName)));
+            return S2CActionResult.error(Component.translatable(
+                    "message.createkontor.manager_invite.offline", ComponentFormatting.highlightError(playerName)));
         }
         if (registry.companyOf(target.getUUID()).isPresent()) {
-            return S2CActionResult.error(Component.translatable("message.createkontor.manager_invite.in_company", ComponentFormatting.highlightError(playerName)));
+            return S2CActionResult.error(Component.translatable(
+                    "message.createkontor.manager_invite.in_company", ComponentFormatting.highlightError(playerName)));
         }
 
         long issuedAt = System.currentTimeMillis();
-        String command = "/kontorinvite accept " + company.id().value() + " " + inviter.getUUID() + " " + issuedAt + " " + inviteToken(company.id().value(), inviter.getUUID(), target.getUUID(), issuedAt);
+        String command = "/kontorinvite accept " + company.id().value() + " " + inviter.getUUID() + " " + issuedAt + " "
+                + inviteToken(company.id().value(), inviter.getUUID(), target.getUUID(), issuedAt);
         Component accept = Component.translatable("message.createkontor.manager_invite.accept")
-                .withStyle(style -> style
-                        .withColor(ChatFormatting.GREEN)
+                .withStyle(style -> style.withColor(ChatFormatting.GREEN)
                         .withBold(true)
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        .withHoverEvent(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
                                 Component.translatable("message.createkontor.manager_invite.accept_hover"))));
 
-        target.sendSystemMessage(Component.translatable("message.createkontor.manager_invite.text",
-                        ComponentFormatting.highlightStandard(inviter.getGameProfile().getName()),
+        target.sendSystemMessage(Component.translatable(
+                        "message.createkontor.manager_invite.text",
+                        ComponentFormatting.highlightStandard(
+                                inviter.getGameProfile().getName()),
                         ComponentFormatting.highlightStandard(company.name()))
                 .append(" ")
                 .append(accept));
 
-        return S2CActionResult.success(Component.translatable("message.createkontor.manager_invite.sent", ComponentFormatting.highlightStandard(playerName)));
+        return S2CActionResult.success(Component.translatable(
+                "message.createkontor.manager_invite.sent", ComponentFormatting.highlightStandard(playerName)));
     }
 
-    public static Optional<S2CActionResult> acceptManagerInvitation(ServerPlayer invitee, int companyId, UUID inviterId, long issuedAt, String token) {
-        byte[] expected = inviteToken(companyId, inviterId, invitee.getUUID(), issuedAt).getBytes(StandardCharsets.UTF_8);
+    public static Optional<S2CActionResult> acceptManagerInvitation(
+            ServerPlayer invitee, int companyId, UUID inviterId, long issuedAt, String token) {
+        byte[] expected =
+                inviteToken(companyId, inviterId, invitee.getUUID(), issuedAt).getBytes(StandardCharsets.UTF_8);
         boolean validToken = MessageDigest.isEqual(expected, token.getBytes(StandardCharsets.UTF_8));
         if (!validToken || System.currentTimeMillis() - issuedAt > INVITE_VALID_MILLIS) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable("message.createkontor.manager_invite.invalid"));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable("message.createkontor.manager_invite.invalid"));
         }
 
         MinecraftServer server = invitee.server;
@@ -277,14 +302,20 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
             return S2CActionResult.error(ComponentFormatting.error("Invalid invite."));
         }
         if (registry.companyOf(invitee.getUUID()).isPresent()) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable("message.createkontor.manager_invite.already_in_company"));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable("message.createkontor.manager_invite.already_in_company"));
         }
 
         company.addManager(invitee.getUUID());
         data.setDirty();
-        PlayerNotifications.sendMessageToAllMembers(company, server, Component.translatable("message.createkontor.manager_invite.joined",
-                ComponentFormatting.highlightStandard(invitee.getGameProfile().getName()),
-                ComponentFormatting.highlightStandard(company.name())));
+        PlayerNotifications.sendMessageToAllMembers(
+                company,
+                server,
+                Component.translatable(
+                        "message.createkontor.manager_invite.joined",
+                        ComponentFormatting.highlightStandard(
+                                invitee.getGameProfile().getName()),
+                        ComponentFormatting.highlightStandard(company.name())));
         return S2CActionResult.empty();
     }
 
@@ -296,10 +327,12 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanySavedData data = CompanySavedData.get(server);
         Company company = data.getRegistry().get(getCompanyId()).orElse(null);
         if (company == null) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
         if (!company.isOwner(owner.getUUID())) {
-            return S2CActionResult.error(Component.literal("This action can only be taken by the owner of this company."));
+            return S2CActionResult.error(
+                    Component.literal("This action can only be taken by the owner of this company."));
         }
         if (!company.removeManager(managerId)) {
             return S2CActionResult.error(ComponentFormatting.error("This player is not a manager."));
@@ -308,7 +341,8 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
         ServerPlayer fired = server.getPlayerList().getPlayer(managerId);
         if (fired != null) {
-            fired.sendSystemMessage(Component.translatable("message.createkontor.manager_fire.fired", ComponentFormatting.highlightError(company.name())));
+            fired.sendSystemMessage(Component.translatable(
+                    "message.createkontor.manager_fire.fired", ComponentFormatting.highlightError(company.name())));
         }
         return S2CActionResult.success(Component.translatable("message.createkontor.manager_fire.done"));
     }
@@ -322,7 +356,8 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanySavedData data = CompanySavedData.get(server);
         Company company = data.getRegistry().get(getCompanyId()).orElse(null);
         if (company == null) {
-            return S2CActionResult.error(ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
         if (company.isOwner(player.getUUID())) {
             return S2CActionResult.error(ComponentFormatting.error("The owner cannot leave the company."));
@@ -332,16 +367,24 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
         data.setDirty();
 
-        PlayerNotifications.sendMessageToAllMembers(company, server, Component.translatable("message.createkontor.leave.left", ComponentFormatting.highlightStandard(player.getGameProfile().getName())));
+        PlayerNotifications.sendMessageToAllMembers(
+                company,
+                server,
+                Component.translatable(
+                        "message.createkontor.leave.left",
+                        ComponentFormatting.highlightStandard(
+                                player.getGameProfile().getName())));
         player.closeContainer();
-        return S2CActionResult.success(Component.translatable("message.createkontor.leave.done", ComponentFormatting.highlightStandard(company.name())));
+        return S2CActionResult.success(Component.translatable(
+                "message.createkontor.leave.done", ComponentFormatting.highlightStandard(company.name())));
     }
 
     private static String inviteToken(int companyId, UUID inviterId, UUID inviteeId, long issuedAt) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(INVITE_KEY, "HmacSHA256"));
-            byte[] hash = mac.doFinal((companyId + "|" + inviterId + "|" + inviteeId + "|" + issuedAt).getBytes(StandardCharsets.UTF_8));
+            byte[] hash = mac.doFinal(
+                    (companyId + "|" + inviterId + "|" + inviteeId + "|" + issuedAt).getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException(e);
