@@ -1,5 +1,6 @@
 package com.timder.kontor.game.ui.element;
 
+import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
@@ -9,15 +10,17 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
+import dev.vfyjxf.taffy.style.TaffyPosition;
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
-import net.minecraft.network.chat.Component;
-
 import java.util.Locale;
 import java.util.function.Function;
+import net.minecraft.network.chat.Component;
 
 public final class UiSliders {
 
     private static final long MIN_TYPING_COMMIT_DELAY_MILLIS = 1000;
+    private static final float CENTER_TICK_WIDTH = 1;
+    private static final int CENTER_TICK_COLOR = 0xFFFFFFFF;
 
     private enum Layout {
         STACKED,
@@ -25,20 +28,93 @@ public final class UiSliders {
         INLINE_FIELD_LEFT
     }
 
-    public static UIElement labeled(float min, float max, float initial, float step, int decimals, long commitDelayMillis, Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
-        return create(Layout.STACKED, min, max, initial, step, decimals, commitDelayMillis, format, onChange, onCommit);
+    public static UIElement labeled(
+            float min,
+            float max,
+            float initial,
+            float step,
+            int decimals,
+            boolean centerTick,
+            long commitDelayMillis,
+            Function<Float, Component> format,
+            FloatConsumer onChange,
+            FloatConsumer onCommit) {
+        return create(
+                Layout.STACKED,
+                min,
+                max,
+                initial,
+                step,
+                decimals,
+                centerTick,
+                commitDelayMillis,
+                format,
+                onChange,
+                onCommit);
     }
 
-    public static UIElement labeledInline(float min, float max, float initial, float step, int decimals, long commitDelayMillis, Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
-        return create(Layout.INLINE_FIELD_RIGHT, min, max, initial, step, decimals, commitDelayMillis, format, onChange, onCommit);
+    public static UIElement labeledInline(
+            float min,
+            float max,
+            float initial,
+            float step,
+            int decimals,
+            boolean centerTick,
+            long commitDelayMillis,
+            Function<Float, Component> format,
+            FloatConsumer onChange,
+            FloatConsumer onCommit) {
+        return create(
+                Layout.INLINE_FIELD_RIGHT,
+                min,
+                max,
+                initial,
+                step,
+                decimals,
+                centerTick,
+                commitDelayMillis,
+                format,
+                onChange,
+                onCommit);
     }
 
-    public static UIElement labeledInlineLeft(float min, float max, float initial, float step, int decimals, long commitDelayMillis, Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
-        return create(Layout.INLINE_FIELD_LEFT, min, max, initial, step, decimals, commitDelayMillis, format, onChange, onCommit);
+    public static UIElement labeledInlineLeft(
+            float min,
+            float max,
+            float initial,
+            float step,
+            int decimals,
+            boolean centerTick,
+            long commitDelayMillis,
+            Function<Float, Component> format,
+            FloatConsumer onChange,
+            FloatConsumer onCommit) {
+        return create(
+                Layout.INLINE_FIELD_LEFT,
+                min,
+                max,
+                initial,
+                step,
+                decimals,
+                centerTick,
+                commitDelayMillis,
+                format,
+                onChange,
+                onCommit);
     }
 
-    private static UIElement create(Layout layoutType, float min, float max, float initial, float step, int decimals, long commitDelayMillis,
-                                    Function<Float, Component> format, FloatConsumer onChange, FloatConsumer onCommit) {
+    private static UIElement create(
+            Layout layoutType,
+            float min,
+            float max,
+            float initial,
+            float step,
+            int decimals,
+            boolean centerTick,
+            long commitDelayMillis,
+            Function<Float, Component> format,
+            FloatConsumer onChange,
+            FloatConsumer onCommit) {
         if (max <= min) {
             throw new IllegalArgumentException("max must be greater than min.");
         }
@@ -49,11 +125,15 @@ public final class UiSliders {
         if (step > 0) {
             slider.sliderStyle(style -> style.sliderStep(step / (max - min)));
         }
+        if (centerTick) {
+            // Between track and handle, so the handle is drawn over the tick when it sits on the middle.
+            slider.trackContainer.addChildAt(centerTick(), 1);
+        }
 
         TextField field = new TextField();
         field.setNumbersOnlyDouble(min, max);
-        field.style(style -> style.tooltips(Component.translatable(
-                "ldlib.gui.text_field.number.0", fixed(min, decimals), fixed(max, decimals))));
+        field.style(style -> style.tooltips(
+                Component.translatable("ldlib.gui.text_field.number.0", fixed(min, decimals), fixed(max, decimals))));
         field.setWheelDur(decimals, step > 0 ? step : (max - min) / 100f);
         field.setText(fixed(slider.getValue(), decimals), false);
 
@@ -63,13 +143,15 @@ public final class UiSliders {
         UIElement container;
         switch (layoutType) {
             case INLINE_FIELD_RIGHT -> {
-                slider.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).minWidth(0));
+                slider.layout(
+                        layout -> layout.widthAuto().flexBasis(0).flexGrow(1).minWidth(0));
                 field.layout(layout -> layout.width(50).marginLeft(8));
                 container = inlineRow();
                 container.addChildren(minLabel, slider, maxLabel, field);
             }
             case INLINE_FIELD_LEFT -> {
-                slider.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).minWidth(0));
+                slider.layout(
+                        layout -> layout.widthAuto().flexBasis(0).flexGrow(1).minWidth(0));
                 field.layout(layout -> layout.width(50).marginRight(8));
                 container = inlineRow();
                 container.addChildren(field, minLabel, slider, maxLabel);
@@ -83,25 +165,23 @@ public final class UiSliders {
                 maxLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
 
                 UIElement labelRow = new UIElement()
-                        .layout(layout -> layout
-                                .flexDirection(FlexDirection.ROW)
+                        .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                                 .justifyContent(AlignContent.SPACE_BETWEEN)
                                 .alignItems(AlignItems.CENTER)
                                 .widthPercent(100));
                 labelRow.addChildren(minLabel, field, maxLabel);
 
                 container = new UIElement()
-                        .layout(layout -> layout
-                                .flexDirection(FlexDirection.COLUMN)
+                        .layout(layout -> layout.flexDirection(FlexDirection.COLUMN)
                                 .gapAll(2)
                                 .widthPercent(100));
                 container.addChildren(slider, labelRow);
             }
         }
 
-        long[] lastChange = { 0L };
-        long[] delay = { commitDelayMillis };
-        boolean[] pending = { false };
+        long[] lastChange = {0L};
+        long[] delay = {commitDelayMillis};
+        boolean[] pending = {false};
 
         slider.setOnValueChanged(value -> {
             float snapped = snap(value, min, max, step);
@@ -148,10 +228,22 @@ public final class UiSliders {
         return container;
     }
 
+    private static UIElement centerTick() {
+        UIElement tick = new UIElement();
+        tick.layout(layout -> {
+            layout.positionType(TaffyPosition.ABSOLUTE);
+            layout.leftPercent(50);
+            layout.marginLeft(-CENTER_TICK_WIDTH / 2);
+            layout.width(CENTER_TICK_WIDTH);
+            layout.heightPercent(100);
+        });
+        tick.style(style -> style.background(new ColorRectTexture(CENTER_TICK_COLOR)));
+        return tick;
+    }
+
     private static UIElement inlineRow() {
         return new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.ROW)
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                         .alignItems(AlignItems.CENTER)
                         .gapAll(4)
                         .widthPercent(100));

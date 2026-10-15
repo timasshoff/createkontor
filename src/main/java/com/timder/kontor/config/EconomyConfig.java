@@ -1,6 +1,5 @@
 package com.timder.kontor.config;
 
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.macro.MacroParams;
@@ -8,9 +7,8 @@ import com.timder.kontor.core.macro.PolicyRateParams;
 import com.timder.kontor.core.macro.ProgressParams;
 import com.timder.kontor.core.market.MarketDynamicsParams;
 import com.timder.kontor.core.raw.PriceProcessParams;
-import net.neoforged.neoforge.common.ModConfigSpec;
-
 import java.util.List;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class EconomyConfig {
     public static final ModConfigSpec SPEC;
@@ -93,21 +91,21 @@ public class EconomyConfig {
                 .defineInRange("noiseDecay", 0.8, 0.0, 0.999999);
         NOISE_SCALE = builder.comment("How much noise gets added each day")
                 .defineInRange("noiseScale", 0.01, 0.0, Double.MAX_VALUE);
-        MIN_INDEX = builder.comment("Minimal cycle index")
-                .defineInRange("minIndex", 0.70, 1.0E-6, Double.MAX_VALUE);
-        MAX_INDEX = builder.comment("Maximum cycle index")
-                .defineInRange("maxIndex", 1.30, 1.0E-6, Double.MAX_VALUE);
-        TREND_PER_DAY = builder.comment("Long-term demand growth")
-                .defineInRange("trendPerDay", 0.0015, 0, Double.MAX_VALUE);
+        MIN_INDEX = builder.comment("Minimal cycle index").defineInRange("minIndex", 0.70, 1.0E-6, Double.MAX_VALUE);
+        MAX_INDEX = builder.comment("Maximum cycle index").defineInRange("maxIndex", 1.30, 1.0E-6, Double.MAX_VALUE);
+        TREND_PER_DAY =
+                builder.comment("Long-term demand growth").defineInRange("trendPerDay", 0.0015, 0, Double.MAX_VALUE);
         builder.pop();
 
-        builder.comment("Policy rate as a fraction per day, e.g. 0.0020 is 0.20 %").push("policyRate");
-        POLICY_BASE_RATE = builder.comment("Start rate and rate of a normal economy (difficulty: 0.0010 easy, 0.0020 standard, 0.0030 realistic)")
+        builder.comment("Policy rate as a fraction per day, e.g. 0.0020 is 0.20 %")
+                .push("policyRate");
+        POLICY_BASE_RATE = builder.comment(
+                        "Start rate and rate of a normal economy (difficulty: 0.0010 easy, 0.0020 standard, 0.0030 realistic)")
                 .defineInRange("baseRate", 0.0020, 1.0E-6, 1.0);
-        POLICY_MIN_RATE = builder.comment("Lowest rate the process aims for")
-                .defineInRange("minRate", 0.0005, 1.0E-6, 1.0);
-        POLICY_MAX_RATE = builder.comment("Highest rate the process aims for")
-                .defineInRange("maxRate", 0.0050, 1.0E-6, 1.0);
+        POLICY_MIN_RATE =
+                builder.comment("Lowest rate the process aims for").defineInRange("minRate", 0.0005, 1.0E-6, 1.0);
+        POLICY_MAX_RATE =
+                builder.comment("Highest rate the process aims for").defineInRange("maxRate", 0.0050, 1.0E-6, 1.0);
         POLICY_DECISION_INTERVAL_DAYS = builder.comment("A decision is made every this many days")
                 .defineInRange("decisionIntervalDays", 7, 1, Integer.MAX_VALUE);
         POLICY_TARGET_SENSITIVITY = builder.comment("How strongly the target rate reacts to the cycle index")
@@ -129,7 +127,8 @@ public class EconomyConfig {
                 .defineInRange("onTimeUrgencyFactor", 0.5, 0.0, Double.MAX_VALUE);
         REPUTATION_LATE_LOSS = builder.comment("Base reputation loss for a late (grace period) order, before weighting")
                 .defineInRange("lateLoss", 1.0, 0.0, Double.MAX_VALUE);
-        REPUTATION_FAILURE_LOSS = builder.comment("Base reputation loss for a burst or cancelled order, before weighting")
+        REPUTATION_FAILURE_LOSS = builder.comment(
+                        "Base reputation loss for a burst or cancelled order, before weighting")
                 .defineInRange("failureLoss", 4.0, 0.0, Double.MAX_VALUE);
         REPUTATION_FOUNDER_PROTECTION_FACTOR = builder.comment("Dampening of the failure loss in legal form stage 1")
                 .defineInRange("founderProtectionFactor", 0.5, 0.0, 1.0);
@@ -138,43 +137,56 @@ public class EconomyConfig {
         builder.pop();
 
         RequestParams requestDefaults = RequestParams.standard();
-        builder.comment("Requests: what a request looks like (K 12.4). Changes apply to requests that arrive from now on").push("request");
-        REQUEST_QUANTITY_STEPS = builder.comment("Quantity factors as 'factor:weight'. The weights are relative and are divided by their sum, they need not add up to 100")
-                .defineList("quantitySteps",
-                        requestDefaults.quantitySteps().stream().map(QuantityStepFormat::format).toList(),
+        builder.comment(
+                        "Requests: what a request looks like (K 12.4). Changes apply to requests that arrive from now on")
+                .push("request");
+        REQUEST_QUANTITY_STEPS = builder.comment(
+                        "Quantity factors as 'factor:weight'. The weights are relative and are divided by their sum, they need not add up to 100")
+                .defineList(
+                        "quantitySteps",
+                        requestDefaults.quantitySteps().stream()
+                                .map(QuantityStepFormat::format)
+                                .toList(),
                         () -> "1:1",
                         QuantityStepFormat::isValid);
         REQUEST_URGENCY_PROBABILITY = builder.comment("Probability that a request is urgent")
                 .defineInRange("urgencyProbability", requestDefaults.urgencyProbability(), 0.0, 1.0);
-        REQUEST_DEADLINE_URGENCY_FACTOR = builder.comment("An urgent request has (1 - x*urgency) of the normal deadline")
+        REQUEST_DEADLINE_URGENCY_FACTOR = builder.comment(
+                        "An urgent request has (1 - x*urgency) of the normal deadline")
                 .defineInRange("deadlineUrgencyFactor", requestDefaults.deadlineUrgencyFactor(), 0.0, 1.0);
         REQUEST_PRICE_URGENCY_FACTOR = builder.comment("An urgent request pays (1 + x*urgency) of the normal price")
                 .defineInRange("priceUrgencyFactor", requestDefaults.priceUrgencyFactor(), 0.0, Double.MAX_VALUE);
-        REQUEST_OFFER_DURATION_URGENCY_FACTOR = builder.comment("An urgent request stays (1 - x*urgency) of the normal time on the board")
+        REQUEST_OFFER_DURATION_URGENCY_FACTOR = builder.comment(
+                        "An urgent request stays (1 - x*urgency) of the normal time on the board")
                 .defineInRange("offerDurationUrgencyFactor", requestDefaults.offerDurationUrgencyFactor(), 0.0, 0.99);
-        REQUEST_DEADLINE_BASE_TICKS = builder.comment("Base of the deadline in ticks, before the manufacturing time of the quantity is added")
+        REQUEST_DEADLINE_BASE_TICKS = builder.comment(
+                        "Base of the deadline in ticks, before the manufacturing time of the quantity is added")
                 .defineInRange("deadlineBaseTicks", requestDefaults.deadlineBaseTicks(), 1L, Long.MAX_VALUE);
         REQUEST_DEADLINE_FLOOR_TICKS = builder.comment("No deadline is shorter than this many ticks")
                 .defineInRange("deadlineFloorTicks", requestDefaults.deadlineFloorTicks(), 1L, Long.MAX_VALUE);
         REQUEST_OFFER_DURATION_BASE_TICKS = builder.comment("How many ticks a normal request stays on the board")
-                .defineInRange("offerDurationBaseTicks", requestDefaults.offerDurationBaseTicks(), 100L, Long.MAX_VALUE);
+                .defineInRange(
+                        "offerDurationBaseTicks", requestDefaults.offerDurationBaseTicks(), 100L, Long.MAX_VALUE);
         REQUEST_GRACE_PERIOD_PORTION = builder.comment("Portion of the deadline that is granted as grace period")
                 .defineInRange("gracePeriodPortion", requestDefaults.gracePeriodPortion(), 0.01, 0.99);
         REQUEST_QUANTITY_DISCOUNT_FLOOR = builder.comment("Lowest price factor of the quantity discount")
                 .defineInRange("quantityDiscountFloor", requestDefaults.quantityDiscountFloor(), 0.01, 1.0);
         REQUEST_QUANTITY_DISCOUNT_PER_STEP = builder.comment("Discount per quantity factor above 1")
                 .defineInRange("quantityDiscountPerStep", requestDefaults.quantityDiscountPerStep(), 0.0, 1.0);
-        REQUEST_WALK_IN_PRICE_THRESHOLD = builder.comment("List price relative to the market price up to which at least one request per day is guaranteed")
-                .defineInRange("walkInPriceThreshold", requestDefaults.walkInPriceThreshold(), 1.0001, Double.MAX_VALUE);
-        REQUEST_WALK_IN_REQUESTS_PER_DAY = builder.comment("Minimum number of requests per day guaranteed while the walk-in price threshold applies")
-                .defineInRange("walkInRequestsPerDay", requestDefaults.walkInRequestsPerDay(), 1.0E-6, Double.MAX_VALUE);
+        REQUEST_WALK_IN_PRICE_THRESHOLD = builder.comment(
+                        "List price relative to the market price up to which at least one request per day is guaranteed")
+                .defineInRange(
+                        "walkInPriceThreshold", requestDefaults.walkInPriceThreshold(), 1.0001, Double.MAX_VALUE);
+        REQUEST_WALK_IN_REQUESTS_PER_DAY = builder.comment(
+                        "Minimum number of requests per day guaranteed while the walk-in price threshold applies")
+                .defineInRange(
+                        "walkInRequestsPerDay", requestDefaults.walkInRequestsPerDay(), 1.0E-6, Double.MAX_VALUE);
         builder.pop();
 
         builder.comment("Technical Progress").push("progress");
         DAILY_DECAY = builder.comment("How much processing costs sink every day (for competitors)")
                 .defineInRange("dailyDecay", 0.002, 0.0, 0.999999);
-        PROGRESS_FLOOR = builder.comment("Minimum processing costs")
-                .defineInRange("floor", 0.60, 1.0E-6, 1.0);
+        PROGRESS_FLOOR = builder.comment("Minimum processing costs").defineInRange("floor", 0.60, 1.0E-6, 1.0);
         builder.pop();
 
         builder.comment("Processing of raw material prices").push("priceProcess");
@@ -189,41 +201,36 @@ public class EconomyConfig {
         builder.pop();
 
         builder.comment("Default values for the market simulation").push("market");
-        DEFAULT_TARGET_UTILISATION = builder
-                .comment("Fallback for the target utilisation of competitors")
+        DEFAULT_TARGET_UTILISATION = builder.comment("Fallback for the target utilisation of competitors")
                 .defineInRange("defaultTargetUtilisation", 0.80, 1.0E-6, 1.0);
-        DEVIATION_DECAY = builder
-                .comment("How much of the short-term price deviation survives from one trading tick (100 s) to the next")
+        DEVIATION_DECAY = builder.comment(
+                        "How much of the short-term price deviation survives from one trading tick (100 s) to the next")
                 .defineInRange("deviationDecay", 0.95, 0.0, 0.999999);
-        DEVIATION_STRENGTH = builder
-                .comment("How strongly a surprise (delivered - expected - weighted purchases, relative to the tick demand) moves the deviation")
+        DEVIATION_STRENGTH = builder.comment(
+                        "How strongly a surprise (delivered - expected - weighted purchases, relative to the tick demand) moves the deviation")
                 .defineInRange("deviationStrength", 0.045, 0.0, Double.MAX_VALUE);
-        DEVIATION_BOUND = builder
-                .comment("Largest short-term deviation of the displayed price from the price level, as a fraction")
-                .defineInRange("deviationBound",0.4, 1.0E-6, 0.999999);
-        PURCHASE_IMPACT = builder
-                .comment("How much one purchased unit weighs in the short-term price compared to one delivered unit. 1.0 = equal, 2.5 = purchases move the price 2.5 times as strongly. Does not affect the daily price level")
-                .defineInRange("purchaseImpact", 1.75, 0.0, Double.MAX_VALUE);
-        MAX_PRICE_FACTOR = builder
-                .comment("Ceiling of the daily price level relative to the reference cost")
+        DEVIATION_BOUND = builder.comment(
+                        "Largest short-term deviation of the displayed price from the price level, as a fraction")
+                .defineInRange("deviationBound", 0.4, 1.0E-6, 0.999999);
+        PURCHASE_IMPACT = builder.comment(
+                        "How much one purchased unit weighs in the short-term price compared to one delivered unit. 1.0 = equal, 2.5 = purchases move the price 2.5 times as strongly. Does not affect the daily price level")
+                .defineInRange("purchaseImpact", 1.4, 0.0, Double.MAX_VALUE);
+        MAX_PRICE_FACTOR = builder.comment("Ceiling of the daily price level relative to the reference cost")
                 .defineInRange("maxPriceFactor", 2.5, 1.0001, Double.MAX_VALUE);
-        MIN_COMPETITORS = builder
-                .comment("Lowest number of competitors a market can fall to")
+        MIN_COMPETITORS = builder.comment("Lowest number of competitors a market can fall to")
                 .defineInRange("minCompetitors", 2.0, 1.0E-6, Double.MAX_VALUE);
-        MAX_COMPETITORS = builder
-                .comment("Highest number of competitors a market can grow to")
+        MAX_COMPETITORS = builder.comment("Highest number of competitors a market can grow to")
                 .defineInRange("maxCompetitors", 9.0, 1.0E-6, Double.MAX_VALUE);
-        COST_PASS_THROUGH = builder
-                .comment("How much of a rise of a product's reference cost (checked once per day) is passed on to its price level. 0 = none, 1 = fully")
+        COST_PASS_THROUGH = builder.comment(
+                        "How much of a rise of a product's reference cost (checked once per day) is passed on to its price level. 0 = none, 1 = fully")
                 .defineInRange("costPassThrough", 0.5, 0.0, 1.0);
-        COST_PASS_THROUGH_DOWN = builder
-                .comment("How much of a fall of a product's reference cost is passed on to its price level. 0 = none, 1 = fully. Values below costPassThrough make prices sticky downwards; the gap lets prices drift upwards over time")
+        COST_PASS_THROUGH_DOWN = builder.comment(
+                        "How much of a fall of a product's reference cost is passed on to its price level. 0 = none, 1 = fully. Values below costPassThrough make prices sticky downwards; the gap lets prices drift upwards over time")
                 .defineInRange("costPassThroughDown", 0.3, 0.0, 1.0);
         builder.pop();
 
         builder.comment("Processing cost").push("processCosts");
-        DEFAULT_PROCESS_COST = builder.comment("Fallback")
-                .defineInRange("defaultCost", 0.50, 0.0, Double.MAX_VALUE);
+        DEFAULT_PROCESS_COST = builder.comment("Fallback").defineInRange("defaultCost", 0.50, 0.0, Double.MAX_VALUE);
         builder.pop();
 
         SPEC = builder.build();
@@ -271,7 +278,8 @@ public class EconomyConfig {
     }
 
     public static PriceProcessParams toPriceProcessParams() {
-        return new PriceProcessParams(MEAN_REVERSION.get(), PURCHASE_PRESSURE.get(), MIN_FACTOR.get(), MAX_FACTOR.get());
+        return new PriceProcessParams(
+                MEAN_REVERSION.get(), PURCHASE_PRESSURE.get(), MIN_FACTOR.get(), MAX_FACTOR.get());
     }
 
     public static MarketDynamicsParams toMarketDynamicsParams() {

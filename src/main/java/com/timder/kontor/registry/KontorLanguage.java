@@ -840,6 +840,17 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("wiki.createkontor.page.market_analyst.title", "Market Analyst");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.buyer.title", "Buyer");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.p1",
+                "The buyer allows you to purchase goods from markets and get them delivered to a postbox. The prices are %s of the market price. Right-clicking the Buyer with a Material List will add all available items from that list to your quote.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.buyer.b1", "Linking a postbox");
+        REGISTRATE.addRawLang("wiki.createkontor.page.buyer.scene1", "A Buyer with a linked postbox.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.p2",
+                "Right-click the buyers desk with a postbox and then place the postbox nearby to link it. Bought items will be delivered in packages to linked postboxes. If you have multiple postboxes, one will be chosen. If a postbox is full, new packages will be held in a queue until there is space to deliver them.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.buyer.p3",
+                "You can optionally set an address that the delivered packages will be addressed to. This way you can automatically route incoming deliveries e.g. to your storage. Tip: Set the Address value of your postbox to * to make the postbox eject incoming packages.");
 
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.logistics_manager.p1",

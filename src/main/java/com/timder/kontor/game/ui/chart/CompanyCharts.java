@@ -89,6 +89,7 @@ public class CompanyCharts {
                         ChartColors.BLUE,
                         x,
                         balance))
+                .referenceLine("0", 0, ChartColors.WHITE)
                 .referenceLine(
                         Component.translatable("chart.createkontor.balance.reference.overdraft")
                                 .getString(),
