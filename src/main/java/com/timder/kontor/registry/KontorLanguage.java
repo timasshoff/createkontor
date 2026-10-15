@@ -322,6 +322,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "ui.createkontor.market_analyst_desk.expected_daily_quantity.tooltip",
                 "§7How many items you will be §6requested §7to deliver on average per day.");
+        REGISTRATE.addRawLang("ui.createkontor.market_analyst_desk.expected_revenue", "Expected daily revenue: %s");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.market_analyst_desk.expected_revenue.tooltip",
+                "§7How much revenue you can roughly expect per day (list price * expected quantity)");
         REGISTRATE.addRawLang(
                 "ui.createkontor.market_analyst_desk.own_price", "Your Price: %s §7(%s §7compared to market price)");
         REGISTRATE.addRawLang(
@@ -837,9 +841,28 @@ public class KontorLanguage {
 
         REGISTRATE.addRawLang("wiki.createkontor.page.lawyer.title", "Lawyer");
 
-        REGISTRATE.addRawLang("wiki.createkontor.page.market_analyst.title", "Market Analyst");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_analyst.p1",
+                "The market analyst provides you with detailed infos about markets, raw materials and your participation in markets.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.market_analyst.b1", "Market Analysis");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_analyst.p2",
+                "There are several informations that the market analyst can give you about any market:");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_analyst.market_infos",
+                "Price and Price History\nCompetitors and Competitor History\nDemand and Demand History\nUnserved Demand and Unserved Demand History");
+        REGISTRATE.addRawLang("wiki.createkontor.page.market_analyst.b2", "Market Participation Analysis");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_analyst.p3",
+                "If you participate in a Market, the Market Analyst can give you information about your participation:");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_analyst.participation_infos",
+                "Market Share Breakdown (your share, other player's share, competitor's share)\nExpected Daily Quantity (how many items you can expect in requests per day for this market)\nExpected Daily Revenue (expected daily quantity * your list price)\nYour Reputation (in stars from 0 to 5)\nLost requests today because the request book was full");
+        REGISTRATE.addRawLang("wiki.createkontor.page.market_analyst.b3", "Raw Material Analysis");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_analyst.p4",
+                "The Market Analyst can provide you with a price history of any raw material.");
 
-        REGISTRATE.addRawLang("wiki.createkontor.page.buyer.title", "Buyer");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p1",
                 "The buyer allows you to purchase goods from markets and get them delivered to a postbox. The prices are %s of the market price. Right-clicking the Buyer with a Material List will add all available items from that list to your quote.");
