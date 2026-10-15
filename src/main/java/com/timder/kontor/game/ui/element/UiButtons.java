@@ -8,9 +8,7 @@ import net.minecraft.network.chat.Component;
 
 public final class UiButtons {
     public static Button primary(Component text) {
-        return (Button) new Button()
-                .setText(text)
-                .layout(layout -> layout.height(20));
+        return (Button) new Button().setText(text).layout(layout -> layout.height(20));
     }
 
     public static Button critical(Component text) {
@@ -21,20 +19,13 @@ public final class UiButtons {
     }
 
     public static Button wrapping(Button button) {
-        button.layout(layout -> layout
-                .heightAuto()
-                .minHeight(20)
-                .alignItems(AlignItems.CENTER)
-                .paddingVertical(4));
-        button.textStyle(style -> style
-                .adaptiveWidth(false)
+        button.layout(layout ->
+                layout.heightAuto().minHeight(20).alignItems(AlignItems.CENTER).paddingVertical(4));
+        button.textStyle(style -> style.adaptiveWidth(false)
                 .textWrap(TextWrap.WRAP)
                 .adaptiveHeight(true)
                 .textAlignHorizontal(Horizontal.CENTER));
-        button.text.layout(layout -> layout
-                .widthAuto()
-                .flexBasis(0)
-                .flexGrow(1));
+        button.text.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
         return button;
     }
 

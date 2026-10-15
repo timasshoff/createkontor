@@ -5,7 +5,6 @@ import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.economy.Economy;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
@@ -30,7 +29,8 @@ public final class LogisticsStorageRules {
         long unbilled = state.unbilledItemTicks();
         if (state.hasSample()) {
             if (nowTick < state.lastSampleTick()) {
-                throw new IllegalArgumentException("nowTick " + nowTick + " is before the last sample at " + state.lastSampleTick() + ".");
+                throw new IllegalArgumentException(
+                        "nowTick " + nowTick + " is before the last sample at " + state.lastSampleTick() + ".");
             }
             long gap = Math.min(nowTick - state.lastSampleTick(), Economy.TRADING_TICK_LENGTH);
             unbilled = addSaturating(unbilled, state.lastSampleItems(), gap);

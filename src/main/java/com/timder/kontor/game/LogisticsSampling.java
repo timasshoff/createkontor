@@ -6,7 +6,6 @@ import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.logistics.LogisticsState;
 import com.timder.kontor.core.company.logistics.LogisticsStorageRules;
 import com.timder.kontor.core.economy.Economy;
-
 import java.util.Objects;
 import java.util.Set;
 

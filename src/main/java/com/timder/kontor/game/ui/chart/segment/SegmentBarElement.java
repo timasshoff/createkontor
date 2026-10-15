@@ -5,15 +5,14 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.timder.kontor.game.ui.chart.ChartColors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 public class SegmentBarElement extends UIElement {
     private record LegendEntry(int index, int row, String text, float x, float y, float width, float height) {
@@ -41,6 +40,7 @@ public class SegmentBarElement extends UIElement {
 
     @Nullable
     private SegmentBarSpec spec;
+
     private float appliedHeight = -1f;
     private int legendRows = 1;
 
@@ -74,7 +74,13 @@ public class SegmentBarElement extends UIElement {
     }
 
     public static float heightFor(boolean hasTitle, int legendRows) {
-        return PAD + (hasTitle ? ROW_HEIGHT + GAP : 0f) + BAR_HEIGHT + GAP + ROW_HEIGHT + (Math.max(1, legendRows) - 1) * LEGEND_ROW_STEP + PAD;
+        return PAD
+                + (hasTitle ? ROW_HEIGHT + GAP : 0f)
+                + BAR_HEIGHT
+                + GAP
+                + ROW_HEIGHT
+                + (Math.max(1, legendRows) - 1) * LEGEND_ROW_STEP
+                + PAD;
     }
 
     @Override
@@ -166,7 +172,13 @@ public class SegmentBarElement extends UIElement {
             String text = spec.valueText(i);
             float textWidth = font.width(text);
             if (x2 - x1 >= textWidth + 2f * INNER_PAD) {
-                drawText(g, font, text, x1 + (x2 - x1 - textWidth) / 2f, textY, SegmentBarMath.readableTextColor(segment.color()));
+                drawText(
+                        g,
+                        font,
+                        text,
+                        x1 + (x2 - x1 - textWidth) / 2f,
+                        textY,
+                        SegmentBarMath.readableTextColor(segment.color()));
             }
         }
 
@@ -194,9 +206,14 @@ public class SegmentBarElement extends UIElement {
                 x = x0;
             }
             float y = y0 + row * LEGEND_ROW_STEP;
-            entries.add(new LegendEntry(i, row, text,
-                    x - LEGEND_HIT_PAD, y - LEGEND_HIT_PAD,
-                    entryWidth + 2f * LEGEND_HIT_PAD, font.lineHeight + 2f * LEGEND_HIT_PAD));
+            entries.add(new LegendEntry(
+                    i,
+                    row,
+                    text,
+                    x - LEGEND_HIT_PAD,
+                    y - LEGEND_HIT_PAD,
+                    entryWidth + 2f * LEGEND_HIT_PAD,
+                    font.lineHeight + 2f * LEGEND_HIT_PAD));
             x += entryWidth + LEGEND_ENTRY_GAP;
         }
         return entries;
@@ -208,12 +225,19 @@ public class SegmentBarElement extends UIElement {
             float x = entry.x() + LEGEND_HIT_PAD;
             float y = entry.y() + LEGEND_HIT_PAD;
             float swatchY = y + (font.lineHeight - LEGEND_SWATCH) / 2f;
-            DrawerHelper.drawSolidRect(g, Math.round(x), Math.round(swatchY), LEGEND_SWATCH, LEGEND_SWATCH, segment.color());
+            DrawerHelper.drawSolidRect(
+                    g, Math.round(x), Math.round(swatchY), LEGEND_SWATCH, LEGEND_SWATCH, segment.color());
 
             float textX = x + LEGEND_SWATCH + LEGEND_GAP;
             drawText(g, font, entry.text(), textX, y, ChartColors.TEXT);
             if (entry.index() == hovered) {
-                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + font.lineHeight), font.width(entry.text()), 1f, ChartColors.TEXT);
+                DrawerHelper.drawSolidRect(
+                        g,
+                        Math.round(textX),
+                        Math.round(y + font.lineHeight),
+                        font.width(entry.text()),
+                        1f,
+                        ChartColors.TEXT);
             }
         }
     }
@@ -261,7 +285,13 @@ public class SegmentBarElement extends UIElement {
             drawText(g, font, header, bx + TOOLTIP_PAD, ty, ChartColors.TEXT);
 
             ty += lineHeight + 1f;
-            DrawerHelper.drawSolidRect(g, Math.round(bx + TOOLTIP_PAD), Math.round(ty + (lineHeight - SWATCH) / 2f), SWATCH, SWATCH, color);
+            DrawerHelper.drawSolidRect(
+                    g,
+                    Math.round(bx + TOOLTIP_PAD),
+                    Math.round(ty + (lineHeight - SWATCH) / 2f),
+                    SWATCH,
+                    SWATCH,
+                    color);
             drawText(g, font, valueLine, bx + TOOLTIP_PAD + SWATCH + 4f, ty, ChartColors.TEXT);
 
             if (shareLine != null) {
@@ -270,7 +300,8 @@ public class SegmentBarElement extends UIElement {
             }
             for (FormattedCharSequence line : description) {
                 ty += lineHeight + 1f;
-                LDLibFonts.drawText(g, font, line, Math.round(bx + TOOLTIP_PAD), Math.round(ty), ChartColors.TEXT_DIM, false);
+                LDLibFonts.drawText(
+                        g, font, line, Math.round(bx + TOOLTIP_PAD), Math.round(ty), ChartColors.TEXT_DIM, false);
             }
         });
     }

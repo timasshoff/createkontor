@@ -13,7 +13,8 @@ public class UiProgressBars {
         ProgressBar bar = new ProgressBar();
         bar.setRange(0, 100);
         bar.setProgress(percent);
-        bar.label(label -> label.setText(Component.literal(Math.round(percent) + " %").withStyle(ChatFormatting.GOLD)));
+        bar.label(label ->
+                label.setText(Component.literal(Math.round(percent) + " %").withStyle(ChatFormatting.GOLD)));
         bar.layout(layout -> layout.height(HEIGHT));
         return bar;
     }

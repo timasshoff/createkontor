@@ -41,7 +41,11 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
 
     public LogisticsManagerDeskBlock(Properties properties) {
         super(properties, ROLE, CompanyConfig.LOGISTICS_MANAGER_SALARY_IN_DOLLARS);
-        ConsultantWiki.register("logistics_manager", WikiCategory.EMPLOYEES, Component.translatable("employee_role.createkontor.logistics_manager"), this::buildWikiPage);
+        ConsultantWiki.register(
+                "logistics_manager",
+                WikiCategory.EMPLOYEES,
+                Component.translatable("employee_role.createkontor.logistics_manager"),
+                this::buildWikiPage);
     }
 
     @Override
@@ -52,7 +56,14 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hitResult) {
         if (LogisticsNetworkAccess.isStockLink(stack)) {
             return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
@@ -74,20 +85,29 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
         page.addChild(WikiUtils.heading(Component.translatable("wiki.createkontor.page.logistics_manager.b1")));
 
         var level = new TrackedDummyWorld();
-        level.addBlock(new BlockPos(0, 0, 0), BlockInfo.fromBlockState(KontorBlocks.LOGISTICS_MANAGER_DESK.getDefaultState()));
+        level.addBlock(
+                new BlockPos(0, 0, 0), BlockInfo.fromBlockState(KontorBlocks.LOGISTICS_MANAGER_DESK.getDefaultState()));
         WikiUtils.addSeatedVillager(level, new BlockPos(0, 0, 1), Direction.NORTH, DyeColor.RED);
 
-        BlockState link = AllBlocks.STOCK_LINK.getDefaultState()
+        BlockState link = AllBlocks.STOCK_LINK
+                .getDefaultState()
                 .setValue(PackagerLinkBlock.FACE, AttachFace.WALL)
                 .setValue(PackagerLinkBlock.FACING, Direction.WEST);
         level.addBlock(new BlockPos(-1, 0, 0), BlockInfo.fromBlockState(link));
 
-        page.addChild(WikiUtils.scene(level, WikiUtils.SCENE_DEFAULT_HEIGHT, false, Component.translatable("wiki.createkontor.page.logistics_manager.scene1")));
+        page.addChild(WikiUtils.scene(
+                level,
+                WikiUtils.SCENE_DEFAULT_HEIGHT,
+                false,
+                Component.translatable("wiki.createkontor.page.logistics_manager.scene1")));
 
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.logistics_manager.p2")));
 
         page.addChild(WikiUtils.heading(Component.translatable("wiki.createkontor.page.logistics_manager.b2")));
-        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.logistics_manager.p3", Money.fromDollar(CompanyConfig.STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS.get()).toString())));
+        page.addChild(WikiUtils.paragraph(Component.translatable(
+                "wiki.createkontor.page.logistics_manager.p3",
+                Money.fromDollar(CompanyConfig.STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS.get())
+                        .toString())));
 
         page.addChild(WikiUtils.heading(Component.translatable("wiki.createkontor.page.logistics_manager.b3")));
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.logistics_manager.p4")));

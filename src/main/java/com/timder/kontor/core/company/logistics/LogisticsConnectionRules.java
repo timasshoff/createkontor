@@ -4,7 +4,6 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.financial.Money;
-
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,7 +21,8 @@ public class LogisticsConnectionRules {
         }
     }
 
-    public static Check check(CompanyRegistry registry, Company company, UUID networkId, UUID networkOwner, CompanyParams params) {
+    public static Check check(
+            CompanyRegistry registry, Company company, UUID networkId, UUID networkOwner, CompanyParams params) {
         Objects.requireNonNull(registry, "registry must not be null.");
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(networkId, "networkId must not be null.");
@@ -38,7 +38,8 @@ public class LogisticsConnectionRules {
         }
 
         for (Company other : registry.all()) {
-            if (!other.id().equals(company.id()) && networkId.equals(other.logistics().networkId())) {
+            if (!other.id().equals(company.id())
+                    && networkId.equals(other.logistics().networkId())) {
                 return Check.NETWORK_USED_BY_OTHER_COMPANY;
             }
         }
@@ -49,7 +50,8 @@ public class LogisticsConnectionRules {
         return Check.OK;
     }
 
-    public static Check connect(CompanyRegistry registry, Company company, UUID networkId, UUID networkOwner, CompanyParams params) {
+    public static Check connect(
+            CompanyRegistry registry, Company company, UUID networkId, UUID networkOwner, CompanyParams params) {
         Check check = check(registry, company, networkId, networkOwner, params);
         if (check.isOk() && !networkId.equals(company.logistics().networkId())) {
             company.setLogistics(LogisticsState.connectedTo(networkId));

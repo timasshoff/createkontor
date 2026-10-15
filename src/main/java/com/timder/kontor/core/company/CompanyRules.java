@@ -5,11 +5,8 @@ import com.timder.kontor.core.company.employee.Employee;
 import com.timder.kontor.core.company.employee.EmployeeRules;
 import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.license.HeldLicense;
-import com.timder.kontor.core.company.license.LicenseDef;
-import com.timder.kontor.core.company.license.LicenseHolding;
 import com.timder.kontor.core.company.license.LicenseHoldingRules;
 import com.timder.kontor.core.company.logistics.LogisticsStorageRules;
-
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +24,8 @@ public final class CompanyRules {
      * @param params The company parameters
      * @return The history entry of that day
      */
-    public static CompanyHistoryEntry settleDay(Company company, long day, double policyRate, Map<BookingKind, Money> otherCosts, CompanyParams params) {
+    public static CompanyHistoryEntry settleDay(
+            Company company, long day, double policyRate, Map<BookingKind, Money> otherCosts, CompanyParams params) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(otherCosts, "otherCosts must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
@@ -37,7 +35,11 @@ public final class CompanyRules {
 
         // Step 1: Fixed and mixed costs (only business license is actually computed)
         if (params.businessLicenseFee().isPositive()) {
-            account.book(day, BookingKind.BUSINESS_LICENSE, params.businessLicenseFee().negate(), "");
+            account.book(
+                    day,
+                    BookingKind.BUSINESS_LICENSE,
+                    params.businessLicenseFee().negate(),
+                    "");
         }
         bookLicenseFees(company, day, params);
         bookSalaries(company, day, params);
@@ -53,7 +55,8 @@ public final class CompanyRules {
                 account.book(day, BookingKind.INTEREST, installment.interest().negate(), referenceOf(loan));
             }
             if (installment.repayment().isPositive()) {
-                account.book(day, BookingKind.LOAN_REPAYMENT, installment.repayment().negate(), referenceOf(loan));
+                account.book(
+                        day, BookingKind.LOAN_REPAYMENT, installment.repayment().negate(), referenceOf(loan));
             }
             if (loan.isRepaid()) {
                 company.removeLoan(loan);
@@ -90,7 +93,8 @@ public final class CompanyRules {
                 continue;
             }
             BookingKind kind = held.hasRevenueShare() ? BookingKind.TURNOVER_LICENSE : BookingKind.FLAT_LICENSE;
-            company.account().book(day, kind, held.dailyFee().negate(), held.key().toString());
+            company.account()
+                    .book(day, kind, held.dailyFee().negate(), held.key().toString());
         }
         LicenseHoldingRules.dropCancelled(company);
     }
@@ -110,7 +114,12 @@ public final class CompanyRules {
     private static void bookSalary(Company company, Employee employee, long day, CompanyParams params) {
         Money salary = EmployeeRules.dailySalary(employee.baseSalary(), company.legalForm(params));
         if (salary.isPositive()) {
-            company.account().book(day, BookingKind.SALARY, salary.negate(), employee.role().value());
+            company.account()
+                    .book(
+                            day,
+                            BookingKind.SALARY,
+                            salary.negate(),
+                            employee.role().value());
         }
     }
 
@@ -124,7 +133,8 @@ public final class CompanyRules {
                     || kind == BookingKind.INTEREST
                     || kind == BookingKind.STORAGE
                     || kind == BookingKind.SALARY) {
-                throw new IllegalArgumentException(kind + " is booked by settleDay itself, it must not be in otherCosts.");
+                throw new IllegalArgumentException(
+                        kind + " is booked by settleDay itself, it must not be in otherCosts.");
             }
             if (!kind.isCost()) {
                 throw new IllegalArgumentException(kind + " is not a cost kind.");

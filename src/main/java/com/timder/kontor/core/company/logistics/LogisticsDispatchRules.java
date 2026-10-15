@@ -5,7 +5,6 @@ import com.timder.kontor.core.company.order.DeliveryRules;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
-
 import java.util.*;
 
 public final class LogisticsDispatchRules {
@@ -26,7 +25,12 @@ public final class LogisticsDispatchRules {
      * @param minimumStock Minimum amount of one item to keep in storage
      * @return The lines in the order they were planned
      */
-    public static List<Line> plan(Company company, Economy economy, Map<ItemId, Integer> stock, Map<Long, Integer> alreadyOrdered, int minimumStock) {
+    public static List<Line> plan(
+            Company company,
+            Economy economy,
+            Map<ItemId, Integer> stock,
+            Map<Long, Integer> alreadyOrdered,
+            int minimumStock) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(stock, "stock must not be null.");

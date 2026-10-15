@@ -30,8 +30,7 @@ public final class UiSwitches {
         Label label = UiLabels.primary(text, Horizontal.LEFT);
 
         LabeledSwitch row = new LabeledSwitch(switchElement);
-        row.layout(layout -> layout
-                .flexDirection(FlexDirection.ROW)
+        row.layout(layout -> layout.flexDirection(FlexDirection.ROW)
                 .alignItems(AlignItems.CENTER)
                 .gapAll(4));
         row.addChildren(switchElement, label);
@@ -46,8 +45,7 @@ public final class UiSwitches {
         Label label = UiLabels.primary(text, Horizontal.RIGHT);
 
         LabeledSwitch row = new LabeledSwitch(switchElement);
-        row.layout(layout -> layout
-                .flexDirection(FlexDirection.ROW)
+        row.layout(layout -> layout.flexDirection(FlexDirection.ROW)
                 .alignItems(AlignItems.CENTER)
                 .gapAll(4));
         row.addChildren(label, switchElement);

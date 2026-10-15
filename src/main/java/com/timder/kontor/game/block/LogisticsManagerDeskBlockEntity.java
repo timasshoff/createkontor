@@ -8,8 +8,8 @@ import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
-import com.timder.kontor.core.company.logistics.LogisticsDispatchRules;
 import com.timder.kontor.core.company.logistics.LogisticsConnectionRules;
+import com.timder.kontor.core.company.logistics.LogisticsDispatchRules;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
@@ -20,6 +20,7 @@ import com.timder.kontor.game.LogisticsNetworkAccess;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.PlayerNotifications;
+import java.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -32,8 +33,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
@@ -143,7 +142,10 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         if (!(level instanceof ServerLevel serverLevel)) {
             return Map.of();
         }
-        Company company = CompanySavedData.get(serverLevel.getServer()).getRegistry().get(getCompanyId()).orElse(null);
+        Company company = CompanySavedData.get(serverLevel.getServer())
+                .getRegistry()
+                .get(getCompanyId())
+                .orElse(null);
         if (company == null) {
             return Map.of();
         }
@@ -220,7 +222,9 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         if (oldId != null && level instanceof ServerLevel serverLevel) {
             MinecraftServer server = serverLevel.getServer();
             CompanySavedData data = CompanySavedData.get(server);
-            data.getRegistry().get(oldId).ifPresent(company -> disconnect(server, data, company, DisconnectReason.DESK_REMOVED));
+            data.getRegistry()
+                    .get(oldId)
+                    .ifPresent(company -> disconnect(server, data, company, DisconnectReason.DESK_REMOVED));
         }
         connectionStatus = ConnectionStatus.WAITING;
         orderingStatus = OrderingStatus.NOT_CONNECTED;
@@ -245,7 +249,8 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
             return;
         }
         MinecraftServer server = level.getServer();
-        Company company = CompanySavedData.get(server).getRegistry().get(companyId).orElse(null);
+        Company company =
+                CompanySavedData.get(server).getRegistry().get(companyId).orElse(null);
         if (company == null || !company.isActive()) {
             return;
         }
@@ -276,7 +281,9 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
             ticksUntilOrder = Math.max(0, ticksUntilOrder - CHECK_INTERVAL_TICKS);
         }
         if (ticksUntilOrder > 0) {
-            if (orderingStatus == OrderingStatus.OFF || orderingStatus == OrderingStatus.NOT_CONNECTED || orderingStatus == OrderingStatus.NO_ADDRESS) {
+            if (orderingStatus == OrderingStatus.OFF
+                    || orderingStatus == OrderingStatus.NOT_CONNECTED
+                    || orderingStatus == OrderingStatus.NO_ADDRESS) {
                 updateOrderingStatus(OrderingStatus.WAITING);
             }
             return;
@@ -288,7 +295,8 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
             products.add(order.getProduct());
         }
         Map<ItemId, Integer> stock = products.isEmpty() ? Map.of() : LogisticsNetworkAccess.stockOf(network, products);
-        List<LogisticsDispatchRules.Line> plan = LogisticsDispatchRules.plan(company, economy, stock, orderedQuantities, minimumStock);
+        List<LogisticsDispatchRules.Line> plan =
+                LogisticsDispatchRules.plan(company, economy, stock, orderedQuantities, minimumStock);
 
         ticksUntilOrder = ORDER_INTERVAL_TICKS;
         setChanged();
@@ -328,7 +336,8 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         MinecraftServer server = level.getServer();
         CompanySavedData data = CompanySavedData.get(server);
         Company company = data.getRegistry().get(companyId).orElse(null);
-        if (company == null || !company.isActive()
+        if (company == null
+                || !company.isActive()
                 || company.boundResourceCount(LogisticsManagerDeskBlock.RESOURCE_KEY) != 1) {
             updateStatus(ConnectionStatus.WAITING);
             return;
@@ -362,7 +371,8 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         boolean wasConnected = company.logistics().isConnected();
         UUID owner = LogisticsNetworkAccess.ownerOf(wanted);
-        LogisticsConnectionRules.Check check = LogisticsConnectionRules.connect(data.getRegistry(), company, wanted, owner, params);
+        LogisticsConnectionRules.Check check =
+                LogisticsConnectionRules.connect(data.getRegistry(), company, wanted, owner, params);
 
         if (check.isOk()) {
             if (!wasConnected) {
@@ -406,15 +416,22 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
         notifyUpdate();
     }
 
-    private static void disconnect(MinecraftServer server, CompanySavedData data, Company company, DisconnectReason reason) {
+    private static void disconnect(
+            MinecraftServer server, CompanySavedData data, Company company, DisconnectReason reason) {
         if (!company.logistics().isConnected()) {
             return;
         }
         Economy economy = EconomySavedData.get(server).getEconomy();
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
-        Money booked = LogisticsConnectionRules.disconnect(company, economy.currentDay(), economy.ticksElapsed(), params);
+        Money booked =
+                LogisticsConnectionRules.disconnect(company, economy.currentDay(), economy.ticksElapsed(), params);
         data.setDirty();
-        PlayerNotifications.sendLogisticsDisconnectedNotification(server, company, Component.translatable("message.createkontor.logistics.reason." + reason.name().toLowerCase(Locale.ROOT)), booked);
+        PlayerNotifications.sendLogisticsDisconnectedNotification(
+                server,
+                company,
+                Component.translatable(
+                        "message.createkontor.logistics.reason." + reason.name().toLowerCase(Locale.ROOT)),
+                booked);
     }
 
     private boolean allNeighborsLoaded(ServerLevel level) {
@@ -439,7 +456,8 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
             default -> ComponentFormatting.highlightErrorTranslatable(connectionStatus.translationKey());
         };
         CreateLang.builder()
-                .add(Component.translatable("goggle.createkontor.logistics_manager_desk.status", value).withStyle(ComponentFormatting.DEFAULT))
+                .add(Component.translatable("goggle.createkontor.logistics_manager_desk.status", value)
+                        .withStyle(ComponentFormatting.DEFAULT))
                 .forGoggles(tooltip, 1);
 
         Component ordering = switch (orderingStatus) {
@@ -448,7 +466,8 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
             default -> ComponentFormatting.standardTranslatable(orderingStatus.translationKey());
         };
         CreateLang.builder()
-                .add(Component.translatable("goggle.createkontor.logistics_manager_desk.ordering", ordering).withStyle(ComponentFormatting.DEFAULT))
+                .add(Component.translatable("goggle.createkontor.logistics_manager_desk.ordering", ordering)
+                        .withStyle(ComponentFormatting.DEFAULT))
                 .forGoggles(tooltip, 1);
         return true;
     }

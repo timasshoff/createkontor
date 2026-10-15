@@ -12,13 +12,12 @@ import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.KontorTickHandler;
 import com.timder.kontor.util.PlayerNotifications;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 
 /*
 The following code has been AI generated
@@ -26,24 +25,23 @@ The following code has been AI generated
 public class UpgradeCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(
-                Commands.literal("kontor")
-                        .requires(source -> source.hasPermission(2))
-                        .then(Commands.literal("company")
-                                .then(Commands.literal("upgrade")
-                                        .then(Commands.literal("check")
-                                                .then(Commands.argument("company", StringArgumentType.string())
-                                                        .executes(UpgradeCommands::check)))
-                                        .then(Commands.literal("apply")
-                                                .then(Commands.argument("company", StringArgumentType.string())
-                                                        .executes(UpgradeCommands::apply)))
-                                        .then(Commands.literal("info")
-                                                .then(Commands.argument("company", StringArgumentType.string())
-                                                        .executes(UpgradeCommands::info)))
-                                        .then(Commands.literal("fastforward")
-                                                .then(Commands.argument("company", StringArgumentType.string())
-                                                        .then(Commands.argument("ticks", LongArgumentType.longArg(1))
-                                                                .executes(UpgradeCommands::fastForward)))))));
+        dispatcher.register(Commands.literal("kontor")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.literal("company")
+                        .then(Commands.literal("upgrade")
+                                .then(Commands.literal("check")
+                                        .then(Commands.argument("company", StringArgumentType.string())
+                                                .executes(UpgradeCommands::check)))
+                                .then(Commands.literal("apply")
+                                        .then(Commands.argument("company", StringArgumentType.string())
+                                                .executes(UpgradeCommands::apply)))
+                                .then(Commands.literal("info")
+                                        .then(Commands.argument("company", StringArgumentType.string())
+                                                .executes(UpgradeCommands::info)))
+                                .then(Commands.literal("fastforward")
+                                        .then(Commands.argument("company", StringArgumentType.string())
+                                                .then(Commands.argument("ticks", LongArgumentType.longArg(1))
+                                                        .executes(UpgradeCommands::fastForward)))))));
     }
 
     private static int check(CommandContext<CommandSourceStack> context) {
@@ -64,7 +62,8 @@ public class UpgradeCommands {
 
         Economy economy = EconomySavedData.get(source.getServer()).getEconomy();
         String target = forms.next(company.legalLevel()).id();
-        UpgradeChecklist checklist = UpgradeRules.checkApplication(company, forms.next(company.legalLevel()), economy.overallReputationInStars(company.id()));
+        UpgradeChecklist checklist = UpgradeRules.checkApplication(
+                company, forms.next(company.legalLevel()), economy.overallReputationInStars(company.id()));
 
         source.sendSuccess(() -> Component.literal(formatChecklist(company, target, checklist)), false);
         return 1;
@@ -83,20 +82,28 @@ public class UpgradeCommands {
 
         CompanySavedData data = CompanySavedData.get(source.getServer());
         Economy economy = EconomySavedData.get(source.getServer()).getEconomy();
-        ApplyResult result = UpgradeRules.apply(company, economy.overallReputationInStars(company.id()), economy.currentDay(), params);
+        ApplyResult result = UpgradeRules.apply(
+                company, economy.overallReputationInStars(company.id()), economy.currentDay(), params);
 
         switch (result.status()) {
             case STARTED -> {
                 data.setDirty();
                 UpgradeApplication application = company.upgradeApplication().orElseThrow();
-                String target = params.legalForms().get(application.targetLevel()).id();
-                source.sendSuccess(() -> Component.literal(company.name() + " applied for " + target + ". Fee paid: "
-                        + params.legalForms().get(application.targetLevel()).entryRequirements().fee()
-                        + ". Processing takes " + CommandSupport.formatTicks(application.ticksLeft()) + "."), false);
+                String target =
+                        params.legalForms().get(application.targetLevel()).id();
+                source.sendSuccess(
+                        () -> Component.literal(company.name() + " applied for " + target + ". Fee paid: "
+                                + params.legalForms()
+                                        .get(application.targetLevel())
+                                        .entryRequirements()
+                                        .fee()
+                                + ". Processing takes " + CommandSupport.formatTicks(application.ticksLeft()) + "."),
+                        false);
                 return 1;
             }
             case ALREADY_PENDING -> {
-                source.sendFailure(Component.literal(company.name() + " already has an application: " + formatApplication(company, params)));
+                source.sendFailure(Component.literal(
+                        company.name() + " already has an application: " + formatApplication(company, params)));
                 return 0;
             }
             case NO_NEXT_FORM -> {
@@ -105,7 +112,8 @@ public class UpgradeCommands {
             }
             case REQUIREMENTS_NOT_MET -> {
                 String target = params.legalForms().next(company.legalLevel()).id();
-                source.sendFailure(Component.literal("Requirements not met. Nothing was paid.\n" + formatChecklist(company, target, result.checklist())));
+                source.sendFailure(Component.literal("Requirements not met. Nothing was paid.\n"
+                        + formatChecklist(company, target, result.checklist())));
                 return 0;
             }
         }
@@ -163,24 +171,31 @@ public class UpgradeCommands {
         data.setDirty();
 
         if (event.isPresent()) {
-            PlayerNotifications.sendUpgradeEventNotifications(source.getServer(), data.getRegistry(), List.of(event.get()), params);
+            PlayerNotifications.sendUpgradeEventNotifications(
+                    source.getServer(), data.getRegistry(), List.of(event.get()), params);
             source.sendSuccess(() -> Component.literal(formatEvent(event.get(), company, params)), false);
         } else {
-            source.sendSuccess(() -> Component.literal("Advanced by " + ticks + " ticks. " + formatApplication(company, params)), false);
+            source.sendSuccess(
+                    () -> Component.literal("Advanced by " + ticks + " ticks. " + formatApplication(company, params)),
+                    false);
         }
         return 1;
     }
 
     private static String formatEvent(UpgradeEvent event, Company company, CompanyParams params) {
         return switch (event) {
-            case UpgradeEvent.Completed completed -> company.name() + " advanced to level " + completed.newLevel()
-                    + " " + params.legalForms().get(completed.newLevel()).id() + ".";
-            case UpgradeEvent.Resting resting -> "Processing finished, but the net worth of " + company.name()
-                    + " is too low. The application for " + params.legalForms().get(resting.targetLevel()).id()
-                    + " rests for up to " + resting.restingDays() + " day(s).";
-            case UpgradeEvent.Rejected rejected -> "The application of " + company.name() + " for "
-                    + params.legalForms().get(rejected.targetLevel()).id() + " was rejected. The fee of "
-                    + rejected.feeLost() + " is lost.";
+            case UpgradeEvent.Completed completed ->
+                company.name() + " advanced to level " + completed.newLevel() + " "
+                        + params.legalForms().get(completed.newLevel()).id() + ".";
+            case UpgradeEvent.Resting resting ->
+                "Processing finished, but the net worth of " + company.name()
+                        + " is too low. The application for "
+                        + params.legalForms().get(resting.targetLevel()).id()
+                        + " rests for up to " + resting.restingDays() + " day(s).";
+            case UpgradeEvent.Rejected rejected ->
+                "The application of " + company.name() + " for "
+                        + params.legalForms().get(rejected.targetLevel()).id() + " was rejected. The fee of "
+                        + rejected.feeLost() + " is lost.";
         };
     }
 
@@ -190,16 +205,23 @@ public class UpgradeCommands {
             return "none";
         }
         UpgradeApplication a = application.get();
-        String target = "level " + a.targetLevel() + " " + params.legalForms().get(a.targetLevel()).id();
+        String target = "level " + a.targetLevel() + " "
+                + params.legalForms().get(a.targetLevel()).id();
         if (a.isProcessing()) {
             return "processing for " + target + ", " + CommandSupport.formatTicks(a.ticksLeft()) + " left";
         }
-        return "resting for " + target + ", " + a.restingDaysLeft() + " day" + (a.restingDaysLeft() == 1 ? "" : "s") + " left";
+        return "resting for " + target + ", " + a.restingDaysLeft() + " day" + (a.restingDaysLeft() == 1 ? "" : "s")
+                + " left";
     }
 
     private static String formatChecklist(Company company, String target, UpgradeChecklist checklist) {
-        StringBuilder text = new StringBuilder("=== ").append(company.name()).append(" -> ").append(target)
-                .append(" (").append(checklist.mode().name().toLowerCase(Locale.ROOT)).append(") ===");
+        StringBuilder text = new StringBuilder("=== ")
+                .append(company.name())
+                .append(" -> ")
+                .append(target)
+                .append(" (")
+                .append(checklist.mode().name().toLowerCase(Locale.ROOT))
+                .append(") ===");
         for (UpgradeChecklist.Row row : checklist.rows()) {
             text.append("\n  ").append(formatRow(checklist.mode(), row));
         }
@@ -210,7 +232,8 @@ public class UpgradeCommands {
 
     private static String formatRow(UpgradeCheckMode mode, UpgradeChecklist.Row row) {
         String label = switch (row.criterion()) {
-            case NET_WORTH -> mode == UpgradeCheckMode.APPLICATION ? "Net worth (minimum plus fee)" : "Net worth (minimum)";
+            case NET_WORTH ->
+                mode == UpgradeCheckMode.APPLICATION ? "Net worth (minimum plus fee)" : "Net worth (minimum)";
             case FULFILLED_ORDERS -> "Fulfilled orders";
             case REPUTATION -> "Reputation";
             case LIQUIDITY -> "No payment difficulties";
@@ -218,7 +241,8 @@ public class UpgradeCommands {
         String values = switch (row) {
             case UpgradeChecklist.MoneyRow money -> money.actual() + " / " + money.required();
             case UpgradeChecklist.CountRow count -> count.actual() + " / " + count.required();
-            case UpgradeChecklist.StarsRow stars -> String.format(Locale.ROOT, "%.2f / %.2f stars", stars.actual(), stars.required());
+            case UpgradeChecklist.StarsRow stars ->
+                String.format(Locale.ROOT, "%.2f / %.2f stars", stars.actual(), stars.required());
             case UpgradeChecklist.FlagRow flag -> flag.fulfilled() ? "yes" : "no";
         };
         return label + ": " + values + (row.met() ? "  [OK]" : "  [MISSING]");

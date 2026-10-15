@@ -9,18 +9,14 @@ import java.util.UUID;
  * @param lastSampleItems The amount of stored items at the last sample
  * @param lastSampleTick The economy tick of the last sample
  */
-public record LogisticsState(
-        UUID networkId,
-        long unbilledItemTicks,
-        long lastSampleItems,
-        long lastSampleTick
-) {
+public record LogisticsState(UUID networkId, long unbilledItemTicks, long lastSampleItems, long lastSampleTick) {
     public static final long NO_SAMPLE = -1L;
 
     public LogisticsState {
         if (unbilledItemTicks < 0) throw new IllegalArgumentException("unbilledItemTicks must not be negative.");
         if (lastSampleItems < 0) throw new IllegalArgumentException("lastSampleItems must not be negative.");
-        if (lastSampleTick < NO_SAMPLE) throw new IllegalArgumentException("lastSampleTick must be at least " + NO_SAMPLE + ".");
+        if (lastSampleTick < NO_SAMPLE)
+            throw new IllegalArgumentException("lastSampleTick must be at least " + NO_SAMPLE + ".");
 
         if (lastSampleTick == NO_SAMPLE && (lastSampleItems != 0 || unbilledItemTicks != 0)) {
             throw new IllegalArgumentException("Without a sample there can be no sampled items and nothing unbilled.");

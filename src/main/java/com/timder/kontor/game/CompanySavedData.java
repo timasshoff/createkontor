@@ -21,6 +21,7 @@ import com.timder.kontor.core.company.request.RequestArrivals;
 import com.timder.kontor.core.company.request.RequestBoard;
 import com.timder.kontor.core.port.SeededRng;
 import com.timder.kontor.core.value.ItemId;
+import java.util.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,8 +30,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
-
-import java.util.*;
 
 public class CompanySavedData extends SavedData {
 
@@ -48,10 +47,8 @@ public class CompanySavedData extends SavedData {
 
     public static CompanySavedData get(MinecraftServer server) {
         ServerLevel overworld = server.overworld();
-        SavedData.Factory<CompanySavedData> factory = new SavedData.Factory<>(
-                CompanySavedData::create,
-                (tag, registries) -> load(tag)
-        );
+        SavedData.Factory<CompanySavedData> factory =
+                new SavedData.Factory<>(CompanySavedData::create, (tag, registries) -> load(tag));
         return overworld.getDataStorage().computeIfAbsent(factory, NAME);
     }
 
@@ -62,7 +59,8 @@ public class CompanySavedData extends SavedData {
     public RequestArrivals getArrivals(MinecraftServer server) {
         if (arrivals == null) {
             ServerLevel overworld = server.overworld();
-            arrivals = new RequestArrivals(SeededRng.forName(overworld.getSeed(), "request_arrivals:" + overworld.getGameTime()));
+            arrivals = new RequestArrivals(
+                    SeededRng.forName(overworld.getSeed(), "request_arrivals:" + overworld.getGameTime()));
         }
         return arrivals;
     }
@@ -234,18 +232,21 @@ public class CompanySavedData extends SavedData {
             licenses.add(readLicenseHolding((CompoundTag) t));
         }
 
-        long nextEmployeeNumber = tag.contains("NextEmployeeNumber", Tag.TAG_LONG) ? tag.getLong("NextEmployeeNumber") : 1L;
+        long nextEmployeeNumber =
+                tag.contains("NextEmployeeNumber", Tag.TAG_LONG) ? tag.getLong("NextEmployeeNumber") : 1L;
         List<Employee> employees = new ArrayList<>();
         for (Tag t : tag.getList("Employees", Tag.TAG_COMPOUND)) {
             employees.add(readEmployee((CompoundTag) t));
         }
 
-        long lastActiveDay = tag.contains("LastActiveDay", Tag.TAG_LONG) ? tag.getLong("LastActiveDay") : Company.NEVER_ACTIVE;
+        long lastActiveDay =
+                tag.contains("LastActiveDay", Tag.TAG_LONG) ? tag.getLong("LastActiveDay") : Company.NEVER_ACTIVE;
 
         List<Departure> departures = new ArrayList<>();
         for (Tag t : tag.getList("Departures", Tag.TAG_COMPOUND)) {
             CompoundTag departureTag = (CompoundTag) t;
-            departures.add(new Departure(readEmployee(departureTag.getCompound("Employee")), departureTag.getLong("Day")));
+            departures.add(
+                    new Departure(readEmployee(departureTag.getCompound("Employee")), departureTag.getLong("Day")));
         }
 
         LogisticsState logistics = tag.contains("Logistics", Tag.TAG_COMPOUND)
@@ -276,8 +277,7 @@ public class CompanySavedData extends SavedData {
                 employees,
                 lastActiveDay,
                 departures,
-                logistics
-        );
+                logistics);
     }
 
     private static CompoundTag writeAccount(Account.SaveState state) {
@@ -469,7 +469,8 @@ public class CompanySavedData extends SavedData {
                 tag.getDouble("Urgency"),
                 tag.getLong("DeadlineTicks"),
                 tag.getLong("GracePeriodTicks"),
-                new RequestOrigin(tag.getLong("OriginRequestNumber")), // TODO needs changing when more order origins get added
+                new RequestOrigin(
+                        tag.getLong("OriginRequestNumber")), // TODO needs changing when more order origins get added
                 tag.getInt("DeliveredQuantity"),
                 tag.getLong("RemainingDeadlineTicks"),
                 tag.getLong("RemainingGracePeriodTicks"),

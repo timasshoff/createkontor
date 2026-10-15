@@ -32,6 +32,7 @@ import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
+import java.util.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -42,27 +43,35 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
-
 public class LogisticsManagerUi {
     public static ModularUI create(EmployeeDeskContext context) {
         LogisticsManagerDeskBlockEntity be = (LogisticsManagerDeskBlockEntity) context.desk();
 
         ObservableValue<Boolean> networkConnected = new ObservableValue<>(false);
-        SimpleBinding<Boolean> networkConnectedBinding = DataBindingBuilder.boolS2C(() -> context.company().logistics().isConnected())
+        SimpleBinding<Boolean> networkConnectedBinding = DataBindingBuilder.boolS2C(
+                        () -> context.company().logistics().isConnected())
                 .onRemoteSyncReceived(networkConnected::set)
                 .build();
 
         var tabView = UiContainer.largeTabView();
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.logistics_manager_desk.network_overview")), networkOverview(context, be, networkConnected, networkConnectedBinding));
-        tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.logistics_manager_desk.orders")), orders(context, be, networkConnected, networkConnectedBinding));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.logistics_manager_desk.network_overview")),
+                networkOverview(context, be, networkConnected, networkConnectedBinding));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.logistics_manager_desk.orders")),
+                orders(context, be, networkConnected, networkConnectedBinding));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
         return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
     }
 
-    public static UIElement networkOverview(EmployeeDeskContext context, LogisticsManagerDeskBlockEntity be, ObservableValue<Boolean> networkConnected, SimpleBinding<Boolean> networkConnectedBinding) {
-        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+    public static UIElement networkOverview(
+            EmployeeDeskContext context,
+            LogisticsManagerDeskBlockEntity be,
+            ObservableValue<Boolean> networkConnected,
+            SimpleBinding<Boolean> networkConnectedBinding) {
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
         content.addSyncValue(networkConnectedBinding.getSyncValue());
 
         UIElement notConnected = getNotConnectedElement(be);
@@ -76,59 +85,83 @@ public class LogisticsManagerUi {
         });
 
         Label totalItemCountLabel = UiLabels.secondary(Component.empty(), Horizontal.CENTER);
-        totalItemCountLabel.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> context.company().logistics().isConnected() ? Component.translatable("ui.createkontor.logistics_manager_desk.total_items", ComponentFormatting.highlightStandard(String.valueOf(LogisticsNetworkAccess.totalItemCount(context.company().logistics().networkId())))) : Component.empty())
-                        .onRemoteSyncReceived(totalItemCountLabel::setText)
-                        .build().getSyncValue()
-        );
+        totalItemCountLabel.addSyncValue(DataBindingBuilder.componentS2C(() ->
+                        context.company().logistics().isConnected()
+                                ? Component.translatable(
+                                        "ui.createkontor.logistics_manager_desk.total_items",
+                                        ComponentFormatting.highlightStandard(
+                                                String.valueOf(LogisticsNetworkAccess.totalItemCount(context.company()
+                                                        .logistics()
+                                                        .networkId()))))
+                                : Component.empty())
+                .onRemoteSyncReceived(totalItemCountLabel::setText)
+                .build()
+                .getSyncValue());
 
         Label expectedCostLabel = UiLabels.secondary(Component.empty(), Horizontal.CENTER);
-        expectedCostLabel.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> {
-                            if (!context.company().logistics().isConnected()) {
-                                return Component.empty();
-                            }
-                            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
-                            long itemsTicks = LogisticsNetworkAccess.totalItemCount(context.company().logistics().networkId()) * Economy.DAY_LENGTH;
-                            return Component.translatable("ui.createkontor.logistics_manager_desk.expected_cost", ComponentFormatting.moneyNegative(LogisticsStorageRules.storageCost(itemsTicks, params)));
-                        })
-                        .onRemoteSyncReceived(expectedCostLabel::setText)
-                        .build().getSyncValue()
-        );
+        expectedCostLabel.addSyncValue(DataBindingBuilder.componentS2C(() -> {
+                    if (!context.company().logistics().isConnected()) {
+                        return Component.empty();
+                    }
+                    CompanyParams params =
+                            CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+                    long itemsTicks = LogisticsNetworkAccess.totalItemCount(
+                                    context.company().logistics().networkId())
+                            * Economy.DAY_LENGTH;
+                    return Component.translatable(
+                            "ui.createkontor.logistics_manager_desk.expected_cost",
+                            ComponentFormatting.moneyNegative(LogisticsStorageRules.storageCost(itemsTicks, params)));
+                })
+                .onRemoteSyncReceived(expectedCostLabel::setText)
+                .build()
+                .getSyncValue());
 
         connected.addChild(UiContainer.headerWithSubtitle(
-                UiLabels.h2(Component.translatable("ui.createkontor.logistics_manager_desk.connected_network"), Horizontal.CENTER),
-                UiLabels.seperatedLabelRow(List.of(
-                        totalItemCountLabel,
-                        expectedCostLabel
-                ))
-        ));
+                UiLabels.h2(
+                        Component.translatable("ui.createkontor.logistics_manager_desk.connected_network"),
+                        Horizontal.CENTER),
+                UiLabels.seperatedLabelRow(List.of(totalItemCountLabel, expectedCostLabel))));
 
         ObservableValue<Integer> unloadedLinks = new ObservableValue<>(0);
-        SimpleBinding<Integer> unloadedLinksBinding = DataBindingBuilder.intValS2C(() -> context.company().logistics().isConnected() ? LogisticsNetworkAccess.unloadedLinkCount(context.company().logistics().networkId()) : 0)
+        SimpleBinding<Integer> unloadedLinksBinding = DataBindingBuilder.intValS2C(
+                        () -> context.company().logistics().isConnected()
+                                ? LogisticsNetworkAccess.unloadedLinkCount(
+                                        context.company().logistics().networkId())
+                                : 0)
                 .onRemoteSyncReceived(unloadedLinks::set)
                 .build();
         connected.addSyncValue(unloadedLinksBinding.getSyncValue());
-        Label unloadedLinksLabel = UiLabels.paragraphError(Component.translatable("ui.createkontor.logistics_manager_desk.unloaded_links", ComponentFormatting.highlightError(String.valueOf(unloadedLinks.get()))), Horizontal.LEFT);
+        Label unloadedLinksLabel = UiLabels.paragraphError(
+                Component.translatable(
+                        "ui.createkontor.logistics_manager_desk.unloaded_links",
+                        ComponentFormatting.highlightError(String.valueOf(unloadedLinks.get()))),
+                Horizontal.LEFT);
         unloadedLinks.addListener(() -> unloadedLinksLabel.setDisplay(unloadedLinks.get() > 0));
         unloadedLinks.runListenersOnce();
 
-        SegmentBarElement stockBar = SegmentBarElement.from(SegmentBarSpec.builder("").build());
+        SegmentBarElement stockBar =
+                SegmentBarElement.from(SegmentBarSpec.builder("").build());
         stockBar.layout(layout -> layout.widthPercent(100));
         stockBar.addSyncValue(DataBindingBuilder.tagS2C(() -> stockToTag(context))
                 .onRemoteSyncReceived(tag -> {
                     StockBreakdown breakdown = tagToStock((CompoundTag) tag);
                     stockBar.update(CompanyCharts.stock(breakdown.top(), breakdown.others()));
                 })
-                .build().getSyncValue());
+                .build()
+                .getSyncValue());
         connected.addChild(stockBar);
 
         networkConnected.runListenersOnce();
         return content;
     }
 
-    public static UIElement orders(EmployeeDeskContext context, LogisticsManagerDeskBlockEntity be, ObservableValue<Boolean> networkConnected, SimpleBinding<Boolean> networkConnectedBinding) {
-        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+    public static UIElement orders(
+            EmployeeDeskContext context,
+            LogisticsManagerDeskBlockEntity be,
+            ObservableValue<Boolean> networkConnected,
+            SimpleBinding<Boolean> networkConnectedBinding) {
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
         content.addSyncValue(networkConnectedBinding.getSyncValue());
 
         UIElement notConnected = getNotConnectedElement(be);
@@ -156,23 +189,34 @@ public class LogisticsManagerUi {
     }
 
     public static UIElement orderDeliverySettings(LogisticsManagerDeskBlockEntity be) {
-        ScrollerView content = (ScrollerView) UiContainer.tabScroller().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
+        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
+                .style(style -> style.background(Sprites.BORDER_DARK))
+                .layout(layout -> layout.paddingAll(8));
 
-        content.addScrollViewChildren(UiLabels.h2(Component.translatable("ui.createkontor.logistics_manager_desk.order_delivery_settings"), Horizontal.LEFT));
-        content.addScrollViewChildren(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.logistics_manager_desk.ordering_explanation"), Horizontal.LEFT));
+        content.addScrollViewChildren(UiLabels.h2(
+                Component.translatable("ui.createkontor.logistics_manager_desk.order_delivery_settings"),
+                Horizontal.LEFT));
+        content.addScrollViewChildren(UiLabels.paragraphSecondary(
+                Component.translatable("ui.createkontor.logistics_manager_desk.ordering_explanation"),
+                Horizontal.LEFT));
 
         ObservableValue<Boolean> orderingEnabled = new ObservableValue<>(false);
         SimpleBinding<Boolean> orderingEnabledBinding = DataBindingBuilder.boolS2C(be::isOrderingEnabled)
                 .onRemoteSyncReceived(orderingEnabled::set)
                 .build();
 
-        UIElement statusBox = new UIElement().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8).widthPercent(100));
-        statusBox.addChild(UiLabels.paragraphPrimary(Component.translatable("ui.createkontor.logistics_manager_desk.status"), Horizontal.LEFT));
+        UIElement statusBox = new UIElement()
+                .style(style -> style.background(Sprites.BORDER_DARK))
+                .layout(layout -> layout.paddingAll(8).widthPercent(100));
+        statusBox.addChild(UiLabels.paragraphPrimary(
+                Component.translatable("ui.createkontor.logistics_manager_desk.status"), Horizontal.LEFT));
         Label statusLabel = UiLabels.paragraphSecondary(Component.empty(), Horizontal.LEFT);
-        statusLabel.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> Component.translatable("ui.createkontor.logistics_manager_desk.status." + be.getOrderingStatus().name().toLowerCase(Locale.ROOT)))
-                        .onRemoteSyncReceived(statusLabel::setText)
-                        .build().getSyncValue());
+        statusLabel.addSyncValue(DataBindingBuilder.componentS2C(
+                        () -> Component.translatable("ui.createkontor.logistics_manager_desk.status."
+                                + be.getOrderingStatus().name().toLowerCase(Locale.ROOT)))
+                .onRemoteSyncReceived(statusLabel::setText)
+                .build()
+                .getSyncValue());
         statusBox.addChild(statusLabel);
         content.addScrollViewChildren(statusBox);
 
@@ -202,7 +246,8 @@ public class LogisticsManagerUi {
         orderingEnabled.addListener(() -> address.setDisplay(orderingEnabled.get()));
         address.addSyncValue(DataBindingBuilder.stringS2C(be::getOrderAddress)
                 .onRemoteSyncReceived(value -> address.getTextField().setText(value, false))
-                .build().getSyncValue());
+                .build()
+                .getSyncValue());
         content.addScrollViewChildren(address);
         content.onMessage("c2s_set_order_address", tag -> be.setOrderAddress(tag.getString("Address")));
 
@@ -226,7 +271,8 @@ public class LogisticsManagerUi {
         orderingEnabled.addListener(() -> minimumStock.setDisplay(orderingEnabled.get()));
         minimumStock.addSyncValue(DataBindingBuilder.intValS2C(be::getMinimumStock)
                 .onRemoteSyncReceived(value -> minimumStock.getTextField().setText(String.valueOf(value), false))
-                .build().getSyncValue());
+                .build()
+                .getSyncValue());
         content.addScrollViewChildren(minimumStock);
         content.onMessage("c2s_set_minimum_stock", tag -> be.setMinimumStock(tag.getInt("MinimumStock")));
 
@@ -234,27 +280,34 @@ public class LogisticsManagerUi {
     }
 
     public static UIElement orderDeliveryOverview(LogisticsManagerDeskBlockEntity be) {
-        ScrollerView content = (ScrollerView) UiContainer.tabScroller().style(style -> style.background(Sprites.BORDER_DARK)).layout(layout -> layout.paddingAll(8));
+        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
+                .style(style -> style.background(Sprites.BORDER_DARK))
+                .layout(layout -> layout.paddingAll(8));
 
         ObservableList<OrderEntry> orderedQuantities = new ObservableList<>();
-        SimpleBinding<Tag> orderedQuantitiesBinding = DataBindingBuilder.tagS2C(() -> orderedQuantitiesToTag(be.getOrderedQuantitiesFractions()))
+        SimpleBinding<Tag> orderedQuantitiesBinding = DataBindingBuilder.tagS2C(
+                        () -> orderedQuantitiesToTag(be.getOrderedQuantitiesFractions()))
                 .onRemoteSyncReceived(tag -> orderedQuantities.set(tagToOrderedQuantities(tag)))
                 .build();
 
-        Label title = UiLabels.h2(Component.translatable("ui.createkontor.logistics_manager_desk.order_delivery_overview"), Horizontal.LEFT);
+        Label title = UiLabels.h2(
+                Component.translatable("ui.createkontor.logistics_manager_desk.order_delivery_overview"),
+                Horizontal.LEFT);
         orderedQuantities.addListener(() -> title.setText(Component.translatable(
                 "ui.createkontor.logistics_manager_desk.order_delivery_overview_count",
-                orderedQuantities.get().size())
-        ));
+                orderedQuantities.get().size())));
         title.addSyncValue(orderedQuantitiesBinding.getSyncValue());
         content.addScrollViewChildren(title);
 
-        UIElement ordersBox = new UIElement().layout(layout -> layout.gapColumn(4)).addSyncValue(orderedQuantitiesBinding.getSyncValue());
+        UIElement ordersBox = new UIElement()
+                .layout(layout -> layout.gapColumn(4))
+                .addSyncValue(orderedQuantitiesBinding.getSyncValue());
         orderedQuantities.addListener(() -> {
             ordersBox.clearAllChildren();
 
             if (orderedQuantities.get().isEmpty()) {
-                ordersBox.addChild(UiLabels.paragraphSecondary(Component.translatable("ui.createkontor.logistics_manager_desk.no_orders"), Horizontal.LEFT));
+                ordersBox.addChild(UiLabels.paragraphSecondary(
+                        Component.translatable("ui.createkontor.logistics_manager_desk.no_orders"), Horizontal.LEFT));
             }
 
             for (OrderEntry entry : orderedQuantities.get()) {
@@ -263,8 +316,7 @@ public class LogisticsManagerUi {
                         .layout(layout -> layout.paddingAll(8).gapAll(4));
 
                 UIElement titleRow = new UIElement()
-                        .layout(layout -> layout
-                                .flexDirection(FlexDirection.ROW)
+                        .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                                 .flexWrap(FlexWrap.WRAP)
                                 .justifyContent(AlignContent.FLEX_START)
                                 .alignItems(AlignItems.CENTER)
@@ -273,35 +325,54 @@ public class LogisticsManagerUi {
                                 .widthPercent(100));
 
                 titleRow.addChild(new ItemSlot().setItem(new ItemStack(entry.product(), entry.quantity)));
-                titleRow.addChild(UiLabels.paragraphPrimary(Component.empty()
-                                .append(Component.literal(String.valueOf(entry.quantity)).withStyle(ChatFormatting.GOLD))
-                                .append(Component.literal(" "))
-                                .append(entry.product().getDescription().copy().withStyle(ChatFormatting.GOLD))
-                                .append(Component.literal(" (#" + entry.number() + ")").withStyle(ChatFormatting.DARK_GRAY)), Horizontal.LEFT)
+                titleRow.addChild(UiLabels.paragraphPrimary(
+                                Component.empty()
+                                        .append(Component.literal(String.valueOf(entry.quantity))
+                                                .withStyle(ChatFormatting.GOLD))
+                                        .append(Component.literal(" "))
+                                        .append(entry.product()
+                                                .getDescription()
+                                                .copy()
+                                                .withStyle(ChatFormatting.GOLD))
+                                        .append(Component.literal(" (#" + entry.number() + ")")
+                                                .withStyle(ChatFormatting.DARK_GRAY)),
+                                Horizontal.LEFT)
                         .textStyle(style -> style.textAlignVertical(Vertical.CENTER))
-                        .layout(layout -> layout
-                                .widthAuto()
-                                .flexBasis(0)
-                                .flexGrow(1)));
+                        .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1)));
                 orderElement.addChild(titleRow);
 
-                orderElement.addChild(UiLabels.secondary(Component.translatable("ui.createkontor.logistics_manager_desk.order_missing", Math.round(entry.quantity() * (1.0 - entry.percent()))), Horizontal.LEFT));
-                orderElement.addChild(UiProgressBars.ofFraction(entry.percent()).style(style -> style.tooltips(Component.translatable("ui.createkontor.logistics_manager_desk.order_progress.tooltip", Math.round(Math.max(0.0, Math.min(1.0, entry.percent())) * 100.0)))));
+                orderElement.addChild(UiLabels.secondary(
+                        Component.translatable(
+                                "ui.createkontor.logistics_manager_desk.order_missing",
+                                Math.round(entry.quantity() * (1.0 - entry.percent()))),
+                        Horizontal.LEFT));
+                orderElement.addChild(UiProgressBars.ofFraction(entry.percent())
+                        .style(style -> style.tooltips(Component.translatable(
+                                "ui.createkontor.logistics_manager_desk.order_progress.tooltip",
+                                Math.round(Math.max(0.0, Math.min(1.0, entry.percent())) * 100.0)))));
 
                 if (entry.percent() > 0) {
-                    orderElement.addChild(UiButtons.criticalWrapping(Component.translatable("ui.createkontor.logistics_manager_desk.order_reset"))
+                    orderElement.addChild(UiButtons.criticalWrapping(
+                                    Component.translatable("ui.createkontor.logistics_manager_desk.order_reset"))
                             .setOnClick((e) -> {
                                 CompoundTag order = new CompoundTag();
                                 order.putLong("Number", entry.number());
                                 ordersBox.sendMessage("c2s_reset_order", order);
-                            }).style(style -> style.tooltips(Component.translatable("ui.createkontor.logistics_manager_desk.order_reset.tooltip"))).layout(layout -> layout.minHeight(14).paddingVertical(2)));
+                            })
+                            .style(style -> style.tooltips(Component.translatable(
+                                    "ui.createkontor.logistics_manager_desk.order_reset.tooltip")))
+                            .layout(layout -> layout.minHeight(14).paddingVertical(2)));
                 }
 
                 ordersBox.addChild(orderElement);
             }
 
             if (!orderedQuantities.get().isEmpty()) {
-                ordersBox.addChild(UiButtons.criticalWrapping(Component.translatable("ui.createkontor.logistics_manager_desk.order_reset_all")).setOnClick((e) -> ordersBox.sendMessage("c2s_reset_all_orders")).style(style -> style.tooltips(Component.translatable("ui.createkontor.logistics_manager_desk.order_reset_all.tooltip"))));
+                ordersBox.addChild(UiButtons.criticalWrapping(
+                                Component.translatable("ui.createkontor.logistics_manager_desk.order_reset_all"))
+                        .setOnClick((e) -> ordersBox.sendMessage("c2s_reset_all_orders"))
+                        .style(style -> style.tooltips(Component.translatable(
+                                "ui.createkontor.logistics_manager_desk.order_reset_all.tooltip"))));
             }
         });
         ordersBox.onMessage("c2s_reset_order", (tag) -> be.resetOrderProgress(tag.getLong("Number")));
@@ -313,9 +384,12 @@ public class LogisticsManagerUi {
 
     private static UIElement getNotConnectedElement(LogisticsManagerDeskBlockEntity be) {
         return UiContainer.headerWithSubtitle(
-                UiLabels.h2(Component.translatable("ui.createkontor.logistics_manager_desk.no_network"), Horizontal.CENTER),
-                UiLabels.error(Component.translatable(be.getConnectionStatus().translationKey()).withStyle(ChatFormatting.DARK_RED), Horizontal.CENTER)
-        );
+                UiLabels.h2(
+                        Component.translatable("ui.createkontor.logistics_manager_desk.no_network"), Horizontal.CENTER),
+                UiLabels.error(
+                        Component.translatable(be.getConnectionStatus().translationKey())
+                                .withStyle(ChatFormatting.DARK_RED),
+                        Horizontal.CENTER));
     }
 
     private static Tag stockToTag(EmployeeDeskContext context) {
@@ -376,7 +450,11 @@ public class LogisticsManagerUi {
         }
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entryTag = list.getCompound(i);
-            quantities.add(new OrderEntry(entryTag.getLong("Number"), BuiltInRegistries.ITEM.get(ResourceLocation.parse(entryTag.getString("Product"))), entryTag.getInt("Quantity"), entryTag.getDouble("Percent")));
+            quantities.add(new OrderEntry(
+                    entryTag.getLong("Number"),
+                    BuiltInRegistries.ITEM.get(ResourceLocation.parse(entryTag.getString("Product"))),
+                    entryTag.getInt("Quantity"),
+                    entryTag.getDouble("Percent")));
         }
         return quantities;
     }
