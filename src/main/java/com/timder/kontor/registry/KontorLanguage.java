@@ -306,15 +306,16 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.targets", "Refill Targets");
         REGISTRATE.addRawLang(
                 "ui.createkontor.buyer_desk.auto_stock.explanation",
-                "The Buyer will buy missing items from markets to keep a minimum amount of those items in stock. Set items to restock on the right.");
+                "If enabled, the Buyer will buy missing items from markets to keep a minimum amount of those items in stock. Set items to restock on the right. Buying items automatically is more expensive than buying them manually.");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.refill_address", "Address");
         REGISTRATE.addRawLang(
                 "ui.createkontor.buyer_desk.auto_stock.refill_address.tooltip",
-                "Restock packages will be addressed to this value. Make sure they get routed to the company's Logistics Network.");
+                "Restock packages will be addressed to this value. Make sure they get routed to your company's Logistics Network.");
         REGISTRATE.addRawLang(
                 "ui.createkontor.buyer_desk.auto_stock.no_postbox",
                 "There is no postbox connected to this Buyer's Desk.");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.unit_price", " §7(Current Offer: %s§7)");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.enabled", "Enable Automatic Restock");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.add", "Add");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.promised", "(Promised: %s)");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.reset_promised", "Reset Promises");
@@ -753,7 +754,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("wiki.createkontor.page.finances.b3", "Illiquidity");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.finances.p4",
-                "A company's payment status is illiquid, when the overdraft limit has been exceeded. Your liquid assets have been fully exhausted. In this state, you cannot spend anymore money. You can see your current payment status in the Kontor Desk.");
+                "A company's payment status is illiquid, when the overdraft limit has been exceeded. Your liquid assets have been fully exhausted. In this state, you cannot spend anymore money. You can see your current payment status in the Kontor Desk. When illiquid your bank will instantly refuse and payments that you try to make, but your Illiquidity Status might only update on the next day. If you recover from illiquidity, your payment status will go back to normal on the next trading day and then you will be able to make payments again.");
         REGISTRATE.addRawLang("wiki.createkontor.page.finances.b4", "Insolvency");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.finances.p5",
@@ -909,7 +910,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("wiki.createkontor.page.buyer.b2", "Automatic Restock");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p4",
-                "If you have a Logistics Manager with a connected Logistics Network, you can tell the Buyer to auto-restock items. If an item falls below a configured minimum, the Buyer will buy enough items to reach the minimum. Bought items will be delivered to a connected postbox. Your own logistics will have to deliver them to the company's Logistics Network from there.");
+                "If you have a Logistics Manager with a connected Logistics Network, you can tell the Buyer to auto-restock items. If an item falls below a configured minimum, the Buyer will buy enough items to reach the minimum. Bought items will be delivered to a connected postbox. Your own logistics will have to deliver them to the company's Logistics Network from there. Buying items automatically is more expensive than buying them manually (%s the market price)");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p5",
                 "The Buyer uses Create's Promise system to track bought items. He will buy enough items that, together with the promised items, the minimum is reached. This way, promised items from e.g. factory gauges are accounted for. If some items get lost, you can reset the Promises for this item.");

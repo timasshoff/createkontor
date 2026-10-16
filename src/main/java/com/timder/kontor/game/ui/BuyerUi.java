@@ -379,6 +379,22 @@ public final class BuyerUi {
         content.addScrollViewChildren(UiLabels.paragraphSecondary(
                 Component.translatable("ui.createkontor.buyer_desk.auto_stock.explanation"), Horizontal.LEFT));
 
+        ObservableValue<Boolean> refillEnabled = new ObservableValue<>(false);
+        SimpleBinding<Boolean> refillEnabledBinding = DataBindingBuilder.boolS2C(be::isRefillEnabled)
+                .onRemoteSyncReceived(refillEnabled::set)
+                .build();
+
+        UiSwitches.LabeledSwitch refillEnabledSwitch = UiSwitches.labeled(
+                Component.translatable("ui.createkontor.buyer_desk.auto_stock.enabled"), be.isRefillEnabled(), isOn -> {
+                    CompoundTag tag = new CompoundTag();
+                    tag.putBoolean("Enable", isOn);
+                    content.sendMessage("c2s_set_restock_enabled", tag);
+                });
+        refillEnabledSwitch.addSyncValue(refillEnabledBinding.getSyncValue());
+        refillEnabled.addListener(() -> refillEnabledSwitch.getSwitch().setOn(refillEnabled.get()));
+        content.onMessage("c2s_set_restock_enabled", (tag) -> be.setRefillEnabled(tag.getBoolean("Enable")));
+        content.addScrollViewChildren(refillEnabledSwitch);
+
         UiTextFields.LabeledTextField address = UiTextFields.labeled(
                 Component.translatable("ui.createkontor.buyer_desk.auto_stock.refill_address"),
                 Component.translatable("ui.createkontor.buyer_desk.auto_stock.refill_address"),
@@ -715,7 +731,7 @@ public final class BuyerUi {
             return list;
         }
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
-        for (PurchaseOffer offer : PurchaseOffers.list(context.economy(), params)) {
+        for (PurchaseOffer offer : PurchaseOffers.list(context.economy(), params, false)) {
             CompoundTag entry = new CompoundTag();
             entry.putString("Item", offer.item().value());
             entry.putString("Kind", offer.kind().name());
@@ -814,7 +830,7 @@ public final class BuyerUi {
                     LogisticsNetworkAccess.promisedOf(company.logistics().networkId(), target.getKey()));
             entry.putLong(
                     "UnitPriceCents",
-                    PurchaseOffers.offerFor(economy, params, target.getKey())
+                    PurchaseOffers.offerFor(economy, params, target.getKey(), true)
                             .unitPrice()
                             .cents());
             list.add(entry);

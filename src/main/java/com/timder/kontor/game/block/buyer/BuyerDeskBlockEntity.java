@@ -52,12 +52,14 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
     private static final String TAG_PENDING_COUNT = "PendingCount";
     private static final String TAG_ADDRESS = "Address";
     private static final String TAG_REFILL_ADDRESS = "RefillAddress";
+    private static final String TAG_REFILL_ENABLED = "RefillEnabled";
     private static final String TAG_REFILL = "RefillTargets";
     private static final String TAG_REFILL_ITEM = "Item";
     private static final String TAG_REFILL_MIN = "MinStock";
 
     private String address = "";
     private String refillAddress = "";
+    private boolean refillEnabled = false;
     private final Map<ItemId, Integer> refillTargets = new LinkedHashMap<>();
 
     public record Goods(Item item, int quantity) {
@@ -136,6 +138,18 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         notifyUpdate();
     }
 
+    public boolean isRefillEnabled() {
+        return refillEnabled;
+    }
+
+    public void setRefillEnabled(boolean enabled) {
+        if (level == null || level.isClientSide() || enabled == refillEnabled) {
+            return;
+        }
+        refillEnabled = enabled;
+        notifyUpdate();
+    }
+
     public void attachPort(PackagePortBlockEntity port) {
         if (level == null || level.isClientSide()) {
             return;
@@ -208,8 +222,8 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
                 return S2CActionResult.error(Component.literal("Quantity invalid."));
 
             try {
-                lines.add(
-                        PurchaseOffers.offerFor(economy, params, entry.getKey()).lineFor(quantity));
+                lines.add(PurchaseOffers.offerFor(economy, params, entry.getKey(), false)
+                        .lineFor(quantity));
             } catch (IllegalArgumentException e) {
                 return S2CActionResult.error(Component.literal("Failed: " + e.getMessage()));
             }
@@ -227,7 +241,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         }
 
         try {
-            PurchaseRules.buy(company, economy, purchaseQuote, economy.currentDay(), params);
+            PurchaseRules.buy(company, economy, purchaseQuote, false, economy.currentDay(), params);
         } catch (IllegalStateException e) {
             return S2CActionResult.error(ComponentFormatting.error("Failed: " + e.getMessage()));
         }
@@ -308,7 +322,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
     private void refill(ServerLevel serverLevel) {
         CompanyId companyId = getCompanyId();
-        if (refillTargets.isEmpty() || companyId == null || !hasEmployee()) {
+        if (refillTargets.isEmpty() || companyId == null || !hasEmployee() || !isRefillEnabled()) {
             return;
         }
         CompanySavedData companyData = CompanySavedData.get(serverLevel.getServer());
@@ -344,7 +358,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
             int quantity = Math.min(MAX_GOOD_SIZE, missing);
             try {
-                lines.add(PurchaseOffers.offerFor(economy, params, id).lineFor(quantity));
+                lines.add(PurchaseOffers.offerFor(economy, params, id, true).lineFor(quantity));
             } catch (IllegalArgumentException e) {
                 continue;
             }
@@ -363,7 +377,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
 
         PurchaseQuote quote = new PurchaseQuote(lines);
         try {
-            PurchaseRules.buy(company, economy, quote, economy.currentDay(), params);
+            PurchaseRules.buy(company, economy, quote, true, economy.currentDay(), params);
         } catch (IllegalStateException e) {
             CreateKontor.LOGGER.warn("Buyer refill of {} failed: {}", company.name(), e.getMessage());
             return;
@@ -413,6 +427,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         super.write(tag, registries, clientPacket);
         tag.putString(TAG_ADDRESS, address);
         tag.putString(TAG_REFILL_ADDRESS, refillAddress);
+        tag.putBoolean(TAG_REFILL_ENABLED, refillEnabled);
         if (clientPacket) {
             tag.putInt(TAG_PORT_COUNT, portCount);
             tag.putInt(TAG_PENDING_COUNT, pendingCount);
@@ -438,6 +453,9 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         super.read(tag, registries, clientPacket);
         address = tag.getString(TAG_ADDRESS);
         refillAddress = tag.getString(TAG_REFILL_ADDRESS);
+        if (tag.contains(TAG_REFILL_ENABLED)) {
+            refillEnabled = tag.getBoolean(TAG_REFILL_ENABLED);
+        }
         if (clientPacket) {
             portCount = tag.getInt(TAG_PORT_COUNT);
             pendingCount = tag.getInt(TAG_PENDING_COUNT);
