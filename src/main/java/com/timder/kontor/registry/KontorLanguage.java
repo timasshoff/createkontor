@@ -94,6 +94,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.auto_stock.already_added", "%s is already added.");
         REGISTRATE.addRawLang(
                 "message.createkontor.buyer_desk.auto_stock.limit_reached", "This buyer can handle at most %s items.");
+        REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -316,12 +317,14 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.unit_price", " §7(Current Offer: %s§7)");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.add", "Add");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.promised", "(Promised: %s)");
-        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.reset_promised", "Reset Promised");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.reset_promised", "Reset Promises");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.remove", "Remove");
         REGISTRATE.addRawLang(
                 "ui.createkontor.buyer_desk.auto_stock.status.not_enough",
-                "§eNot enough items promised to reach minimum amount for item.");
+                "§cNot enough items promised to reach minimum amount for item.");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.auto_stock.status.enough", "§aMinimum amount reached.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.buyer_desk.auto_stock.status.enough_promised", "§eMinimum amount promised.");
         REGISTRATE.addRawLang(
                 "ui.createkontor.buyer_desk.auto_stock.status.disabled", "§7Disabled (minimum amount set to 0).");
 
@@ -906,7 +909,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("wiki.createkontor.page.buyer.b2", "Automatic Restock");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p4",
-                "If you have a Logistics Manager with a connected Logistics Network, you can tell the Buyer to auto-restock items. If an item falls below a configured minimum, the buyer will buy enough items to reach the minimum. Bought items will be delivered to a connected postbox. Your own logistics will have to deliver them to the company's Logistics Network from there.");
+                "If you have a Logistics Manager with a connected Logistics Network, you can tell the Buyer to auto-restock items. If an item falls below a configured minimum, the Buyer will buy enough items to reach the minimum. Bought items will be delivered to a connected postbox. Your own logistics will have to deliver them to the company's Logistics Network from there.");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p5",
                 "The Buyer uses Create's Promise system to track bought items. He will buy enough items that, together with the promised items, the minimum is reached. This way, promised items from e.g. factory gauges are accounted for. If some items get lost, you can reset the Promises for this item.");
@@ -915,7 +918,7 @@ public class KontorLanguage {
                 "The color of an item in the Automatic Restock menu informs you about the status of this restock:");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.restock_status",
-                "§aGreen: §rEnough items are in stock\n§fWhite: §rNot enough stock, but enough items are promised to reach the minimum amount.\n§eYellow: §rNot enough items could be promised to reach the minimum. Check your bank account.\nGray: Minimum amount is set to 0, the Automatic Restocking for this item is disabled.");
+                "§aGreen: §rEnough items are in stock\n§eYellow: §rNot enough stock, but enough items are promised to reach the minimum amount.\n§cRed: §rNot enough items could be promised to reach the minimum. Check your bank account.\nGray: Minimum amount is set to 0, the Automatic Restocking for this item is disabled.");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p7",
                 "§cWarning: §rUse the Automatic Restocking with care. Bought items cannot be refunded. When telling the Buyer to restock large amounts of items, §ccheck your balance before!");

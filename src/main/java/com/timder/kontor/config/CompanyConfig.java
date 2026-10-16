@@ -113,7 +113,7 @@ public class CompanyConfig {
         builder.comment("Purchasing").push("purchasing");
         PURCHASE_MARKUP = builder.comment(
                         "Factor times market prices a company pays when it buys goods, as a fraction (1.10 = 110 % the market price). Raise it to make buying products and reselling them to customers less attractive")
-                .defineInRange("purchaseMarkup", 1.125, 0.0, 10.0);
+                .defineInRange("purchaseMarkup", 1.25, 0.0, 10.0);
 
         builder.pop();
 

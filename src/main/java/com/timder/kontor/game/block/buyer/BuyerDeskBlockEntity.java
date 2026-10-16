@@ -129,7 +129,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
         if (cleaned.length() > MAX_ADDRESS_LENGTH) {
             cleaned = cleaned.substring(0, MAX_ADDRESS_LENGTH);
         }
-        if (cleaned.equals(address)) {
+        if (cleaned.equals(refillAddress)) {
             return;
         }
         refillAddress = cleaned;
@@ -342,7 +342,6 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
                 continue;
             }
 
-            // int quantity = Math.min(MAX_GOOD_SIZE, Math.max(missing, new ItemStack(item.get()).getMaxStackSize()));
             int quantity = Math.min(MAX_GOOD_SIZE, missing);
             try {
                 lines.add(PurchaseOffers.offerFor(economy, params, id).lineFor(quantity));

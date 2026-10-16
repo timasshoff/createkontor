@@ -13,6 +13,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
+import com.timder.kontor.client.ui.KontorToasts;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
@@ -40,6 +41,7 @@ import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
 import java.util.*;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
@@ -76,6 +78,11 @@ public final class BuyerUi {
                             id,
                             entry.itemAmount); // Items that do not have offers will be caught in buildQuote()
                 }
+            }
+            if (context.player().level() instanceof ClientLevel) {
+                KontorToasts.show(
+                        ToastPayload.ToastKind.INFO,
+                        Component.translatable("message.createkontor.buyer_desk.material_list_added"));
             }
         }
 
@@ -562,10 +569,14 @@ public final class BuyerUi {
                 int color = 0xFFFFFF;
                 Component tooltip = Component.empty();
                 if (entry.minStock > entry.currentStock + entry.promised) {
-                    color = 0xFFFF55;
+                    color = 0xFF5555;
                     tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.not_enough");
                 }
-                if (entry.currentStock + entry.promised() >= entry.minStock) {
+                if (entry.currentStock + entry.promised() >= entry.minStock()) {
+                    color = 0xFFFF55;
+                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough_promised");
+                }
+                if (entry.currentStock >= entry.minStock) {
                     color = 0x55FF55;
                     tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough");
                 }
@@ -678,14 +689,19 @@ public final class BuyerUi {
                 refillTargets.addScrollViewChildren(element);
             }
         });
-        content.onMessage(
-                "c2s_set_refill_min",
-                tag -> be.setRefillTarget(new ItemId(tag.getString("Item")), tag.getInt("MinStock")));
+        content.onMessage("c2s_set_refill_min", tag -> {
+            String item = tag.getString("Item");
+            if (!item.isBlank()) {
+                be.setRefillTarget(new ItemId(item), tag.getInt("MinStock"));
+            }
+        });
         content.onMessage("c2s_remove_refill_target", tag -> be.removeRefillTarget(new ItemId(tag.getString("Item"))));
-        content.onMessage(
-                "c2s_reset_promises",
-                tag -> LogisticsNetworkAccess.clearPromises(
-                        context.company().logistics().networkId(), new ItemId(tag.getString("Item"))));
+        content.onMessage("c2s_reset_promises", tag -> {
+            if (context.company().logistics().networkId() != null) {
+                LogisticsNetworkAccess.clearPromises(
+                        context.company().logistics().networkId(), new ItemId(tag.getString("Item")));
+            }
+        });
         targets.runListenersOnce();
 
         content.addChild(refillTargets);
@@ -781,23 +797,26 @@ public final class BuyerUi {
 
     private static Tag refillTargetsToTag(Company company, Economy economy, BuyerDeskBlockEntity be) {
         ListTag list = new ListTag();
+        if (company.logistics() == null || !company.logistics().isConnected()) {
+            return list;
+        }
+
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        Map<ItemId, Integer> stock = LogisticsNetworkAccess.stockOf(
+                company.logistics().networkId(), be.getRefillTargets().keySet());
         for (Map.Entry<ItemId, Integer> target : be.getRefillTargets().entrySet()) {
             CompoundTag entry = new CompoundTag();
-            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
             entry.putString("Item", target.getKey().value());
             entry.putInt("MinStock", target.getValue());
-            entry.putInt(
-                    "CurrentStock",
-                    LogisticsNetworkAccess.stockOf(company.logistics().networkId(), List.of(target.getKey()))
-                            .getOrDefault(target.getKey(), 0));
+            entry.putInt("CurrentStock", stock.getOrDefault(target.getKey(), 0));
             entry.putInt(
                     "Promised",
                     LogisticsNetworkAccess.promisedOf(company.logistics().networkId(), target.getKey()));
-            entry.putDouble(
-                    "UnitPrice",
+            entry.putLong(
+                    "UnitPriceCents",
                     PurchaseOffers.offerFor(economy, params, target.getKey())
                             .unitPrice()
-                            .toDollars());
+                            .cents());
             list.add(entry);
         }
         return list;
@@ -821,7 +840,7 @@ public final class BuyerUi {
                     entry.getInt("MinStock"),
                     entry.getInt("CurrentStock"),
                     entry.getInt("Promised"),
-                    Money.fromDollar(entry.getDouble("UnitPrice"))));
+                    Money.ofCents(entry.getLong("UnitPriceCents"))));
         }
         return targets;
     }
