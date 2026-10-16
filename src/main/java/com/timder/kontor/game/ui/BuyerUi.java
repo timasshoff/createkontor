@@ -391,7 +391,7 @@ public final class BuyerUi {
                     content.sendMessage("c2s_set_restock_enabled", tag);
                 });
         refillEnabledSwitch.addSyncValue(refillEnabledBinding.getSyncValue());
-        refillEnabled.addListener(() -> refillEnabledSwitch.getSwitch().setOn(refillEnabled.get()));
+        refillEnabled.addListener(() -> refillEnabledSwitch.getSwitch().setOn(refillEnabled.get(), false));
         content.onMessage("c2s_set_restock_enabled", (tag) -> be.setRefillEnabled(tag.getBoolean("Enable")));
         content.addScrollViewChildren(refillEnabledSwitch);
 
@@ -587,16 +587,13 @@ public final class BuyerUi {
                 if (entry.minStock > entry.currentStock + entry.promised) {
                     color = 0xFF5555;
                     tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.not_enough");
-                }
-                if (entry.currentStock + entry.promised() >= entry.minStock()) {
+                } else if (entry.currentStock + entry.promised() >= entry.minStock()) {
                     color = 0xFFFF55;
                     tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough_promised");
-                }
-                if (entry.currentStock >= entry.minStock) {
+                } else if (entry.currentStock >= entry.minStock) {
                     color = 0x55FF55;
                     tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough");
-                }
-                if (entry.minStock == 0) {
+                } else if (entry.minStock == 0) {
                     color = 0xAAAAAA;
                     tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.disabled");
                 }
@@ -821,6 +818,9 @@ public final class BuyerUi {
         Map<ItemId, Integer> stock = LogisticsNetworkAccess.stockOf(
                 company.logistics().networkId(), be.getRefillTargets().keySet());
         for (Map.Entry<ItemId, Integer> target : be.getRefillTargets().entrySet()) {
+            if (!economy.isMarket(target.getKey()) || !economy.isRawMaterial(target.getKey())) {
+                continue;
+            }
             CompoundTag entry = new CompoundTag();
             entry.putString("Item", target.getKey().value());
             entry.putInt("MinStock", target.getValue());

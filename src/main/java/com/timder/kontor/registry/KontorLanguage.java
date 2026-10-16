@@ -910,7 +910,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("wiki.createkontor.page.buyer.b2", "Automatic Restock");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p4",
-                "If you have a Logistics Manager with a connected Logistics Network, you can tell the Buyer to auto-restock items. If an item falls below a configured minimum, the Buyer will buy enough items to reach the minimum. Bought items will be delivered to a connected postbox. Your own logistics will have to deliver them to the company's Logistics Network from there. Buying items automatically is more expensive than buying them manually (%s the market price)");
+                "If you have a Logistics Manager with a connected Logistics Network, you can tell the Buyer to auto-restock items. If an item falls below a configured minimum, the Buyer will buy enough items to reach the minimum. Bought items will be delivered to a connected postbox. Your own logistics will have to deliver them to the company's Logistics Network from there. Buying items automatically is more expensive than buying them manually (%s of the market price).");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.buyer.p5",
                 "The Buyer uses Create's Promise system to track bought items. He will buy enough items that, together with the promised items, the minimum is reached. This way, promised items from e.g. factory gauges are accounted for. If some items get lost, you can reset the Promises for this item.");
