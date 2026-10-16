@@ -40,6 +40,7 @@ import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
 import java.util.*;
+import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -558,12 +559,35 @@ public final class BuyerUi {
         ObservableList<RefillTargetEntry> targets = new ObservableList<>();
         SimpleBinding<Tag> targetsBinding = DataBindingBuilder.tagS2C(
                         () -> refillTargetsToTag(context.company(), context.economy(), be))
-                .onRemoteSyncReceived(tag -> targets.set(tagToRefillTargets(tag)))
+                .onRemoteSyncReceived(tag -> targets.set(tagToRefillTargets(tag).stream()
+                        .sorted(Comparator.comparing(
+                                (RefillTargetEntry entry) -> BuiltInRegistries.ITEM
+                                        .get(ResourceLocation.parse(entry.item().value()))
+                                        .asItem()
+                                        .getDescription()
+                                        .getString(),
+                                String.CASE_INSENSITIVE_ORDER))
+                        .toList()))
                 .build();
         refillTargets.addSyncValue(targetsBinding.getSyncValue());
 
+        Map<ItemId, Consumer<RefillTargetEntry>> rowUpdaters = new HashMap<>();
+        List<ItemId> shownOrder = new ArrayList<>();
+
         targets.addListener(() -> {
+            List<ItemId> order =
+                    targets.get().stream().map(RefillTargetEntry::item).toList();
+            if (order.equals(shownOrder)) {
+                for (RefillTargetEntry entry : targets.get()) {
+                    rowUpdaters.get(entry.item()).accept(entry);
+                }
+                return;
+            }
+            shownOrder.clear();
+            shownOrder.addAll(order);
+            rowUpdaters.clear();
             refillTargets.clearAllScrollViewChildren();
+
             for (RefillTargetEntry entry : targets.get()) {
                 UIElement element = new UIElement()
                         .style(style -> style.background(Sprites.BORDER_DARK))
@@ -582,37 +606,10 @@ public final class BuyerUi {
                                 BuiltInRegistries.ITEM.get(
                                         ResourceLocation.tryParse(entry.item().value())),
                                 1)));
-                int color = 0xFFFFFF;
-                Component tooltip = Component.empty();
-                if (entry.minStock > entry.currentStock + entry.promised) {
-                    color = 0xFF5555;
-                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.not_enough");
-                } else if (entry.currentStock + entry.promised() >= entry.minStock()) {
-                    color = 0xFFFF55;
-                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough_promised");
-                } else if (entry.currentStock >= entry.minStock) {
-                    color = 0x55FF55;
-                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough");
-                } else if (entry.minStock == 0) {
-                    color = 0xAAAAAA;
-                    tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.disabled");
-                }
-                final int finalColor = color;
-                final Component finalTooltip = tooltip;
-                titleRow.addChild(UiLabels.paragraphPrimary(
-                                Component.empty()
-                                        .append(BuiltInRegistries.ITEM
-                                                .get(ResourceLocation.tryParse(
-                                                        entry.item().value()))
-                                                .getDescription())
-                                        .append(Component.translatable(
-                                                "ui.createkontor.buyer_desk.auto_stock.unit_price",
-                                                ComponentFormatting.moneyColored(entry.unitPrice()))),
-                                Horizontal.LEFT)
-                        .textStyle(style ->
-                                style.textAlignVertical(Vertical.CENTER).textColor(finalColor))
-                        .layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1))
-                        .style(style -> style.tooltips(finalTooltip)));
+
+                Label itemLabel = UiLabels.paragraphPrimary(Component.empty(), Horizontal.LEFT);
+                itemLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
+                titleRow.addChild(itemLabel);
                 element.addChild(titleRow);
 
                 UIElement valueRow = new UIElement()
@@ -630,8 +627,7 @@ public final class BuyerUi {
                                 .flexShrink(1)
                                 .minWidth(0));
 
-                Label stock =
-                        UiLabels.secondary(Component.literal(String.valueOf(entry.currentStock())), Horizontal.RIGHT);
+                Label stock = UiLabels.secondary(Component.literal("0"), Horizontal.RIGHT);
                 stock.layout(layout -> layout.width(32));
 
                 Label slash = UiLabels.secondary(Component.literal("/"), Horizontal.LEFT);
@@ -660,9 +656,7 @@ public final class BuyerUi {
                     }
                 });
 
-                Label promised = UiLabels.secondary(
-                        Component.translatable("ui.createkontor.buyer_desk.auto_stock.promised", entry.promised()),
-                        Horizontal.LEFT);
+                Label promised = UiLabels.secondary(Component.empty(), Horizontal.LEFT);
 
                 infoGroup.addChildren(stock, slash, minField, promised);
 
@@ -698,6 +692,50 @@ public final class BuyerUi {
 
                 valueRow.addChildren(infoGroup, buttonGroup);
                 element.addChild(valueRow);
+
+                Consumer<RefillTargetEntry> update = e -> {
+                    int color;
+                    Component tooltip;
+                    if (e.minStock() == 0) {
+                        color = 0xAAAAAA;
+                        tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.disabled");
+                    } else if (e.currentStock() >= e.minStock()) {
+                        color = 0x55FF55;
+                        tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough");
+                    } else if (e.currentStock() + e.promised() >= e.minStock()) {
+                        color = 0xFFFF55;
+                        tooltip =
+                                Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.enough_promised");
+                    } else {
+                        color = 0xFF5555;
+                        tooltip = Component.translatable("ui.createkontor.buyer_desk.auto_stock.status.not_enough");
+                    }
+                    final int finalColor = color;
+                    final Component finalTooltip = tooltip;
+
+                    itemLabel.setText(Component.empty()
+                            .append(BuiltInRegistries.ITEM
+                                    .get(ResourceLocation.tryParse(e.item().value()))
+                                    .getDescription())
+                            .append(Component.translatable(
+                                    "ui.createkontor.buyer_desk.auto_stock.unit_price",
+                                    ComponentFormatting.moneyColored(e.unitPrice()))));
+                    itemLabel.textStyle(
+                            style -> style.textAlignVertical(Vertical.CENTER).textColor(finalColor));
+                    itemLabel.style(style -> style.tooltips(finalTooltip));
+
+                    stock.setText(Component.literal(String.valueOf(e.currentStock())));
+                    promised.setText(
+                            Component.translatable("ui.createkontor.buyer_desk.auto_stock.promised", e.promised()));
+
+                    if (e.minStock() != committed[0]) {
+                        committed[0] = e.minStock();
+                        current[0] = e.minStock();
+                        minField.setText(String.valueOf(e.minStock()), false);
+                    }
+                };
+                update.accept(entry);
+                rowUpdaters.put(entry.item(), update);
 
                 refillTargets.addScrollViewChildren(element);
             }
@@ -818,7 +856,7 @@ public final class BuyerUi {
         Map<ItemId, Integer> stock = LogisticsNetworkAccess.stockOf(
                 company.logistics().networkId(), be.getRefillTargets().keySet());
         for (Map.Entry<ItemId, Integer> target : be.getRefillTargets().entrySet()) {
-            if (!economy.isMarket(target.getKey()) || !economy.isRawMaterial(target.getKey())) {
+            if (!economy.isMarket(target.getKey()) && !economy.isRawMaterial(target.getKey())) {
                 continue;
             }
             CompoundTag entry = new CompoundTag();
