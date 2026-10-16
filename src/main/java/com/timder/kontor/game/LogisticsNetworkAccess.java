@@ -128,6 +128,39 @@ public final class LogisticsNetworkAccess {
         return sorted;
     }
 
+    public static int promisedOf(UUID networkId, ItemId product) {
+        Objects.requireNonNull(networkId, "networkId must not be null.");
+        Objects.requireNonNull(product, "product must not be null.");
+        Item item = itemOf(product);
+        RequestPromiseQueue queue = Create.LOGISTICS.getQueuedPromises(networkId);
+        if (item == null || queue == null) {
+            return 0;
+        }
+        return queue.getTotalPromisedAndRemoveExpired(new ItemStack(item), -1);
+    }
+
+    public static void promise(UUID networkId, ItemId product, int quantity) {
+        Objects.requireNonNull(networkId, "networkId must not be null.");
+        Objects.requireNonNull(product, "product must not be null.");
+        Item item = itemOf(product);
+        RequestPromiseQueue queue = Create.LOGISTICS.getQueuedPromises(networkId);
+        if (item == null || queue == null || quantity < 1) {
+            return;
+        }
+        queue.add(new RequestPromise(new BigItemStack(new ItemStack(item), quantity)));
+    }
+
+    public static void clearPromises(UUID networkId, ItemId product) {
+        Objects.requireNonNull(networkId, "networkId must not be null.");
+        Objects.requireNonNull(product, "product must not be null.");
+        Item item = itemOf(product);
+        RequestPromiseQueue queue = Create.LOGISTICS.getQueuedPromises(networkId);
+        if (item == null || queue == null) {
+            return;
+        }
+        queue.forceClear(new ItemStack(item));
+    }
+
     @Nullable
     private static Item itemOf(ItemId product) {
         ResourceLocation location = ResourceLocation.tryParse(product.value());
