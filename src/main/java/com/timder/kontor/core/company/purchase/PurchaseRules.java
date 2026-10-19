@@ -4,7 +4,6 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.economy.Economy;
-
 import java.util.Objects;
 
 public final class PurchaseRules {
@@ -23,14 +22,17 @@ public final class PurchaseRules {
         return PurchaseStatus.AFFORDABLE;
     }
 
-    public static boolean isCurrent(Economy economy, PurchaseQuote quote, CompanyParams params) {
+    public static boolean isCurrent(
+            Economy economy, PurchaseQuote quote, CompanyParams params, boolean automaticPurchase) {
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(quote, "quote must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
 
         for (PurchaseQuote.Line line : quote.lines()) {
             try {
-                if (!PurchaseOffers.offerFor(economy, params, line.item()).lineFor(line.quantity()).equals(line)) {
+                if (!PurchaseOffers.offerFor(economy, params, line.item(), automaticPurchase)
+                        .lineFor(line.quantity())
+                        .equals(line)) {
                     return false;
                 }
             } catch (IllegalArgumentException e) {
@@ -40,13 +42,19 @@ public final class PurchaseRules {
         return true;
     }
 
-    public static void buy(Company company, Economy economy, PurchaseQuote quote, long day, CompanyParams params) {
+    public static void buy(
+            Company company,
+            Economy economy,
+            PurchaseQuote quote,
+            boolean automaticPurchase,
+            long day,
+            CompanyParams params) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(quote, "quote must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
 
-        if (!isCurrent(economy, quote, params)) {
+        if (!isCurrent(economy, quote, params, automaticPurchase)) {
             throw new IllegalStateException("The quote is outdated: a price has changed since it was made.");
         }
         PurchaseStatus status = preview(company, quote, params);
@@ -57,7 +65,8 @@ public final class PurchaseRules {
         for (PurchaseQuote.Line line : quote.lines()) {
             boolean paid = company.trySpend(day, BookingKind.PURCHASE, line.lineTotal(), reference(line), params);
             if (!paid) {
-                throw new IllegalStateException("Booking of " + reference(line) + " failed although the total was affordable.");
+                throw new IllegalStateException(
+                        "Booking of " + reference(line) + " failed although the total was affordable.");
             }
         }
 

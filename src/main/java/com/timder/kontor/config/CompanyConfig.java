@@ -34,6 +34,7 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue LOGISTICS_MANAGER_SALARY_IN_DOLLARS;
 
     public static final ModConfigSpec.DoubleValue PURCHASE_MARKUP;
+    public static final ModConfigSpec.DoubleValue AUTO_PURCHASE_MARKUP;
 
     public static final ModConfigSpec.DoubleValue STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS;
 
@@ -113,7 +114,10 @@ public class CompanyConfig {
         builder.comment("Purchasing").push("purchasing");
         PURCHASE_MARKUP = builder.comment(
                         "Factor times market prices a company pays when it buys goods, as a fraction (1.10 = 110 % the market price). Raise it to make buying products and reselling them to customers less attractive")
-                .defineInRange("purchaseMarkup", 1.125, 0.0, 10.0);
+                .defineInRange("purchaseMarkup", 1.8, 0.0, 10.0);
+        AUTO_PURCHASE_MARKUP = builder.comment(
+                        "Factor times market prices a company pays when it buys goods automatically, as a fraction (1.10 = 110 % the market price). Raise it to make buying products and reselling them to customers less attractive")
+                .defineInRange("autoPurchaseMarkup", 2.1, 0.0, 10.0);
 
         builder.pop();
 
@@ -145,6 +149,7 @@ public class CompanyConfig {
                 HISTORY_LENGTH_DAYS.get(),
                 HIRE_BONUS_SALARY_MULTIPLE.get(),
                 PURCHASE_MARKUP.get(),
+                AUTO_PURCHASE_MARKUP.get(),
                 STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS.get());
     }
 }

@@ -14,30 +14,31 @@ public final class PurchaseOffers {
 
     public static final Money MINIMUM_UNIT_PRICE = Money.ofCents(1L);
 
-    public static List<PurchaseOffer> list(Economy economy, CompanyParams params) {
+    public static List<PurchaseOffer> list(Economy economy, CompanyParams params, boolean automaticPurchase) {
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
 
         List<PurchaseOffer> offers = new ArrayList<>();
         for (ItemId market : economy.marketIds()) {
-            offers.add(productOffer(economy, params, market));
+            offers.add(productOffer(economy, params, market, automaticPurchase));
         }
         for (ItemId material : economy.rawMaterialIds()) {
-            offers.add(rawMaterialOffer(economy, params, material));
+            offers.add(rawMaterialOffer(economy, params, material, automaticPurchase));
         }
         return List.copyOf(offers);
     }
 
-    public static PurchaseOffer offerFor(Economy economy, CompanyParams params, ItemId item) {
+    public static PurchaseOffer offerFor(
+            Economy economy, CompanyParams params, ItemId item, boolean automaticPurchase) {
         Objects.requireNonNull(economy, "economy must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
         Objects.requireNonNull(item, "item must not be null.");
 
         if (economy.isMarket(item)) {
-            return productOffer(economy, params, item);
+            return productOffer(economy, params, item, automaticPurchase);
         }
         if (economy.isRawMaterial(item)) {
-            return rawMaterialOffer(economy, params, item);
+            return rawMaterialOffer(economy, params, item, automaticPurchase);
         }
         throw new IllegalArgumentException(item + " cannot be purchased.");
     }
@@ -56,13 +57,23 @@ public final class PurchaseOffers {
         return Money.max(Money.ofCents(cents.longValueExact()), MINIMUM_UNIT_PRICE);
     }
 
-    private static PurchaseOffer productOffer(Economy economy, CompanyParams params, ItemId market) {
+    private static PurchaseOffer productOffer(
+            Economy economy, CompanyParams params, ItemId market, boolean automaticPurchase) {
         double price = economy.marketSnapshot(market).displayedPrice();
-        return new PurchaseOffer(market, PurchaseKind.PRODUCT, price, unitPrice(price, params.purchaseMarkup()));
+        return new PurchaseOffer(
+                market,
+                PurchaseKind.PRODUCT,
+                price,
+                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()));
     }
 
-    private static PurchaseOffer rawMaterialOffer(Economy economy, CompanyParams params, ItemId material) {
+    private static PurchaseOffer rawMaterialOffer(
+            Economy economy, CompanyParams params, ItemId material, boolean automaticPurchase) {
         double price = economy.rawMaterialSnapshot(material).price();
-        return new PurchaseOffer(material, PurchaseKind.RAW_MATERIAL, price, unitPrice(price, params.purchaseMarkup()));
+        return new PurchaseOffer(
+                material,
+                PurchaseKind.RAW_MATERIAL,
+                price,
+                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()));
     }
 }

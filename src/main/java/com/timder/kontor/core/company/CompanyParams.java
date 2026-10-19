@@ -40,6 +40,7 @@ public record CompanyParams(
         int historyLengthDays,
         double hireBonusSalaryMultiple,
         double purchaseMarkup,
+        double autoPurchaseMarkup,
         double storageFeePerItemDay) {
 
     public CompanyParams {
@@ -63,6 +64,8 @@ public record CompanyParams(
             throw new IllegalArgumentException("hireBonusSalaryMultiple must be a finite number, not negative.");
         if (!(purchaseMarkup >= 0.0) || Double.isInfinite(purchaseMarkup))
             throw new IllegalArgumentException("purchaseMarkup must be a finite number, not negative.");
+        if (!(autoPurchaseMarkup >= 0.0) || Double.isInfinite(autoPurchaseMarkup))
+            throw new IllegalArgumentException("autoPurchaseMarkup must be a finite number, not negative.");
         if (!(storageFeePerItemDay >= 0.0) || Double.isInfinite(storageFeePerItemDay))
             throw new IllegalArgumentException("storageFeePerItemDay must be a finite number, not negative.");
     }
@@ -91,6 +94,7 @@ public record CompanyParams(
                 360,
                 3.0,
                 0.1,
+                0.2,
                 0.002);
     }
 }
