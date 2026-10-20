@@ -107,7 +107,7 @@ public class EconomyConfig {
         POLICY_MAX_RATE =
                 builder.comment("Highest rate the process aims for").defineInRange("maxRate", 0.0050, 1.0E-6, 1.0);
         POLICY_DECISION_INTERVAL_DAYS = builder.comment("A decision is made every this many days")
-                .defineInRange("decisionIntervalDays", 7, 1, Integer.MAX_VALUE);
+                .defineInRange("decisionIntervalDays", 5, 1, Integer.MAX_VALUE);
         POLICY_TARGET_SENSITIVITY = builder.comment("How strongly the target rate reacts to the cycle index")
                 .defineInRange("targetSensitivity", 2.0, 0.0, Double.MAX_VALUE);
         POLICY_SMALL_STEP = builder.comment("Step when the target is further away than smallThreshold")

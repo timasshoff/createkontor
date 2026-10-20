@@ -442,6 +442,23 @@ public class KontorLanguage {
                 "ui.createkontor.logistics_manager_desk.no_orders",
                 "The Logistics Manager does not keep track of any orders right now.");
 
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan", "Take Loan");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan_title", "Take a new bank loan");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.bank_loan_not_allowed", "§cBank Loans not allowed");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.legal_level_too_low", "Your legal level does not allow bank loans.");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_credit", "The Bank does not grant you any loans at this moment.");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.average_revenue", "Average Revenue: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.reputation", "Reputation: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.policy_rate", "Policy Rate: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_offers", "No offers available.");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.rate", "Daily Rate");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.free_days", "Free Days");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.repayment_days", "Repayment Days");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.total_days", "Total Term Days");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.first_payment", "First Payment");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.total_interest", "Total Interest");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.accept_offer", "Accept Offer");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -523,6 +540,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
         REGISTRATE.addRawLang("legal_forms.createkontor.public_company", "§6Public Company");
 
+        REGISTRATE.addRawLang("loan_offers.createkontor.short", "Short Offer");
+        REGISTRATE.addRawLang("loan_offers.createkontor.long", "Long Offer");
+        REGISTRATE.addRawLang("loan_offers.createkontor.grace", "Grace Offer");
+
         REGISTRATE.addRawLang("license.createkontor.oak_bundle", "Oak Bundle");
         REGISTRATE.addRawLang("license.createkontor.spruce_bundle", "Spruce Bundle");
         REGISTRATE.addRawLang("license.createkontor.birch_bundle", "Birch Bundle");
@@ -551,8 +572,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("employee_role.createkontor.market_analyst", "Market Analyst");
         REGISTRATE.addRawLang("employee_role.createkontor.consultant", "Consultant");
         REGISTRATE.addRawLang("employee_role.createkontor.logistics_manager", "Logistics Manager");
+        REGISTRATE.addRawLang("employee_role.createkontor.finances_manager", "Finances Manager");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
+        REGISTRATE.addRawLang("economy.createkontor.days", "%s §7Day(s)");
 
         REGISTRATE.addRawLang("loan.createkontor.bank", "Bank Loan");
         REGISTRATE.addRawLang("loan.createkontor.founder", "Founder's Loan");
@@ -674,6 +697,19 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "block.createkontor.logistics_manager_desk.tooltip.behaviour2",
                 "The company is _connected_ to the network of the link. The goods stored in the network cost a _daily storage fee_.");
+        REGISTRATE.addRawLang("block.createkontor.logistics_manager_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang(
+                "block.createkontor.logistics_manager_desk.tooltip.action1", "Opens the _Logistics Manager's Desk_ interface.");
+
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.summary",
+                "Staffs the company with a _finances manager_. Gives you deeper insides into your finances and allows you to take _bank loans_.");
+        REGISTRATE.addRawLang("block.createkontor.finances_manager_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.behaviour1",
+                "The villager is _hired_ as a finances manager. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang("block.createkontor.finances_manager_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang("block.createkontor.finances_manager_desk.tooltip.action1", "Opens the _Finances Manager's Desk_ interface.");
 
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
         REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");

@@ -126,7 +126,7 @@ public class KontorDeskBoundUi {
                 .getSyncValue());
 
         Label currentDay = UiLabels.primary(Component.empty(), Horizontal.CENTER);
-        currentDay.addSyncValue(DataBindingBuilder.componentS2C(() -> ComponentFormatting.day(economy.currentDay()))
+        currentDay.addSyncValue(DataBindingBuilder.componentS2C(() -> ComponentFormatting.dayColored(economy.currentDay()))
                 .onRemoteSyncReceived(currentDay::setText)
                 .build()
                 .getSyncValue());
@@ -336,7 +336,7 @@ public class KontorDeskBoundUi {
             for (Booking booking : reversedBookings) {
                 if (booking.day() != lastDay) {
                     Component combined = Component.empty()
-                            .append(ComponentFormatting.day(booking.day()))
+                            .append(ComponentFormatting.dayColored(booking.day()))
                             .append(ComponentFormatting.standard(" ("))
                             .append(ComponentFormatting.moneyColored(booking.balanceAfter()))
                             .append(ComponentFormatting.standard(")"));

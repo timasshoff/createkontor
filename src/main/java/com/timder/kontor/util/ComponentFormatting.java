@@ -1,7 +1,6 @@
 package com.timder.kontor.util;
 
 import com.timder.kontor.core.company.financial.Money;
-import com.timder.kontor.core.market.MarketRules;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -93,8 +92,16 @@ public final class ComponentFormatting {
         return Component.literal(text ).withStyle(MONEY_NEGATIVE);
     }
 
-    public static Component day(long day) {
+    public static Component dayColored(long day) {
         return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)).withStyle(ChatFormatting.GOLD));
+    }
+
+    public static Component day(long day) {
+        return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)));
+    }
+
+    public static Component lengthInDays(long day) {
+        return Component.translatable("economy.createkontor.days", Component.literal(Long.toString(day)));
     }
 
     public static MutableComponent ticks(long ticks) {

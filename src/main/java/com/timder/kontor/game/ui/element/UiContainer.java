@@ -10,7 +10,6 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.util.ComponentFormatting;
@@ -20,7 +19,6 @@ import dev.vfyjxf.taffy.style.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
@@ -42,7 +40,7 @@ public final class UiContainer {
 
         Label day = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER).textStyle(style -> style.textAlignVertical(Vertical.CENTER));
         day.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> ComponentFormatting.day(economy.currentDay()))
+                DataBindingBuilder.componentS2C(() -> ComponentFormatting.dayColored(economy.currentDay()))
                         .onRemoteSyncReceived(day::setText)
                         .build().getSyncValue()
         );
@@ -286,6 +284,68 @@ public final class UiContainer {
         return new UIElement()
                 .layout(layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0).gapAll(4))
                 .addChildren(searchField, scroller);
+    }
+
+    public static <T> UIElement grid(ObservableList<T> entries,
+                                     Function<T, UIElement> cardFactory,
+                                     Component emptyText,
+                                     int maxColumns,
+                                     float minCardWidth) {
+
+        ScrollerView scroller = tabScroller();
+        scroller.layout(layout -> layout.heightAuto().flexBasis(0).flexGrow(1).minHeight(0));
+        scroller.viewContainer.layout(layout -> layout.gapAll(0).display(TaffyDisplay.GRID));
+
+        int[] appliedTracks = {0};
+        float[] appliedTrackWidth = {0};
+        float[] appliedWidth = {0};
+        boolean[] showingEmpty = {false};
+
+        Runnable applyLayout = () -> {
+            float available = scroller.viewPort.getContentWidth();
+            if (available <= 0) return;
+
+            int columns = Math.max(1, Math.min(maxColumns, (int) (available / minCardWidth)));
+            int tracks = showingEmpty[0] ? 1 : columns;
+            float trackWidth = (float) Math.floor(available / tracks * 100f) / 100f;
+
+            if (tracks != appliedTracks[0] || trackWidth != appliedTrackWidth[0]) {
+                appliedTracks[0] = tracks;
+                appliedTrackWidth[0] = trackWidth;
+                String template = String.format(Locale.ROOT, "%.2fpx ", trackWidth).repeat(tracks).trim();
+                scroller.viewContainer.layout(layout -> layout.gridTemplateColumns(template));
+            }
+            if (Math.abs(available - appliedWidth[0]) >= 0.01f) {
+                appliedWidth[0] = available;
+                scroller.viewContainer.layout(layout -> layout.width(available));
+            }
+        };
+
+        Runnable rebuild = () -> {
+            scroller.clearAllScrollViewChildren();
+
+            int shown = 0;
+            for (T entry : entries.get()) {
+                UIElement card = cardFactory.apply(entry);
+                card.layout(layout -> layout.marginAll(GRID_GAP / 2f));
+                scroller.addScrollViewChild(card);
+                shown++;
+            }
+            showingEmpty[0] = shown == 0;
+            if (shown == 0) {
+                scroller.addScrollViewChild(UiLabels.secondary(emptyText, Horizontal.CENTER)
+                        .layout(layout -> layout.widthPercent(100)));
+            }
+            applyLayout.run();
+        };
+
+        scroller.viewPort.addEventListener(UIEvents.LAYOUT_CHANGED, event -> applyLayout.run());
+        entries.addListener(rebuild);
+        rebuild.run();
+
+        return new UIElement()
+                .layout(layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0).gapAll(4))
+                .addChildren(scroller);
     }
 
     public static <T> UIElement searchableList(ObservableList<T> entries, Function<T, UIElement> rowFactory,

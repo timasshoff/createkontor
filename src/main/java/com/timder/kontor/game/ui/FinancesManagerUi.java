@@ -1,0 +1,263 @@
+package com.timder.kontor.game.ui;
+
+import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
+import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
+import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
+import com.lowdragmc.lowdraglib2.gui.ui.UI;
+import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
+import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
+import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
+import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
+import com.timder.kontor.config.CompanyConfig;
+import com.timder.kontor.core.company.Company;
+import com.timder.kontor.core.company.CompanyParams;
+import com.timder.kontor.core.company.financial.BankLoanQuote;
+import com.timder.kontor.core.company.financial.BankLoanRules;
+import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.license.LicenseKeyCodec;
+import com.timder.kontor.data.KontorData;
+import com.timder.kontor.game.block.FinancesManagerActions;
+import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.ui.element.UiButtons;
+import com.timder.kontor.game.ui.element.UiContainer;
+import com.timder.kontor.game.ui.element.UiLabels;
+import com.timder.kontor.game.ui.element.UiSliders;
+import com.timder.kontor.util.ComponentFormatting;
+import com.timder.kontor.util.ObservableList;
+import com.timder.kontor.util.ObservableValue;
+import dev.vfyjxf.taffy.style.AlignContent;
+import dev.vfyjxf.taffy.style.AlignItems;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+public class FinancesManagerUi {
+    public static ModularUI create(EmployeeDeskContext context, FinancesManagerActions actions) {
+        var tabView = UiContainer.largeTabView();
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.finances_manager.take_loan")),
+                newLoanTab(context));
+
+        var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
+        return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
+    }
+
+    public static UIElement newLoanTab(EmployeeDeskContext context) {
+        ObservableValue<CreditInfo> info = new ObservableValue<>(new CreditInfo(false, false, 0, 0,  0,0, 0));
+        SimpleBinding<Tag> infoBinding = DataBindingBuilder.tagS2C(() -> creditInfoToTag(context))
+                .onRemoteSyncReceived(tag -> info.set(tagToCreditInfo(tag)))
+                .build();
+
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+        content.addSyncValue(infoBinding.getSyncValue());
+
+        UIElement notAllowed = UiContainer.headerWithSubtitle(
+                UiLabels.h2(
+                        Component.translatable("ui.createkontor.finances_manager.bank_loan_not_allowed"), Horizontal.CENTER),
+                UiLabels.error(
+                        Component.translatable("ui.createkontor.finances_manager.legal_level_too_low")
+                                .withStyle(ChatFormatting.DARK_RED),
+                        Horizontal.CENTER));
+        ScrollerView allowedContent = (ScrollerView) UiContainer.tabScroller().layout(layout -> layout.gapAll(4));
+
+        content.addChildren(allowedContent, notAllowed);
+        info.addListener(() -> {
+            boolean allowed = info.get().allowed;
+            notAllowed.setDisplay(!allowed);
+            allowedContent.setDisplay(allowed);
+        });
+
+        double[] selectedDollars = {0};
+        content.onMessage("c2s_set_borrow_amount", tag -> selectedDollars[0] = tag.getDouble("Dollars"));
+
+        ObservableList<OfferView> offers = new ObservableList<>();
+        SimpleBinding<Tag> offersBinding = DataBindingBuilder.tagS2C(() -> offersToTag(context, selectedDollars[0]))
+                .onRemoteSyncReceived(tag -> offers.set(tagToOffers(tag)))
+                .build();
+        content.addSyncValue(offersBinding.getSyncValue());
+
+        UIElement offersGrid = UiContainer.grid(
+                offers,
+                (OfferView offer) -> {
+                    UIElement card = new UIElement()
+                            .style(style -> style.background(Sprites.BORDER_DARK))
+                            .layout(layout -> layout.paddingAll(8).gapAll(2));
+
+                    card.addChild(UiLabels.paragraphPrimary(Component.literal(offer.id).withStyle(ChatFormatting.DARK_GRAY), Horizontal.LEFT));
+                    card.addChild(UiLabels.paragraphPrimary(Component.translatable("loan_offers.createkontor." + offer.id).withStyle(ChatFormatting.GOLD), Horizontal.LEFT));
+
+                    card.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.finances_manager.offer.rate"),
+                            Component.literal(String.format(Locale.ROOT, "%.4f %%", offer.rate() * 100))));
+                    card.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.finances_manager.offer.free_days"),
+                            ComponentFormatting.lengthInDays(offer.freeDays())));
+                    card.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.finances_manager.offer.repayment_days"),
+                            ComponentFormatting.lengthInDays(offer.termDays())));
+                    card.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.finances_manager.offer.total_days"),
+                            ComponentFormatting.lengthInDays(offer.totalDays())));
+                    card.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.finances_manager.offer.first_payment"),
+                            ComponentFormatting.moneyColored(Money.ofCents(offer.firstPaymentCents()))));
+                    card.addChild(UiLabels.labelValueNoWrap(
+                            Component.translatable("ui.createkontor.finances_manager.offer.total_interest"),
+                            ComponentFormatting.moneyColored(Money.ofCents(offer.totalInterestCents()))));
+
+                    Button button = UiButtons.primary(Component.translatable("ui.createkontor.finances_manager.offer.accept_offer")).setOnClick((e) -> {
+                        CompoundTag tag = new CompoundTag();
+                        tag.putString("Id", offer.id());
+                        content.sendMessage("c2s_accept_offer", tag);
+                    });
+                    button.layout(layout -> layout.heightAuto()
+                            .minHeight(20)
+                            .marginTopAuto()
+                            .alignItems(AlignItems.CENTER)
+                            .paddingVertical(4));
+                    button.textStyle(style -> style.adaptiveWidth(false)
+                            .textWrap(TextWrap.WRAP)
+                            .adaptiveHeight(true));
+                    button.text.layout(
+                            layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
+                    card.addChild(button);
+
+                    return card;
+                },
+                Component.translatable("ui.createkontor.finances_manager.no_offers"),
+                3, 140);
+
+        info.addListener(() -> {
+            CreditInfo i = info.get();
+            if (!i.allowed()) {
+                return;
+            }
+
+            allowedContent.clearAllChildren();
+            allowedContent.addChild(UiLabels.h1(Component.translatable("ui.createkontor.finances_manager.take_loan_title"), Horizontal.LEFT));
+
+            Money averageRevenue = Money.ofCents(i.averageRevenueCents());
+            Money min = Money.ofCents(i.minCents());
+            Money max = Money.ofCents(i.maxCents);
+
+            Label averageRevenueLabel = UiLabels.secondary(
+                            Component.translatable("ui.createkontor.finances_manager.average_revenue", ComponentFormatting.moneyColored(averageRevenue)),
+                            Horizontal.LEFT);
+            Label reputation = UiLabels.secondary(
+                    Component.translatable("ui.createkontor.finances_manager.reputation", ComponentFormatting.starsWithValue(i.reputation())),
+                    Horizontal.LEFT);
+            Label policyRate = UiLabels.secondary(
+                    Component.translatable("ui.createkontor.finances_manager.policy_rate", Component.literal(String.format(Locale.ROOT, "%.4f %%", i.policyRate() * 100)).withStyle(ChatFormatting.WHITE)),
+                    Horizontal.LEFT);
+
+            allowedContent.addChild(UiLabels.seperatedLabelRow(List.of(averageRevenueLabel, reputation, policyRate))
+                    .layout(layout -> layout.justifyContent(AlignContent.FLEX_START)));
+
+            if (max.cents() < min.cents() || !i.available()) {
+                allowedContent.addChild(UiLabels.error(
+                        Component.translatable("ui.createkontor.finances_manager.no_credit"), Horizontal.CENTER));
+                return;
+            }
+
+            allowedContent.addChild(UiSliders.labeledInlineLeft(
+                    (float) min.toDollars(), (float) max.toDollars(), (float) selectedDollars[0], 1f, 0, false, 400,
+                    value -> ComponentFormatting.moneyColored(Money.fromDollar((double) value)),
+                    value -> {},
+                    value -> {
+                        selectedDollars[0] = Math.round(value);
+                        CompoundTag tag = new CompoundTag();
+                        tag.putDouble("Dollars", selectedDollars[0]);
+                        content.sendMessage("c2s_set_borrow_amount", tag);
+                    }));
+
+            allowedContent.addChild(offersGrid);
+        });
+
+        info.runListenersOnce();
+
+        return content;
+    }
+
+    private static Tag creditInfoToTag(EmployeeDeskContext context) {
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        Company company = context.company();
+
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Allowed",
+                BankLoanRules.isAllowed(company, params));
+        tag.putBoolean("Available",
+                BankLoanRules.isAllowed(company, params)
+                        && BankLoanRules.bankLoanCount(company) < params.bankLoans().maxLoans());
+        tag.putLong("AverageRevenueCents", company.averageDailyRevenue(params.bankLoans().creditLimitRevenueDays()).cents());
+        tag.putDouble("PolicyRate", context.economy().policyRate());
+        tag.putLong("MinCents", BankLoanRules.minimumAmount(company, params).cents());
+        tag.putLong("MaxCents", BankLoanRules.getCreditLimit(company, params).cents());
+        tag.putDouble("Reputation", context.economy().overallReputationInStars(company.id()));
+        return tag;
+    }
+
+    public record CreditInfo(boolean allowed, boolean available, long averageRevenueCents, double policyRate, long minCents, long maxCents, double reputation) {}
+
+    private static CreditInfo tagToCreditInfo(Tag tag) {
+        CompoundTag t = (CompoundTag) tag;
+        return new CreditInfo(t.getBoolean("Allowed"), t.getBoolean("Available"), t.getLong("AverageRevenueCents"), t.getDouble("PolicyRate"), t.getLong("MinCents"), t.getLong("MaxCents"), t.getDouble("Reputation"));
+    }
+
+    private static Tag offersToTag(EmployeeDeskContext context, double requestedDollars) {
+        ListTag list = new ListTag();
+        Company company = context.company();
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+
+        Money amount = requestedDollars > 0
+                ? Money.fromDollar(requestedDollars)
+                : BankLoanRules.minimumAmount(company, params);
+
+        try {
+            for (BankLoanQuote q : BankLoanRules.quotes(
+                    company,
+                    amount,
+                    context.economy().policyRate(),
+                    context.economy().overallReputationInStars(company.id()),
+                    params)) {
+                CompoundTag t = new CompoundTag();
+                t.putString("Id", q.offer().id());
+                t.putDouble("Rate", q.rate());
+                t.putLong("FirstPaymentCents", q.firstPayment().cents());
+                t.putLong("TotalInterestCents", q.totalInterest().cents());
+                t.putInt("TermDays", q.offer().termDays());
+                t.putInt("FreeDays", q.offer().freeDays());
+                t.putInt("TotalDays", q.totalDays());
+                list.add(t);
+            }
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            // No offers
+        }
+        return list;
+    }
+
+    public record OfferView(String id, double rate, long firstPaymentCents, long totalInterestCents,
+                            int termDays, int freeDays, int totalDays) {}
+
+    private static List<OfferView> tagToOffers(Tag tag) {
+        ListTag list = (ListTag) tag;
+        List<OfferView> offers = new ArrayList<>(list.size());
+        for (Tag e : list) {
+            CompoundTag t = (CompoundTag) e;
+            offers.add(new OfferView(t.getString("Id"), t.getDouble("Rate"), t.getLong("FirstPaymentCents"),
+                    t.getLong("TotalInterestCents"), t.getInt("TermDays"), t.getInt("FreeDays"), t.getInt("TotalDays")));
+        }
+        return offers;
+    }
+}

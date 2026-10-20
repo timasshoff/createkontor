@@ -33,6 +33,7 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue BUYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CONSULTANT_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue LOGISTICS_MANAGER_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue FINANCES_MANAGER_SALARY_IN_DOLLARS;
 
     public static final ModConfigSpec.DoubleValue BANK_LOAN_GRACE_DAY_SURCHARGE;
     public static final ModConfigSpec.DoubleValue BANK_LOAN_RISK_SURCHARGE_AT_ONE_STAR;
@@ -117,6 +118,9 @@ public class CompanyConfig {
         LOGISTICS_MANAGER_SALARY_IN_DOLLARS = builder.comment(
                         "Base salary of a logistics manager per day. Fixed when the logistics manager is hired")
                 .defineInRange("logisticsManagerSalaryInDollars", 90, 0, Integer.MAX_VALUE);
+        FINANCES_MANAGER_SALARY_IN_DOLLARS = builder.comment(
+                        "Base salary of a finances manager per day. Fixed when the logistics manager is hired")
+                .defineInRange("financesManagerSalaryInDollars", 100, 0, Integer.MAX_VALUE);
 
         builder.pop();
 
