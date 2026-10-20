@@ -1,6 +1,7 @@
 package com.timder.kontor.config;
 
 import com.timder.kontor.core.company.CompanyParams;
+import com.timder.kontor.core.company.financial.BankLoanParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseParams;
@@ -32,6 +33,14 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue BUYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CONSULTANT_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue LOGISTICS_MANAGER_SALARY_IN_DOLLARS;
+
+    public static final ModConfigSpec.DoubleValue BANK_LOAN_GRACE_DAY_SURCHARGE;
+    public static final ModConfigSpec.DoubleValue BANK_LOAN_RISK_SURCHARGE_AT_ONE_STAR;
+    public static final ModConfigSpec.DoubleValue BANK_LOAN_RISK_SURCHARGE_AT_FIVE_STARS;
+    public static final ModConfigSpec.IntValue BANK_LOAN_MAX_LOANS;
+    public static final ModConfigSpec.DoubleValue BANK_LOAN_CREDIT_LIMIT_REVENUE_MULTIPLE;
+    public static final ModConfigSpec.IntValue BANK_LOAN_CREDIT_LIMIT_REVENUE_DAYS;
+    public static final ModConfigSpec.DoubleValue BANK_LOAN_MINIMUM_AMOUNT_SHARE;
 
     public static final ModConfigSpec.DoubleValue PURCHASE_MARKUP;
     public static final ModConfigSpec.DoubleValue AUTO_PURCHASE_MARKUP;
@@ -111,6 +120,34 @@ public class CompanyConfig {
 
         builder.pop();
 
+        builder.comment(
+                        "Bank loans. The offers themselves (term, free days, term surcharge) are data pack files in kontor/bank_loan_offers")
+                .push("bankLoans");
+
+        BANK_LOAN_GRACE_DAY_SURCHARGE = builder.comment(
+                        "Daily surcharge on the interest rate for every free day of an offer, as a fraction (e.g. 0.0001 is 0.01 %)")
+                .defineInRange("graceDaySurcharge", 0.0001, 0.0, Double.MAX_VALUE);
+        BANK_LOAN_RISK_SURCHARGE_AT_ONE_STAR = builder.comment(
+                        "Daily surcharge on the interest rate for a company with one star, as a fraction (e.g. 0.0040 is 0.40 %). Must not be below the surcharge at five stars. In between the surcharge falls in a straight line")
+                .defineInRange("riskSurchargeAtOneStar", 0.0040, 0.0, Double.MAX_VALUE);
+        BANK_LOAN_RISK_SURCHARGE_AT_FIVE_STARS = builder.comment(
+                        "Daily surcharge on the interest rate for a company with five stars, as a fraction (e.g. 0.0010 is 0.10 %)")
+                .defineInRange("riskSurchargeAtFiveStars", 0.0010, 0.0, Double.MAX_VALUE);
+        BANK_LOAN_MAX_LOANS = builder.comment(
+                        "How many bank loans a company can have at the same time. The founder loan does not count")
+                .defineInRange("maxLoans", 3, 1, Integer.MAX_VALUE);
+        BANK_LOAN_CREDIT_LIMIT_REVENUE_MULTIPLE = builder.comment(
+                        "The credit limit is at most this many times the average daily revenue (and at most the bank loan limit of the legal form)")
+                .defineInRange("creditLimitRevenueMultiple", 10.0, 0.0001, 1_000.0);
+        BANK_LOAN_CREDIT_LIMIT_REVENUE_DAYS = builder.comment(
+                        "How many settled days the average daily revenue for the credit limit covers")
+                .defineInRange("creditLimitRevenueDays", 7, 1, Integer.MAX_VALUE);
+        BANK_LOAN_MINIMUM_AMOUNT_SHARE = builder.comment(
+                        "The smallest bank loan is this share of the bank loan limit of the legal form (0.05 is 5 %)")
+                .defineInRange("minimumAmountShare", 0.05, 0.0, 1.0);
+
+        builder.pop();
+
         builder.comment("Purchasing").push("purchasing");
         PURCHASE_MARKUP = builder.comment(
                         "Factor times market prices a company pays when it buys goods, as a fraction (1.10 = 110 % the market price). Raise it to make buying products and reselling them to customers less attractive")
@@ -150,6 +187,15 @@ public class CompanyConfig {
                 HIRE_BONUS_SALARY_MULTIPLE.get(),
                 PURCHASE_MARKUP.get(),
                 AUTO_PURCHASE_MARKUP.get(),
-                STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS.get());
+                STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS.get(),
+                new BankLoanParams(
+                        KontorData.getBankLoanOffers(),
+                        BANK_LOAN_GRACE_DAY_SURCHARGE.get(),
+                        BANK_LOAN_RISK_SURCHARGE_AT_ONE_STAR.get(),
+                        BANK_LOAN_RISK_SURCHARGE_AT_FIVE_STARS.get(),
+                        BANK_LOAN_MAX_LOANS.get(),
+                        BANK_LOAN_CREDIT_LIMIT_REVENUE_MULTIPLE.get(),
+                        BANK_LOAN_CREDIT_LIMIT_REVENUE_DAYS.get(),
+                        BANK_LOAN_MINIMUM_AMOUNT_SHARE.get()));
     }
 }

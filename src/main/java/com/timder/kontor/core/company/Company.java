@@ -25,6 +25,7 @@ public final class Company {
     public static final int MAX_NAME_LENGTH = 32;
 
     public static final String FOUNDER_LOAN_REFERENCE = "founder_loan";
+    public static final String BANK_LOAN_REFERENCE = "bank_loan_";
 
     public static final long NEVER_ACTIVE = -1L;
 
@@ -44,6 +45,7 @@ public final class Company {
 
     private long nextRequestNumber = 1;
     private long nextOrderNumber = 1;
+    private long nextLoanNumber = 1;
 
     private long fulfilledOrders = 0;
 
@@ -106,9 +108,9 @@ public final class Company {
         }
 
         if (takeFounderLoan) {
-            Loan loan = Loan.founder(params.founderLoan(), policyRate, params);
+            Loan loan = Loan.founder(company.issueLoanNumber(), params.founderLoan(), policyRate, params);
             company.account.book(day, BookingKind.LOAN_PAYOUT, loan.principal(), FOUNDER_LOAN_REFERENCE);
-            company.loans.add(loan);
+            company.addLoan(loan);
         }
 
         company.markActive(day);
@@ -532,6 +534,23 @@ public final class Company {
         return List.copyOf(loans);
     }
 
+    public long issueLoanNumber() {
+        return nextLoanNumber++;
+    }
+
+    public void addLoan(Loan loan) {
+        Objects.requireNonNull(loan, "loan must not be null.");
+        if (loan.number() >= nextLoanNumber) {
+            throw new IllegalArgumentException("The loan number " + loan.number() + " was not issued.");
+        }
+        for (Loan existing : loans) {
+            if (existing.number() == loan.number()) {
+                throw new IllegalStateException("The company already has the loan " + loan.number() + ".");
+            }
+        }
+        loans.add(loan);
+    }
+
     public Money totalDebt() {
         Money debt = Money.ZERO;
         for (Loan loan : loans) {
@@ -599,6 +618,24 @@ public final class Company {
 
     public List<CompanyHistoryEntry> history() {
         return List.copyOf(history);
+    }
+
+    /**
+     * Calculates the average revenue per settled day over the most recent history.
+     * @param days How many recent days (on which the company was active)
+     * @return The average revenue
+     */
+    public Money averageDailyRevenue(int days) {
+        if (days < 1) throw new IllegalArgumentException("days must be at least 1.");
+        int count = Math.min(days, history.size());
+        if (count == 0) return Money.ZERO;
+
+        Money sum = Money.ZERO;
+        Iterator<CompanyHistoryEntry> newestFirst = history.descendingIterator();
+        for (int i = 0; i < count; i++) {
+            sum = sum.plus(newestFirst.next().revenue());
+        }
+        return sum.dividedBy(count);
     }
 
     /**
@@ -678,6 +715,7 @@ public final class Company {
             int legalLevel,
             Account.SaveState account,
             List<Loan.SaveState> loans,
+            long nextLoanNumber,
             Liquidity liquidity,
             int daysInTrouble,
             long nextRequestNumber,
@@ -707,7 +745,19 @@ public final class Company {
             if (daysInTrouble < 0) throw new IllegalArgumentException("daysInTrouble must not be negative.");
             managers = Set.copyOf(managers);
             if (managers.contains(owner)) throw new IllegalArgumentException("owner must not be a manager.");
+
             loans = List.copyOf(loans);
+            if (nextLoanNumber < 1) throw new IllegalArgumentException("nextLoanNumber must be at least 1.");
+            Set<Long> loanNumbers = new HashSet<>();
+            for (Loan.SaveState loan : loans) {
+                if (!loanNumbers.add(loan.number()))
+                    throw new IllegalArgumentException("loans contains number " + loan.number() + " twice.");
+                if (loan.number() >= nextLoanNumber) {
+                    throw new IllegalArgumentException(
+                            "loan number " + loan.number() + " is not below nextLoanNumber.");
+                }
+            }
+
             history = List.copyOf(history);
             boundResourceCounts = boundResourceCounts == null ? Map.of() : Map.copyOf(boundResourceCounts);
             if (fulfilledOrders < 0) throw new IllegalArgumentException("fulfilledOrders must not be negative.");
@@ -764,6 +814,7 @@ public final class Company {
                 legalLevel,
                 account.getSaveState(),
                 loanStates,
+                nextLoanNumber,
                 liquidity,
                 daysInTrouble,
                 nextRequestNumber,
@@ -796,6 +847,7 @@ public final class Company {
         for (Loan.SaveState loanState : saveState.loans()) {
             company.loans.add(Loan.restore(loanState));
         }
+        company.nextLoanNumber = saveState.nextLoanNumber();
         company.liquidity = saveState.liquidity();
         company.daysInTrouble = saveState.daysInTrouble();
         company.nextRequestNumber = saveState.nextRequestNumber();

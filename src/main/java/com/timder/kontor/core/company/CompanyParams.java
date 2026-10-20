@@ -1,5 +1,6 @@
 package com.timder.kontor.core.company;
 
+import com.timder.kontor.core.company.financial.BankLoanParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseCatalog;
@@ -24,6 +25,7 @@ import java.util.Objects;
  * @param hireBonusSalaryMultiple The multiple of the salary that is paid as a hiring bonus
  * @param purchaseMarkup Surcharge on the market price when a company buys goods, as a fraction (0.10 is 10 %)
  * @param storageFeePerItemDay Dollars a company pays per day for each stored item in the logistics network
+ * @param bankLoans The bank loan parameters
  */
 public record CompanyParams(
         LegalForms legalForms,
@@ -41,10 +43,12 @@ public record CompanyParams(
         double hireBonusSalaryMultiple,
         double purchaseMarkup,
         double autoPurchaseMarkup,
-        double storageFeePerItemDay) {
+        double storageFeePerItemDay,
+        BankLoanParams bankLoans) {
 
     public CompanyParams {
         Objects.requireNonNull(legalForms, "legalForms must not be null.");
+        Objects.requireNonNull(bankLoans, "bankLoans must not be null.");
         Objects.requireNonNull(licenses, "licenses must not be null.");
         Objects.requireNonNull(startDeposit, "startDeposit must not be null.");
         Objects.requireNonNull(founderLoan, "founderLoan must not be null.");
@@ -95,6 +99,7 @@ public record CompanyParams(
                 3.0,
                 0.1,
                 0.2,
-                0.002);
+                0.002,
+                BankLoanParams.standard());
     }
 }

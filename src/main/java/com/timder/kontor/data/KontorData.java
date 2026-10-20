@@ -1,5 +1,6 @@
 package com.timder.kontor.data;
 
+import com.timder.kontor.core.company.financial.BankLoanOfferDef;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseCatalog;
@@ -9,7 +10,6 @@ import com.timder.kontor.core.market.GroupDef;
 import com.timder.kontor.core.market.MarketDefinition;
 import com.timder.kontor.core.raw.RawMaterialDefinition;
 import com.timder.kontor.core.value.ItemId;
-
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +22,7 @@ public class KontorData {
     private static volatile List<LegalFormDef> legalFormDefinitions = List.of();
     private static volatile List<LicenseDef> licenseDefinitions = List.of();
     private static volatile CachedLicenseCatalog cachedLicenseCatalog = null;
+    private static volatile List<BankLoanOfferDef> bankLoanOffers = List.of();
 
     public static List<RawMaterialDefinition> getRawMaterials() {
         return rawMaterials;
@@ -75,16 +76,28 @@ public class KontorData {
         List<MarketDefinition> currentMarkets = marketDefinitions;
         List<LicenseDef> currentLicenses = licenseDefinitions;
         CachedLicenseCatalog cached = cachedLicenseCatalog;
-        if (cached != null && cached.markets() == currentMarkets && cached.licenses() == currentLicenses
-                && cached.legalForms().equals(legalForms) && cached.params().equals(params)) {
+        if (cached != null
+                && cached.markets() == currentMarkets
+                && cached.licenses() == currentLicenses
+                && cached.legalForms().equals(legalForms)
+                && cached.params().equals(params)) {
             return cached.catalog();
         }
 
-        List<ItemId> marketIds = currentMarkets.stream().map(MarketDefinition::id).toList();
+        List<ItemId> marketIds =
+                currentMarkets.stream().map(MarketDefinition::id).toList();
         LicenseCatalog catalog = LicenseCatalog.build(params, currentLicenses, marketIds, legalForms);
 
         cachedLicenseCatalog = new CachedLicenseCatalog(currentMarkets, currentLicenses, legalForms, params, catalog);
         return catalog;
+    }
+
+    public static List<BankLoanOfferDef> getBankLoanOffers() {
+        return bankLoanOffers;
+    }
+
+    public static void setBankLoanOffers(List<BankLoanOfferDef> value) {
+        bankLoanOffers = List.copyOf(value);
     }
 
     private record CachedLicenseCatalog(
@@ -92,8 +105,5 @@ public class KontorData {
             List<LicenseDef> licenses,
             LegalForms legalForms,
             LicenseParams params,
-            LicenseCatalog catalog
-    ) {
-    }
-
+            LicenseCatalog catalog) {}
 }

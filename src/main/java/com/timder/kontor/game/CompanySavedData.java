@@ -123,6 +123,7 @@ public class CompanySavedData extends SavedData {
             loans.add(writeLoan(loan));
         }
         tag.put("Loans", loans);
+        tag.putLong("NextLoanNumber", state.nextLoanNumber());
 
         tag.putString("Liquidity", state.liquidity().name());
         tag.putInt("DaysInTrouble", state.daysInTrouble());
@@ -198,8 +199,10 @@ public class CompanySavedData extends SavedData {
 
         List<Loan.SaveState> loans = new ArrayList<>();
         for (Tag t : tag.getList("Loans", Tag.TAG_COMPOUND)) {
-            loans.add(readLoan((CompoundTag) t));
+            loans.add(readLoan((CompoundTag) t, loans.size() + 1L));
         }
+        long nextLoanNumber =
+                tag.contains("NextLoanNumber", Tag.TAG_LONG) ? tag.getLong("NextLoanNumber") : loans.size() + 1L;
 
         Liquidity liquidity = Liquidity.valueOf(tag.getString("Liquidity"));
         int daysInTrouble = tag.getInt("DaysInTrouble");
@@ -262,6 +265,7 @@ public class CompanySavedData extends SavedData {
                 legalLevel,
                 account,
                 loans,
+                nextLoanNumber,
                 liquidity,
                 daysInTrouble,
                 nextRequestNumber,
@@ -316,6 +320,7 @@ public class CompanySavedData extends SavedData {
 
     public static CompoundTag writeLoan(Loan.SaveState state) {
         CompoundTag tag = new CompoundTag();
+        tag.putLong("Number", state.number());
         tag.putString("Kind", state.kind().name());
         tag.putLong("Principal", state.principal().cents());
         tag.putLong("Outstanding", state.outstanding().cents());
@@ -328,7 +333,13 @@ public class CompanySavedData extends SavedData {
     }
 
     public static Loan.SaveState readLoan(CompoundTag tag) {
+        return readLoan(tag, 0L);
+    }
+
+    private static Loan.SaveState readLoan(CompoundTag tag, long numberIfMissing) {
+        long number = tag.contains("Number", Tag.TAG_LONG) ? tag.getLong("Number") : numberIfMissing;
         return new Loan.SaveState(
+                number,
                 Loan.Kind.valueOf(tag.getString("Kind")),
                 Money.ofCents(tag.getLong("Principal")),
                 Money.ofCents(tag.getLong("Outstanding")),
