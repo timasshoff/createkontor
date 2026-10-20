@@ -540,10 +540,6 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
         REGISTRATE.addRawLang("legal_forms.createkontor.public_company", "§6Public Company");
 
-        REGISTRATE.addRawLang("loan_offers.createkontor.short", "Short Offer");
-        REGISTRATE.addRawLang("loan_offers.createkontor.long", "Long Offer");
-        REGISTRATE.addRawLang("loan_offers.createkontor.grace", "Grace Offer");
-
         REGISTRATE.addRawLang("license.createkontor.oak_bundle", "Oak Bundle");
         REGISTRATE.addRawLang("license.createkontor.spruce_bundle", "Spruce Bundle");
         REGISTRATE.addRawLang("license.createkontor.birch_bundle", "Birch Bundle");
@@ -580,6 +576,14 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("loan.createkontor.bank", "Bank Loan");
         REGISTRATE.addRawLang("loan.createkontor.founder", "Founder's Loan");
         REGISTRATE.addRawLang("loan.createkontor.principal", "Principal: %s");
+
+        REGISTRATE.addRawLang("loan_offers.createkontor.standard", "Standard");
+        REGISTRATE.addRawLang("loan_offers.createkontor.express", "Express");
+        REGISTRATE.addRawLang("loan_offers.createkontor.bridging", "Bridging");
+        REGISTRATE.addRawLang("loan_offers.createkontor.short_investment", "Short Investment");
+        REGISTRATE.addRawLang("loan_offers.createkontor.long_investment", "Long Investment");
+        REGISTRATE.addRawLang("loan_offers.createkontor.pioneer", "Pioneer");
+        REGISTRATE.addRawLang("loan_offers.createkontor.expansion", "Expansion");
 
         REGISTRATE.addRawLang("chart.createkontor.d", "d");
         REGISTRATE.addRawLang("chart.createkontor.day", "Day ");

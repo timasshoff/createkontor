@@ -22,9 +22,13 @@ public class BankLoanOfferDefDataProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         List<CompletableFuture<?>> futures = new ArrayList<>();
 
-        futures.add(save(cache, "short", 14, 0, 0.0));
-        futures.add(save(cache, "grace", 28, 7, 0.0002));
-        futures.add(save(cache, "long", 56, 0, 0.0006));
+        futures.add(save(cache, "standard", 28, 0, 0.00_02));
+        futures.add(save(cache, "express", 7, 0, 0.00_00));
+        futures.add(save(cache, "bridging", 3, 14, 0.00_17));
+        futures.add(save(cache, "short_investment", 56, 0, 0.00_04));
+        futures.add(save(cache, "long_investment", 84, 0, 0.00_04));
+        futures.add(save(cache, "pioneer", 70, 28, 0.00_04));
+        futures.add(save(cache, "expansion", 91, 35, 0.00_05));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
