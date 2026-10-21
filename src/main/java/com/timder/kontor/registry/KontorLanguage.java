@@ -443,15 +443,19 @@ public class KontorLanguage {
                 "ui.createkontor.logistics_manager_desk.no_orders",
                 "The Logistics Manager does not keep track of any orders right now.");
 
-        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan", "Take Loan");
-        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan_title", "Take a new bank loan");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan", "Bank Loan Offers");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan_title", "Offers for new bank loans");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.bank_loan_not_allowed", "§cBank Loans not allowed");
-        REGISTRATE.addRawLang("ui.createkontor.finances_manager.legal_level_too_low", "Your legal level does not allow bank loans.");
-        REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_credit", "The Bank does not grant you any loans at this moment. §7This might be caused by a too low average daily revenue or because your open bank loans already use up your credit limit. Ask a Consultant for more info.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.finances_manager.legal_level_too_low", "Your legal level does not allow bank loans.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.finances_manager.no_credit",
+                "The Bank does not grant you any loans at this moment. §7This might be caused by a too low average daily revenue or because your open bank loans already use up your credit limit. Ask a Consultant for more info.");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.average_revenue", "Average Revenue: %s");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.reputation", "Reputation: %s");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.policy_rate", "Policy Rate: %s");
-        REGISTRATE.addRawLang("ui.createkontor.finances_manager.legal_form_credit_limit", "Legal Form Credit Limit: %s");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.finances_manager.legal_form_credit_limit", "Legal Form Credit Limit: %s");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_offers", "No offers available.");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.rate", "Daily Rate");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.free_days", "Free Days");
@@ -462,6 +466,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.accept_offer", "Accept Offer");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.policy_rate_tab", "Policy Rate");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.current_policy_rate", "Current Policy Rate: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.open_loans_tab", "Open Loans");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.loan_days", "Day: %s / %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.loans_total", "Total borrowed: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.loans_outstanding", "Still to repay: %s");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
@@ -635,7 +643,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.stock.title", "Stock Overview");
 
         REGISTRATE.addRawLang("chart.createkontor.policy_rate.title", "Policy Rate History");
-        REGISTRATE.addRawLang("chart.createkontor.policy_rate.series.policy_rate", "Policy Rate");
+        REGISTRATE.addRawLang("chart.createkontor.policy_rate.series.policy_rate", "Policy Rate in %");
 
         REGISTRATE.addRawLang("toast.createkontor.error.title", "An error occurred:");
         REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");
@@ -708,19 +716,25 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "block.createkontor.logistics_manager_desk.tooltip.behaviour2",
                 "The company is _connected_ to the network of the link. The goods stored in the network cost a _daily storage fee_.");
-        REGISTRATE.addRawLang("block.createkontor.logistics_manager_desk.tooltip.control1", "When R-Clicked on Employee");
         REGISTRATE.addRawLang(
-                "block.createkontor.logistics_manager_desk.tooltip.action1", "Opens the _Logistics Manager's Desk_ interface.");
+                "block.createkontor.logistics_manager_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang(
+                "block.createkontor.logistics_manager_desk.tooltip.action1",
+                "Opens the _Logistics Manager's Desk_ interface.");
 
         REGISTRATE.addRawLang(
                 "block.createkontor.finances_manager_desk.tooltip.summary",
                 "Staffs the company with a _finances manager_. Gives you deeper insides into your finances and allows you to take _bank loans_.");
-        REGISTRATE.addRawLang("block.createkontor.finances_manager_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.condition1", "When a Villager sits next to it");
         REGISTRATE.addRawLang(
                 "block.createkontor.finances_manager_desk.tooltip.behaviour1",
                 "The villager is _hired_ as a finances manager. You need to pay a one-time _hiring bonus_.");
-        REGISTRATE.addRawLang("block.createkontor.finances_manager_desk.tooltip.control1", "When R-Clicked on Employee");
-        REGISTRATE.addRawLang("block.createkontor.finances_manager_desk.tooltip.action1", "Opens the _Finances Manager's Desk_ interface.");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.action1",
+                "Opens the _Finances Manager's Desk_ interface.");
 
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
         REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");

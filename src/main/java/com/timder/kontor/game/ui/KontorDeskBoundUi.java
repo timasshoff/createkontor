@@ -126,10 +126,11 @@ public class KontorDeskBoundUi {
                 .getSyncValue());
 
         Label currentDay = UiLabels.primary(Component.empty(), Horizontal.CENTER);
-        currentDay.addSyncValue(DataBindingBuilder.componentS2C(() -> ComponentFormatting.dayColored(economy.currentDay()))
-                .onRemoteSyncReceived(currentDay::setText)
-                .build()
-                .getSyncValue());
+        currentDay.addSyncValue(
+                DataBindingBuilder.componentS2C(() -> ComponentFormatting.dayColored(economy.currentDay()))
+                        .onRemoteSyncReceived(currentDay::setText)
+                        .build()
+                        .getSyncValue());
 
         Label balance = UiLabels.primary(Component.empty(), Horizontal.CENTER);
         balance.addSyncValue(DataBindingBuilder.componentS2C(
@@ -1116,7 +1117,7 @@ public class KontorDeskBoundUi {
         return history;
     }
 
-    private static List<Loan> tagToLoans(Tag tag) {
+    public static List<Loan> tagToLoans(Tag tag) {
         ListTag list = (ListTag) tag;
         List<Loan> loans = new ArrayList<>();
         for (Tag t : list) {
@@ -1125,7 +1126,7 @@ public class KontorDeskBoundUi {
         return loans;
     }
 
-    private static Tag loansToTag(List<Loan> loans) {
+    public static Tag loansToTag(List<Loan> loans) {
         ListTag tag = new ListTag();
         for (Loan loan : loans) {
             tag.add(CompanySavedData.writeLoan(loan.getSaveState()));

@@ -2,14 +2,11 @@ package com.timder.kontor.game.ui.chart;
 
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.core.macro.MacroRules;
-import com.timder.kontor.core.market.MarketHistoryEntry;
-import com.timder.kontor.core.market.MarketRules;
 import com.timder.kontor.game.ui.chart.classic.ChartSeries;
 import com.timder.kontor.game.ui.chart.classic.ChartSpec;
-import net.minecraft.network.chat.Component;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.chat.Component;
 
 public final class EconomyCharts {
 
@@ -47,13 +44,21 @@ public final class EconomyCharts {
         for (int i = 0; i < count; i++) {
             MacroHistoryEntry entry = history.get(i);
             x[i] = -(double) (count - 1 - i);
-            policyRate[i] = entry.policyRate();
+            policyRate[i] = entry.policyRate() * 100;
             pointLabels.add(Component.translatable("chart.createkontor.day").getString() + entry.day());
         }
 
-        return ChartSpec.builder(Component.translatable("chart.createkontor.policy_rate.title").getString())
-                .series(new ChartSeries(Component.translatable("chart.createkontor.policy_rate.series.policy_rate").getString(), ChartColors.TEAL, x, policyRate))
-                .xAxis(Component.translatable("chart.createkontor.d").getString(), Component.translatable("chart.createkontor.today").getString())
+        return ChartSpec.builder(Component.translatable("chart.createkontor.policy_rate.title")
+                        .getString())
+                .series(new ChartSeries(
+                        Component.translatable("chart.createkontor.policy_rate.series.policy_rate")
+                                .getString(),
+                        ChartColors.TEAL,
+                        x,
+                        policyRate))
+                .xAxis(
+                        Component.translatable("chart.createkontor.d").getString(),
+                        Component.translatable("chart.createkontor.today").getString())
                 .xRangeOptions(List.of(5, 10, 30, 100, 360), 30)
                 .pointLabels(pointLabels)
                 .build();

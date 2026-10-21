@@ -16,12 +16,11 @@ import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.*;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public final class UiContainer {
 
@@ -31,26 +30,26 @@ public final class UiContainer {
 
     public static UIElement hudBox(Company company, Economy economy) {
         UIElement hud = new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.ROW)
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                         .paddingAll(3)
                         .gapAll(4)
                         .alignItems(AlignItems.CENTER))
                 .style(style -> style.background(Sprites.BORDER_DARK));
 
-        Label day = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER).textStyle(style -> style.textAlignVertical(Vertical.CENTER));
-        day.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> ComponentFormatting.dayColored(economy.currentDay()))
-                        .onRemoteSyncReceived(day::setText)
-                        .build().getSyncValue()
-        );
+        Label day = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER)
+                .textStyle(style -> style.textAlignVertical(Vertical.CENTER));
+        day.addSyncValue(DataBindingBuilder.componentS2C(() -> ComponentFormatting.dayColored(economy.currentDay()))
+                .onRemoteSyncReceived(day::setText)
+                .build()
+                .getSyncValue());
 
-        Label balance = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER).textStyle(style -> style.textAlignVertical(Vertical.CENTER));
-        balance.addSyncValue(
-                DataBindingBuilder.componentS2C(() -> ComponentFormatting.moneyColored(company.account().getBalance()))
-                        .onRemoteSyncReceived(balance::setText)
-                        .build().getSyncValue()
-        );
+        Label balance = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER)
+                .textStyle(style -> style.textAlignVertical(Vertical.CENTER));
+        balance.addSyncValue(DataBindingBuilder.componentS2C(
+                        () -> ComponentFormatting.moneyColored(company.account().getBalance()))
+                .onRemoteSyncReceived(balance::setText)
+                .build()
+                .getSyncValue());
 
         hud.addChildren(day, UiLabels.secondary(Component.literal("•"), Horizontal.CENTER), balance);
         return hud;
@@ -58,31 +57,39 @@ public final class UiContainer {
 
     public static UIElement withHud(UIElement mainContent, UIElement hud) {
         UIElement root = new UIElement()
-                .layout(layout -> layout
-                        .widthPercent(100)
+                .layout(layout -> layout.widthPercent(100)
                         .heightPercent(100)
                         .justifyContent(AlignContent.CENTER)
                         .alignItems(AlignItems.CENTER));
 
         if (mainContent instanceof TabView tabView) {
-            tabView.tabScroller(scroller -> scroller.layout(layout -> layout
-                    .widthAuto().flexBasis(0).flexGrow(1).flexShrink(1).minWidth(0)
+            tabView.tabScroller(scroller -> scroller.layout(layout -> layout.widthAuto()
+                    .flexBasis(0)
+                    .flexGrow(1)
+                    .flexShrink(1)
+                    .minWidth(0)
                     .alignSelf(AlignItems.FLEX_END)));
-            hud.layout(layout -> layout
-                    .flexShrink(0).alignSelf(AlignItems.FLEX_END).marginLeft(4).marginBottom(HUD_GAP));
+            hud.layout(layout -> layout.flexShrink(0)
+                    .alignSelf(AlignItems.FLEX_END)
+                    .marginLeft(4)
+                    .marginBottom(HUD_GAP));
             tabView.tabHeaderContainer.layout(layout -> layout.paddingRight(0));
             tabView.tabHeaderContainer.addChild(hud);
             return root.addChildren(tabView);
         }
 
-        hud.layout(layout -> layout.flexShrink(0).alignSelf(AlignItems.FLEX_END).marginLeft(4).marginBottom(HUD_GAP));
+        hud.layout(layout -> layout.flexShrink(0)
+                .alignSelf(AlignItems.FLEX_END)
+                .marginLeft(4)
+                .marginBottom(HUD_GAP));
         return root.addChildren(mainContent, hud);
     }
 
     public static UIElement small() {
-       return new UIElement()
-               .layout(layout -> layout.widthPercent(50).heightPercent(50).paddingAll(8).gapAll(4))
-               .style(style -> style.background(Sprites.BORDER_DARK));
+        return new UIElement()
+                .layout(layout ->
+                        layout.widthPercent(50).heightPercent(50).paddingAll(8).gapAll(4))
+                .style(style -> style.background(Sprites.BORDER_DARK));
     }
 
     public static ScrollerView smallScroller() {
@@ -90,10 +97,8 @@ public final class UiContainer {
         scroller.layout(layout -> layout.widthPercent(50).heightPercent(50).paddingAll(8));
         scroller.style(style -> style.background(Sprites.BORDER_DARK));
 
-        return scroller
-                .scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
-                .viewPort(viewPort -> viewPort
-                        .layout(layout -> layout.paddingAll(0))
+        return scroller.scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
+                .viewPort(viewPort -> viewPort.layout(layout -> layout.paddingAll(0))
                         .style(style -> style.background(IGuiTexture.EMPTY)))
                 .viewContainer(viewContainer -> viewContainer.layout(layout -> layout.gapAll(4)))
                 .verticalScroller(vs -> vs.layout(layout -> layout.marginLeft(4)));
@@ -101,7 +106,8 @@ public final class UiContainer {
 
     public static UIElement large() {
         return new UIElement()
-                .layout(layout -> layout.widthPercent(95).heightPercent(95).paddingAll(8).gapAll(4))
+                .layout(layout ->
+                        layout.widthPercent(95).heightPercent(95).paddingAll(8).gapAll(4))
                 .style(style -> style.background(Sprites.BORDER_DARK));
     }
 
@@ -110,10 +116,8 @@ public final class UiContainer {
         scroller.layout(layout -> layout.widthPercent(95).heightPercent(95).paddingAll(8));
         scroller.style(style -> style.background(Sprites.BORDER_DARK));
 
-        return scroller
-                .scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
-                .viewPort(viewPort -> viewPort
-                        .layout(layout -> layout.paddingAll(0))
+        return scroller.scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
+                .viewPort(viewPort -> viewPort.layout(layout -> layout.paddingAll(0))
                         .style(style -> style.background(IGuiTexture.EMPTY)))
                 .viewContainer(viewContainer -> viewContainer.layout(layout -> layout.gapAll(4)))
                 .verticalScroller(vs -> vs.layout(layout -> layout.marginLeft(4)));
@@ -123,8 +127,8 @@ public final class UiContainer {
         TabView tabView = new TabView();
         tabView.layout(layout -> layout.widthPercent(95).heightPercent(98));
         tabView.tabScroller(UiContainer::fitTabScrollerHeight);
-        tabView.tabContentContainer(content -> content
-                .layout(layout -> layout.paddingAll(8).gapAll(4).flexBasis(0))
+        tabView.tabContentContainer(content -> content.layout(
+                        layout -> layout.paddingAll(8).gapAll(4).flexBasis(0))
                 .style(style -> style.background(Sprites.BORDER_DARK)));
         return tabView;
     }
@@ -137,10 +141,8 @@ public final class UiContainer {
         ScrollerView scroller = new ScrollerView();
         scroller.layout(layout -> layout.widthPercent(100).heightPercent(100));
 
-        return scroller
-                .scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
-                .viewPort(viewPort -> viewPort
-                        .layout(layout -> layout.paddingAll(0))
+        return scroller.scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
+                .viewPort(viewPort -> viewPort.layout(layout -> layout.paddingAll(0))
                         .style(style -> style.background(IGuiTexture.EMPTY)))
                 .viewContainer(viewContainer -> viewContainer.layout(layout -> layout.gapAll(4)))
                 .verticalScroller(vs -> vs.layout(layout -> layout.marginLeft(4)));
@@ -148,8 +150,7 @@ public final class UiContainer {
 
     public static UIElement headerWithSubtitle(Label header, UIElement subtitle) {
         UIElement headerWithSubtitle = new UIElement()
-                .layout(layout -> layout
-                        .paddingAll(8)
+                .layout(layout -> layout.paddingAll(8)
                         .gapAll(4)
                         .widthFitContent()
                         .alignSelf(AlignItems.CENTER)
@@ -167,8 +168,7 @@ public final class UiContainer {
 
     public static UIElement twoColumns(List<? extends UIElement> left, List<? extends UIElement> right) {
         UIElement row = new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.ROW)
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                         .alignItems(AlignItems.FLEX_START)
                         .gapAll(8)
                         .widthPercent(100));
@@ -180,16 +180,13 @@ public final class UiContainer {
 
     private static UIElement columnDivider() {
         return new UIElement()
-                .layout(layout -> layout
-                        .width(1)
-                        .alignSelf(AlignItems.STRETCH))
+                .layout(layout -> layout.width(1).alignSelf(AlignItems.STRETCH))
                 .style(style -> style.background(new ColorRectTexture(0xFF555555)));
     }
 
     private static UIElement column(List<? extends UIElement> elements) {
         UIElement column = new UIElement()
-                .layout(layout -> layout
-                        .flexDirection(FlexDirection.COLUMN)
+                .layout(layout -> layout.flexDirection(FlexDirection.COLUMN)
                         .flexBasis(0)
                         .flexGrow(1)
                         .gapAll(4));
@@ -200,25 +197,26 @@ public final class UiContainer {
     }
 
     public static UIElement itemSlotRow(List<ItemStack> items) {
-        UIElement row = new UIElement().layout(layout -> layout
-                .widthPercent(100)
-                .flexDirection(FlexDirection.ROW)
-                .flexWrap(FlexWrap.WRAP)
-                .alignItems(AlignItems.FLEX_START)
-                .gapAll(2));
+        UIElement row = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexDirection(FlexDirection.ROW)
+                        .flexWrap(FlexWrap.WRAP)
+                        .alignItems(AlignItems.FLEX_START)
+                        .gapAll(2));
         for (ItemStack stack : items) {
             row.addChild(new ItemSlot().setItem(stack));
         }
         return row;
     }
 
-    public static <T> UIElement searchableGrid(ObservableList<T> entries,
-                                               Function<T, UIElement> cardFactory,
-                                               Function<T, List<String>> searchTexts,
-                                               Component searchPlaceholder,
-                                               Component noResultsText,
-                                               int maxColumns,
-                                               float minCardWidth) {
+    public static <T> UIElement searchableGrid(
+            ObservableList<T> entries,
+            Function<T, UIElement> cardFactory,
+            Function<T, List<String>> searchTexts,
+            Component searchPlaceholder,
+            Component noResultsText,
+            int maxColumns,
+            float minCardWidth) {
 
         ObservableValue<String> query = new ObservableValue<>("");
 
@@ -247,7 +245,9 @@ public final class UiContainer {
             if (tracks != appliedTracks[0] || trackWidth != appliedTrackWidth[0]) {
                 appliedTracks[0] = tracks;
                 appliedTrackWidth[0] = trackWidth;
-                String template = String.format(Locale.ROOT, "%.2fpx ", trackWidth).repeat(tracks).trim();
+                String template = String.format(Locale.ROOT, "%.2fpx ", trackWidth)
+                        .repeat(tracks)
+                        .trim();
                 scroller.viewContainer.layout(layout -> layout.gridTemplateColumns(template));
             }
             if (Math.abs(available - appliedWidth[0]) >= 0.01f) {
@@ -282,15 +282,20 @@ public final class UiContainer {
         rebuild.run();
 
         return new UIElement()
-                .layout(layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0).gapAll(4))
+                .layout(layout -> layout.widthPercent(100)
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .minHeight(0)
+                        .gapAll(4))
                 .addChildren(searchField, scroller);
     }
 
-    public static <T> UIElement grid(ObservableList<T> entries,
-                                     Function<T, UIElement> cardFactory,
-                                     Component emptyText,
-                                     int maxColumns,
-                                     float minCardWidth) {
+    public static <T> UIElement grid(
+            ObservableList<T> entries,
+            Function<T, UIElement> cardFactory,
+            Component emptyText,
+            int maxColumns,
+            float minCardWidth) {
 
         ScrollerView scroller = tabScroller();
         scroller.layout(layout -> layout.heightAuto().flexBasis(0).flexGrow(1).minHeight(0));
@@ -312,7 +317,9 @@ public final class UiContainer {
             if (tracks != appliedTracks[0] || trackWidth != appliedTrackWidth[0]) {
                 appliedTracks[0] = tracks;
                 appliedTrackWidth[0] = trackWidth;
-                String template = String.format(Locale.ROOT, "%.2fpx ", trackWidth).repeat(tracks).trim();
+                String template = String.format(Locale.ROOT, "%.2fpx ", trackWidth)
+                        .repeat(tracks)
+                        .trim();
                 scroller.viewContainer.layout(layout -> layout.gridTemplateColumns(template));
             }
             if (Math.abs(available - appliedWidth[0]) >= 0.01f) {
@@ -333,8 +340,8 @@ public final class UiContainer {
             }
             showingEmpty[0] = shown == 0;
             if (shown == 0) {
-                scroller.addScrollViewChild(UiLabels.secondary(emptyText, Horizontal.CENTER)
-                        .layout(layout -> layout.widthPercent(100)));
+                scroller.addScrollViewChild(
+                        UiLabels.secondary(emptyText, Horizontal.CENTER).layout(layout -> layout.widthPercent(100)));
             }
             applyLayout.run();
         };
@@ -344,12 +351,20 @@ public final class UiContainer {
         rebuild.run();
 
         return new UIElement()
-                .layout(layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0).gapAll(4))
+                .layout(layout -> layout.widthPercent(100)
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .minHeight(0)
+                        .gapAll(4))
                 .addChildren(scroller);
     }
 
-    public static <T> UIElement searchableList(ObservableList<T> entries, Function<T, UIElement> rowFactory,
-                                               Function<T, List<String>> searchTexts, Component searchPlaceholder, Component noResultsText) {
+    public static <T> UIElement searchableList(
+            ObservableList<T> entries,
+            Function<T, UIElement> rowFactory,
+            Function<T, List<String>> searchTexts,
+            Component searchPlaceholder,
+            Component noResultsText) {
 
         ObservableValue<String> query = new ObservableValue<>("");
 
@@ -360,7 +375,8 @@ public final class UiContainer {
 
         ScrollerView scroller = tabScroller();
         scroller.layout(layout -> layout.heightAuto().flexBasis(0).flexGrow(1).minHeight(0));
-        scroller.viewContainer.layout(layout -> layout.flexDirection(FlexDirection.COLUMN).gapAll(LIST_GAP));
+        scroller.viewContainer.layout(
+                layout -> layout.flexDirection(FlexDirection.COLUMN).gapAll(LIST_GAP));
 
         float[] appliedWidth = {0};
 
@@ -394,7 +410,11 @@ public final class UiContainer {
         rebuild.run();
 
         return new UIElement()
-                .layout(layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0).gapAll(4))
+                .layout(layout -> layout.widthPercent(100)
+                        .flexBasis(0)
+                        .flexGrow(1)
+                        .minHeight(0)
+                        .gapAll(4))
                 .addChildren(searchField, scroller);
     }
 
