@@ -460,6 +460,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.first_payment", "First Payment");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.total_interest", "Total Interest");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.accept_offer", "Accept Offer");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.policy_rate_tab", "Policy Rate");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.current_policy_rate", "Current Policy Rate: %s");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
@@ -631,6 +633,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.cost_structure.title", "Cost Structure");
 
         REGISTRATE.addRawLang("chart.createkontor.stock.title", "Stock Overview");
+
+        REGISTRATE.addRawLang("chart.createkontor.policy_rate.title", "Policy Rate History");
+        REGISTRATE.addRawLang("chart.createkontor.policy_rate.series.policy_rate", "Policy Rate");
 
         REGISTRATE.addRawLang("toast.createkontor.error.title", "An error occurred:");
         REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");

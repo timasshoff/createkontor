@@ -21,10 +21,15 @@ import com.timder.kontor.core.company.financial.BankLoanRules;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseKeyCodec;
+import com.timder.kontor.core.macro.MacroHistoryEntry;
+import com.timder.kontor.core.raw.RawMaterialHistoryEntry;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.FinancesManagerActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.network.ToastPayload;
+import com.timder.kontor.game.ui.chart.EconomyCharts;
+import com.timder.kontor.game.ui.chart.RawMaterialCharts;
+import com.timder.kontor.game.ui.chart.classic.ChartHost;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
@@ -51,6 +56,9 @@ public class FinancesManagerUi {
         tabView.addTab(
                 UiContainer.tab(Component.translatable("ui.createkontor.finances_manager.take_loan")),
                 newLoanTab(context, actions));
+        tabView.addTab(
+                UiContainer.tab(Component.translatable("ui.createkontor.finances_manager.policy_rate_tab")),
+                policyRateTab(context));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
         return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
@@ -203,6 +211,39 @@ public class FinancesManagerUi {
         return content;
     }
 
+    public static UIElement policyRateTab(EmployeeDeskContext context) {
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100).gapAll(4));
+
+        content.addChild(UiLabels.h1(Component.translatable("ui.createkontor.finances_manager.policy_rate_tab"), Horizontal.LEFT));
+
+        Label currentPolicyRate = UiLabels.secondary(
+                Component.translatable("ui.createkontor.finances_manager.current_policy_rate", Component.literal("-").withStyle(ChatFormatting.WHITE)),
+                Horizontal.LEFT);
+
+        content.addChild(UiLabels.seperatedLabelRow(List.of(currentPolicyRate))
+                .layout(layout -> layout.justifyContent(AlignContent.FLEX_START)));
+
+        ChartHost policyRateChartHost = new ChartHost();
+        policyRateChartHost.layout(
+                layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0));
+        policyRateChartHost.setDisplay(false);
+        content.addChild(policyRateChartHost);
+
+        SimpleBinding<Tag> historyBinding = DataBindingBuilder.tagS2C(
+                        () -> macroHistoryToTag(context.economy().macroHistory()))
+                .onRemoteSyncReceived(tag -> {
+                    List<MacroHistoryEntry> history = tagToMacroHistory(tag);
+                    policyRateChartHost.show(EconomyCharts.policyRate(history));
+                    policyRateChartHost.setDisplay(!history.isEmpty());
+                    currentPolicyRate.setText(Component.translatable("ui.createkontor.finances_manager.policy_rate", Component.literal(String.format(Locale.ROOT, "%.4f %%", history.getLast().policyRate() * 100)).withStyle(ChatFormatting.WHITE)));
+                })
+                .build();
+        content.addSyncValue(historyBinding.getSyncValue());
+
+        return content;
+    }
+
     private static Tag creditInfoToTag(EmployeeDeskContext context) {
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         Company company = context.company();
@@ -273,5 +314,27 @@ public class FinancesManagerUi {
                     t.getLong("TotalInterestCents"), t.getInt("TermDays"), t.getInt("FreeDays"), t.getInt("TotalDays")));
         }
         return offers;
+    }
+
+    public static Tag macroHistoryToTag(List<MacroHistoryEntry> history) {
+        ListTag list = new ListTag();
+        for (MacroHistoryEntry entry : history) {
+            CompoundTag e = new CompoundTag();
+            e.putLong("day", entry.day());
+            e.putDouble("index", entry.index());
+            e.putDouble("policyRate", entry.policyRate());
+            list.add(e);
+        }
+        return list;
+    }
+
+    public static List<MacroHistoryEntry> tagToMacroHistory(Tag tag) {
+        ListTag list = (ListTag) tag;
+        List<MacroHistoryEntry> history = new ArrayList<>(list.size());
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag e = list.getCompound(i);
+            history.add(new MacroHistoryEntry(e.getLong("day"), e.getDouble("index"), e.getDouble("policyRate")));
+        }
+        return history;
     }
 }
