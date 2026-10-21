@@ -24,7 +24,7 @@ public class BankLoanOfferDefDataProvider implements DataProvider {
 
         futures.add(save(cache, "standard", 28, 0, 0.00_02));
         futures.add(save(cache, "express", 7, 0, 0.00_00));
-        futures.add(save(cache, "bridging", 3, 14, 0.00_17));
+        futures.add(save(cache, "bridging", 3, 14, 0.00_20));
         futures.add(save(cache, "short_investment", 56, 0, 0.00_04));
         futures.add(save(cache, "long_investment", 84, 0, 0.00_04));
         futures.add(save(cache, "pioneer", 70, 28, 0.00_04));

@@ -15,6 +15,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
+import com.timder.kontor.core.company.financial.BankLoanOfferDef;
 import com.timder.kontor.core.company.financial.BankLoanQuote;
 import com.timder.kontor.core.company.financial.BankLoanRules;
 import com.timder.kontor.core.company.financial.Money;
@@ -23,6 +24,7 @@ import com.timder.kontor.core.company.license.LicenseKeyCodec;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.FinancesManagerActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
@@ -39,6 +41,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,14 +50,14 @@ public class FinancesManagerUi {
         var tabView = UiContainer.largeTabView();
         tabView.addTab(
                 UiContainer.tab(Component.translatable("ui.createkontor.finances_manager.take_loan")),
-                newLoanTab(context));
+                newLoanTab(context, actions));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
         return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
     }
 
-    public static UIElement newLoanTab(EmployeeDeskContext context) {
-        ObservableValue<CreditInfo> info = new ObservableValue<>(new CreditInfo(false, false, 0, 0,  0,0, 0));
+    public static UIElement newLoanTab(EmployeeDeskContext context, FinancesManagerActions actions) {
+        ObservableValue<CreditInfo> info = new ObservableValue<>(new CreditInfo(false, false, 0, 0,  0,0, 0, 0));
         SimpleBinding<Tag> infoBinding = DataBindingBuilder.tagS2C(() -> creditInfoToTag(context))
                 .onRemoteSyncReceived(tag -> info.set(tagToCreditInfo(tag)))
                 .build();
@@ -84,7 +87,9 @@ public class FinancesManagerUi {
 
         ObservableList<OfferView> offers = new ObservableList<>();
         SimpleBinding<Tag> offersBinding = DataBindingBuilder.tagS2C(() -> offersToTag(context, selectedDollars[0]))
-                .onRemoteSyncReceived(tag -> offers.set(tagToOffers(tag)))
+                .onRemoteSyncReceived(tag -> offers.set(tagToOffers(tag).stream().sorted(Comparator.comparingInt(OfferView::termDays)
+                        .thenComparingInt(OfferView::freeDays)
+                        .thenComparing(OfferView::id)).toList()))
                 .build();
         content.addSyncValue(offersBinding.getSyncValue());
 
@@ -139,6 +144,10 @@ public class FinancesManagerUi {
                 Component.translatable("ui.createkontor.finances_manager.no_offers"),
                 3, 140);
 
+        content.onMessage(
+                "c2s_accept_offer",
+                tag -> ToastPayload.send(context.player(), actions.takeLoan(tag.getString("Id"), selectedDollars[0])));
+
         info.addListener(() -> {
             CreditInfo i = info.get();
             if (!i.allowed()) {
@@ -153,7 +162,7 @@ public class FinancesManagerUi {
             Money max = Money.ofCents(i.maxCents);
 
             Label averageRevenueLabel = UiLabels.secondary(
-                            Component.translatable("ui.createkontor.finances_manager.average_revenue", ComponentFormatting.moneyColored(averageRevenue)),
+                            Component.translatable("ui.createkontor.finances_manager.average_revenue", averageRevenue.toString()),
                             Horizontal.LEFT);
             Label reputation = UiLabels.secondary(
                     Component.translatable("ui.createkontor.finances_manager.reputation", ComponentFormatting.starsWithValue(i.reputation())),
@@ -161,13 +170,17 @@ public class FinancesManagerUi {
             Label policyRate = UiLabels.secondary(
                     Component.translatable("ui.createkontor.finances_manager.policy_rate", Component.literal(String.format(Locale.ROOT, "%.4f %%", i.policyRate() * 100)).withStyle(ChatFormatting.WHITE)),
                     Horizontal.LEFT);
+            Label legalFormCreditLimit = UiLabels.secondary(
+                    Component.translatable("ui.createkontor.finances_manager.legal_form_credit_limit", Money.ofCents(i.legalFormLimitCents()).toString()),
+                    Horizontal.LEFT);
 
-            allowedContent.addChild(UiLabels.seperatedLabelRow(List.of(averageRevenueLabel, reputation, policyRate))
+
+            allowedContent.addChild(UiLabels.seperatedLabelRow(List.of(averageRevenueLabel, reputation, policyRate, legalFormCreditLimit))
                     .layout(layout -> layout.justifyContent(AlignContent.FLEX_START)));
 
             if (max.cents() < min.cents() || !i.available()) {
-                allowedContent.addChild(UiLabels.error(
-                        Component.translatable("ui.createkontor.finances_manager.no_credit"), Horizontal.CENTER));
+                allowedContent.addChild(UiLabels.paragraphError(
+                        Component.translatable("ui.createkontor.finances_manager.no_credit"), Horizontal.LEFT));
                 return;
             }
 
@@ -204,15 +217,16 @@ public class FinancesManagerUi {
         tag.putDouble("PolicyRate", context.economy().policyRate());
         tag.putLong("MinCents", BankLoanRules.minimumAmount(company, params).cents());
         tag.putLong("MaxCents", BankLoanRules.getCreditLimit(company, params).cents());
+        tag.putLong("LegalFormLimitCents", company.legalForm(params).bankLoanLimit().cents());
         tag.putDouble("Reputation", context.economy().overallReputationInStars(company.id()));
         return tag;
     }
 
-    public record CreditInfo(boolean allowed, boolean available, long averageRevenueCents, double policyRate, long minCents, long maxCents, double reputation) {}
+    public record CreditInfo(boolean allowed, boolean available, long averageRevenueCents, double policyRate, long minCents, long maxCents, long legalFormLimitCents, double reputation) {}
 
     private static CreditInfo tagToCreditInfo(Tag tag) {
         CompoundTag t = (CompoundTag) tag;
-        return new CreditInfo(t.getBoolean("Allowed"), t.getBoolean("Available"), t.getLong("AverageRevenueCents"), t.getDouble("PolicyRate"), t.getLong("MinCents"), t.getLong("MaxCents"), t.getDouble("Reputation"));
+        return new CreditInfo(t.getBoolean("Allowed"), t.getBoolean("Available"), t.getLong("AverageRevenueCents"), t.getDouble("PolicyRate"), t.getLong("MinCents"), t.getLong("MaxCents"), t.getLong("LegalFormLimitCents"), t.getDouble("Reputation"));
     }
 
     private static Tag offersToTag(EmployeeDeskContext context, double requestedDollars) {

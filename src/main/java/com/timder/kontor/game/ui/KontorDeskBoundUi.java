@@ -419,7 +419,8 @@ public class KontorDeskBoundUi {
                                         Horizontal.CENTER),
                                 UiLabels.secondary(
                                         Component.translatable(
-                                                "ui.createkontor.kontor_desk.loan.rate", loan.rate() + "%"),
+                                                "ui.createkontor.kontor_desk.loan.rate",
+                                                String.format(Locale.ROOT, "%.4f%%", loan.rate() * 100)),
                                         Horizontal.CENTER),
                                 UiLabels.secondary(
                                         Component.translatable(

@@ -139,16 +139,16 @@ public class CompanyConfig {
                 .defineInRange("riskSurchargeAtFiveStars", 0.0010, 0.0, Double.MAX_VALUE);
         BANK_LOAN_MAX_LOANS = builder.comment(
                         "How many bank loans a company can have at the same time. The founder loan does not count")
-                .defineInRange("maxLoans", 3, 1, Integer.MAX_VALUE);
+                .defineInRange("maxLoans", 5, 1, Integer.MAX_VALUE);
         BANK_LOAN_CREDIT_LIMIT_REVENUE_MULTIPLE = builder.comment(
                         "The credit limit is at most this many times the average daily revenue (and at most the bank loan limit of the legal form)")
-                .defineInRange("creditLimitRevenueMultiple", 10.0, 0.0001, 1_000.0);
+                .defineInRange("creditLimitRevenueMultiple", 20.0, 0.0001, 1_000.0);
         BANK_LOAN_CREDIT_LIMIT_REVENUE_DAYS = builder.comment(
                         "How many settled days the average daily revenue for the credit limit covers")
                 .defineInRange("creditLimitRevenueDays", 7, 1, Integer.MAX_VALUE);
         BANK_LOAN_MINIMUM_AMOUNT_SHARE = builder.comment(
                         "The smallest bank loan is this share of the bank loan limit of the legal form (0.05 is 5 %)")
-                .defineInRange("minimumAmountShare", 0.05, 0.0, 1.0);
+                .defineInRange("minimumAmountShare", 0.01, 0.0, 1.0);
 
         builder.pop();
 

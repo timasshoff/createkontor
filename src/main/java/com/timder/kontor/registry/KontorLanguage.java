@@ -95,6 +95,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "message.createkontor.buyer_desk.auto_stock.limit_reached", "This buyer can handle at most %s items.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
+        REGISTRATE.addRawLang("message.createkontor.finances_manager.loan_taken", "Loan of %s taken and paid out.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -446,10 +447,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan_title", "Take a new bank loan");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.bank_loan_not_allowed", "§cBank Loans not allowed");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.legal_level_too_low", "Your legal level does not allow bank loans.");
-        REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_credit", "The Bank does not grant you any loans at this moment.");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_credit", "The Bank does not grant you any loans at this moment. §7This might be caused by a too low average daily revenue or because your open bank loans already use up your credit limit. Ask a Consultant for more info.");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.average_revenue", "Average Revenue: %s");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.reputation", "Reputation: %s");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.policy_rate", "Policy Rate: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.legal_form_credit_limit", "Legal Form Credit Limit: %s");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_offers", "No offers available.");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.rate", "Daily Rate");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.free_days", "Free Days");
