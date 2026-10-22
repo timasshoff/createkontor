@@ -1009,6 +1009,22 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.logistics_manager.p6",
                 "The minimum stock applies to each item separately. The Logistics Manager only orders what exceeds the minimum stock and leaves the rest in the Logistics Network.");
+
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p1", "The finances manager allows you to take bank loans.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.finances_manager.b1", "Bank Loan Offers");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p2",
+                "To get offers for a bank loan, your company must fulfill some requirements:");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.loan_requirements",
+                "Your legal form allows bank loans\nYour average daily revenue over the past %s days is high enough\nYour open bank loans do not fully use up your credit limit");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p3",
+                "The credit limit is %s times your average daily revenue over the past %s days and is capped by your current legal form.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p4",
+                "If you are eligible for a bank loan, you can set the loan amount and the finance manager presents you with different offers for bank loans. The repayment plan and daily interest rate depend on the chosen offer. Additionally, the interest rate is influenced by the policy rate and your reputation.");
     }
 
     static void touch() {}
