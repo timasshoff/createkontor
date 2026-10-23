@@ -5,6 +5,7 @@ import com.timder.kontor.core.company.financial.BankLoanParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseParams;
+import com.timder.kontor.core.company.property.PropertyParams;
 import com.timder.kontor.data.KontorData;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -200,6 +201,7 @@ public class CompanyConfig {
                         BANK_LOAN_MAX_LOANS.get(),
                         BANK_LOAN_CREDIT_LIMIT_REVENUE_MULTIPLE.get(),
                         BANK_LOAN_CREDIT_LIMIT_REVENUE_DAYS.get(),
-                        BANK_LOAN_MINIMUM_AMOUNT_SHARE.get()));
+                        BANK_LOAN_MINIMUM_AMOUNT_SHARE.get()),
+                PropertyParams.disabled());
     }
 }

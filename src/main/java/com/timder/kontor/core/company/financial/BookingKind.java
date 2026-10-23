@@ -30,6 +30,8 @@ public enum BookingKind {
     CONTRACT_PENALTY(BookingCategory.COST),
     /** Fee of upgrading to a higher legal form */
     UPGRADE_FEE(BookingCategory.COST),
+    /** Rent of a property **/
+    PROPERTY_RENT(BookingCategory.COST),
 
     /** Revenue from full-filled orders. */
     ORDER_REVENUE(BookingCategory.REVENUE),
@@ -43,7 +45,12 @@ public enum BookingKind {
     /** Payout of a loan. */
     LOAN_PAYOUT(BookingCategory.FINANCING),
     /** Repayment of a loan. */
-    LOAN_REPAYMENT(BookingCategory.FINANCING);
+    LOAN_REPAYMENT(BookingCategory.FINANCING),
+
+    /** Purchase of property **/
+    PROPERTY_PURCHASE(BookingCategory.INVESTMENT),
+    /** Sale of property **/
+    PROPERTY_SALE(BookingCategory.INVESTMENT);
 
     private final BookingCategory category;
 
@@ -65,5 +72,13 @@ public enum BookingKind {
 
     public boolean isFinancing() {
         return category == BookingCategory.FINANCING;
+    }
+
+    public boolean isInvestment() {
+        return category == BookingCategory.INVESTMENT;
+    }
+
+    public boolean countsInResult() {
+        return isCost() || isRevenue();
     }
 }

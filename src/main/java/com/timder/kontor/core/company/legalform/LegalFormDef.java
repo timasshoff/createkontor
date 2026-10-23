@@ -1,7 +1,6 @@
 package com.timder.kontor.core.company.legalform;
 
 import com.timder.kontor.core.company.financial.Money;
-
 import java.util.Objects;
 
 /**
@@ -26,6 +25,8 @@ import java.util.Objects;
  * @param logisticsNetwork Whether the company can connect to a logistics network
  * @param freeStorage Value of stock that costs no storage fee
  * @param founderProtection Whether the founder protection applies
+ * @param maxShippingExits The max shipping exits
+ * @param maxProperties The max chunks
  */
 public record LegalFormDef(
         int level,
@@ -48,8 +49,8 @@ public record LegalFormDef(
         Money freeStorage,
         boolean founderProtection,
         int maxShippingExits,
-        UpgradeRequirements entryRequirements
-) {
+        int maxProperties,
+        UpgradeRequirements entryRequirements) {
 
     public static final int UNLIMITED = Integer.MAX_VALUE;
 
@@ -57,9 +58,11 @@ public record LegalFormDef(
         if (level < 1) throw new IllegalArgumentException("level must be at least 1.");
         if (id == null || id.isBlank()) throw new IllegalArgumentException("id must not be blank.");
         if (maxEmployees < 0) throw new IllegalArgumentException("maxEmployees must not be negative.");
-        if (!(employeeSalaryFactor > 0.0) || Double.isInfinite(employeeSalaryFactor)) throw new IllegalArgumentException("employeeSalaryFactor must be positive and finite.");
+        if (!(employeeSalaryFactor > 0.0) || Double.isInfinite(employeeSalaryFactor))
+            throw new IllegalArgumentException("employeeSalaryFactor must be positive and finite.");
         if (maxProductLicenses < 0) throw new IllegalArgumentException("maxProductLicenses must not be negative.");
-        if (maxOpenRequestsPerProduct < 0) throw new IllegalArgumentException("maxOpenRequestsPerProduct must not be negative.");
+        if (maxOpenRequestsPerProduct < 0)
+            throw new IllegalArgumentException("maxOpenRequestsPerProduct must not be negative.");
         if (maxOpenRequestsTotal < 0) throw new IllegalArgumentException("maxOpenRequestsTotal must not be negative.");
         if (maxOpenOrders < 0) throw new IllegalArgumentException("maxOpenOrders must not be negative.");
         if (maxOpenContracts < 0) throw new IllegalArgumentException("maxOpenContracts must not be negative.");
@@ -73,8 +76,11 @@ public record LegalFormDef(
         if (overdraftLimit.isNegative()) throw new IllegalArgumentException("overdraftLimit must not be negative.");
         if (bankLoanLimit.isNegative()) throw new IllegalArgumentException("bankLoanLimit must not be negative.");
         if (freeStorage.isNegative()) throw new IllegalArgumentException("freeStorage must not be negative.");
-        if (level == 1 && entryRequirements != null) throw new IllegalArgumentException("The first legal form must not have entry requirements.");
-        if (level > 1 && entryRequirements == null) throw new IllegalArgumentException("Legal form of level " + level + " needs entry requirements.");
+        if (maxProperties < 0) throw new IllegalArgumentException("maxProperties must not be negative.");
+        if (level == 1 && entryRequirements != null)
+            throw new IllegalArgumentException("The first legal form must not have entry requirements.");
+        if (level > 1 && entryRequirements == null)
+            throw new IllegalArgumentException("Legal form of level " + level + " needs entry requirements.");
     }
 
     public boolean bankLoanAllowed() {

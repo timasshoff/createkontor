@@ -132,7 +132,8 @@ public final class LawyerUi {
                             context.company(),
                             forms.next(context.company().legalLevel()),
                             context.economy()
-                                    .overallReputationInStars(context.company().id())));
+                                    .overallReputationInStars(context.company().id()),
+                            params));
                 })
                 .onRemoteSyncReceived(tag -> checklist.set(tagToChecklist(tag).orElse(null)))
                 .build();
@@ -655,6 +656,7 @@ public final class LawyerUi {
                 Money.ofCents(t.getLong("FreeStorageCents")),
                 t.getBoolean("FounderProtection"),
                 t.getInt("MaxShippingExits"),
+                t.getInt("MaxProperties"),
                 requirements));
     }
 
@@ -680,6 +682,7 @@ public final class LawyerUi {
         t.putLong("FreeStorageCents", legalForm.freeStorage().cents());
         t.putBoolean("FounderProtection", legalForm.founderProtection());
         t.putInt("MaxShippingExits", legalForm.maxShippingExits());
+        t.putInt("MaxProperties", legalForm.maxProperties());
         if (legalForm.hasEntryRequirements()) {
             t.put("Requirements", requirementsToTag(legalForm.entryRequirements()));
         }

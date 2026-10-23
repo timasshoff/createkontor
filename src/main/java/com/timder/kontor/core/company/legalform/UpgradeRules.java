@@ -4,35 +4,43 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public final class UpgradeRules {
 
-    public static UpgradeChecklist checkApplication(Company company, LegalFormDef target, double reputationStars) {
+    public static UpgradeChecklist checkApplication(
+            Company company, LegalFormDef target, double reputationStars, CompanyParams params) {
+        Objects.requireNonNull(params, "params must not be null.");
         UpgradeRequirements requirements = requirementsFor(company, target);
 
         if (Double.isNaN(reputationStars)
                 || reputationStars < UpgradeRequirements.MIN_STARS - UpgradeChecklist.StarsRow.TOLERANCE
                 || reputationStars > UpgradeRequirements.MAX_STARS + UpgradeChecklist.StarsRow.TOLERANCE) {
-            throw new IllegalArgumentException("reputationStars must be between " + UpgradeRequirements.MIN_STARS + " and " + UpgradeRequirements.MAX_STARS + ".");
+            throw new IllegalArgumentException("reputationStars must be between " + UpgradeRequirements.MIN_STARS
+                    + " and " + UpgradeRequirements.MAX_STARS + ".");
         }
 
         List<UpgradeChecklist.Row> rows = List.of(
-                new UpgradeChecklist.MoneyRow(UpgradeCriterion.NET_WORTH, company.netWorth(), requirements.moneyNeededToApply()),
-                new UpgradeChecklist.CountRow(UpgradeCriterion.FULFILLED_ORDERS, (int) company.fulfilledOrders(), requirements.minFulfilledOrders()),
-                new UpgradeChecklist.StarsRow(UpgradeCriterion.REPUTATION, reputationStars, requirements.minReputationStars()),
-                new UpgradeChecklist.FlagRow(UpgradeCriterion.LIQUIDITY, company.isOperational())
-        );
+                new UpgradeChecklist.MoneyRow(
+                        UpgradeCriterion.NET_WORTH, company.netWorth(params), requirements.moneyNeededToApply()),
+                new UpgradeChecklist.CountRow(
+                        UpgradeCriterion.FULFILLED_ORDERS,
+                        (int) company.fulfilledOrders(),
+                        requirements.minFulfilledOrders()),
+                new UpgradeChecklist.StarsRow(
+                        UpgradeCriterion.REPUTATION, reputationStars, requirements.minReputationStars()),
+                new UpgradeChecklist.FlagRow(UpgradeCriterion.LIQUIDITY, company.isOperational()));
 
         return new UpgradeChecklist(UpgradeCheckMode.APPLICATION, target.level(), rows);
     }
 
-    public static UpgradeChecklist checkCompletion(Company company, LegalFormDef target) {
+    public static UpgradeChecklist checkCompletion(Company company, LegalFormDef target, CompanyParams params) {
+        Objects.requireNonNull(params, "params must not be null.");
         UpgradeRequirements requirements = requirementsFor(company, target);
-        List<UpgradeChecklist.Row> rows = List.of(new UpgradeChecklist.MoneyRow(UpgradeCriterion.NET_WORTH, company.netWorth(), requirements.minNetWorth()));
+        List<UpgradeChecklist.Row> rows = List.of(new UpgradeChecklist.MoneyRow(
+                UpgradeCriterion.NET_WORTH, company.netWorth(params), requirements.minNetWorth()));
         return new UpgradeChecklist(UpgradeCheckMode.COMPLETION, target.level(), rows);
     }
 
@@ -48,14 +56,15 @@ public final class UpgradeRules {
         }
 
         LegalFormDef target = params.legalForms().next(company.legalLevel());
-        UpgradeChecklist checklist = checkApplication(company, target, reputationStars);
+        UpgradeChecklist checklist = checkApplication(company, target, reputationStars, params);
         if (!checklist.allMet()) {
             return new ApplyResult(ApplyResult.Status.REQUIREMENTS_NOT_MET, checklist);
         }
 
         Money fee = target.entryRequirements().fee();
         if (fee.isPositive() && !company.trySpend(day, BookingKind.UPGRADE_FEE, fee, target.id(), params)) {
-            throw new IllegalStateException("Every requirement is met, but the company cannot pay the fee of " + fee + ".");
+            throw new IllegalStateException(
+                    "Every requirement is met, but the company cannot pay the fee of " + fee + ".");
         }
 
         company.startUpgrade(UpgradeApplication.start(target));
@@ -97,7 +106,8 @@ public final class UpgradeRules {
      * @param params The company parameters
      * @return What happened. Empty, if the application only moved closer to finishing
      */
-    public static Optional<UpgradeEvent> advance(Company company, long ticks, boolean processingAllowed, CompanyParams params) {
+    public static Optional<UpgradeEvent> advance(
+            Company company, long ticks, boolean processingAllowed, CompanyParams params) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(params, "params must not be null.");
         if (ticks < 1) throw new IllegalArgumentException("ticks must be at least 1.");
@@ -114,7 +124,7 @@ public final class UpgradeRules {
         }
 
         LegalFormDef target = targetOf(company, application, params);
-        if (checkCompletion(company, target).allMet()) {
+        if (checkCompletion(company, target, params).allMet()) {
             return Optional.of(complete(company, target, params));
         }
         int restingDays = target.entryRequirements().restingDays();
@@ -142,7 +152,7 @@ public final class UpgradeRules {
         }
 
         LegalFormDef target = targetOf(company, application, params);
-        if (checkCompletion(company, target).allMet()) {
+        if (checkCompletion(company, target, params).allMet()) {
             return Optional.of(complete(company, target, params));
         }
         Optional<UpgradeApplication> next = application.afterRestingDay();
@@ -160,21 +170,24 @@ public final class UpgradeRules {
 
     private static UpgradeEvent reject(Company company, LegalFormDef target) {
         company.discardUpgrade();
-        return new UpgradeEvent.Rejected(company.id(), target.level(), target.entryRequirements().fee());
+        return new UpgradeEvent.Rejected(
+                company.id(), target.level(), target.entryRequirements().fee());
     }
 
     private static UpgradeRequirements requirementsFor(Company company, LegalFormDef target) {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(target, "target must not be null.");
         if (target.level() != company.legalLevel() + 1) {
-            throw new IllegalArgumentException("A company of level " + company.legalLevel() + " can only advance into level " + (company.legalLevel() + 1) + ", not " + target.level() + ".");
+            throw new IllegalArgumentException("A company of level " + company.legalLevel()
+                    + " can only advance into level " + (company.legalLevel() + 1) + ", not " + target.level() + ".");
         }
         return target.entryRequirements();
     }
 
     private static LegalFormDef targetOf(Company company, UpgradeApplication application, CompanyParams params) {
         if (!params.legalForms().hasNext(application.targetLevel() - 1)) {
-            throw new IllegalStateException("The application of " + company.name() + " aims at level " + application.targetLevel() + ", which does not exist any more.");
+            throw new IllegalStateException("The application of " + company.name() + " aims at level "
+                    + application.targetLevel() + ", which does not exist any more.");
         }
         return params.legalForms().get(application.targetLevel());
     }

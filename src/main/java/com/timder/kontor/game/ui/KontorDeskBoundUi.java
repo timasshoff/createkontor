@@ -244,7 +244,9 @@ public class KontorDeskBoundUi {
         Label netWorth = UiLabels.primary(Component.empty(), Horizontal.CENTER);
         netWorth.addSyncValue(DataBindingBuilder.componentS2C(() -> Component.translatable(
                         "ui.createkontor.kontor_desk.net_worth",
-                        company.netWorth().toString()))
+                        company.netWorth(CompanyConfig.toCompanyParams(
+                                        new LegalForms(KontorData.getLegalFormDefinitions())))
+                                .toString()))
                 .onRemoteSyncReceived(netWorth::setText)
                 .build()
                 .getSyncValue());
