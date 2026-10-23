@@ -126,10 +126,11 @@ public class KontorDeskBoundUi {
                 .getSyncValue());
 
         Label currentDay = UiLabels.primary(Component.empty(), Horizontal.CENTER);
-        currentDay.addSyncValue(DataBindingBuilder.componentS2C(() -> ComponentFormatting.day(economy.currentDay()))
-                .onRemoteSyncReceived(currentDay::setText)
-                .build()
-                .getSyncValue());
+        currentDay.addSyncValue(
+                DataBindingBuilder.componentS2C(() -> ComponentFormatting.dayColored(economy.currentDay()))
+                        .onRemoteSyncReceived(currentDay::setText)
+                        .build()
+                        .getSyncValue());
 
         Label balance = UiLabels.primary(Component.empty(), Horizontal.CENTER);
         balance.addSyncValue(DataBindingBuilder.componentS2C(
@@ -336,7 +337,7 @@ public class KontorDeskBoundUi {
             for (Booking booking : reversedBookings) {
                 if (booking.day() != lastDay) {
                     Component combined = Component.empty()
-                            .append(ComponentFormatting.day(booking.day()))
+                            .append(ComponentFormatting.dayColored(booking.day()))
                             .append(ComponentFormatting.standard(" ("))
                             .append(ComponentFormatting.moneyColored(booking.balanceAfter()))
                             .append(ComponentFormatting.standard(")"));
@@ -419,7 +420,8 @@ public class KontorDeskBoundUi {
                                         Horizontal.CENTER),
                                 UiLabels.secondary(
                                         Component.translatable(
-                                                "ui.createkontor.kontor_desk.loan.rate", loan.rate() + "%"),
+                                                "ui.createkontor.kontor_desk.loan.rate",
+                                                String.format(Locale.ROOT, "%.4f%%", loan.rate() * 100)),
                                         Horizontal.CENTER),
                                 UiLabels.secondary(
                                         Component.translatable(
@@ -1115,7 +1117,7 @@ public class KontorDeskBoundUi {
         return history;
     }
 
-    private static List<Loan> tagToLoans(Tag tag) {
+    public static List<Loan> tagToLoans(Tag tag) {
         ListTag list = (ListTag) tag;
         List<Loan> loans = new ArrayList<>();
         for (Tag t : list) {
@@ -1124,7 +1126,7 @@ public class KontorDeskBoundUi {
         return loans;
     }
 
-    private static Tag loansToTag(List<Loan> loans) {
+    public static Tag loansToTag(List<Loan> loans) {
         ListTag tag = new ListTag();
         for (Loan loan : loans) {
             tag.add(CompanySavedData.writeLoan(loan.getSaveState()));

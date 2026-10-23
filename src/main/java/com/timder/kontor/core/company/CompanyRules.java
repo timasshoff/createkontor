@@ -162,7 +162,7 @@ public final class CompanyRules {
     private static String referenceOf(Loan loan) {
         return switch (loan.kind()) {
             case FOUNDER -> Company.FOUNDER_LOAN_REFERENCE;
-            case BANK -> "bank_loan";
+            case BANK -> Company.BANK_LOAN_REFERENCE + loan.number();
         };
     }
 }

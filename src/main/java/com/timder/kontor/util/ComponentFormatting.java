@@ -1,14 +1,12 @@
 package com.timder.kontor.util;
 
 import com.timder.kontor.core.company.financial.Money;
-import com.timder.kontor.core.market.MarketRules;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Locale;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public final class ComponentFormatting {
 
@@ -82,19 +80,31 @@ public final class ComponentFormatting {
         if (!Double.isFinite(fraction)) {
             return Component.literal("Inf.");
         }
-        double percent = BigDecimal.valueOf(fraction * 100).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        double percent = BigDecimal.valueOf(fraction * 100)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
         String text = String.format(Locale.ROOT, "%.2f%%", percent);
         if (percent > 0.0) {
             return Component.literal("+" + text).withStyle(MONEY_POSITIVE);
         }
         if (percent == 0.0) {
-            return Component.literal(text ).withStyle(MONEY_NEUTRAL);
+            return Component.literal(text).withStyle(MONEY_NEUTRAL);
         }
-        return Component.literal(text ).withStyle(MONEY_NEGATIVE);
+        return Component.literal(text).withStyle(MONEY_NEGATIVE);
+    }
+
+    public static Component dayColored(long day) {
+        return Component.translatable(
+                "economy.createkontor.current_day",
+                Component.literal(Long.toString(day)).withStyle(ChatFormatting.GOLD));
     }
 
     public static Component day(long day) {
-        return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)).withStyle(ChatFormatting.GOLD));
+        return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)));
+    }
+
+    public static Component lengthInDays(long day) {
+        return Component.translatable("economy.createkontor.days", Component.literal(Long.toString(day)));
     }
 
     public static MutableComponent ticks(long ticks) {
@@ -110,9 +120,7 @@ public final class ComponentFormatting {
     }
 
     public static MutableComponent check(boolean met) {
-        return met
-                ? Component.literal("\u2713")
-                : Component.literal("\u2717");
+        return met ? Component.literal("\u2713") : Component.literal("\u2717");
     }
 
     public static MutableComponent progress(String actual, String required, boolean met) {
@@ -131,7 +139,8 @@ public final class ComponentFormatting {
 
     public static MutableComponent stars(double stars) {
         int filled = filledStars(stars);
-        return Component.literal(FILLED_STAR.repeat(filled)).withStyle(STAR_FILLED)
+        return Component.literal(FILLED_STAR.repeat(filled))
+                .withStyle(STAR_FILLED)
                 .append(Component.literal(EMPTY_STAR.repeat(MAX_STARS - filled)).withStyle(STAR_EMPTY));
     }
 

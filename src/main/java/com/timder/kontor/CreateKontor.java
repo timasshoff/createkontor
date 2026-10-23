@@ -1,11 +1,11 @@
 package com.timder.kontor;
 
+import com.mojang.logging.LogUtils;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.data.loader.*;
 import com.timder.kontor.data.provider.*;
 import com.timder.kontor.game.EconomySavedData;
-import com.timder.kontor.game.EmployeeContracts;
 import com.timder.kontor.game.KontorTickHandler;
 import com.timder.kontor.game.block.employee.EmployeeDeskInteraction;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
@@ -14,21 +14,18 @@ import com.timder.kontor.game.network.KontorNetwork;
 import com.timder.kontor.game.wiki.KontorWikiPages;
 import com.timder.kontor.registry.KontorRegistries;
 import net.minecraft.data.DataGenerator;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import org.slf4j.Logger;
-
-import com.mojang.logging.LogUtils;
-
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import org.slf4j.Logger;
 
 @Mod(CreateKontor.MODID)
 public class CreateKontor {
@@ -57,6 +54,7 @@ public class CreateKontor {
             event.addListener(new ProcessCostDataLoader());
             event.addListener(new LegalFormDefDataLoader());
             event.addListener(new LicenseDefDataLoader());
+            event.addListener(new BankLoanOfferDefDataLoader());
         });
 
         NeoForge.EVENT_BUS.addListener(CreateKontor::onRegisterCommands);
@@ -65,30 +63,20 @@ public class CreateKontor {
         modContainer.registerConfig(ModConfig.Type.SERVER, CompanyConfig.SPEC, "createkontor-server-company.toml");
     }
 
-    private void commonSetup(FMLCommonSetupEvent event) {
-
-    }
+    private void commonSetup(FMLCommonSetupEvent event) {}
 
     private void gatherData(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new RawMaterialDataProvider(generator.getPackOutput()));
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new GroupDefDataProvider(generator.getPackOutput()));
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new MarketDefinitionDataProvider(generator.getPackOutput()));
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new ProcessCostDataProvider(generator.getPackOutput()));
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new LegalFormDefDataProvider(generator.getPackOutput()));
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new LicenseDefDataProvider(generator.getPackOutput()));
+        event.getGenerator().addProvider(event.includeServer(), new RawMaterialDataProvider(generator.getPackOutput()));
+        event.getGenerator().addProvider(event.includeServer(), new GroupDefDataProvider(generator.getPackOutput()));
+        event.getGenerator()
+                .addProvider(event.includeServer(), new MarketDefinitionDataProvider(generator.getPackOutput()));
+        event.getGenerator().addProvider(event.includeServer(), new ProcessCostDataProvider(generator.getPackOutput()));
+        event.getGenerator()
+                .addProvider(event.includeServer(), new LegalFormDefDataProvider(generator.getPackOutput()));
+        event.getGenerator().addProvider(event.includeServer(), new LicenseDefDataProvider(generator.getPackOutput()));
+        event.getGenerator()
+                .addProvider(event.includeServer(), new BankLoanOfferDefDataProvider(generator.getPackOutput()));
     }
 
     public static void onRegisterCommands(RegisterCommandsEvent event) {

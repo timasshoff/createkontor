@@ -95,6 +95,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "message.createkontor.buyer_desk.auto_stock.limit_reached", "This buyer can handle at most %s items.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
+        REGISTRATE.addRawLang("message.createkontor.finances_manager.loan_taken", "Loan of %s taken and paid out.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -442,6 +443,34 @@ public class KontorLanguage {
                 "ui.createkontor.logistics_manager_desk.no_orders",
                 "The Logistics Manager does not keep track of any orders right now.");
 
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan", "Bank Loan Offers");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.take_loan_title", "Offers for new bank loans");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.bank_loan_not_allowed", "§cBank Loans not allowed");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.finances_manager.legal_level_too_low", "Your legal level does not allow bank loans.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.finances_manager.no_credit",
+                "The Bank does not grant you any loans at this moment. §7This might be caused by a too low average daily revenue or because your open bank loans already use up your credit limit. Ask a Consultant for more info.");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.average_revenue", "Average Revenue: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.reputation", "Reputation: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.policy_rate", "Policy Rate: %s");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.finances_manager.legal_form_credit_limit", "Legal Form Credit Limit: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.no_offers", "No offers available.");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.rate", "Daily Rate");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.free_days", "Free Days");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.repayment_days", "Repayment Days");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.total_days", "Total Term Days");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.first_payment", "First Payment");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.total_interest", "Total Interest");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.offer.accept_offer", "Accept Offer");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.policy_rate_tab", "Policy Rate");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.current_policy_rate", "Current Policy Rate: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.open_loans_tab", "Open Loans");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.loan_days", "Day: %s / %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.loans_total", "Total borrowed: %s");
+        REGISTRATE.addRawLang("ui.createkontor.finances_manager.loans_outstanding", "Still to repay: %s");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -551,12 +580,22 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("employee_role.createkontor.market_analyst", "Market Analyst");
         REGISTRATE.addRawLang("employee_role.createkontor.consultant", "Consultant");
         REGISTRATE.addRawLang("employee_role.createkontor.logistics_manager", "Logistics Manager");
+        REGISTRATE.addRawLang("employee_role.createkontor.finances_manager", "Finances Manager");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
+        REGISTRATE.addRawLang("economy.createkontor.days", "%s §7Day(s)");
 
         REGISTRATE.addRawLang("loan.createkontor.bank", "Bank Loan");
         REGISTRATE.addRawLang("loan.createkontor.founder", "Founder's Loan");
         REGISTRATE.addRawLang("loan.createkontor.principal", "Principal: %s");
+
+        REGISTRATE.addRawLang("loan_offers.createkontor.standard", "Standard");
+        REGISTRATE.addRawLang("loan_offers.createkontor.express", "Express");
+        REGISTRATE.addRawLang("loan_offers.createkontor.bridging", "Bridging");
+        REGISTRATE.addRawLang("loan_offers.createkontor.short_investment", "Short Investment");
+        REGISTRATE.addRawLang("loan_offers.createkontor.long_investment", "Long Investment");
+        REGISTRATE.addRawLang("loan_offers.createkontor.pioneer", "Pioneer");
+        REGISTRATE.addRawLang("loan_offers.createkontor.expansion", "Expansion");
 
         REGISTRATE.addRawLang("chart.createkontor.d", "d");
         REGISTRATE.addRawLang("chart.createkontor.day", "Day ");
@@ -602,6 +641,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.cost_structure.title", "Cost Structure");
 
         REGISTRATE.addRawLang("chart.createkontor.stock.title", "Stock Overview");
+
+        REGISTRATE.addRawLang("chart.createkontor.policy_rate.title", "Policy Rate History");
+        REGISTRATE.addRawLang("chart.createkontor.policy_rate.series.policy_rate", "Policy Rate in %");
 
         REGISTRATE.addRawLang("toast.createkontor.error.title", "An error occurred:");
         REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");
@@ -674,6 +716,25 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "block.createkontor.logistics_manager_desk.tooltip.behaviour2",
                 "The company is _connected_ to the network of the link. The goods stored in the network cost a _daily storage fee_.");
+        REGISTRATE.addRawLang(
+                "block.createkontor.logistics_manager_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang(
+                "block.createkontor.logistics_manager_desk.tooltip.action1",
+                "Opens the _Logistics Manager's Desk_ interface.");
+
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.summary",
+                "Staffs the company with a _finances manager_. Gives you deeper insides into your finances and allows you to take _bank loans_.");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.behaviour1",
+                "The villager is _hired_ as a finances manager. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang(
+                "block.createkontor.finances_manager_desk.tooltip.action1",
+                "Opens the _Finances Manager's Desk_ interface.");
 
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
         REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");
@@ -948,6 +1009,22 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.logistics_manager.p6",
                 "The minimum stock applies to each item separately. The Logistics Manager only orders what exceeds the minimum stock and leaves the rest in the Logistics Network.");
+
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p1", "The finances manager allows you to take bank loans.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.finances_manager.b1", "Bank Loan Offers");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p2",
+                "To get offers for a bank loan, your company must fulfill some requirements:");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.loan_requirements",
+                "Your legal form allows bank loans\nYour average daily revenue over the past %s days is high enough\nYour open bank loans do not fully use up your credit limit");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p3",
+                "The credit limit is %s times your average daily revenue over the past %s days and is capped by your current legal form.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.finances_manager.p4",
+                "If you are eligible for a bank loan, you can set the loan amount and the finance manager presents you with different offers for bank loans. The repayment plan and daily interest rate depend on the chosen offer. Additionally, the interest rate is influenced by the policy rate and your reputation.");
     }
 
     static void touch() {}
