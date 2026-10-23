@@ -96,6 +96,8 @@ public class KontorLanguage {
                 "message.createkontor.buyer_desk.auto_stock.limit_reached", "This buyer can handle at most %s items.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
         REGISTRATE.addRawLang("message.createkontor.finances_manager.loan_taken", "Loan of %s taken and paid out.");
+        REGISTRATE.addRawLang("message.createkontor.measurement_running", "§7Create: Kontor is measuring the biomes of dimension %s §7to calculate land prices (%s §7done). The server may lag, this is normal! Depending on your configuration, measurement might take a few minutes.");
+        REGISTRATE.addRawLang("message.createkontor.measurement_done", "§7Biome measurement of dimension %s §7finished.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");

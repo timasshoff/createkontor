@@ -3,6 +3,7 @@ package com.timder.kontor;
 import com.mojang.logging.LogUtils;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
+import com.timder.kontor.config.PropertyConfig;
 import com.timder.kontor.data.loader.*;
 import com.timder.kontor.data.provider.*;
 import com.timder.kontor.game.EconomySavedData;
@@ -11,6 +12,7 @@ import com.timder.kontor.game.block.employee.EmployeeDeskInteraction;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.command.*;
 import com.timder.kontor.game.network.KontorNetwork;
+import com.timder.kontor.game.property.BiomeMeasurer;
 import com.timder.kontor.game.wiki.KontorWikiPages;
 import com.timder.kontor.registry.KontorRegistries;
 import net.minecraft.data.DataGenerator;
@@ -45,7 +47,12 @@ public class CreateKontor {
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(KontorTickHandler.class);
         NeoForge.EVENT_BUS.register(EmployeeDeskInteraction.class);
+
         NeoForge.EVENT_BUS.addListener(KontorChunkLoading::onServerStopped);
+        NeoForge.EVENT_BUS.addListener(BiomeMeasurer::onServerTick);
+        NeoForge.EVENT_BUS.addListener(BiomeMeasurer::onServerStarted);
+        NeoForge.EVENT_BUS.addListener(BiomeMeasurer::onServerStopped);
+        NeoForge.EVENT_BUS.addListener(BiomeMeasurer::onPlayerLoggedIn);
 
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
             event.addListener(new RawMaterialDataLoader());
@@ -61,6 +68,7 @@ public class CreateKontor {
 
         modContainer.registerConfig(ModConfig.Type.SERVER, EconomyConfig.SPEC, "createkontor-server-economy.toml");
         modContainer.registerConfig(ModConfig.Type.SERVER, CompanyConfig.SPEC, "createkontor-server-company.toml");
+        modContainer.registerConfig(ModConfig.Type.SERVER, PropertyConfig.SPEC, "createkontor-server-property.toml");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {}
@@ -90,6 +98,7 @@ public class CreateKontor {
         LicenseCommands.register(event.getDispatcher());
         EmployeeCommands.register(event.getDispatcher());
         ManagerInviteCommands.register(event.getDispatcher());
+        PropertyCommands.register(event.getDispatcher());
     }
 
     @SubscribeEvent

@@ -541,6 +541,9 @@ public final class LawyerUi {
                         "Bank Loan Limit",
                         money(current.bankLoanLimit(), nextOf(next, LegalFormDef::bankLoanLimit), true)),
                 statRow(
+                        "Max. Properties",
+                        count(current.maxProperties(), nextOf(next, LegalFormDef::maxProperties), true)),
+                statRow(
                         "Logistics Network Integration",
                         flag(current.logisticsNetwork(), nextOf(next, LegalFormDef::logisticsNetwork))));
 
