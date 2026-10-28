@@ -6,12 +6,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.timder.kontor.config.PropertyConfig;
 import com.timder.kontor.core.company.financial.Money;
-import com.timder.kontor.core.company.property.BiomeFrequencies;
-import com.timder.kontor.core.company.property.BiomeId;
-import com.timder.kontor.core.company.property.DimensionId;
-import com.timder.kontor.core.company.property.DimensionPricing;
-import com.timder.kontor.core.company.property.PropertyPricingParams;
-import com.timder.kontor.core.company.property.PropertyPricingRules;
+import com.timder.kontor.core.company.property.*;
 import com.timder.kontor.core.company.property.measurement.MeasuredFrequencies;
 import com.timder.kontor.core.company.property.measurement.MeasurementGrid;
 import com.timder.kontor.core.company.property.measurement.MeasurementReport;
@@ -184,14 +179,22 @@ public final class PropertyCommands {
                         Component.literal(dimension + " was not measured yet. Use /kontor property measure start."));
                 return 0;
             }
-            MeasurementReport report =
-                    MeasurementReport.of(measured.get().frequencies(), BiomeSampling.possibleBiomes(level));
+
+            BiomeFrequencies frequencies = measured.get().frequencies();
+            MeasurementReport report = MeasurementReport.of(frequencies, BiomeSampling.possibleBiomes(level));
+            PropertyParams params = PropertyConfig.toPropertyParams();
+            boolean priceable = PropertyPricingRules.isPriceable(params.pricing(), dimension, frequencies);
 
             MutableComponent text = Component.literal("=== Biome frequencies of " + dimension + " ("
                     + measured.get().frequencies().total() + " points) ===");
             for (MeasurementReport.Row row : report.hit()) {
                 text.append(Component.literal(String.format(
-                        Locale.ROOT, "\n%s: %d (%.3f %%)", row.biome(), row.samples(), row.share() * 100.0)));
+                        Locale.ROOT,
+                        "\n%s: %d (%.3f %%)%s",
+                        row.biome(),
+                        row.samples(),
+                        row.share() * 100.0,
+                        priceable ? priceText(params, dimension, frequencies, row.biome()) : "")));
             }
             if (report.neverHit().isEmpty()) {
                 text.append(Component.literal("\nNever hit: none."));
@@ -199,8 +202,13 @@ public final class PropertyCommands {
                 text.append(
                         Component.literal("\nNever hit (" + report.neverHit().size() + "):"));
                 for (BiomeId biome : report.neverHit()) {
-                    text.append(Component.literal("\n" + biome));
+                    text.append(Component.literal(
+                            "\n" + biome + (priceable ? priceText(params, dimension, frequencies, biome) : "")));
                 }
+            }
+            if (!priceable) {
+                text.append(Component.literal("\nNo prices: the reference biome of " + dimension
+                        + " (see the pricing section of the property config) was never hit by the measurement."));
             }
             source.sendSuccess(() -> text, false);
             return 1;
@@ -208,6 +216,13 @@ public final class PropertyCommands {
             source.sendFailure(Component.literal(e.getMessage()));
             return 0;
         }
+    }
+
+    private static String priceText(
+            PropertyParams params, DimensionId dimension, BiomeFrequencies frequencies, BiomeId biome) {
+        Money price = PropertyPricingRules.priceOf(params.pricing(), dimension, frequencies, biome);
+        return " | price " + price + " | rent/day " + params.dailyRent(price) + " | resale "
+                + params.resaleValue(price);
     }
 
     private static int pricePreview(

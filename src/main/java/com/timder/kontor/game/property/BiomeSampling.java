@@ -1,5 +1,6 @@
 package com.timder.kontor.game.property;
 
+import com.timder.kontor.config.PropertyConfig;
 import com.timder.kontor.core.company.property.BiomeId;
 import com.timder.kontor.core.company.property.DimensionId;
 import java.util.LinkedHashSet;
@@ -8,6 +9,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -36,6 +38,14 @@ public final class BiomeSampling {
                         QuartPos.fromBlock(blockZ),
                         randomState.sampler());
         return idOf(biome);
+    }
+
+    public static BiomeId biomeAt(ServerLevel level, ChunkPos chunk) {
+        return biomeAt(
+                level,
+                chunk.getMiddleBlockX(),
+                chunk.getMiddleBlockZ(),
+                PropertyConfig.MEASUREMENT_CEILING_SAMPLE_Y.get());
     }
 
     public static Set<BiomeId> possibleBiomes(ServerLevel level) {

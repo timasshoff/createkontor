@@ -202,6 +202,6 @@ public class CompanyConfig {
                         BANK_LOAN_CREDIT_LIMIT_REVENUE_MULTIPLE.get(),
                         BANK_LOAN_CREDIT_LIMIT_REVENUE_DAYS.get(),
                         BANK_LOAN_MINIMUM_AMOUNT_SHARE.get()),
-                PropertyParams.disabled());
+                PropertyConfig.toPropertyParams());
     }
 }
