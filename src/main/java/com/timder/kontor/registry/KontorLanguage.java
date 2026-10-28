@@ -94,10 +94,38 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.auto_stock.already_added", "%s is already added.");
         REGISTRATE.addRawLang(
                 "message.createkontor.buyer_desk.auto_stock.limit_reached", "This buyer can handle at most %s items.");
+        REGISTRATE.addRawLang("message.createkontor.property_manager.bought", "The property %s has been bought.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.rented",
+                "The property %s has been rented. The daily rent will be booked automatically.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.converted",
+                "The previously rented property %s has been bought.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.reactivated", "The rented property %s has been reactivated.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.already_held",
+                "This property is already being held by your company.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.occupied_by_other",
+                "This property is already being occupied by another company.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.limit_reached",
+                "Your company's legal form does not allow more properties.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.unpriceable",
+                "No price for this property. Contact a server admin.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.not_operational", "Your company is in payment difficulties.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.cannot_afford", "Your company cannot afford this property.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
         REGISTRATE.addRawLang("message.createkontor.finances_manager.loan_taken", "Loan of %s taken and paid out.");
-        REGISTRATE.addRawLang("message.createkontor.measurement_running", "§7Create: Kontor is measuring the biomes of dimension %s §7to calculate land prices (%s §7done). The server may lag, this is normal! Depending on your configuration, measurement might take a few minutes.");
-        REGISTRATE.addRawLang("message.createkontor.measurement_done", "§7Biome measurement of dimension %s §7finished.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.measurement_running",
+                "§7Create: Kontor is measuring the biomes of dimension %s §7to calculate land prices (%s §7done). The server may lag, this is normal! Depending on your configuration, measurement might take a few minutes.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.measurement_done", "§7Biome measurement of dimension %s §7finished.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -473,6 +501,30 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.loans_total", "Total borrowed: %s");
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.loans_outstanding", "Still to repay: %s");
 
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.chunk_map", "Map");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.selected_property", "Property %s");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.biome", "Biome");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.unpriceable", "-");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.can_buy", "Buying");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.buy_price", "Buy Price");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.can_rent", "Renting");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.daily_rent", "Daily Rent");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.value", "Property Value");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.biome_rarity", "Biome Rarity");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.rent", "Rent Property");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.buy", "Buy Property");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.foreign", "This property is owned by another company.");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.rented", "§a§l\u2713");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.bought", "§a§l\u2713");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.converted", "§aConvertable");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.reactivated", "§a§l\u2713");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.already_held", "Already owned");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.occupied_by_other", "§cAlready occupied");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.limit_reached", "§cLimit reached.");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.unpriceable", "§4Unpriceable");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.not_operational", "§c§l\u2717");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.cannot_afford", "§cCannot afford");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -495,10 +547,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.deposit", "Deposit");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.loan_payout", "Loan Payout");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.loan_repayment", "Loan Repayment");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_rent", "Property Rent");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_purchase", "Property Purchase");
 
         REGISTRATE.addRawLang("enum.createkontor.booking_category.cost", "Cost");
         REGISTRATE.addRawLang("enum.createkontor.booking_category.revenue", "Revenue");
         REGISTRATE.addRawLang("enum.createkontor.booking_category.financing", "Financing");
+        REGISTRATE.addRawLang("enum.createkontor.booking_category.investment", "Investment");
 
         REGISTRATE.addRawLang(
                 "enum.createkontor.upgrade_criterion.net_worth", "Net Worth (Required Net Worth + Application Fee)");
@@ -549,6 +604,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.ordered", "Ordered");
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_ordering.busy", "Busy");
 
+        REGISTRATE.addRawLang("enum.createkontor.biome_rarity.common", "Common");
+        REGISTRATE.addRawLang("enum.createkontor.biome_rarity.uncommon", "§bUncommon");
+        REGISTRATE.addRawLang("enum.createkontor.biome_rarity.rare", "§dRare");
+        REGISTRATE.addRawLang("enum.createkontor.biome_rarity.very_rare", "§5Very Rare");
+
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
         REGISTRATE.addRawLang("legal_forms.createkontor.limited_company", "§5Limited Company");
@@ -583,6 +643,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("employee_role.createkontor.consultant", "Consultant");
         REGISTRATE.addRawLang("employee_role.createkontor.logistics_manager", "Logistics Manager");
         REGISTRATE.addRawLang("employee_role.createkontor.finances_manager", "Finances Manager");
+        REGISTRATE.addRawLang("employee_role.createkontor.property_manager", "Property Manager");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
         REGISTRATE.addRawLang("economy.createkontor.days", "%s §7Day(s)");
@@ -737,6 +798,20 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "block.createkontor.finances_manager_desk.tooltip.action1",
                 "Opens the _Finances Manager's Desk_ interface.");
+
+        REGISTRATE.addRawLang(
+                "block.createkontor.property_manager_desk.tooltip.summary",
+                "Staffs the company with a _property manager_. Allows your to _rent_ or _buy_ chunks of land.");
+        REGISTRATE.addRawLang(
+                "block.createkontor.property_manager_desk.tooltip.condition1", "When a Villager sits next to it");
+        REGISTRATE.addRawLang(
+                "block.createkontor.property_manager_desk.tooltip.behaviour1",
+                "The villager is _hired_ as a property manager. You need to pay a one-time _hiring bonus_.");
+        REGISTRATE.addRawLang(
+                "block.createkontor.property_manager_desk.tooltip.control1", "When R-Clicked on Employee");
+        REGISTRATE.addRawLang(
+                "block.createkontor.property_manager_desk.tooltip.action1",
+                "Opens the _Property Manager's Desk_ interface.");
 
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
         REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");

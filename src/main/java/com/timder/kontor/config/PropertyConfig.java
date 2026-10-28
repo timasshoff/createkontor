@@ -4,14 +4,13 @@ import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.property.*;
 import com.timder.kontor.core.company.property.measurement.MeasurementGrid;
 import com.timder.kontor.game.property.BiomeFrequencySavedData;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class PropertyConfig {
 
@@ -31,7 +30,9 @@ public class PropertyConfig {
     public static final ModConfigSpec.DoubleValue RESALE_SHARE;
 
     private record DimensionSetting(
-            String dimension, ModConfigSpec.ConfigValue<String> referenceBiome, ModConfigSpec.IntValue referencePrice) {}
+            String dimension,
+            ModConfigSpec.ConfigValue<String> referenceBiome,
+            ModConfigSpec.IntValue referencePrice) {}
 
     private static final List<DimensionSetting> DIMENSIONS = new ArrayList<>();
 
@@ -80,7 +81,8 @@ public class PropertyConfig {
                         + "(samples of the reference biome / samples of the biome) ^ exponent, kept between the "
                         + "minimum and the maximum factor. A biome the measurement never hit gets the maximum factor.")
                 .push("pricing");
-        PRICING_RARITY_EXPONENT = builder.comment("0 = every biome costs the reference price, 1 = price follows rarity linearly")
+        PRICING_RARITY_EXPONENT = builder.comment(
+                        "0 = every biome costs the reference price, 1 = price follows rarity linearly")
                 .defineInRange("rarityExponent", 0.4, 0.0, 5.0);
         PRICING_MIN_FACTOR = builder.comment("Lowest factor, only biomes more common than the reference biome get it")
                 .defineInRange("minFactor", 0.2, 0.01, 1.0);
@@ -104,11 +106,12 @@ public class PropertyConfig {
 
     private static void defineDimension(
             ModConfigSpec.Builder builder, String name, String dimension, String biome, int priceInDollars) {
-        builder.comment("Reference biome and price of " + dimension + ". The reference biome must appear in the measurement "
+        builder.comment("Reference biome and price of " + dimension
+                        + ". The reference biome must appear in the measurement "
                         + "(/kontor property table), otherwise nothing in this dimension can be priced.")
                 .push(name);
-        ModConfigSpec.ConfigValue<String> referenceBiome = builder.define(
-                "referenceBiome", biome, value -> value instanceof String text && !text.isBlank());
+        ModConfigSpec.ConfigValue<String> referenceBiome =
+                builder.define("referenceBiome", biome, value -> value instanceof String text && !text.isBlank());
         ModConfigSpec.IntValue referencePrice = builder.comment("Price of a chunk of the reference biome")
                 .defineInRange("referencePriceInDollars", priceInDollars, 1, Integer.MAX_VALUE);
         builder.pop();

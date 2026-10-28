@@ -10,6 +10,13 @@ import java.util.Objects;
  */
 public record BiomeFrequencies(Map<BiomeId, Long> samples) {
 
+    public enum Rarity {
+        COMMON,
+        UNCOMMON,
+        RARE,
+        VERY_RARE
+    }
+
     public static final BiomeFrequencies EMPTY = new BiomeFrequencies(Map.of());
 
     public BiomeFrequencies {
@@ -65,5 +72,21 @@ public record BiomeFrequencies(Map<BiomeId, Long> samples) {
             return 0.0;
         }
         return (double) count(biome) / (double) total;
+    }
+
+    public Rarity rarity(BiomeId biome) {
+        Objects.requireNonNull(biome, "biome must not be null.");
+        Rarity[] rarities = Rarity.values();
+        long count = count(biome);
+        if (count == 0) {
+            return rarities[rarities.length - 1];
+        }
+        int moreCommon = 0;
+        for (long other : samples.values()) {
+            if (other > count) {
+                moreCommon++;
+            }
+        }
+        return rarities[Math.min(rarities.length - 1, moreCommon * rarities.length / samples.size())];
     }
 }
