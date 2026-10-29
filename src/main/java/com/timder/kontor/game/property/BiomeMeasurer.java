@@ -26,6 +26,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 public final class BiomeMeasurer {
 
+    private static final long SLOW_SAMPLE_NANOS = 1_000_000_000L;
+
     private record Job(ResourceKey<Level> level, BiomeMeasurement measurement, int ceilingSampleY) {}
 
     public enum StartResult {
@@ -73,6 +75,7 @@ public final class BiomeMeasurer {
 
         MinecraftServer server = event.getServer();
         int budget = PropertyConfig.MEASUREMENT_SAMPLES_PER_TICK.get();
+        long deadline = System.nanoTime() + PropertyConfig.MEASUREMENT_MAX_MILLIS_PER_TICK.get() * 1_000_000L;
 
         Iterator<Map.Entry<DimensionId, Job>> jobs = JOBS.entrySet().iterator();
         while (jobs.hasNext()) {
@@ -91,9 +94,20 @@ public final class BiomeMeasurer {
             BiomeMeasurement measurement = job.measurement();
             try {
                 while (budget > 0 && !measurement.isDone()) {
-                    measurement.record(BiomeSampling.biomeAt(
-                            level, measurement.nextX(), measurement.nextZ(), job.ceilingSampleY()));
+                    int x = measurement.nextX();
+                    int z = measurement.nextZ();
+                    long started = System.nanoTime();
+                    measurement.record(BiomeSampling.biomeAt(level, x, z, job.ceilingSampleY()));
                     budget--;
+
+                    long now = System.nanoTime();
+                    if (now - started > SLOW_SAMPLE_NANOS) {
+                        CreateKontor.LOGGER.warn(
+                                "Sampling x={} z={} in {} took {} ms.", x, z, dimension, (now - started) / 1_000_000L);
+                    }
+                    if (now >= deadline) {
+                        budget = 0;
+                    }
                 }
             } catch (RuntimeException e) {
                 CreateKontor.LOGGER.error("Stopping the measurement of {} because an error occurred.", dimension, e);

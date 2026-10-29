@@ -154,6 +154,8 @@ public class PropertyManagerUi {
         content.clearAllScrollViewChildren();
         if (info == null) return;
 
+        // TODO Block any actions here when BiomeMeasurer.isRunning() is true for current dimension
+
         content.addScrollViewChildren(UiLabels.h2(
                 Component.translatable(
                         "ui.createkontor.property_manager.selected_property",

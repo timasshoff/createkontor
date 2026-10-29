@@ -22,6 +22,7 @@ public class PropertyConfig {
     public static final ModConfigSpec.IntValue MEASUREMENT_STEP_BLOCKS;
     public static final ModConfigSpec.IntValue MEASUREMENT_SAMPLES_PER_TICK;
     public static final ModConfigSpec.IntValue MEASUREMENT_CEILING_SAMPLE_Y;
+    public static final ModConfigSpec.IntValue MEASUREMENT_MAX_MILLIS_PER_TICK;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> MEASUREMENT_AUTO_DIMENSIONS;
     public static final ModConfigSpec.DoubleValue PRICING_RARITY_EXPONENT;
     public static final ModConfigSpec.DoubleValue PRICING_MIN_FACTOR;
@@ -60,6 +61,11 @@ public class PropertyConfig {
         MEASUREMENT_SAMPLES_PER_TICK = builder.comment(
                         "How many points are sampled per server tick while a measurement runs. Lower = less lag, slower.")
                 .defineInRange("samplesPerTick", 64, 1, 100_000);
+        MEASUREMENT_MAX_MILLIS_PER_TICK = builder.comment(
+                        "Upper limit for the time spent sampling per server tick, in milliseconds. "
+                                + "At least one point is sampled per tick, even if that takes longer. "
+                                + "Lower = less lag, slower.")
+                .defineInRange("maxMillisPerTick", 20, 1, 1_000);
         MEASUREMENT_CEILING_SAMPLE_Y = builder.comment(
                         "Height at which dimensions with a bedrock ceiling (the Nether) are sampled. "
                                 + "Other dimensions are sampled at the height of the surface.")
