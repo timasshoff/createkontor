@@ -53,9 +53,11 @@ public class PropertyManagerActions extends EmployeeActions {
         PropertyRules.CancelResult result = PropertyRules.cancelRent(company, key);
 
         if (result == PropertyRules.CancelResult.CANCELLED) {
-            return S2CActionResult.success(Component.translatable("message.createkontor.property_manager." + result.name().toLowerCase(), chunk.toString()));
+            return S2CActionResult.success(Component.translatable(
+                    "message.createkontor.property_manager." + result.name().toLowerCase(), chunk.toString()));
         }
-        return S2CActionResult.error(Component.translatable("message.createkontor.property_manager." + result.name().toLowerCase(), chunk.toString()));
+        return S2CActionResult.error(Component.translatable(
+                "message.createkontor.property_manager." + result.name().toLowerCase(), chunk.toString()));
     }
 
     public Optional<S2CActionResult> sell(ChunkPos chunk) {
@@ -65,8 +67,14 @@ public class PropertyManagerActions extends EmployeeActions {
 
         PropertyRules.SellResult result = PropertyRules.sell(company, key, economy.currentDay(), params);
         if (result.status() == PropertyRules.SellResult.Status.SOLD) {
-            return S2CActionResult.success(Component.translatable("message.createkontor.property_manager.sold", chunk.toString(), ComponentFormatting.moneyColored(result.proceeds())));
+            return S2CActionResult.success(Component.translatable(
+                    "message.createkontor.property_manager.sold",
+                    chunk.toString(),
+                    ComponentFormatting.moneyColored(result.proceeds())));
         }
-        return S2CActionResult.error(Component.translatable("message.createkontor.property_manager." + result.status().name().toLowerCase(), chunk.toString()));
+        return S2CActionResult.error(Component.translatable(
+                "message.createkontor.property_manager."
+                        + result.status().name().toLowerCase(),
+                chunk.toString()));
     }
 }

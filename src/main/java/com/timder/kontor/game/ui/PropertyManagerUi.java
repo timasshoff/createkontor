@@ -73,7 +73,8 @@ public class PropertyManagerUi {
                 .style(style -> style.background(Sprites.BORDER_DARK))
                 .layout(layout -> layout.paddingAll(8));
 
-        ObservableValue<ChunkOwnership> ownership = new ObservableValue<>(new ChunkOwnership(Set.of(), Set.of(), Set.of()));
+        ObservableValue<ChunkOwnership> ownership =
+                new ObservableValue<>(new ChunkOwnership(Set.of(), Set.of(), Set.of()));
         SimpleBinding<Tag> ownershipBinding = DataBindingBuilder.tagS2C(() -> chunkOwnershipToTag(context))
                 .onRemoteSyncReceived(tag -> ownership.set(tagToChunkOwnership(tag)))
                 .build();
@@ -179,11 +180,11 @@ public class PropertyManagerUi {
             case FOREIGN -> ownership = Component.translatable("ui.createkontor.property_manager.occupied");
             case OWNED -> ownership = Component.translatable("ui.createkontor.property_manager.owned");
             case RENTED -> ownership = Component.translatable("ui.createkontor.property_manager.rented");
-            case RENTED_CANCELLED -> ownership = Component.translatable("ui.createkontor.property_manager.rented_cancelled");
+            case RENTED_CANCELLED ->
+                ownership = Component.translatable("ui.createkontor.property_manager.rented_cancelled");
         }
         content.addScrollViewChildren(UiLabels.labelValueNoWrap(
-                Component.translatable("ui.createkontor.property_manager.status"),
-                ownership));
+                Component.translatable("ui.createkontor.property_manager.status"), ownership));
 
         content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.can_rent"),
@@ -209,13 +210,15 @@ public class PropertyManagerUi {
                         ? Component.translatable("ui.createkontor.property_manager.unpriceable")
                         : ComponentFormatting.moneyColored(info.price())));
 
-        if ((info.ownership() == Ownership.FREE || info.ownership() == Ownership.RENTED_CANCELLED) && info.price() != null) {
+        if ((info.ownership() == Ownership.FREE || info.ownership() == Ownership.RENTED_CANCELLED)
+                && info.price() != null) {
             UIElement buttons = new UIElement()
                     .layout(layout -> layout.widthPercent(100)
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
 
-            Button rent = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.rent", ComponentFormatting.moneyColored(info.dailyRent()))));
+            Button rent = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+                    "ui.createkontor.property_manager.rent", ComponentFormatting.moneyColored(info.dailyRent()))));
             rent.layout(layout -> layout.flexBasis(0).flexGrow(1));
             rent.setActive(info.canRent());
             rent.setOnClick(e -> {
@@ -225,7 +228,8 @@ public class PropertyManagerUi {
             });
             buttons.addChild(rent);
 
-            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
+            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+                    "ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
             buy.layout(layout -> layout.flexBasis(0).flexGrow(1));
             buy.setActive(info.canBuy());
             buy.setOnClick(e -> {
@@ -244,12 +248,14 @@ public class PropertyManagerUi {
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
 
-            Button cancel = UiButtons.wrapping(UiButtons.critical(Component.translatable("ui.createkontor.property_manager.cancel")));
+            Button cancel = UiButtons.wrapping(
+                    UiButtons.critical(Component.translatable("ui.createkontor.property_manager.cancel")));
             cancel.layout(layout -> layout.flexBasis(0).flexGrow(1));
             cancel.setOnClick(e -> content.sendMessage("c2s_cancel_rent"));
             buttons.addChild(cancel);
 
-            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
+            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+                    "ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
             buy.layout(layout -> layout.flexBasis(0).flexGrow(1));
             buy.setActive(info.canBuy());
             buy.setOnClick(e -> {
@@ -267,7 +273,8 @@ public class PropertyManagerUi {
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
 
-            Button sell = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.sell", ComponentFormatting.moneyColored(info.resaleValue()))));
+            Button sell = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+                    "ui.createkontor.property_manager.sell", ComponentFormatting.moneyColored(info.resaleValue()))));
             sell.layout(layout -> layout.flexBasis(0).flexGrow(1));
             sell.setOnClick(e -> content.sendMessage("c2s_sell_chunk"));
             buttons.addChild(sell);
@@ -410,7 +417,10 @@ public class PropertyManagerUi {
 
     private static ChunkOwnership tagToChunkOwnership(Tag tag) {
         CompoundTag data = (CompoundTag) tag;
-        return new ChunkOwnership(toChunks(data.getLongArray("Own")), toChunks(data.getLongArray("Cancelled")), toChunks(data.getLongArray("Foreign")));
+        return new ChunkOwnership(
+                toChunks(data.getLongArray("Own")),
+                toChunks(data.getLongArray("Cancelled")),
+                toChunks(data.getLongArray("Foreign")));
     }
 
     private static Set<ChunkPos> toChunks(long[] packed) {

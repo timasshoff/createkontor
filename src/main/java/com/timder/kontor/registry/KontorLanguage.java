@@ -119,18 +119,15 @@ public class KontorLanguage {
                 "message.createkontor.property_manager.not_operational", "Your company is in payment difficulties.");
         REGISTRATE.addRawLang(
                 "message.createkontor.property_manager.cannot_afford", "Your company cannot afford this property.");
+        REGISTRATE.addRawLang("message.createkontor.property_manager.cancelled", "Rent for property %s cancelled.");
         REGISTRATE.addRawLang(
-                "message.createkontor.property_manager.cancelled", "Rent for property %s cancelled.");
-        REGISTRATE.addRawLang(
-                "message.createkontor.property_manager.already_cancelled", "Rent for property %s is already cancelled.");
+                "message.createkontor.property_manager.already_cancelled",
+                "Rent for property %s is already cancelled.");
         REGISTRATE.addRawLang(
                 "message.createkontor.property_manager.not_held", "The property %s is not held by your company.");
-        REGISTRATE.addRawLang(
-                "message.createkontor.property_manager.not_rented", "The property %s is owned by you.");
-        REGISTRATE.addRawLang(
-                "message.createkontor.property_manager.sold", "The property %s has been sold for %s.");
-        REGISTRATE.addRawLang(
-                "message.createkontor.property_manager.not_owned", "The property %s is owned by you.");
+        REGISTRATE.addRawLang("message.createkontor.property_manager.not_rented", "The property %s is owned by you.");
+        REGISTRATE.addRawLang("message.createkontor.property_manager.sold", "The property %s has been sold for %s.");
+        REGISTRATE.addRawLang("message.createkontor.property_manager.not_owned", "The property %s is owned by you.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
         REGISTRATE.addRawLang("message.createkontor.finances_manager.loan_taken", "Loan of %s taken and paid out.");
         REGISTRATE.addRawLang(
