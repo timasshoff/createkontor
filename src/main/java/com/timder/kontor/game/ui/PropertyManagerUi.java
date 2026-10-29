@@ -7,6 +7,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.SplitView;
 import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
@@ -58,6 +59,7 @@ public class PropertyManagerUi {
 
         SplitView.Horizontal split = new SplitView.Horizontal();
         split.layout(layout -> layout.widthPercent(100).heightPercent(100));
+        split.setPercentage(65);
 
         split.left(chunkMap(context, selectedChunk));
         split.right(selectedChunk(context, actions, selectedChunk));
@@ -71,7 +73,7 @@ public class PropertyManagerUi {
                 .style(style -> style.background(Sprites.BORDER_DARK))
                 .layout(layout -> layout.paddingAll(8));
 
-        ObservableValue<ChunkOwnership> ownership = new ObservableValue<>(new ChunkOwnership(Set.of(), Set.of()));
+        ObservableValue<ChunkOwnership> ownership = new ObservableValue<>(new ChunkOwnership(Set.of(), Set.of(), Set.of()));
         SimpleBinding<Tag> ownershipBinding = DataBindingBuilder.tagS2C(() -> chunkOwnershipToTag(context))
                 .onRemoteSyncReceived(tag -> ownership.set(tagToChunkOwnership(tag)))
                 .build();
@@ -90,6 +92,9 @@ public class PropertyManagerUi {
                 if (ownership.get().own().contains(pos)) {
                     return 0x5000FF00;
                 }
+                if (ownership.get().cancelled().contains(pos)) {
+                    return 0x50F6FF00;
+                }
                 if (ownership.get().foreign().contains(pos)) {
                     return 0x50FF0000;
                 }
@@ -105,7 +110,7 @@ public class PropertyManagerUi {
 
     public static UIElement selectedChunk(
             EmployeeDeskContext context, PropertyManagerActions actions, ObservableValue<ChunkPos> selectedChunk) {
-        UIElement content = new UIElement()
+        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
                 .layout(layout -> layout.widthPercent(100).heightPercent(100))
                 .style(style -> style.background(Sprites.BORDER_DARK))
                 .layout(layout -> layout.paddingAll(8));
@@ -126,6 +131,16 @@ public class PropertyManagerUi {
             ToastPayload.send(context.player(), actions.acquire(selected[0], mode));
         });
 
+        content.onMessage("c2s_cancel_rent", tag -> {
+            if (selected[0] == null) return;
+            ToastPayload.send(context.player(), actions.cancel(selected[0]));
+        });
+
+        content.onMessage("c2s_sell_chunk", tag -> {
+            if (selected[0] == null) return;
+            ToastPayload.send(context.player(), actions.sell(selected[0]));
+        });
+
         SimpleBinding<Tag> chunkBinding = DataBindingBuilder.tagS2C(() -> chunkInfoToTag(context, selected[0]))
                 .onRemoteSyncReceived(tag -> showChunk(content, tagToChunkInfo(tag)))
                 .build();
@@ -134,62 +149,73 @@ public class PropertyManagerUi {
         return content;
     }
 
-    private static void showChunk(UIElement content, @Nullable ChunkInfo info) {
-        content.clearAllChildren();
+    private static void showChunk(ScrollerView content, @Nullable ChunkInfo info) {
+        content.clearAllScrollViewChildren();
         if (info == null) return;
 
-        content.addChild(UiLabels.h2(
+        content.addScrollViewChildren(UiLabels.h2(
                 Component.translatable(
                         "ui.createkontor.property_manager.selected_property",
                         info.chunk().toString()),
                 Horizontal.LEFT));
-        content.addChild(UiLabels.labelValueNoWrap(
+
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.biome"),
                 Component.translatable(Util.makeDescriptionId(
                         "biome", ResourceLocation.parse(info.biome().value())))));
-        content.addChild(UiLabels.labelValueNoWrap(
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.biome_rarity"),
                 Component.translatable("enum.createkontor.biome_rarity."
                         + info.rarity().toString().toLowerCase())));
-        content.addChild(UiLabels.labelValueNoWrap(
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.value"),
                 info.price() == null
                         ? Component.translatable("ui.createkontor.property_manager.unpriceable")
                         : Component.literal(info.resaleValue().toString())));
 
-        content.addChild(UiLabels.labelValueNoWrap(
+        Component ownership = Component.literal("-");
+        switch (info.ownership()) {
+            case FREE -> ownership = Component.translatable("ui.createkontor.property_manager.free");
+            case FOREIGN -> ownership = Component.translatable("ui.createkontor.property_manager.occupied");
+            case OWNED -> ownership = Component.translatable("ui.createkontor.property_manager.owned");
+            case RENTED -> ownership = Component.translatable("ui.createkontor.property_manager.rented");
+            case RENTED_CANCELLED -> ownership = Component.translatable("ui.createkontor.property_manager.rented_cancelled");
+        }
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
+                Component.translatable("ui.createkontor.property_manager.status"),
+                ownership));
+
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.can_rent"),
                 info.price() == null
                         ? Component.translatable("ui.createkontor.property_manager.unpriceable")
                         : Component.translatable("ui.createkontor.property_manager.preview."
                                 + info.rentStatus().toString().toLowerCase())));
-        content.addChild(UiLabels.labelValueNoWrap(
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.daily_rent"),
                 info.price() == null
                         ? Component.translatable("ui.createkontor.property_manager.unpriceable")
                         : ComponentFormatting.moneyColored(info.dailyRent())));
 
-        content.addChild(UiLabels.labelValueNoWrap(
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.can_buy"),
                 info.price() == null
                         ? Component.translatable("ui.createkontor.property_manager.unpriceable")
                         : Component.translatable("ui.createkontor.property_manager.preview."
                                 + info.buyStatus().toString().toLowerCase())));
-        content.addChild(UiLabels.labelValueNoWrap(
+        content.addScrollViewChildren(UiLabels.labelValueNoWrap(
                 Component.translatable("ui.createkontor.property_manager.buy_price"),
                 info.price() == null
                         ? Component.translatable("ui.createkontor.property_manager.unpriceable")
                         : ComponentFormatting.moneyColored(info.price())));
 
-        content.addChild(new UIElement().layout(layout -> layout.flexGrow(1)));
-
-        if (info.ownership() == Ownership.FREE) {
+        if ((info.ownership() == Ownership.FREE || info.ownership() == Ownership.RENTED_CANCELLED) && info.price() != null) {
             UIElement buttons = new UIElement()
                     .layout(layout -> layout.widthPercent(100)
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
 
-            Button rent = UiButtons.primary(Component.translatable("ui.createkontor.property_manager.rent"));
+            Button rent = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.rent", ComponentFormatting.moneyColored(info.dailyRent()))));
             rent.layout(layout -> layout.flexBasis(0).flexGrow(1));
             rent.setActive(info.canRent());
             rent.setOnClick(e -> {
@@ -199,7 +225,7 @@ public class PropertyManagerUi {
             });
             buttons.addChild(rent);
 
-            Button buy = UiButtons.primary(Component.translatable("ui.createkontor.property_manager.buy"));
+            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
             buy.layout(layout -> layout.flexBasis(0).flexGrow(1));
             buy.setActive(info.canBuy());
             buy.setOnClick(e -> {
@@ -209,16 +235,43 @@ public class PropertyManagerUi {
             });
 
             buttons.addChild(buy);
-            content.addChild(buttons);
+            content.addScrollViewChildren(buttons);
         }
 
-        if (info.ownership() == Ownership.FOREIGN) {
-            UIElement label = UiLabels.paragraphError(
-                            Component.translatable("ui.createkontor.property_manager.foreign"), Horizontal.CENTER)
+        if (info.ownership() == Ownership.RENTED) {
+            UIElement buttons = new UIElement()
                     .layout(layout -> layout.widthPercent(100)
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
-            content.addChild(label);
+
+            Button cancel = UiButtons.wrapping(UiButtons.critical(Component.translatable("ui.createkontor.property_manager.cancel")));
+            cancel.layout(layout -> layout.flexBasis(0).flexGrow(1));
+            cancel.setOnClick(e -> content.sendMessage("c2s_cancel_rent"));
+            buttons.addChild(cancel);
+
+            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
+            buy.layout(layout -> layout.flexBasis(0).flexGrow(1));
+            buy.setActive(info.canBuy());
+            buy.setOnClick(e -> {
+                CompoundTag tag = new CompoundTag();
+                tag.putBoolean("Buy", true);
+                content.sendMessage("c2s_acquire_chunk", tag);
+            });
+            buttons.addChild(buy);
+            content.addScrollViewChildren(buttons);
+        }
+
+        if (info.ownership() == Ownership.OWNED) {
+            UIElement buttons = new UIElement()
+                    .layout(layout -> layout.widthPercent(100)
+                            .flexDirection(FlexDirection.ROW)
+                            .gapAll(4));
+
+            Button sell = UiButtons.wrapping(UiButtons.primary(Component.translatable("ui.createkontor.property_manager.sell", ComponentFormatting.moneyColored(info.resaleValue()))));
+            sell.layout(layout -> layout.flexBasis(0).flexGrow(1));
+            sell.setOnClick(e -> content.sendMessage("c2s_sell_chunk"));
+            buttons.addChild(sell);
+            content.addScrollViewChildren(buttons);
         }
     }
 
@@ -323,6 +376,7 @@ public class PropertyManagerUi {
         DimensionId dimension = BiomeSampling.dimensionId(level);
         ChunkPos desk = new ChunkPos(context.holder().pos);
         List<Long> own = new ArrayList<>();
+        List<Long> cancelled = new ArrayList<>();
         List<Long> foreign = new ArrayList<>();
         for (Company company :
                 CompanySavedData.get(level.getServer()).getRegistry().all()) {
@@ -334,19 +388,29 @@ public class PropertyManagerUi {
                         || Math.abs(chunk.z() - desk.z) > MAP_RADIUS_CHUNKS) {
                     continue;
                 }
-                (isOwn ? own : foreign).add(ChunkPos.asLong(chunk.x(), chunk.z()));
+
+                if (isOwn) {
+                    if (holding.cancelled()) {
+                        cancelled.add(ChunkPos.asLong(chunk.x(), chunk.z()));
+                    } else {
+                        own.add(ChunkPos.asLong(chunk.x(), chunk.z()));
+                    }
+                } else {
+                    foreign.add(ChunkPos.asLong(chunk.x(), chunk.z()));
+                }
             }
         }
         tag.putLongArray("Own", own);
+        tag.putLongArray("Cancelled", cancelled);
         tag.putLongArray("Foreign", foreign);
         return tag;
     }
 
-    public record ChunkOwnership(Set<ChunkPos> own, Set<ChunkPos> foreign) {}
+    public record ChunkOwnership(Set<ChunkPos> own, Set<ChunkPos> cancelled, Set<ChunkPos> foreign) {}
 
     private static ChunkOwnership tagToChunkOwnership(Tag tag) {
         CompoundTag data = (CompoundTag) tag;
-        return new ChunkOwnership(toChunks(data.getLongArray("Own")), toChunks(data.getLongArray("Foreign")));
+        return new ChunkOwnership(toChunks(data.getLongArray("Own")), toChunks(data.getLongArray("Cancelled")), toChunks(data.getLongArray("Foreign")));
     }
 
     private static Set<ChunkPos> toChunks(long[] packed) {

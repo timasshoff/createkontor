@@ -6,13 +6,11 @@ import com.timder.kontor.core.company.property.DimensionId;
 import com.timder.kontor.core.company.property.measurement.BiomeMeasurement;
 import com.timder.kontor.core.company.property.measurement.MeasuredFrequencies;
 import com.timder.kontor.core.company.property.measurement.MeasurementGrid;
+import com.timder.kontor.util.ComponentFormatting;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import com.timder.kontor.util.ComponentFormatting;
-import com.timder.kontor.util.PlayerNotifications;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -128,7 +126,8 @@ public final class BiomeMeasurer {
 
         for (String name : PropertyConfig.MEASUREMENT_AUTO_DIMENSIONS.get()) {
             ResourceLocation location = ResourceLocation.tryParse(name);
-            ServerLevel level = location == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, location));
+            ServerLevel level =
+                    location == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, location));
             if (level == null) {
                 CreateKontor.LOGGER.warn("Not measuring \"{}\": dimension does not exist.", name);
                 continue;
@@ -139,10 +138,13 @@ public final class BiomeMeasurer {
             }
             try {
                 if (start(level) == StartResult.STARTED) {
-                    CreateKontor.LOGGER.info("Measuring the biomes of {}. Server may lag, this is normal! Depending on your configuration, measurement might take a few minutes.", dimension);
+                    CreateKontor.LOGGER.info(
+                            "Measuring the biomes of {}. Server may lag, this is normal! Depending on your configuration, measurement might take a few minutes.",
+                            dimension);
                 }
             } catch (IllegalArgumentException e) {
-                CreateKontor.LOGGER.error("Not measuring {}: the measurement settings are invalid: {}", dimension, e.getMessage());
+                CreateKontor.LOGGER.error(
+                        "Not measuring {}: the measurement settings are invalid: {}", dimension, e.getMessage());
             }
         }
     }

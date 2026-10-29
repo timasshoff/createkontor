@@ -119,6 +119,18 @@ public class KontorLanguage {
                 "message.createkontor.property_manager.not_operational", "Your company is in payment difficulties.");
         REGISTRATE.addRawLang(
                 "message.createkontor.property_manager.cannot_afford", "Your company cannot afford this property.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.cancelled", "Rent for property %s cancelled.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.already_cancelled", "Rent for property %s is already cancelled.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.not_held", "The property %s is not held by your company.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.not_rented", "The property %s is owned by you.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.sold", "The property %s has been sold for %s.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.not_owned", "The property %s is owned by you.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
         REGISTRATE.addRawLang("message.createkontor.finances_manager.loan_taken", "Loan of %s taken and paid out.");
         REGISTRATE.addRawLang(
@@ -505,15 +517,22 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.property_manager.selected_property", "Property %s");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.biome", "Biome");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.unpriceable", "-");
-        REGISTRATE.addRawLang("ui.createkontor.property_manager.can_buy", "Buying");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.can_buy", "Buyable");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.buy_price", "Buy Price");
-        REGISTRATE.addRawLang("ui.createkontor.property_manager.can_rent", "Renting");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.can_rent", "Rentable");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.daily_rent", "Daily Rent");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.value", "Property Value");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.biome_rarity", "Biome Rarity");
-        REGISTRATE.addRawLang("ui.createkontor.property_manager.rent", "Rent Property");
-        REGISTRATE.addRawLang("ui.createkontor.property_manager.buy", "Buy Property");
-        REGISTRATE.addRawLang("ui.createkontor.property_manager.foreign", "This property is owned by another company.");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.rent", "Rent Property for %s/day");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.buy", "Buy Property for %s");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.sell", "Sell Property for %s");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.cancel", "Cancel Rent");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.status", "Status");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.occupied", "§cOccupied");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.free", "§aAvailable");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.owned", "§2Owned");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.rented", "§2Rented");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.rented_cancelled", "§eRent cancelled");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.rented", "§a§l\u2713");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.bought", "§a§l\u2713");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.converted", "§aConvertable");
@@ -549,6 +568,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.loan_repayment", "Loan Repayment");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_rent", "Property Rent");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_purchase", "Property Purchase");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_sale", "Property Sale");
 
         REGISTRATE.addRawLang("enum.createkontor.booking_category.cost", "Cost");
         REGISTRATE.addRawLang("enum.createkontor.booking_category.revenue", "Revenue");

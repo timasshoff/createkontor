@@ -117,7 +117,7 @@ public final class CompanyRules {
     private static void bookPropertyRent(Company company, long day, CompanyParams params) {
         Money rent = PropertyRules.totalDailyRent(company, params);
         if (rent.isPositive()) {
-            company.account().book(day, BookingKind.PROPERTY_RENT, rent.negate(), rentedCount(company) + " chunks");
+            company.account().book(day, BookingKind.PROPERTY_RENT, rent.negate(), rentedCount(company) + " chunk(s)");
         }
         PropertyRules.dropCancelled(company);
     }

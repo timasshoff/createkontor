@@ -88,14 +88,14 @@ public class PropertyConfig {
                 .defineInRange("minFactor", 0.2, 0.01, 1.0);
         PRICING_MAX_FACTOR = builder.comment("Highest factor, also for biomes that were never hit")
                 .defineInRange("maxFactor", 50.0, 1.0, 1_000.0);
-        defineDimension(builder, "overworld", "minecraft:overworld", "minecraft:plains", 5000);
-        defineDimension(builder, "nether", "minecraft:the_nether", "minecraft:nether_wastes", 7500);
-        defineDimension(builder, "end", "minecraft:the_end", "minecraft:end_highlands", 10000);
+        defineDimension(builder, "overworld", "minecraft:overworld", "minecraft:plains", 8000);
+        defineDimension(builder, "nether", "minecraft:the_nether", "minecraft:nether_wastes", 1200);
+        defineDimension(builder, "end", "minecraft:the_end", "minecraft:end_highlands", 16000);
         builder.pop();
 
         builder.comment("Owning and renting land").push("ownership");
         DAILY_RENT_RATE = builder.comment("Daily rent of a rented chunk as a share of its current price")
-                .defineInRange("dailyRentRate", 0.04, 0.0, 1.0);
+                .defineInRange("dailyRentRate", 0.02, 0.0, 1.0);
         RESALE_SHARE = builder.comment(
                         "Share of the current price a company gets when it sells a chunk, and at which owned land counts as net worth")
                 .defineInRange("resaleShare", 0.6, 0.0, 1.0);

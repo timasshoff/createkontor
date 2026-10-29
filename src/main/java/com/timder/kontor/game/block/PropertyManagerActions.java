@@ -45,4 +45,28 @@ public class PropertyManagerActions extends EmployeeActions {
                         + result.status().name().toLowerCase(),
                 chunk.toString()));
     }
+
+    public Optional<S2CActionResult> cancel(ChunkPos chunk) {
+        if (!isServer) return S2CActionResult.illegalEnvironment();
+        ChunkKey key = new ChunkKey(BiomeSampling.dimensionId(serverLevel), chunk.x, chunk.z);
+
+        PropertyRules.CancelResult result = PropertyRules.cancelRent(company, key);
+
+        if (result == PropertyRules.CancelResult.CANCELLED) {
+            return S2CActionResult.success(Component.translatable("message.createkontor.property_manager." + result.name().toLowerCase(), chunk.toString()));
+        }
+        return S2CActionResult.error(Component.translatable("message.createkontor.property_manager." + result.name().toLowerCase(), chunk.toString()));
+    }
+
+    public Optional<S2CActionResult> sell(ChunkPos chunk) {
+        if (!isServer) return S2CActionResult.illegalEnvironment();
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        ChunkKey key = new ChunkKey(BiomeSampling.dimensionId(serverLevel), chunk.x, chunk.z);
+
+        PropertyRules.SellResult result = PropertyRules.sell(company, key, economy.currentDay(), params);
+        if (result.status() == PropertyRules.SellResult.Status.SOLD) {
+            return S2CActionResult.success(Component.translatable("message.createkontor.property_manager.sold", chunk.toString(), ComponentFormatting.moneyColored(result.proceeds())));
+        }
+        return S2CActionResult.error(Component.translatable("message.createkontor.property_manager." + result.status().name().toLowerCase(), chunk.toString()));
+    }
 }
