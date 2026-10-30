@@ -41,9 +41,23 @@ button.kontor-danger .__button_text__ {
   text-color: #F0DDD6;
 }
 
+button.kontor-paper {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 1, 108, 13, 13, 4, 4, 4, 4);
+  hover-background: sprite(createkontor:textures/gui/kontor_gui.png, 19, 108, 13, 13, 4, 4, 4, 4);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 37, 108, 13, 13, 4, 4, 4, 4);
+}
+
+button.kontor-paper .__button_text__ {
+  text-color: #ded2b0;
+}
 
 tab-view .__tab-view_tab_scroller__ {
   margin-bottom: -4;
+}
+
+tab.__selected__ .__tab_text__ {
+ text-color: #14110A;
+ text-shadow: false;
 }
 
 text, label, HeadingLabel {

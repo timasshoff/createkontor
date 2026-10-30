@@ -295,7 +295,7 @@ public class PropertyManagerUi {
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
 
-            Button sell = UiButtons.wrapping(UiButtons.secondary(Component.translatable(
+            Button sell = UiButtons.wrapping(UiButtons.critical(Component.translatable(
                     "ui.createkontor.property_manager.sell", ComponentFormatting.moneyColored(info.resaleValue()))));
             sell.layout(layout -> layout.flexBasis(0).flexGrow(1));
             sell.setOnClick(e -> content.sendMessage("c2s_sell_chunk"));
