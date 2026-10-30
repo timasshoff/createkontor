@@ -81,6 +81,10 @@ item-slot, .item-slot_bg {
   background: sprite(createkontor:textures/gui/kontor_gui.png, 109, 19, 13, 13, 4, 4, 4, 4);
 }
 
+item-slot.kontor-paper {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 109, 91, 13, 13, 4, 4, 4, 4);
+}
+
 switch:host {
   base-background: sprite(createkontor:textures/gui/kontor_gui.png, 1, 37, 13, 13, 4, 4, 4, 4);
   pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 19, 37, 13, 13, 4, 4, 4, 4);

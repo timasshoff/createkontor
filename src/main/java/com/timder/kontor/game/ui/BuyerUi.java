@@ -133,7 +133,7 @@ public final class BuyerUi {
         content.addChild(UiContainer.searchableGrid(
                 offers,
                 (PurchaseOffer offer) -> {
-                    UIElement element = new UIElement().style(UiStyles.PANEL).layout(layout -> layout.paddingAll(8));
+                    UIElement element = new UIElement().style(UiStyles.CARD).layout(layout -> layout.paddingAll(8));
 
                     if (offer.kind() == PurchaseKind.RAW_MATERIAL) {
                         element.addChild(UiLabels.paragraphTertiary(

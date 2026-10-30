@@ -20,10 +20,6 @@ public final class UiButtons {
         return (Button) new Button().setText(text).addClass("kontor-danger").layout(layout -> layout.height(20));
     }
 
-    public static Button paper(Component text) {
-        return (Button) new Button().setText(text).addClass("kontor-paper").layout(layout -> layout.height(20));
-    }
-
     public static Button wrapping(Button button) {
         button.layout(layout ->
                 layout.heightAuto().minHeight(20).alignItems(AlignItems.CENTER).paddingVertical(4));

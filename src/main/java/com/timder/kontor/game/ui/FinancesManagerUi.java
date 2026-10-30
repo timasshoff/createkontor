@@ -101,36 +101,43 @@ public class FinancesManagerUi {
                 offers,
                 (OfferView offer) -> {
                     UIElement card = new UIElement()
-                            .style(UiStyles.CARD)
+                            .style(UiStyles.PAPER)
                             .layout(layout -> layout.paddingAll(8).gapAll(2));
 
-                    card.addChild(UiLabels.paragraphPrimary(
-                            Component.literal(offer.id).withStyle(ChatFormatting.DARK_GRAY), Horizontal.LEFT));
-                    card.addChild(UiLabels.paragraphPrimary(
-                            Component.translatable("loan_offers.createkontor." + offer.id)
-                                    .withStyle(ChatFormatting.GOLD),
-                            Horizontal.LEFT));
+                    card.addChild(UiPaper.paragraphTertiary(Component.literal(offer.id), Horizontal.LEFT));
+                    card.addChild(UiPaper.paragraphPrimary(
+                            Component.translatable("loan_offers.createkontor." + offer.id), Horizontal.LEFT));
 
-                    card.addChild(UiLabels.labelValueNoWrap(
+                    card.addChild(UiPaper.simpleDivider());
+
+                    card.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.finances_manager.offer.rate"),
                             Component.literal(String.format(Locale.ROOT, "%.4f %%", offer.rate() * 100))));
-                    card.addChild(UiLabels.labelValueNoWrap(
+                    card.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.finances_manager.offer.free_days"),
-                            ComponentFormatting.lengthInDays(offer.freeDays())));
-                    card.addChild(UiLabels.labelValueNoWrap(
+                            ComponentFormatting.lengthInDays(offer.freeDays())
+                                    .copy()
+                                    .withStyle(ChatFormatting.RESET)));
+                    card.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.finances_manager.offer.repayment_days"),
-                            ComponentFormatting.lengthInDays(offer.termDays())));
-                    card.addChild(UiLabels.labelValueNoWrap(
+                            ComponentFormatting.lengthInDays(offer.termDays())
+                                    .copy()
+                                    .withStyle(ChatFormatting.RESET)));
+                    card.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.finances_manager.offer.total_days"),
-                            ComponentFormatting.lengthInDays(offer.totalDays())));
-                    card.addChild(UiLabels.labelValueNoWrap(
+                            ComponentFormatting.lengthInDays(offer.totalDays())
+                                    .copy()
+                                    .withStyle(ChatFormatting.RESET)));
+                    card.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.finances_manager.offer.first_payment"),
                             ComponentFormatting.moneyColored(Money.ofCents(offer.firstPaymentCents()))));
-                    card.addChild(UiLabels.labelValueNoWrap(
+                    card.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.finances_manager.offer.total_interest"),
                             ComponentFormatting.moneyColored(Money.ofCents(offer.totalInterestCents()))));
 
-                    Button button = UiButtons.secondary(
+                    card.addChild(UiPaper.doubleDivider());
+
+                    Button button = UiPaper.button(
                                     Component.translatable("ui.createkontor.finances_manager.offer.accept_offer"))
                             .setOnClick((e) -> {
                                 CompoundTag tag = new CompoundTag();

@@ -515,15 +515,15 @@ public class KontorDeskBoundUi {
                                         .gapAll(4)
                                         .marginBottom(4)
                                         .widthPercent(100));
-                        titleRow.addChild(new ItemSlot()
+                        titleRow.addChild(UiPaper.itemSlot()
                                 .setItem(new ItemStack(
                                         BuiltInRegistries.ITEM.get(ResourceLocation.parse(
                                                 request.getProduct().value())),
                                         request.getQuantity())));
-                        titleRow.addChild(UiLabels.paperPrimary(
+                        titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                ComponentFormatting.highlightStandard(request.getQuantity() + " "
+                                                Component.literal(request.getQuantity() + " "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(request.getProduct()
                                                                         .value()))
@@ -540,14 +540,16 @@ public class KontorDeskBoundUi {
                                         layout.widthAuto().flexBasis(0).flexGrow(1)));
                         requestElement.addChild(titleRow);
 
-                        requestElement.addChild(UiLabels.paperParagraphSecondary(
+                        requestElement.addChild(UiPaper.simpleDivider());
+
+                        requestElement.addChild(UiPaper.paragraphSecondary(
                                 Component.translatable(
                                         "ui.createkontor.kontor_desk.request.unit_price",
                                         ComponentFormatting.moneyColored(Money.fromDollar(request.getUnitPrice()))),
                                 Horizontal.LEFT));
 
                         long expiresOfferAtTick = clientTick() + request.remainingOfferTicks();
-                        Label offerTimeLabel = UiLabels.paperParagraphSecondary(
+                        Label offerTimeLabel = UiPaper.paragraphSecondary(
                                 Component.translatable(
                                         "ui.createkontor.kontor_desk.request.offer_time",
                                         ComponentFormatting.ticks(request.remainingOfferTicks())
@@ -555,19 +557,21 @@ public class KontorDeskBoundUi {
                                 Horizontal.LEFT);
                         offerTimeLabel.addEventListener(
                                 UIEvents.TICK,
-                                event -> offerTimeLabel.setText(Component.translatable(
+                                event -> offerTimeLabel.setText(UiPaper.adapt(Component.translatable(
                                         "ui.createkontor.kontor_desk.request.offer_time",
                                         ComponentFormatting.ticks(Math.max(0, expiresOfferAtTick - clientTick()))
-                                                .withStyle(ChatFormatting.GOLD))));
+                                                .withStyle(ChatFormatting.GOLD)))));
                         requestElement.addChild(offerTimeLabel);
 
-                        requestElement.addChild(UiLabels.paperParagraphSecondary(
+                        requestElement.addChild(UiPaper.paragraphSecondary(
                                 Component.translatable(
                                         "ui.createkontor.kontor_desk.request.deadline",
                                         ComponentFormatting.ticks(request.getDeadlineTicks())),
                                 Horizontal.LEFT));
 
-                        requestElement.addChild(UiButtons.paper(
+                        requestElement.addChild(UiPaper.doubleDivider());
+
+                        requestElement.addChild(UiPaper.button(
                                         Component.translatable("ui.createkontor.kontor_desk.request.accept"))
                                 .setOnClick((e) -> {
                                     CompoundTag tag = new CompoundTag();
@@ -640,15 +644,15 @@ public class KontorDeskBoundUi {
                                         .gapAll(4)
                                         .marginBottom(4)
                                         .widthPercent(100));
-                        titleRow.addChild(new ItemSlot()
+                        titleRow.addChild(UiPaper.itemSlot()
                                 .setItem(new ItemStack(
                                         BuiltInRegistries.ITEM.get(ResourceLocation.parse(
                                                 order.getProduct().value())),
                                         order.getQuantity())));
-                        titleRow.addChild(UiLabels.paperParagraphPrimary(
+                        titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                ComponentFormatting.highlightStandard(order.getQuantity() + " "
+                                                Component.literal(order.getQuantity() + " "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(order.getProduct()
                                                                         .value()))
@@ -667,7 +671,7 @@ public class KontorDeskBoundUi {
 
                         if (order.getPhase() == OrderPhase.OPEN) {
                             long expiresDeadlineAtTick = clientTick() + order.remainingDeadlineTicks();
-                            Label orderDeadlineLabel = UiLabels.paperParagraphSecondary(
+                            Label orderDeadlineLabel = UiPaper.paragraphSecondary(
                                     Component.translatable(
                                             "ui.createkontor.kontor_desk.order.delivery_time",
                                             ComponentFormatting.ticks(order.remainingDeadlineTicks())
@@ -675,13 +679,13 @@ public class KontorDeskBoundUi {
                                     Horizontal.LEFT);
                             orderDeadlineLabel.addEventListener(
                                     UIEvents.TICK,
-                                    event -> orderDeadlineLabel.setText(Component.translatable(
+                                    event -> orderDeadlineLabel.setText(UiPaper.adapt(Component.translatable(
                                             "ui.createkontor.kontor_desk.order.delivery_time",
                                             ComponentFormatting.ticks(Math.max(0, expiresDeadlineAtTick - clientTick()))
-                                                    .withStyle(ChatFormatting.GOLD))));
+                                                    .withStyle(ChatFormatting.GOLD)))));
                             orderElement.addChild(orderDeadlineLabel);
                         } else {
-                            orderElement.addChild(UiLabels.paperParagraphError(
+                            orderElement.addChild(UiPaper.paragraphError(
                                     Component.translatable("ui.createkontor.kontor_desk.order.grace_period"),
                                     Horizontal.LEFT));
                         }

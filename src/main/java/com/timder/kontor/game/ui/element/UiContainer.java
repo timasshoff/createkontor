@@ -193,7 +193,7 @@ public final class UiContainer {
         return column;
     }
 
-    public static UIElement itemSlotRow(List<ItemStack> items) {
+    public static UIElement itemStackRow(List<ItemStack> items) {
         UIElement row = new UIElement()
                 .layout(layout -> layout.widthPercent(100)
                         .flexDirection(FlexDirection.ROW)
@@ -202,6 +202,19 @@ public final class UiContainer {
                         .gapAll(2));
         for (ItemStack stack : items) {
             row.addChild(new ItemSlot().setItem(stack));
+        }
+        return row;
+    }
+
+    public static UIElement itemSlotRow(List<ItemSlot> items) {
+        UIElement row = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexDirection(FlexDirection.ROW)
+                        .flexWrap(FlexWrap.WRAP)
+                        .alignItems(AlignItems.FLEX_START)
+                        .gapAll(2));
+        for (ItemSlot slot : items) {
+            row.addChild(slot);
         }
         return row;
     }

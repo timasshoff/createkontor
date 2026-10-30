@@ -348,7 +348,7 @@ public final class LawyerUi {
                         Component.literal(license.key().toString()), Horizontal.LEFT));
                 element.addChild(UiLabels.paragraphPrimary(
                         LicenseNames.of(license.key()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT));
-                element.addChild(UiContainer.itemSlotRow(license.markets().stream()
+                element.addChild(UiContainer.itemStackRow(license.markets().stream()
                                 .map((id) -> BuiltInRegistries.ITEM
                                         .get(ResourceLocation.parse(id.value()))
                                         .asItem()
@@ -427,35 +427,40 @@ public final class LawyerUi {
         content.addChild(UiContainer.searchableGrid(
                 catalog,
                 (LicenseCard offer) -> {
-                    UIElement element = new UIElement().style(UiStyles.CARD).layout(layout -> layout.paddingAll(8));
+                    UIElement element = new UIElement().style(UiStyles.PAPER).layout(layout -> layout.paddingAll(8));
 
-                    element.addChild(UiLabels.paragraphTertiary(
+                    element.addChild(UiPaper.paragraphTertiary(
                             Component.literal(offer.key().toString()), Horizontal.LEFT));
-                    element.addChild(UiLabels.paragraphPrimary(
-                            LicenseNames.of(offer.key()).withStyle(ChatFormatting.GOLD), Horizontal.LEFT));
+                    element.addChild(UiPaper.paragraphPrimary(LicenseNames.of(offer.key()), Horizontal.LEFT));
+
+                    element.addChild(UiPaper.simpleDivider());
+
                     element.addChild(UiContainer.itemSlotRow(offer.markets().stream()
-                                    .map((id) -> BuiltInRegistries.ITEM
-                                            .get(ResourceLocation.parse(id.value()))
-                                            .asItem()
-                                            .getDefaultInstance())
+                                    .map((id) -> UiPaper.itemSlot()
+                                            .setItem(BuiltInRegistries.ITEM
+                                                    .get(ResourceLocation.parse(id.value()))
+                                                    .asItem()
+                                                    .getDefaultInstance()))
                                     .toList())
                             .layout(layout -> layout.marginBottom(2)));
 
-                    element.addChild(UiLabels.labelValueNoWrap(
+                    element.addChild(UiPaper.simpleDivider());
+
+                    element.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.lawyer_desk.license_catalog.daily_fee"),
                             Component.literal(offer.dailyFee().toString())));
-                    element.addChild(UiLabels.labelValueNoWrap(
+                    element.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.lawyer_desk.license_catalog.revenue_share"),
                             Component.literal(offer.revenueShare() * 100 + "%")));
-                    element.addChild(UiLabels.labelValueNoWrap(
+                    element.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.lawyer_desk.license_catalog.application_fee"),
                             Component.literal(offer.applicationFee().toString())));
 
-                    element.addChild(new UIElement().layout(layout -> layout.flexGrow(1))); // Spacer
+                    element.addChild(new UIElement().layout(layout -> layout.flexGrow(1)));
 
                     if (offer.status() != AcquireResult.Status.ACQUIRED
                             && offer.status() != AcquireResult.Status.REACTIVATED) {
-                        element.addChild(UiLabels.paragraphError(
+                        element.addChild(UiPaper.paragraphError(
                                 Component.translatable("ui.createkontor.lawyer_desk.license_catalog."
                                         + offer.status().toString().toLowerCase()),
                                 Horizontal.LEFT));
@@ -470,7 +475,7 @@ public final class LawyerUi {
                         Component label = offer.status() == AcquireResult.Status.ACQUIRED
                                 ? Component.translatable("ui.createkontor.lawyer_desk.license_catalog.buy")
                                 : Component.translatable("ui.createkontor.lawyer_desk.license_catalog.reactivate");
-                        Button button = UiButtons.secondary(label).setOnClick((e) -> {
+                        Button button = UiPaper.button(label).setOnClick((e) -> {
                             CompoundTag tag = new CompoundTag();
                             tag.putString("Key", LicenseKeyCodec.encode(offer.key()));
                             content.sendMessage("c2s_buy_license", tag);
