@@ -3,14 +3,11 @@ package com.timder.kontor.game.ui;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
-import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.timder.kontor.client.ui.KontorToasts;
@@ -87,7 +84,7 @@ public final class BuyerUi {
             }
         }
 
-        return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
+        return new ModularUI(UiStyles.ui(root), context.player());
     }
 
     public static UIElement catalogTab(
@@ -123,7 +120,7 @@ public final class BuyerUi {
             ObservableValue<Map<ItemId, Integer>> quote) {
         UIElement content = new UIElement()
                 .layout(layout -> layout.widthPercent(100).heightPercent(100))
-                .style(style -> style.background(Sprites.BORDER_DARK))
+                .style(UiStyles.PANEL)
                 .layout(layout -> layout.paddingAll(8));
         content.addSyncValue(offersBinding.getSyncValue());
 
@@ -136,9 +133,7 @@ public final class BuyerUi {
         content.addChild(UiContainer.searchableGrid(
                 offers,
                 (PurchaseOffer offer) -> {
-                    UIElement element = new UIElement()
-                            .style(style -> style.background(Sprites.BORDER_DARK))
-                            .layout(layout -> layout.paddingAll(8));
+                    UIElement element = new UIElement().style(UiStyles.PANEL).layout(layout -> layout.paddingAll(8));
 
                     if (offer.kind() == PurchaseKind.RAW_MATERIAL) {
                         element.addChild(UiLabels.paragraphTertiary(
@@ -204,7 +199,7 @@ public final class BuyerUi {
                             UIEvents.BLUR, event -> quantityField.setText(String.valueOf(quantity[0]), false));
                     quantityField.layout(layout -> layout.width(40));
 
-                    Button add = (Button) UiButtons.primary(
+                    Button add = (Button) UiButtons.secondary(
                                     Component.translatable("ui.createkontor.buyer_desk.catalog.add"))
                             .setOnClick(e -> addToQuote(
                                     quote,
@@ -242,7 +237,7 @@ public final class BuyerUi {
                         .heightPercent(100)
                         .paddingAll(8)
                         .gapAll(4))
-                .style(style -> style.background(Sprites.BORDER_DARK));
+                .style(UiStyles.PANEL);
 
         int[] purchases = {0}; // Server sided
         int[] seen = {0}; // Client sided
@@ -317,7 +312,7 @@ public final class BuyerUi {
         });
         content.addChild(addressField);
 
-        Button buy = UiButtons.primary(Component.translatable("ui.createkontor.buyer_desk.quote.buy"));
+        Button buy = UiButtons.secondary(Component.translatable("ui.createkontor.buyer_desk.quote.buy"));
         buy.setActive(false);
         quote.addListener(() -> buy.setActive(!quote.get().isEmpty()));
         buy.layout(layout -> layout.widthPercent(100));
@@ -371,9 +366,8 @@ public final class BuyerUi {
     }
 
     public static UIElement autoStockSettings(BuyerDeskBlockEntity be) {
-        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
-                .style(style -> style.background(Sprites.BORDER_DARK))
-                .layout(layout -> layout.paddingAll(8));
+        ScrollerView content =
+                (ScrollerView) UiContainer.tabScroller().style(UiStyles.PANEL).layout(layout -> layout.paddingAll(8));
 
         content.addScrollViewChildren(
                 UiLabels.h2(Component.translatable("ui.createkontor.buyer_desk.auto_stock.settings"), Horizontal.LEFT));
@@ -431,7 +425,7 @@ public final class BuyerUi {
 
     public static UIElement autoStockTargets(EmployeeDeskContext context, BuyerDeskBlockEntity be) {
         UIElement content = new UIElement()
-                .style(style -> style.background(Sprites.BORDER_DARK))
+                .style(UiStyles.PANEL)
                 .layout(layout -> layout.heightPercent(100).paddingAll(8));
 
         content.addChild(
@@ -497,7 +491,7 @@ public final class BuyerUi {
         search.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1).height(22));
         search.searchStyle(style -> style.maxItemCount(8).scrollerViewHeight(148));
 
-        Button add = UiButtons.primary(Component.translatable("ui.createkontor.buyer_desk.auto_stock.add"));
+        Button add = UiButtons.secondary(Component.translatable("ui.createkontor.buyer_desk.auto_stock.add"));
         add.setActive(false);
         add.layout(layout -> layout.height(22));
 
@@ -590,7 +584,7 @@ public final class BuyerUi {
 
             for (RefillTargetEntry entry : targets.get()) {
                 UIElement element = new UIElement()
-                        .style(style -> style.background(Sprites.BORDER_DARK))
+                        .style(UiStyles.CARD)
                         .layout(layout -> layout.paddingAll(8).gapAll(4));
 
                 UIElement titleRow = new UIElement()

@@ -6,15 +6,12 @@ import static com.timder.kontor.game.ui.KontorDeskBoundUi.tagToLoans;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
-import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
-import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
@@ -27,10 +24,7 @@ import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.chart.EconomyCharts;
 import com.timder.kontor.game.ui.chart.classic.ChartHost;
-import com.timder.kontor.game.ui.element.UiButtons;
-import com.timder.kontor.game.ui.element.UiContainer;
-import com.timder.kontor.game.ui.element.UiLabels;
-import com.timder.kontor.game.ui.element.UiSliders;
+import com.timder.kontor.game.ui.element.*;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
@@ -60,7 +54,7 @@ public class FinancesManagerUi {
                 policyRateTab(context));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
-        return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
+        return new ModularUI(UiStyles.ui(root), context.player());
     }
 
     public static UIElement newLoanTab(EmployeeDeskContext context, FinancesManagerActions actions) {
@@ -107,7 +101,7 @@ public class FinancesManagerUi {
                 offers,
                 (OfferView offer) -> {
                     UIElement card = new UIElement()
-                            .style(style -> style.background(Sprites.BORDER_DARK))
+                            .style(UiStyles.CARD)
                             .layout(layout -> layout.paddingAll(8).gapAll(2));
 
                     card.addChild(UiLabels.paragraphPrimary(
@@ -136,7 +130,7 @@ public class FinancesManagerUi {
                             Component.translatable("ui.createkontor.finances_manager.offer.total_interest"),
                             ComponentFormatting.moneyColored(Money.ofCents(offer.totalInterestCents()))));
 
-                    Button button = UiButtons.primary(
+                    Button button = UiButtons.secondary(
                                     Component.translatable("ui.createkontor.finances_manager.offer.accept_offer"))
                             .setOnClick((e) -> {
                                 CompoundTag tag = new CompoundTag();
@@ -276,9 +270,7 @@ public class FinancesManagerUi {
             for (Loan loan : loans.get()) {
                 if (loan.isRepaid()) continue;
 
-                UIElement loanElement = new UIElement()
-                        .style(style -> style.background(Sprites.BORDER_DARK))
-                        .layout(layout -> layout.paddingAll(8));
+                UIElement loanElement = new UIElement().style(UiStyles.CARD).layout(layout -> layout.paddingAll(8));
 
                 loanElement.addChild(UiLabels.primary(
                         Component.translatable(

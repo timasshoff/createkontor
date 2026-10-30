@@ -1,8 +1,6 @@
 package com.timder.kontor.game.ui.element;
 
 import com.lowdragmc.lowdraglib2.LDLib2;
-import com.lowdragmc.lowdraglib2.gui.texture.ColorBorderTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
@@ -182,8 +180,7 @@ public final class WikiUtils {
     public static UIElement scene(TrackedDummyWorld level, float height, boolean tickWorld, Component caption) {
         Scene scene = (Scene) scene(level, 100, height, tickWorld);
         if (LDLib2.isClient()) {
-            scene.style(style ->
-                    style.background(new ColorRectTexture(0x40000000)).overlay(new ColorBorderTexture(-1, 0x55FFFFFF)));
+            scene.style(UiStyles.CARD);
         }
         return new UIElement()
                 .layout(layout -> layout.widthPercent(SCENE_DEFAULT_WIDTH_PERCENT)

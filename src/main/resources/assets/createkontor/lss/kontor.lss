@@ -1,0 +1,141 @@
+button:host {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 1, 19, 13, 13, 4, 4, 4, 4);
+  hover-background: sprite(createkontor:textures/gui/kontor_gui.png, 19, 19, 13, 13, 4, 4, 4, 4);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 37, 19, 13, 13, 4, 4, 4, 4);
+}
+
+tab:host {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 1, 55, 13, 16, 3, 3, 3, 4);
+  hover-background: sprite(createkontor:textures/gui/kontor_gui.png, 19, 55, 13, 16, 3, 3, 3, 4);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 37, 55, 13, 16, 3, 3, 3, 4);
+}
+
+text-field:host {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 55, 19, 13, 13, 2, 2, 2, 2);
+  focus-overlay: sprite(createkontor:textures/gui/kontor_gui.png, 73, 19, 13, 13, 4, 4, 4, 4);
+  text-color: #E6DFC8;
+}
+
+button.kontor-primary {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 1, 91, 13, 13, 4, 4, 4, 4);
+  hover-background: sprite(createkontor:textures/gui/kontor_gui.png, 19, 91, 13, 13, 4, 4, 4, 4);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 37, 91, 13, 13, 4, 4, 4, 4);
+}
+
+button.kontor-primary .__button_text__ {
+  text-color: #14110A;
+  text-shadow: false;
+}
+
+button.kontor-primary.__disabled__ .__button_text__ {
+  text-color: #5A4A22;
+}
+
+button.kontor-danger {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 55, 91, 13, 13, 4, 4, 4, 4);
+  hover-background: sprite(createkontor:textures/gui/kontor_gui.png, 73, 91, 13, 13, 4, 4, 4, 4);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 91, 91, 13, 13, 4, 4, 4, 4);
+}
+
+button.kontor-danger .__button_text__ {
+  text-color: #F0DDD6;
+}
+
+
+tab-view .__tab-view_tab_scroller__ {
+  margin-bottom: -4;
+}
+
+text, label, HeadingLabel {
+  text-color: #E6DFC8;
+}
+
+text-field:host {
+  text-color: #E6DFC8;
+}
+
+.__toggle_button__ {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 91, 19, 13, 13, 4, 4, 4, 4);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 91, 19, 13, 13, 4, 4, 4, 4);
+  hover-background: group(
+    sprite(createkontor:textures/gui/kontor_gui.png, 91, 19, 13, 13, 4, 4, 4, 4),
+    border(1, #A6741B)
+  );
+}
+
+item-slot, .item-slot_bg {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 109, 19, 13, 13, 4, 4, 4, 4);
+}
+
+switch:host {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 1, 37, 13, 13, 4, 4, 4, 4);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 19, 37, 13, 13, 4, 4, 4, 4);
+  unmark-background: sprite(createkontor:textures/gui/kontor_gui.png, 37, 37, 13, 13, 4, 4, 4, 4);
+  mark-background: sprite(createkontor:textures/gui/kontor_gui.png, 55, 37, 13, 13, 4, 4, 4, 4);
+}
+
+scroller-vertical .__scroller_scroll_container__ {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 55, 55, 5, 7, 2, 2, 2, 2);
+}
+
+scroller-vertical .__scroller_scroll_bar__ {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 73, 55, 5, 7, 2, 2, 2, 2);
+  hover-background: sprite(createkontor:textures/gui/kontor_gui.png, 91, 55, 5, 7, 2, 2, 2, 2);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 109, 55, 5, 7, 2, 2, 2, 2);
+}
+
+scroller-horizontal .__scroller_scroll_container__ {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 1, 73, 7, 5, 2, 2, 2, 2);
+}
+
+scroller-horizontal .__scroller_scroll_bar__ {
+  base-background: sprite(createkontor:textures/gui/kontor_gui.png, 19, 73, 7, 5, 2, 2, 2, 2);
+  hover-background: sprite(createkontor:textures/gui/kontor_gui.png, 37, 73, 7, 5, 2, 2, 2, 2);
+  pressed-background: sprite(createkontor:textures/gui/kontor_gui.png, 55, 73, 7, 5, 2, 2, 2, 2);
+}
+
+.__scroller_head_button__, .__scroller_tail_button__ {
+  display: none;
+}
+
+.__progress-bar_bar-container__ {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 73, 73, 18, 11, 4, 4, 4, 4);
+}
+
+.__progress-bar_bar-background__ {
+  background: color(#1B1D21);
+}
+
+.__progress-bar_bar__ {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 109, 73, 10, 3, 1, 1, 1, 1);
+}
+
+selector:host {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 73, 37, 13, 13, 4, 4, 4, 4);
+  focus-overlay: sprite(createkontor:textures/gui/kontor_gui.png, 109, 37, 13, 13, 4, 4, 4, 4);
+}
+
+selector:host:hovered {
+  background: group(
+    sprite(createkontor:textures/gui/kontor_gui.png, 73, 37, 13, 13, 4, 4, 4, 4),
+  );
+}
+
+.__selector_button-icon__ {
+  background: sprite(ldlib2:textures/gui/down.png) scale(0.6) color(#E6DFC8);
+}
+
+.__selector_dialog__, .__search-component_dialog__ {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 91, 37, 13, 13, 4, 4, 4, 4);
+  padding-all: 2;
+}
+
+search-component:host {
+  background: sprite(createkontor:textures/gui/kontor_gui.png, 55, 19, 13, 13, 2, 2, 2, 2);
+  focus-overlay: sprite(createkontor:textures/gui/kontor_gui.png, 73, 19, 13, 13, 4, 4, 4, 4);
+}
+
+.__search-component_text-field__ {
+  text-color: #E6DFC8;
+  cursor-color: #E6DFC8;
+}

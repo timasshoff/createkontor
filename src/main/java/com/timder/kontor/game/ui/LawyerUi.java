@@ -3,15 +3,12 @@ package com.timder.kontor.game.ui;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
-import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
-import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
@@ -23,10 +20,7 @@ import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.LawyerActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.network.ToastPayload;
-import com.timder.kontor.game.ui.element.UiButtons;
-import com.timder.kontor.game.ui.element.UiContainer;
-import com.timder.kontor.game.ui.element.UiLabels;
-import com.timder.kontor.game.ui.element.UiProgressBars;
+import com.timder.kontor.game.ui.element.*;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.ObservableList;
@@ -58,7 +52,7 @@ public final class LawyerUi {
         tabView.addTab(UiContainer.tab(Component.literal("License Catalog")), licenseCatalogTab(context, actions));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
-        return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
+        return new ModularUI(UiStyles.ui(root), context.player());
     }
 
     public static UIElement legalFormTab(EmployeeDeskContext context, LawyerActions actions) {
@@ -145,7 +139,7 @@ public final class LawyerUi {
                 .build();
 
         UIElement upgradeContainer = new UIElement()
-                .style(style -> style.background(Sprites.BORDER_DARK))
+                .style(UiStyles.PANEL)
                 .layout(layout -> layout.paddingAll(8).paddingHorizontal(32))
                 .addSyncValue(currentLegalFormBinding.getSyncValue())
                 .addSyncValue(nextLegalFormBinding.getSyncValue())
@@ -285,7 +279,7 @@ public final class LawyerUi {
                             Horizontal.LEFT)
                     .layout(layout -> layout.marginTop(4)));
 
-            parent.addChild(UiButtons.primary(Component.translatable(
+            parent.addChild(UiButtons.primaryWrapping(Component.translatable(
                             "ui.createkontor.lawyer_desk.legal_form.apply_for_upgrade",
                             ComponentFormatting.moneyNegative(
                                     next.entryRequirements().fee())))
@@ -348,9 +342,7 @@ public final class LawyerUi {
             }
 
             for (HeldLicense license : heldLicenses.get()) {
-                UIElement element = new UIElement()
-                        .style(style -> style.background(Sprites.BORDER_DARK))
-                        .layout(layout -> layout.paddingAll(8));
+                UIElement element = new UIElement().style(UiStyles.CARD).layout(layout -> layout.paddingAll(8));
 
                 element.addChild(UiLabels.paragraphTertiary(
                         Component.literal(license.key().toString()), Horizontal.LEFT));
@@ -435,9 +427,7 @@ public final class LawyerUi {
         content.addChild(UiContainer.searchableGrid(
                 catalog,
                 (LicenseCard offer) -> {
-                    UIElement element = new UIElement()
-                            .style(style -> style.background(Sprites.BORDER_DARK))
-                            .layout(layout -> layout.paddingAll(8));
+                    UIElement element = new UIElement().style(UiStyles.CARD).layout(layout -> layout.paddingAll(8));
 
                     element.addChild(UiLabels.paragraphTertiary(
                             Component.literal(offer.key().toString()), Horizontal.LEFT));
@@ -480,7 +470,7 @@ public final class LawyerUi {
                         Component label = offer.status() == AcquireResult.Status.ACQUIRED
                                 ? Component.translatable("ui.createkontor.lawyer_desk.license_catalog.buy")
                                 : Component.translatable("ui.createkontor.lawyer_desk.license_catalog.reactivate");
-                        Button button = UiButtons.primary(label).setOnClick((e) -> {
+                        Button button = UiButtons.secondary(label).setOnClick((e) -> {
                             CompoundTag tag = new CompoundTag();
                             tag.putString("Key", LicenseKeyCodec.encode(offer.key()));
                             content.sendMessage("c2s_buy_license", tag);

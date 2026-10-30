@@ -3,14 +3,11 @@ package com.timder.kontor.game.ui;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.SplitView;
-import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
-import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
@@ -24,10 +21,7 @@ import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.property.BiomeMeasurer;
 import com.timder.kontor.game.property.BiomeSampling;
-import com.timder.kontor.game.ui.element.UiButtons;
-import com.timder.kontor.game.ui.element.UiContainer;
-import com.timder.kontor.game.ui.element.UiLabels;
-import com.timder.kontor.game.ui.element.WorldMapElement;
+import com.timder.kontor.game.ui.element.*;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.FlexDirection;
@@ -52,7 +46,7 @@ public class PropertyManagerUi {
                 acquireTab(context, actions));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
-        return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
+        return new ModularUI(UiStyles.ui(root), context.player());
     }
 
     public static UIElement acquireTab(EmployeeDeskContext context, PropertyManagerActions actions) {
@@ -95,7 +89,7 @@ public class PropertyManagerUi {
     public static UIElement chunkMap(EmployeeDeskContext context, ObservableValue<ChunkPos> selectedChunk) {
         UIElement content = new UIElement()
                 .layout(layout -> layout.widthPercent(100).heightPercent(100))
-                .style(style -> style.background(Sprites.BORDER_DARK))
+                .style(UiStyles.PANEL)
                 .layout(layout -> layout.paddingAll(8));
 
         ObservableValue<ChunkOwnership> ownership =
@@ -139,7 +133,7 @@ public class PropertyManagerUi {
             EmployeeDeskContext context, PropertyManagerActions actions, ObservableValue<ChunkPos> selectedChunk) {
         ScrollerView content = (ScrollerView) UiContainer.tabScroller()
                 .layout(layout -> layout.widthPercent(100).heightPercent(100))
-                .style(style -> style.background(Sprites.BORDER_DARK))
+                .style(UiStyles.PANEL)
                 .layout(layout -> layout.paddingAll(8));
 
         ChunkPos[] selected = {null}; // server
@@ -245,7 +239,7 @@ public class PropertyManagerUi {
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
 
-            Button rent = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+            Button rent = UiButtons.wrapping(UiButtons.secondary(Component.translatable(
                     "ui.createkontor.property_manager.rent", ComponentFormatting.moneyColored(info.dailyRent()))));
             rent.layout(layout -> layout.flexBasis(0).flexGrow(1));
             rent.setActive(info.canRent());
@@ -256,7 +250,7 @@ public class PropertyManagerUi {
             });
             buttons.addChild(rent);
 
-            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+            Button buy = UiButtons.wrapping(UiButtons.secondary(Component.translatable(
                     "ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
             buy.layout(layout -> layout.flexBasis(0).flexGrow(1));
             buy.setActive(info.canBuy());
@@ -282,7 +276,7 @@ public class PropertyManagerUi {
             cancel.setOnClick(e -> content.sendMessage("c2s_cancel_rent"));
             buttons.addChild(cancel);
 
-            Button buy = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+            Button buy = UiButtons.wrapping(UiButtons.secondary(Component.translatable(
                     "ui.createkontor.property_manager.buy", ComponentFormatting.moneyColored(info.price()))));
             buy.layout(layout -> layout.flexBasis(0).flexGrow(1));
             buy.setActive(info.canBuy());
@@ -301,7 +295,7 @@ public class PropertyManagerUi {
                             .flexDirection(FlexDirection.ROW)
                             .gapAll(4));
 
-            Button sell = UiButtons.wrapping(UiButtons.primary(Component.translatable(
+            Button sell = UiButtons.wrapping(UiButtons.secondary(Component.translatable(
                     "ui.createkontor.property_manager.sell", ComponentFormatting.moneyColored(info.resaleValue()))));
             sell.layout(layout -> layout.flexBasis(0).flexGrow(1));
             sell.setOnClick(e -> content.sendMessage("c2s_sell_chunk"));
