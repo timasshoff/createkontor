@@ -17,11 +17,13 @@ import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.property.*;
+import com.timder.kontor.core.company.property.measurement.BiomeMeasurement;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.block.PropertyManagerActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.network.ToastPayload;
+import com.timder.kontor.game.property.BiomeMeasurer;
 import com.timder.kontor.game.property.BiomeSampling;
 import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
@@ -32,6 +34,8 @@ import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import java.util.*;
 import javax.annotation.Nullable;
+
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -55,7 +59,14 @@ public class PropertyManagerUi {
     }
 
     public static UIElement acquireTab(EmployeeDeskContext context, PropertyManagerActions actions) {
+        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+
         ObservableValue<ChunkPos> selectedChunk = new ObservableValue<>(null);
+        ObservableValue<Boolean> measurementActive = new ObservableValue<>(false);
+        SimpleBinding<Boolean> measurementBinding = DataBindingBuilder.boolS2C(() -> BiomeMeasurer.isRunning(BiomeSampling.dimensionId((ServerLevel) context.desk().getLevel())))
+                .onRemoteSyncReceived(measurementActive::set)
+                .build();
+        content.addSyncValue(measurementBinding.getSyncValue());
 
         SplitView.Horizontal split = new SplitView.Horizontal();
         split.layout(layout -> layout.widthPercent(100).heightPercent(100));
@@ -64,7 +75,22 @@ public class PropertyManagerUi {
         split.left(chunkMap(context, selectedChunk));
         split.right(selectedChunk(context, actions, selectedChunk));
 
-        return split;
+        UIElement measurementError = UiContainer.headerWithSubtitle(
+                UiLabels.h2(
+                        Component.translatable("ui.createkontor.property_manager.measurement_active"),
+                        Horizontal.CENTER),
+                UiLabels.error(
+                        Component.translatable("ui.createkontor.property_manager.measurement_active.sub"),
+                        Horizontal.CENTER));
+        content.addChildren(split, measurementError);
+
+        measurementActive.addListener(() -> {
+            split.setDisplay(!measurementActive.get());
+            measurementError.setDisplay(measurementActive.get());
+        });
+        measurementActive.runListenersOnce();
+
+        return content;
     }
 
     public static UIElement chunkMap(EmployeeDeskContext context, ObservableValue<ChunkPos> selectedChunk) {
@@ -85,7 +111,8 @@ public class PropertyManagerUi {
             WorldMapElement map = new WorldMapElement(MAP_RADIUS_CHUNKS)
                     .setCenter(
                             context.desk().getBlockPos().getX(),
-                            context.desk().getBlockPos().getZ());
+                            context.desk().getBlockPos().getZ())
+                    .setSliceY(context.desk().getBlockPos().getY());
             map.layout(layout -> layout.widthPercent(100).heightPercent(100));
             map.onSelectedChunkChanged(selectedChunk::set);
 

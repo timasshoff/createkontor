@@ -512,6 +512,8 @@
   "ui.createkontor.property_manager.chunk_map": "Map",
   "ui.createkontor.property_manager.daily_rent": "Daily Rent",
   "ui.createkontor.property_manager.free": "§aAvailable",
+  "ui.createkontor.property_manager.measurement_active": "§cThe biome frequencies of this dimension are currently being measured.",
+  "ui.createkontor.property_manager.measurement_active.sub": "This process might take a few minutes. Come back later.",
   "ui.createkontor.property_manager.occupied": "§cOccupied",
   "ui.createkontor.property_manager.owned": "§2Owned",
   "ui.createkontor.property_manager.preview.already_held": "Already owned",

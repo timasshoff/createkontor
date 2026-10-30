@@ -44,6 +44,7 @@ public class WorldMapElement extends UIElement {
     private int centerZ;
     private boolean dirty = true;
     private int lastLoadedChunks = -1;
+    private int sliceY;
 
     @Nullable
     private ChunkPos selectedChunk;
@@ -79,6 +80,12 @@ public class WorldMapElement extends UIElement {
 
     public WorldMapElement setChunkColor(ToIntFunction<ChunkPos> function) {
         chunkColor = function;
+        return this;
+    }
+
+    public WorldMapElement setSliceY(int blockY) {
+        sliceY = blockY;
+        dirty = true;
         return this;
     }
 
@@ -171,16 +178,16 @@ public class WorldMapElement extends UIElement {
         int minZ = centerZ - height / 2;
 
         for (int px = 0; px < width; px++) {
-            Surface north = surface(level, minX + px, minZ - 1);
-            double previous = north == null ? 0.0 : height(level, north);
+            Surface north = surface(level, minX + px, minZ - 1, sliceY);
+            double previous = north == null ? 0.0 : north.y();
 
             for (int pz = 0; pz < height; pz++) {
-                Surface surface = surface(level, minX + px, minZ + pz);
+                Surface surface = surface(level, minX + px, minZ + pz, sliceY);
                 if (surface == null) {
                     image.setPixelRGBA(px, pz, 0);
                     continue;
                 }
-                double height = height(level, surface);
+                double height = surface.y();
                 int parity = (px + pz) & 1;
 
                 MapColor.Brightness brightness;
@@ -285,10 +292,6 @@ public class WorldMapElement extends UIElement {
             DrawerHelper.drawSolidRect(g, left, bottom, right - left + 1f, 1f, SELECTION_BORDER_COLOR);
     }
 
-    private static double height(ClientLevel level, Surface surface) {
-        return level.dimensionType().hasCeiling() ? 100.0 : surface.y();
-    }
-
     private int loadedChunks(ClientLevel level) {
         int minX = centerX - width / 2;
         int minZ = centerZ - height / 2;
@@ -303,19 +306,17 @@ public class WorldMapElement extends UIElement {
         return count;
     }
 
-    private static Surface surface(ClientLevel level, int x, int z) {
+    private static Surface surface(ClientLevel level, int x, int z, int sliceY) {
         LevelChunk chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4);
         if (chunk == null || chunk.isEmpty()) {
             return null;
         }
 
-        if (level.dimensionType().hasCeiling()) {
-            return new Surface(Blocks.STONE.defaultBlockState().getMapColor(level, BlockPos.ZERO), 0, 0);
-        }
-
         int minY = level.getMinBuildHeight();
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, 0, z);
-        int y = chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 1;
+        int y = level.dimensionType().hasCeiling()
+                ? Mth.clamp(sliceY + 1, minY + 1, level.getMaxBuildHeight())
+                : chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 1;
         int waterDepth = 0;
         BlockState state;
 

@@ -65,7 +65,7 @@ public class PropertyConfig {
                         "Upper limit for the time spent sampling per server tick, in milliseconds. "
                                 + "At least one point is sampled per tick, even if that takes longer. "
                                 + "Lower = less lag, slower.")
-                .defineInRange("maxMillisPerTick", 20, 1, 1_000);
+                .defineInRange("maxMillisPerTick", 40, 1, 1_000);
         MEASUREMENT_CEILING_SAMPLE_Y = builder.comment(
                         "Height at which dimensions with a bedrock ceiling (the Nether) are sampled. "
                                 + "Other dimensions are sampled at the height of the surface.")
@@ -95,7 +95,7 @@ public class PropertyConfig {
         PRICING_MAX_FACTOR = builder.comment("Highest factor, also for biomes that were never hit")
                 .defineInRange("maxFactor", 50.0, 1.0, 1_000.0);
         defineDimension(builder, "overworld", "minecraft:overworld", "minecraft:plains", 8000);
-        defineDimension(builder, "nether", "minecraft:the_nether", "minecraft:nether_wastes", 1200);
+        defineDimension(builder, "nether", "minecraft:the_nether", "minecraft:nether_wastes", 8000);
         defineDimension(builder, "end", "minecraft:the_end", "minecraft:end_highlands", 16000);
         builder.pop();
 

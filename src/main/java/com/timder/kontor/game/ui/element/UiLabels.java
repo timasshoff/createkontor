@@ -4,34 +4,47 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.TextElement;
 import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
 import java.util.List;
+
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
 public final class UiLabels {
 
     private static final float MIN_LABEL_WIDTH = 80;
 
+    // Necessary to make every heading bold because  the LDLib2 text style does not have a setter for bold formatting
+    private static final class HeadingLabel extends Label {
+        @Override
+        public TextElement setText(Component text) {
+            return super.setText(text.copy().withStyle(ChatFormatting.BOLD));
+        }
+    }
+
     public static Label h1(Component text, Horizontal horizontalAlignment) {
-        return (Label) new Label()
+        return (Label) new HeadingLabel()
                 .setText(text)
                 .textStyle(style -> style.fontSize(12)
                         .textAlignHorizontal(horizontalAlignment)
                         .textWrap(TextWrap.WRAP)
+                        .textShadow(true)
                         .adaptiveHeight(true)
                         .adaptiveWidth(true))
                 .layout(layout -> layout.marginAll(2));
     }
 
     public static Label h2(Component text, Horizontal horizontalAlignment) {
-        return (Label) new Label()
+        return (Label) new HeadingLabel()
                 .setText(text)
                 .textStyle(style -> style.fontSize(10)
                         .textAlignHorizontal(horizontalAlignment)
                         .textWrap(TextWrap.WRAP)
+                        .textShadow(true)
                         .adaptiveHeight(true)
                         .adaptiveWidth(true))
                 .layout(layout -> layout.marginAll(2));
