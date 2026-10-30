@@ -1,13 +1,12 @@
 package com.timder.kontor.core.company.legalform;
 
-import com.timder.kontor.core.company.financial.Money;
+import static com.timder.kontor.core.company.legalform.LegalFormDef.UNLIMITED;
 
+import com.timder.kontor.core.company.financial.Money;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static com.timder.kontor.core.company.legalform.LegalFormDef.UNLIMITED;
 
 /**
  * All legal forms of this world, ordered by level
@@ -22,7 +21,8 @@ public record LegalForms(List<LegalFormDef> forms) {
         for (int i = 0; i < forms.size(); i++) {
             LegalFormDef form = forms.get(i);
             if (form.level() != i + 1) {
-                throw new IllegalArgumentException("levels must be consecutive starting at 1, but position " + (i + 1) + " has level " + form.level() + ".");
+                throw new IllegalArgumentException("levels must be consecutive starting at 1, but position " + (i + 1)
+                        + " has level " + form.level() + ".");
             }
             if (!ids.add(form.id())) {
                 throw new IllegalArgumentException("duplicate legal form id " + form.id() + ".");
@@ -66,58 +66,108 @@ public record LegalForms(List<LegalFormDef> forms) {
         return level >= 1 && level < forms.size();
     }
 
-/*
+    /*
     The following code is AI generated.
      */
 
-/*
+    /*
     The following code is AI generated.
      */
 
     public static LegalForms standard() {
         return new LegalForms(List.of(
                 new LegalFormDef(
-                        1, "sole_proprietorship",
-                        2,                   // employee slots
-                        1.0,                 // employee salary factor
-                        2,                   // product licenses
-                        2,                   // open requests per product
-                        5,                   // open requests total
-                        3,                   // order book
-                        0,                   // framework contracts
-                        64,                  // max order quantity
-                        1.5,                 // deadline factor f_S
-                        1_024,               // max grid connection (SU)
-                        0,                   // feed-in licence tier
-                        Money.ofDollars(1_000),  // overdraft limit
-                        Money.ZERO,          // bank loan limit
-                        false,               // automatic acceptance
-                        false,               // company network, dispatch, framework contracts
-                        Money.ZERO,          // free storage
-                        true,                // founder protection
                         1,
+                        "sole_proprietorship",
+                        2, // employee slots
+                        1.0, // employee salary factor
+                        2, // product licenses
+                        2, // open requests per product
+                        5, // open requests total
+                        3, // order book
+                        0, // framework contracts
+                        64, // max order quantity
+                        1.5, // deadline factor f_S
+                        1_024, // max grid connection (SU)
+                        0, // feed-in licence tier
+                        Money.ofDollars(1_000), // overdraft limit
+                        Money.ZERO, // bank loan limit
+                        false, // automatic acceptance
+                        false, // company network, dispatch, framework contracts
+                        Money.ZERO, // free storage
+                        true, // founder protection
+                        1,
+                        2,
                         null),
                 new LegalFormDef(
-                        2, "partnership",
-                        4, 1.1, 6, 3, 12, 10, 0, 256, 1.2, 4_096, 1,
-                        Money.ofDollars(5_000), Money.ofDollars(20_000),
-                        true, false, Money.ZERO, false,
                         2,
+                        "partnership",
+                        4,
+                        1.1,
+                        6,
+                        3,
+                        12,
+                        10,
+                        0,
+                        256,
+                        1.2,
+                        4_096,
+                        1,
+                        Money.ofDollars(5_000),
+                        Money.ofDollars(20_000),
+                        true,
+                        false,
+                        Money.ZERO,
+                        false,
+                        2,
+                        6,
                         new UpgradeRequirements(Money.ofDollars(1_000), Money.ofDollars(5_000), 30, 3.0, 24_000, 7)),
                 new LegalFormDef(
-                        3, "limited_company",
-                        6, 1.25, 15, 5, 30, 40, 6, 1_024, 1.0, 16_384, 2,
-                        Money.ofDollars(20_000), Money.ofDollars(100_000),
-                        true, true, Money.ofDollars(20_000), false,
+                        3,
+                        "limited_company",
+                        6,
+                        1.25,
+                        15,
+                        5,
+                        30,
+                        40,
+                        6,
+                        1_024,
+                        1.0,
+                        16_384,
+                        2,
+                        Money.ofDollars(20_000),
+                        Money.ofDollars(100_000),
+                        true,
+                        true,
+                        Money.ofDollars(20_000),
+                        false,
                         4,
+                        15,
                         new UpgradeRequirements(Money.ofDollars(5_000), Money.ofDollars(25_000), 150, 3.5, 48_000, 7)),
                 new LegalFormDef(
-                        4, "public_company",
-                        10, 1.5, UNLIMITED, 8, 80, 150, 20, 4_096, 1.0, 65_536, 3,
-                        Money.ofDollars(100_000), Money.ofDollars(500_000),
-                        true, true, Money.ofDollars(100_000), false,
+                        4,
+                        "public_company",
+                        10,
+                        1.5,
+                        UNLIMITED,
                         8,
-                        new UpgradeRequirements(Money.ofDollars(25_000), Money.ofDollars(150_000), 500, 4.0, 72_000, 7))
-        ));
+                        80,
+                        150,
+                        20,
+                        4_096,
+                        1.0,
+                        65_536,
+                        3,
+                        Money.ofDollars(100_000),
+                        Money.ofDollars(500_000),
+                        true,
+                        true,
+                        Money.ofDollars(100_000),
+                        false,
+                        8,
+                        UNLIMITED,
+                        new UpgradeRequirements(
+                                Money.ofDollars(25_000), Money.ofDollars(150_000), 500, 4.0, 72_000, 7))));
     }
 }

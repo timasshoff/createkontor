@@ -7,14 +7,11 @@ import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
-import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.mojang.authlib.GameProfile;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
@@ -107,7 +104,7 @@ public class KontorDeskBoundUi {
         isOwner.addListener(() -> manageTabHeader.setDisplay(isOwner.get()));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(company, economy));
-        return new ModularUI(UI.of(root, StylesheetManager.GDP), holder.player);
+        return new ModularUI(UiStyles.ui(root), holder.player);
     }
 
     public static UIElement overviewTab(
@@ -244,7 +241,9 @@ public class KontorDeskBoundUi {
         Label netWorth = UiLabels.primary(Component.empty(), Horizontal.CENTER);
         netWorth.addSyncValue(DataBindingBuilder.componentS2C(() -> Component.translatable(
                         "ui.createkontor.kontor_desk.net_worth",
-                        company.netWorth().toString()))
+                        company.netWorth(CompanyConfig.toCompanyParams(
+                                        new LegalForms(KontorData.getLegalFormDefinitions())))
+                                .toString()))
                 .onRemoteSyncReceived(netWorth::setText)
                 .build()
                 .getSyncValue());
@@ -400,9 +399,7 @@ public class KontorDeskBoundUi {
             for (Loan loan : loans.get()) {
                 if (loan.isRepaid()) continue;
 
-                UIElement loanElement = new UIElement()
-                        .style(style -> style.background(Sprites.BORDER_DARK))
-                        .layout(layout -> layout.paddingAll(8));
+                UIElement loanElement = new UIElement().style(UiStyles.CARD).layout(layout -> layout.paddingAll(8));
 
                 loanElement.addChild(UiLabels.primary(
                         Component.translatable(
@@ -461,9 +458,8 @@ public class KontorDeskBoundUi {
     }
 
     public static UIElement requests(Company company, KontorDeskBlockEntity be) {
-        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
-                .style(style -> style.background(Sprites.BORDER_DARK))
-                .layout(layout -> layout.paddingAll(8));
+        ScrollerView content =
+                (ScrollerView) UiContainer.tabScroller().style(UiStyles.PANEL).layout(layout -> layout.paddingAll(8));
 
         ObservableList<Request> requests = new ObservableList<>();
         SimpleBinding<Tag> requestsBinding = DataBindingBuilder.tagS2C(
@@ -508,9 +504,8 @@ public class KontorDeskBoundUi {
                     for (Request request : sorted) {
                         if (request.hasExpired()) continue;
 
-                        UIElement requestElement = new UIElement()
-                                .style(style -> style.background(Sprites.BORDER_DARK))
-                                .layout(layout -> layout.paddingAll(8));
+                        UIElement requestElement =
+                                new UIElement().style(UiStyles.PAPER).layout(layout -> layout.paddingAll(8));
 
                         UIElement titleRow = new UIElement()
                                 .layout(layout -> layout.flexDirection(FlexDirection.ROW)
@@ -520,15 +515,15 @@ public class KontorDeskBoundUi {
                                         .gapAll(4)
                                         .marginBottom(4)
                                         .widthPercent(100));
-                        titleRow.addChild(new ItemSlot()
+                        titleRow.addChild(UiPaper.itemSlot()
                                 .setItem(new ItemStack(
                                         BuiltInRegistries.ITEM.get(ResourceLocation.parse(
                                                 request.getProduct().value())),
                                         request.getQuantity())));
-                        titleRow.addChild(UiLabels.paragraphPrimary(
+                        titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                ComponentFormatting.highlightStandard(request.getQuantity() + " "
+                                                Component.literal(request.getQuantity() + " "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(request.getProduct()
                                                                         .value()))
@@ -545,14 +540,16 @@ public class KontorDeskBoundUi {
                                         layout.widthAuto().flexBasis(0).flexGrow(1)));
                         requestElement.addChild(titleRow);
 
-                        requestElement.addChild(UiLabels.paragraphSecondary(
+                        requestElement.addChild(UiPaper.simpleDivider());
+
+                        requestElement.addChild(UiPaper.paragraphSecondary(
                                 Component.translatable(
                                         "ui.createkontor.kontor_desk.request.unit_price",
                                         ComponentFormatting.moneyColored(Money.fromDollar(request.getUnitPrice()))),
                                 Horizontal.LEFT));
 
                         long expiresOfferAtTick = clientTick() + request.remainingOfferTicks();
-                        Label offerTimeLabel = UiLabels.paragraphSecondary(
+                        Label offerTimeLabel = UiPaper.paragraphSecondary(
                                 Component.translatable(
                                         "ui.createkontor.kontor_desk.request.offer_time",
                                         ComponentFormatting.ticks(request.remainingOfferTicks())
@@ -560,19 +557,21 @@ public class KontorDeskBoundUi {
                                 Horizontal.LEFT);
                         offerTimeLabel.addEventListener(
                                 UIEvents.TICK,
-                                event -> offerTimeLabel.setText(Component.translatable(
+                                event -> offerTimeLabel.setText(UiPaper.adapt(Component.translatable(
                                         "ui.createkontor.kontor_desk.request.offer_time",
                                         ComponentFormatting.ticks(Math.max(0, expiresOfferAtTick - clientTick()))
-                                                .withStyle(ChatFormatting.GOLD))));
+                                                .withStyle(ChatFormatting.GOLD)))));
                         requestElement.addChild(offerTimeLabel);
 
-                        requestElement.addChild(UiLabels.paragraphSecondary(
+                        requestElement.addChild(UiPaper.paragraphSecondary(
                                 Component.translatable(
                                         "ui.createkontor.kontor_desk.request.deadline",
                                         ComponentFormatting.ticks(request.getDeadlineTicks())),
                                 Horizontal.LEFT));
 
-                        requestElement.addChild(UiButtons.primary(
+                        requestElement.addChild(UiPaper.doubleDivider());
+
+                        requestElement.addChild(UiPaper.button(
                                         Component.translatable("ui.createkontor.kontor_desk.request.accept"))
                                 .setOnClick((e) -> {
                                     CompoundTag tag = new CompoundTag();
@@ -592,9 +591,8 @@ public class KontorDeskBoundUi {
     }
 
     public static UIElement orders(Company company, KontorDeskBlockEntity be) {
-        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
-                .style(style -> style.background(Sprites.BORDER_DARK))
-                .layout(layout -> layout.paddingAll(8));
+        ScrollerView content =
+                (ScrollerView) UiContainer.tabScroller().style(UiStyles.PANEL).layout(layout -> layout.paddingAll(8));
 
         ObservableList<Order> orders = new ObservableList<>();
         SimpleBinding<Tag> ordersBinding = DataBindingBuilder.tagS2C(
@@ -635,9 +633,8 @@ public class KontorDeskBoundUi {
                     for (Order order : sorted) {
                         if (order.isFullyDelivered()) continue;
 
-                        UIElement orderElement = new UIElement()
-                                .style(style -> style.background(Sprites.BORDER_DARK))
-                                .layout(layout -> layout.paddingAll(8));
+                        UIElement orderElement =
+                                new UIElement().style(UiStyles.PAPER).layout(layout -> layout.paddingAll(8));
 
                         UIElement titleRow = new UIElement()
                                 .layout(layout -> layout.flexDirection(FlexDirection.ROW)
@@ -647,15 +644,15 @@ public class KontorDeskBoundUi {
                                         .gapAll(4)
                                         .marginBottom(4)
                                         .widthPercent(100));
-                        titleRow.addChild(new ItemSlot()
+                        titleRow.addChild(UiPaper.itemSlot()
                                 .setItem(new ItemStack(
                                         BuiltInRegistries.ITEM.get(ResourceLocation.parse(
                                                 order.getProduct().value())),
                                         order.getQuantity())));
-                        titleRow.addChild(UiLabels.paragraphPrimary(
+                        titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                ComponentFormatting.highlightStandard(order.getQuantity() + " "
+                                                Component.literal(order.getQuantity() + " "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(order.getProduct()
                                                                         .value()))
@@ -674,7 +671,7 @@ public class KontorDeskBoundUi {
 
                         if (order.getPhase() == OrderPhase.OPEN) {
                             long expiresDeadlineAtTick = clientTick() + order.remainingDeadlineTicks();
-                            Label orderDeadlineLabel = UiLabels.paragraphSecondary(
+                            Label orderDeadlineLabel = UiPaper.paragraphSecondary(
                                     Component.translatable(
                                             "ui.createkontor.kontor_desk.order.delivery_time",
                                             ComponentFormatting.ticks(order.remainingDeadlineTicks())
@@ -682,13 +679,13 @@ public class KontorDeskBoundUi {
                                     Horizontal.LEFT);
                             orderDeadlineLabel.addEventListener(
                                     UIEvents.TICK,
-                                    event -> orderDeadlineLabel.setText(Component.translatable(
+                                    event -> orderDeadlineLabel.setText(UiPaper.adapt(Component.translatable(
                                             "ui.createkontor.kontor_desk.order.delivery_time",
                                             ComponentFormatting.ticks(Math.max(0, expiresDeadlineAtTick - clientTick()))
-                                                    .withStyle(ChatFormatting.GOLD))));
+                                                    .withStyle(ChatFormatting.GOLD)))));
                             orderElement.addChild(orderDeadlineLabel);
                         } else {
-                            orderElement.addChild(UiLabels.paragraphError(
+                            orderElement.addChild(UiPaper.paragraphError(
                                     Component.translatable("ui.createkontor.kontor_desk.order.grace_period"),
                                     Horizontal.LEFT));
                         }
@@ -741,7 +738,7 @@ public class KontorDeskBoundUi {
                 entries,
                 (MarketEntry entry) -> {
                     UIElement element = new UIElement()
-                            .style(style -> style.background(Sprites.BORDER_DARK))
+                            .style(UiStyles.CARD)
                             .layout(layout -> layout.paddingAll(8).gapAll(4));
 
                     UIElement titleRow = new UIElement()
@@ -890,7 +887,7 @@ public class KontorDeskBoundUi {
                 layout.widthAuto().flexBasis(0).flexGrow(1).minWidth(0).height(20));
         inviteBox.addChild(field);
 
-        Button button = UiButtons.primary(Component.translatable("ui.createkontor.kontor_desk.tab.managers.invite"));
+        Button button = UiButtons.secondary(Component.translatable("ui.createkontor.kontor_desk.tab.managers.invite"));
         button.layout(layout -> layout.flexShrink(0).height(20));
         button.setOnClick(e -> {
             CompoundTag tag = new CompoundTag();
@@ -917,7 +914,7 @@ public class KontorDeskBoundUi {
             membersBox.clearAllScrollViewChildren();
             for (MemberEntry member : members.get()) {
                 UIElement row = new UIElement()
-                        .style(style -> style.background(Sprites.BORDER_DARK))
+                        .style(UiStyles.CARD)
                         .layout(layout -> layout.flexDirection(FlexDirection.ROW)
                                 .gapAll(4)
                                 .paddingAll(8)
@@ -992,9 +989,7 @@ public class KontorDeskBoundUi {
         content.addScrollViewChildren(UiLabels.paragraphSecondary(
                 Component.translatable("ui.createkontor.kontor_desk.tab.bankruptcy.disclaimer"), Horizontal.LEFT));
 
-        UIElement bankruptcyBox = new UIElement()
-                .style(style -> style.background(Sprites.BORDER_DARK))
-                .layout(layout -> layout.paddingAll(8));
+        UIElement bankruptcyBox = new UIElement().style(UiStyles.CARD).layout(layout -> layout.paddingAll(8));
 
         ObservableValue<Boolean> isInsolvent = new ObservableValue<>(false);
         SimpleBinding<Boolean> isInsolventBinding = DataBindingBuilder.boolS2C(() -> company.isInsolvent(

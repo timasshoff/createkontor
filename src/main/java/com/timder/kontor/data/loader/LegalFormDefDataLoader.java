@@ -4,19 +4,18 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
+import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.UpgradeRequirements;
-import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.data.KontorData;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
 
@@ -25,18 +24,25 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> resourceList, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(
+            Map<ResourceLocation, JsonElement> resourceList,
+            ResourceManager resourceManager,
+            ProfilerFiller profilerFiller) {
         Map<Integer, LegalFormDef> byLevel = new TreeMap<>();
         for (Map.Entry<ResourceLocation, JsonElement> entry : resourceList.entrySet()) {
             ResourceLocation file = entry.getKey();
             try {
                 LegalFormDef definition = parse(entry.getValue());
                 if (byLevel.containsKey(definition.level())) {
-                    CreateKontor.LOGGER.warn("Legal form definition {} in {} overrides another already loaded definition.", definition.id(), file);
+                    CreateKontor.LOGGER.warn(
+                            "Legal form definition {} in {} overrides another already loaded definition.",
+                            definition.id(),
+                            file);
                 }
                 byLevel.put(definition.level(), definition);
             } catch (RuntimeException e) {
-                CreateKontor.LOGGER.warn("Legal form definition {} could not be loaded, skipped: {}", file, e.getMessage());
+                CreateKontor.LOGGER.warn(
+                        "Legal form definition {} could not be loaded, skipped: {}", file, e.getMessage());
             }
         }
 
@@ -67,6 +73,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
         Money freeStorage = Money.ofDollars(GsonHelper.getAsLong(object, "free_storage_value_in_dollars"));
         boolean founderProtection = GsonHelper.getAsBoolean(object, "founder_protection");
         int maxShippingExits = GsonHelper.getAsInt(object, "max_shipping_exits");
+        int maxProperties = GsonHelper.getAsInt(object, "max_properties");
 
         UpgradeRequirements entryRequirements = object.has("upgrade_requirements")
                 ? parseUpgradeRequirements(GsonHelper.getAsJsonObject(object, "upgrade_requirements"))
@@ -93,8 +100,8 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
                 freeStorage,
                 founderProtection,
                 maxShippingExits,
-                entryRequirements
-        );
+                maxProperties,
+                entryRequirements);
     }
 
     private static UpgradeRequirements parseUpgradeRequirements(JsonObject object) {
@@ -105,6 +112,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
         long processingTicks = GsonHelper.getAsLong(object, "processing_ticks");
         int restingDays = GsonHelper.getAsInt(object, "resting_days");
 
-        return new UpgradeRequirements(fee, minNetWorth, minFulfilledOrders, minReputationStars, processingTicks, restingDays);
+        return new UpgradeRequirements(
+                fee, minNetWorth, minFulfilledOrders, minReputationStars, processingTicks, restingDays);
     }
 }

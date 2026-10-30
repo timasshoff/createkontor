@@ -7,6 +7,8 @@ import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.license.HeldLicense;
 import com.timder.kontor.core.company.license.LicenseHoldingRules;
 import com.timder.kontor.core.company.logistics.LogisticsStorageRules;
+import com.timder.kontor.core.company.property.PropertyHolding;
+import com.timder.kontor.core.company.property.PropertyRules;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +45,7 @@ public final class CompanyRules {
         }
         bookLicenseFees(company, day, params);
         bookSalaries(company, day, params);
+        bookPropertyRent(company, day, params);
         LogisticsStorageRules.bookUnbilled(company, day, params);
         for (Map.Entry<BookingKind, Money> entry : otherCosts.entrySet()) {
             account.book(day, entry.getKey(), entry.getValue().negate(), "");
@@ -111,6 +114,18 @@ public final class CompanyRules {
         company.dropDeparturesUpTo(day);
     }
 
+    private static void bookPropertyRent(Company company, long day, CompanyParams params) {
+        Money rent = PropertyRules.totalDailyRent(company, params);
+        if (rent.isPositive()) {
+            company.account().book(day, BookingKind.PROPERTY_RENT, rent.negate(), rentedCount(company) + " chunk(s)");
+        }
+        PropertyRules.dropCancelled(company);
+    }
+
+    private static long rentedCount(Company company) {
+        return company.properties().stream().filter(PropertyHolding::isRented).count();
+    }
+
     private static void bookSalary(Company company, Employee employee, long day, CompanyParams params) {
         Money salary = EmployeeRules.dailySalary(employee.baseSalary(), company.legalForm(params));
         if (salary.isPositive()) {
@@ -132,7 +147,8 @@ public final class CompanyRules {
                     || kind == BookingKind.TURNOVER_LICENSE
                     || kind == BookingKind.INTEREST
                     || kind == BookingKind.STORAGE
-                    || kind == BookingKind.SALARY) {
+                    || kind == BookingKind.SALARY
+                    || kind == BookingKind.PROPERTY_RENT) {
                 throw new IllegalArgumentException(
                         kind + " is booked by settleDay itself, it must not be in otherCosts.");
             }

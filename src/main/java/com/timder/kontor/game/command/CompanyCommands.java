@@ -21,6 +21,8 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
+import java.util.*;
+import java.util.stream.Collectors;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -28,38 +30,35 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class CompanyCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(
-                Commands.literal("kontor")
-                        .requires(source -> source.hasPermission(2))
-                        .then(Commands.literal("company")
-                                .then(Commands.literal("found")
-                                        .then(Commands.argument("name", StringArgumentType.string())
-                                                .executes(context -> found(context, false))
-                                                .then(Commands.argument("withLoan", BoolArgumentType.bool())
-                                                        .executes(context -> found(context, BoolArgumentType.getBool(context, "withLoan"))))))
-                                .then(Commands.literal("info")
-                                        .then(Commands.argument("name", StringArgumentType.string())
-                                                .executes(CompanyCommands::info)))
-                                .then(Commands.literal("manager")
-                                        .then(Commands.argument("name", StringArgumentType.string())
-                                                .then(Commands.argument("player", StringArgumentType.string())
-                                                        .executes(CompanyCommands::manager))))
-                                .then(Commands.literal("legallevel")
-                                        .then(Commands.argument("name", StringArgumentType.string())
-                                                .then(Commands.argument("level", IntegerArgumentType.integer(1))
-                                                        .executes(CompanyCommands::legalLevel))))
-                                .then(Commands.literal("reputation")
-                                        .then(Commands.argument("name", StringArgumentType.string())
-                                                .executes(CompanyCommands::reputation)))
-                                .then(Commands.literal("book")
-                                        .then(Commands.argument("name", StringArgumentType.string())
-                                                .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
-                                                        .executes(CompanyCommands::balance))))));
+        dispatcher.register(Commands.literal("kontor")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.literal("company")
+                        .then(Commands.literal("found")
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .executes(context -> found(context, false))
+                                        .then(Commands.argument("withLoan", BoolArgumentType.bool())
+                                                .executes(context -> found(
+                                                        context, BoolArgumentType.getBool(context, "withLoan"))))))
+                        .then(Commands.literal("info")
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .executes(CompanyCommands::info)))
+                        .then(Commands.literal("manager")
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .then(Commands.argument("player", StringArgumentType.string())
+                                                .executes(CompanyCommands::manager))))
+                        .then(Commands.literal("legallevel")
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .then(Commands.argument("level", IntegerArgumentType.integer(1))
+                                                .executes(CompanyCommands::legalLevel))))
+                        .then(Commands.literal("reputation")
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .executes(CompanyCommands::reputation)))
+                        .then(Commands.literal("book")
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
+                                                .executes(CompanyCommands::balance))))));
     }
 
     private static int found(CommandContext<CommandSourceStack> context, boolean withLoan) {
@@ -75,21 +74,24 @@ public class CompanyCommands {
 
         Company company;
         try {
-             company = registry.found(
+            company = registry.found(
                     StringArgumentType.getString(context, "name"),
                     economy.currentDay(),
                     player.getUUID(),
                     withLoan,
                     economy.policyRate(),
-                    CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()))
-            );
+                    CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())));
             data.setDirty();
         } catch (IllegalArgumentException e) {
             context.getSource().sendFailure(Component.literal("Something went wrong: " + e.getMessage()));
             return 0;
         }
 
-        context.getSource().sendSuccess(() -> Component.literal("Founded company with name: " + company.name() + " (" + company.id() + ")."), false);
+        context.getSource()
+                .sendSuccess(
+                        () -> Component.literal(
+                                "Founded company with name: " + company.name() + " (" + company.id() + ")."),
+                        false);
         return 1;
     }
 
@@ -110,7 +112,8 @@ public class CompanyCommands {
 
         String legalForm;
         try {
-            legalForm = "Level " + company.legalLevel() + " " + company.legalForm(params).id();
+            legalForm = "Level " + company.legalLevel() + " "
+                    + company.legalForm(params).id();
         } catch (IllegalArgumentException e) {
             legalForm = "Level " + company.legalLevel() + " (legal form data unavailable)";
         }
@@ -119,7 +122,8 @@ public class CompanyCommands {
         String licenses;
         try {
             int limit = company.legalForm(params).maxProductLicenses();
-            licenses = activeLicenses + " of " + (limit == LegalFormDef.UNLIMITED ? "unlimited" : String.valueOf(limit)) + " active";
+            licenses = activeLicenses + " of " + (limit == LegalFormDef.UNLIMITED ? "unlimited" : String.valueOf(limit))
+                    + " active";
         } catch (IllegalArgumentException e) {
             licenses = activeLicenses + " active";
         }
@@ -134,7 +138,8 @@ public class CompanyCommands {
 
         String liquidity = switch (company.liquidity()) {
             case NORMAL -> "normal";
-            case ILLIQUIDITY -> "in trouble for " + company.daysInTrouble() + " day" + (company.daysInTrouble() == 1 ? "" : "s");
+            case ILLIQUIDITY ->
+                "in trouble for " + company.daysInTrouble() + " day" + (company.daysInTrouble() == 1 ? "" : "s");
         };
 
         List<CompanyHistoryEntry> history = company.history();
@@ -142,29 +147,35 @@ public class CompanyCommands {
                 ? "No settled days yet."
                 : formatHistoryEntry(company, history.get(history.size() - 1));
 
-        String text = String.format(Locale.ROOT,
-                "=== %s (ID %d, %s) ===\n" +
-                        "Founded: Day %d\n" +
-                        "Owner: %s\n" +
-                        "Managers: %s\n" +
-                        "\n" +
-                        "Balance: %s (%s)\n" +
-                        "Net worth: %s\n" +
-                        "Outstanding loans: %s (%d)\n" +
-                        "\n" +
-                        "Open requests: %d | Open orders: %d\n" +
-                        "Licenses: %s | Daily license fees: %s\n" +
-                        "Paused markets: %s\n" +
-                        "%s",
-                company.name(), company.id().value(), legalForm,
+        String text = String.format(
+                Locale.ROOT,
+                "=== %s (ID %d, %s) ===\n" + "Founded: Day %d\n"
+                        + "Owner: %s\n"
+                        + "Managers: %s\n"
+                        + "\n"
+                        + "Balance: %s (%s)\n"
+                        + "Net worth: %s\n"
+                        + "Outstanding loans: %s (%d)\n"
+                        + "\n"
+                        + "Open requests: %d | Open orders: %d\n"
+                        + "Licenses: %s | Daily license fees: %s\n"
+                        + "Paused markets: %s\n"
+                        + "%s",
+                company.name(),
+                company.id().value(),
+                legalForm,
                 company.foundingDay(),
                 playerName(server, company.owner()),
                 managers,
-                company.account().getBalance(), liquidity,
-                company.netWorth(),
-                company.totalDebt(), company.loans().size(),
-                company.requestBoard().openRequestsTotal(), company.orderBook().openOrders(),
-                licenses, LicenseHoldingRules.totalDailyFee(company, params.licenses()),
+                company.account().getBalance(),
+                liquidity,
+                company.netWorth(params),
+                company.totalDebt(),
+                company.loans().size(),
+                company.requestBoard().openRequestsTotal(),
+                company.orderBook().openOrders(),
+                licenses,
+                LicenseHoldingRules.totalDailyFee(company, params.licenses()),
                 pausedMarkets.isEmpty() ? "none" : pausedMarkets,
                 lastResult);
 
@@ -223,7 +234,10 @@ public class CompanyCommands {
             return 0;
         }
 
-        source.sendSuccess(() -> Component.literal(company.name() + " is now legal level " + level + " (" + legalForms.get(level).id() + ")."), false);
+        source.sendSuccess(
+                () -> Component.literal(company.name() + " is now legal level " + level + " ("
+                        + legalForms.get(level).id() + ")."),
+                false);
         return 1;
     }
 
@@ -241,7 +255,8 @@ public class CompanyCommands {
         Economy economy = EconomySavedData.get(source.getServer()).getEconomy();
 
         List<ItemId> markets = economy.marketIds().stream()
-                .filter(market -> economy.storedParticipant(market, company.id()).isPresent())
+                .filter(market ->
+                        economy.storedParticipant(market, company.id()).isPresent())
                 .toList();
 
         StringBuilder text = new StringBuilder();
@@ -251,13 +266,21 @@ public class CompanyCommands {
             text.append("Not registered in any market.");
         } else {
             for (ItemId market : markets) {
-                MarketParticipant participant = economy.storedParticipant(market, company.id()).orElseThrow();
-                text.append(String.format(Locale.ROOT, "%-15s %5.1f  (%.1f stars)%s%n",
-                        market.value() + ":", participant.reputation(), participant.reputationInStars(),
+                MarketParticipant participant =
+                        economy.storedParticipant(market, company.id()).orElseThrow();
+                text.append(String.format(
+                        Locale.ROOT,
+                        "%-15s %5.1f  (%.1f stars)%s%n",
+                        market.value() + ":",
+                        participant.reputation(),
+                        participant.reputationInStars(),
                         economy.isPaused(market, company.id()) ? "  [paused]" : ""));
             }
-            text.append(String.format(Locale.ROOT, "%nOverall: %.1f (%.1f stars)",
-                    economy.overallReputation(company.id()), economy.overallReputationInStars(company.id())));
+            text.append(String.format(
+                    Locale.ROOT,
+                    "%nOverall: %.1f (%.1f stars)",
+                    economy.overallReputation(company.id()),
+                    economy.overallReputationInStars(company.id())));
         }
 
         source.sendSuccess(() -> Component.literal(text.toString()), false);
@@ -279,7 +302,12 @@ public class CompanyCommands {
         Company company = found.get();
         Economy economy = EconomySavedData.get(context.getSource().getServer()).getEconomy();
 
-        company.account().book(economy.currentDay(), BookingKind.DEPOSIT, Money.fromDollar(DoubleArgumentType.getDouble(context, "amount")), "fraud");
+        company.account()
+                .book(
+                        economy.currentDay(),
+                        BookingKind.DEPOSIT,
+                        Money.fromDollar(DoubleArgumentType.getDouble(context, "amount")),
+                        "fraud");
         data.setDirty();
 
         source.sendSuccess(() -> Component.literal("Successfully booked."), false);
@@ -290,22 +318,32 @@ public class CompanyCommands {
         Map<BookingKind, Money> sums = company.account().sumsByKind(entry.day());
 
         StringBuilder text = new StringBuilder();
-        text.append("Last day result (Day ").append(entry.day()).append("): ").append(entry.result())
-                .append("\n  Revenue: ").append(entry.revenue());
+        text.append("Last day result (Day ")
+                .append(entry.day())
+                .append("): ")
+                .append(entry.result())
+                .append("\n  Revenue: ")
+                .append(entry.revenue());
 
         sums.entrySet().stream()
                 .filter(e -> e.getKey().isCost())
                 .sorted(Comparator.comparingInt(e -> e.getKey().ordinal()))
-                .forEach(e -> text.append("\n  ").append(formatBookingKind(e.getKey())).append(": ").append(e.getValue()));
+                .forEach(e -> text.append("\n  ")
+                        .append(formatBookingKind(e.getKey()))
+                        .append(": ")
+                        .append(e.getValue()));
 
         List<Map.Entry<BookingKind, Money>> financing = sums.entrySet().stream()
-                .filter(e -> e.getKey().isFinancing())
+                .filter(e -> e.getKey().isFinancing() || e.getKey().isInvestment())
                 .sorted(Comparator.comparingInt(e -> e.getKey().ordinal()))
                 .toList();
         if (!financing.isEmpty()) {
-            text.append("\nFinancing today (not part of the result above):");
+            text.append("\nFinancing and investments today (not part of the result above):");
             for (Map.Entry<BookingKind, Money> e : financing) {
-                text.append("\n  ").append(formatBookingKind(e.getKey())).append(": ").append(e.getValue());
+                text.append("\n  ")
+                        .append(formatBookingKind(e.getKey()))
+                        .append(": ")
+                        .append(e.getValue());
             }
         }
 

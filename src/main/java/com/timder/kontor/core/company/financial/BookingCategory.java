@@ -15,7 +15,12 @@ public enum BookingCategory {
     REVENUE,
 
     /**
-     * Neither cost nor revenue
+     * Financing (e.g. loans). Neither cost nor revenue.
      */
-    FINANCING
+    FINANCING,
+
+    /**
+     * Purchasing / Selling of and asset. Neither cost nor revenue.
+     */
+    INVESTMENT
 }

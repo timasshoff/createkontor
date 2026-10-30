@@ -3,13 +3,10 @@ package com.timder.kontor.game.ui;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
-import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
-import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.legalform.LegalForms;
@@ -62,7 +59,7 @@ public class LogisticsManagerUi {
                 orders(context, be, networkConnected, networkConnectedBinding));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
-        return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
+        return new ModularUI(UiStyles.ui(root), context.player());
     }
 
     public static UIElement networkOverview(
@@ -189,9 +186,8 @@ public class LogisticsManagerUi {
     }
 
     public static UIElement orderDeliverySettings(LogisticsManagerDeskBlockEntity be) {
-        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
-                .style(style -> style.background(Sprites.BORDER_DARK))
-                .layout(layout -> layout.paddingAll(8));
+        ScrollerView content =
+                (ScrollerView) UiContainer.tabScroller().style(UiStyles.PANEL).layout(layout -> layout.paddingAll(8));
 
         content.addScrollViewChildren(UiLabels.h2(
                 Component.translatable("ui.createkontor.logistics_manager_desk.order_delivery_settings"),
@@ -206,7 +202,7 @@ public class LogisticsManagerUi {
                 .build();
 
         UIElement statusBox = new UIElement()
-                .style(style -> style.background(Sprites.BORDER_DARK))
+                .style(UiStyles.CARD)
                 .layout(layout -> layout.paddingAll(8).widthPercent(100));
         statusBox.addChild(UiLabels.paragraphPrimary(
                 Component.translatable("ui.createkontor.logistics_manager_desk.status"), Horizontal.LEFT));
@@ -280,9 +276,8 @@ public class LogisticsManagerUi {
     }
 
     public static UIElement orderDeliveryOverview(LogisticsManagerDeskBlockEntity be) {
-        ScrollerView content = (ScrollerView) UiContainer.tabScroller()
-                .style(style -> style.background(Sprites.BORDER_DARK))
-                .layout(layout -> layout.paddingAll(8));
+        ScrollerView content =
+                (ScrollerView) UiContainer.tabScroller().style(UiStyles.PANEL).layout(layout -> layout.paddingAll(8));
 
         ObservableList<OrderEntry> orderedQuantities = new ObservableList<>();
         SimpleBinding<Tag> orderedQuantitiesBinding = DataBindingBuilder.tagS2C(
@@ -312,7 +307,7 @@ public class LogisticsManagerUi {
 
             for (OrderEntry entry : orderedQuantities.get()) {
                 UIElement orderElement = new UIElement()
-                        .style(style -> style.background(Sprites.BORDER_DARK))
+                        .style(UiStyles.CARD)
                         .layout(layout -> layout.paddingAll(8).gapAll(4));
 
                 UIElement titleRow = new UIElement()

@@ -84,8 +84,7 @@ public final class Account {
             bookingDays.add(booking.day());
         }
 
-        if (bookingDays.size() <= retentionDays)
-            return;
+        if (bookingDays.size() <= retentionDays) return;
 
         Iterator<Long> iterator = bookingDays.descendingIterator();
         long firstKept = iterator.next();
@@ -117,8 +116,7 @@ public final class Account {
     public Money resultOfDay(long day) {
         Money result = Money.ZERO;
         for (Booking booking : bookings) {
-            if (booking.day() == day && !booking.kind().isFinancing())
-                result = result.plus(booking.amount());
+            if (booking.day() == day && booking.kind().countsInResult()) result = result.plus(booking.amount());
         }
         return result;
     }
