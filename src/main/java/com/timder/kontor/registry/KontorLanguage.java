@@ -511,8 +511,12 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.finances_manager.loans_outstanding", "Still to repay: %s");
 
         REGISTRATE.addRawLang("ui.createkontor.property_manager.chunk_map", "Map");
-        REGISTRATE.addRawLang("ui.createkontor.property_manager.measurement_active", "§cThe biome frequencies of this dimension are currently being measured.");
-        REGISTRATE.addRawLang("ui.createkontor.property_manager.measurement_active.sub", "This process might take a few minutes. Come back later.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.property_manager.measurement_active",
+                "§cThe biome frequencies of this dimension are currently being measured.");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.property_manager.measurement_active.sub",
+                "This process might take a few minutes. Come back later.");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.selected_property", "Property %s");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.biome", "Biome");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.unpriceable", "-");

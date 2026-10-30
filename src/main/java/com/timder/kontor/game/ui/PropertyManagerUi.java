@@ -17,7 +17,6 @@ import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.property.*;
-import com.timder.kontor.core.company.property.measurement.BiomeMeasurement;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.block.PropertyManagerActions;
@@ -34,8 +33,6 @@ import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import java.util.*;
 import javax.annotation.Nullable;
-
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -59,11 +56,13 @@ public class PropertyManagerUi {
     }
 
     public static UIElement acquireTab(EmployeeDeskContext context, PropertyManagerActions actions) {
-        UIElement content = new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
+        UIElement content =
+                new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         ObservableValue<ChunkPos> selectedChunk = new ObservableValue<>(null);
         ObservableValue<Boolean> measurementActive = new ObservableValue<>(false);
-        SimpleBinding<Boolean> measurementBinding = DataBindingBuilder.boolS2C(() -> BiomeMeasurer.isRunning(BiomeSampling.dimensionId((ServerLevel) context.desk().getLevel())))
+        SimpleBinding<Boolean> measurementBinding = DataBindingBuilder.boolS2C(() -> BiomeMeasurer.isRunning(
+                        BiomeSampling.dimensionId((ServerLevel) context.desk().getLevel())))
                 .onRemoteSyncReceived(measurementActive::set)
                 .build();
         content.addSyncValue(measurementBinding.getSyncValue());
