@@ -19,4 +19,9 @@ public class LawyerDeskBlock extends AbstractEmployeeDeskBlock {
     protected ModularUI createEmployeeUi(EmployeeDeskContext context) {
         return LawyerUi.create(context, new LawyerActions(context.desk()));
     }
+
+    @Override
+    public int getTopY() {
+        return 22;
+    }
 }

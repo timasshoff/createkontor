@@ -40,18 +40,18 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
     private final Supplier<Integer> baseSalaryInDollars;
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    private static final double ITEMS_X1 = 0, ITEMS_Z1 = 0, ITEMS_X2 = 16, ITEMS_Z2 = 16;
-    private static final double ITEMS_Y1 = 16, ITEMS_Y2 = 19;
+    private static final double TOP_X1 = 0, TOP_Z1 = 0, TOP_X2 = 16, TOP_Z2 = 16;
+    private static final double TOP_Y_START = 16;
 
     private static final VoxelShape BASE = Block.box(0, 0, 0, 16, 16, 16);
-    private static final Map<Direction, VoxelShape> SHAPES = new EnumMap<>(Direction.class);
+    private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
 
     protected AbstractEmployeeDeskBlock(Properties properties, RoleId role, Supplier<Integer> baseSalaryInDollars) {
         super(properties);
         this.role = Objects.requireNonNull(role, "role must not be null.");
         this.baseSalaryInDollars = Objects.requireNonNull(baseSalaryInDollars, "baseSalaryInDollars must not be null.");
         for (Direction facing : Direction.Plane.HORIZONTAL) {
-            SHAPES.put(facing, Shapes.or(BASE, itemsShape(facing)));
+            shapes.put(facing, Shapes.or(BASE, itemsShape(facing)));
         }
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
@@ -66,6 +66,10 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
 
     public String roleTranslationKey() {
         return "employee_role.createkontor." + role.value();
+    }
+
+    public int getTopY() {
+        return 19;
     }
 
     protected abstract ModularUI createEmployeeUi(EmployeeDeskContext context);
@@ -101,7 +105,7 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPES.get(state.getValue(FACING));
+        return shapes.get(state.getValue(FACING));
     }
 
     @Override
@@ -110,8 +114,8 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
         return BASE;
     }
 
-    private static VoxelShape itemsShape(Direction facing) {
-        double x1 = ITEMS_X1, z1 = ITEMS_Z1, x2 = ITEMS_X2, z2 = ITEMS_Z2;
+    private VoxelShape itemsShape(Direction facing) {
+        double x1 = TOP_X1, z1 = TOP_Z1, x2 = TOP_X2, z2 = TOP_Z2;
         int steps = switch (facing) {
             case EAST -> 0;
             case SOUTH -> 1;
@@ -125,7 +129,7 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
             z1 = nz1;
             z2 = nz2;
         }
-        return Block.box(x1, ITEMS_Y1, z1, x2, ITEMS_Y2, z2);
+        return Block.box(x1, TOP_Y_START, z1, x2, getTopY(), z2);
     }
 
     public final boolean tryOpenUi(ServerPlayer player, ServerLevel level, BlockPos pos) {
