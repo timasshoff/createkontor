@@ -11,6 +11,7 @@ import com.timder.kontor.game.block.employee.EmployeeActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
 import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.game.property.BiomeSampling;
+import com.timder.kontor.game.property.PropertyProtection;
 import com.timder.kontor.util.ComponentFormatting;
 import java.util.Optional;
 import net.minecraft.network.chat.Component;
@@ -40,6 +41,7 @@ public class PropertyManagerActions extends EmployeeActions {
                     + result.status().name().toLowerCase()));
         }
         comapnyData.setDirty();
+        PropertyProtection.onAcquired(key, company);
         return S2CActionResult.success(Component.translatable(
                 "message.createkontor.property_manager."
                         + result.status().name().toLowerCase(),

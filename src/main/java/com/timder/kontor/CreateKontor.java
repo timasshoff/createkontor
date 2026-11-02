@@ -13,6 +13,7 @@ import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.command.*;
 import com.timder.kontor.game.network.KontorNetwork;
 import com.timder.kontor.game.property.BiomeMeasurer;
+import com.timder.kontor.game.property.PropertyProtection;
 import com.timder.kontor.game.wiki.KontorWikiPages;
 import com.timder.kontor.registry.KontorRegistries;
 import net.minecraft.data.DataGenerator;
@@ -47,6 +48,7 @@ public class CreateKontor {
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(KontorTickHandler.class);
         NeoForge.EVENT_BUS.register(EmployeeDeskInteraction.class);
+        NeoForge.EVENT_BUS.register(PropertyProtection.class);
 
         NeoForge.EVENT_BUS.addListener(KontorChunkLoading::onServerStopped);
         NeoForge.EVENT_BUS.addListener(BiomeMeasurer::onServerTick);

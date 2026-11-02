@@ -13,26 +13,26 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_BOUND, "§7Connected to %s");
         REGISTRATE.addRawLang(
                 CompanyBlockSupport.MESSAGE_NOT_IN_COMPANY,
-                "§cYou are not a member of any company. The block stays unconnected.");
-        REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_UNBOUND, "§cThe block is not connected to a company.");
+                "§c⚠ You are not a member of any company. The block stays unconnected.");
+        REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_UNBOUND, "§c⚠ The block is not connected to a company.");
         REGISTRATE.addRawLang(
-                CompanyBlockSupport.MESSAGE_COMPANY_GONE, "§cThe company of this block no longer exists.");
-        REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_NOT_MEMBER, "§cThis block belongs to another company.");
+                CompanyBlockSupport.MESSAGE_COMPANY_GONE, "§c⚠ The company of this block no longer exists.");
+        REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_NOT_MEMBER, "§c⚠ This block belongs to another company.");
         REGISTRATE.addRawLang(CompanyBlockSupport.MESSAGE_STATUS, "§7Company: %s");
         REGISTRATE.addRawLang(
                 "message.createkontor.new_day",
                 "§7Markets have closed and reopened with new prices. Trading day %s §7starts!");
-        REGISTRATE.addRawLang("message.createkontor.already_member", "§cYou are already a member of a company.");
-        REGISTRATE.addRawLang("message.createkontor.employee_desk.vacant", "§cThis desk is not staffed.");
+        REGISTRATE.addRawLang("message.createkontor.already_member", "§c⚠ You are already a member of a company.");
+        REGISTRATE.addRawLang("message.createkontor.employee_desk.vacant", "§c⚠ This desk is not staffed.");
         REGISTRATE.addRawLang(
                 "message.createkontor.shipping_exit.limit",
-                "§cLimit reached: Legal form allows at most %s §cbound shipping exits.");
-        REGISTRATE.addRawLang("message.createkontor.kontor_desk.limit", "§cThis company already has a Kontor Desk.");
+                "§c⚠ Limit reached: Legal form allows at most %s §cbound shipping exits.");
+        REGISTRATE.addRawLang("message.createkontor.kontor_desk.limit", "§c⚠ This company already has a Kontor Desk.");
         REGISTRATE.addRawLang(
                 "message.createkontor.kontor_desk.request_accepting_failed", "§cAccepting request %s §cfailed: %s");
         REGISTRATE.addRawLang(
                 "message.createkontor.logistics_manager_desk.limit",
-                "§cThis company already has a Logistics Manager's Desk.");
+                "§c⚠ This company already has a Logistics Manager's Desk.");
         REGISTRATE.addRawLang(
                 "message.createkontor.logistics.connected",
                 "§7%s §7is connected to a logistics network. Stored goods cost a daily storage fee.");
@@ -135,6 +135,11 @@ public class KontorLanguage {
                 "§7Create: Kontor is measuring the biomes of dimension %s §7to calculate land prices (%s §7done). The server may lag, this is normal! Depending on your configuration, measurement might take a few minutes.");
         REGISTRATE.addRawLang(
                 "message.createkontor.measurement_done", "§7Biome measurement of dimension %s §7finished.");
+        REGISTRATE.addRawLang("message.createkontor.protected", "§c⚠ This land is owned by %s.");
+        REGISTRATE.addRawLang("message.createkontor.entered_own_property", "§7You entered your company's property.");
+        REGISTRATE.addRawLang("message.createkontor.left_own_property", "§7You left your company's property.");
+        REGISTRATE.addRawLang("message.createkontor.entered_foreign_property", "§e⚠ You entered the property of %s.");
+        REGISTRATE.addRawLang("message.createkontor.left_foreign_property", "§7You left the property of %s.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -731,7 +736,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("chart.createkontor.policy_rate.title", "Policy Rate History");
         REGISTRATE.addRawLang("chart.createkontor.policy_rate.series.policy_rate", "Policy Rate in %");
 
-        REGISTRATE.addRawLang("toast.createkontor.error.title", "An error occurred:");
+        REGISTRATE.addRawLang("toast.createkontor.error.title", "⚠ An error occurred:");
         REGISTRATE.addRawLang("toast.createkontor.info.title", "Information:");
         REGISTRATE.addRawLang("toast.createkontor.success.title", "Success:");
 
