@@ -12,6 +12,7 @@ public final class KontorRegistries {
     public static void register(IEventBus modEventBus) {
         KontorBlockEntities.touch();
         KontorLanguage.touch();
+        KontorItems.touch();
         KontorCreativeTabs.CREATIVE_TABS.register(modEventBus);
         KontorPackagePortTargets.register(modEventBus);
     }

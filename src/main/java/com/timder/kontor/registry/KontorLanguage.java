@@ -558,6 +558,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.not_operational", "§c§l\u2717");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.cannot_afford", "§cCannot afford");
 
+        REGISTRATE.addRawLang("ui.createkontor.notebook.title", "Notebook");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
