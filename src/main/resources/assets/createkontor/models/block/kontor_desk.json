@@ -1,0 +1,8 @@
+{
+  "loader": "neoforge:composite",
+  "parent": "minecraft:block/block",
+  "children": {
+    "base": { "parent": "createkontor:block/desk/base" },
+    "top":  { "parent": "createkontor:block/desk/top_kontor" }
+  }
+}

@@ -41,9 +41,10 @@ public final class KontorBlocks {
 
     public static final BlockEntry<KontorDeskBlock> KONTOR_DESK = REGISTRATE
             .block("kontor_desk", KontorDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion())
+            .blockstate((ctx, prov) -> prov.horizontalBlock(
+                    ctx.get(), prov.models().getExistingFile(prov.modLoc("block/" + ctx.getName())), 90))
             .tag(BlockTags.MINEABLE_WITH_PICKAXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()

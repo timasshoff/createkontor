@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=east": {
       "model": "createkontor:block/kontor_desk"
+    },
+    "facing=north": {
+      "model": "createkontor:block/kontor_desk",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "createkontor:block/kontor_desk",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "createkontor:block/kontor_desk",
+      "y": 180
     }
   }
 }
