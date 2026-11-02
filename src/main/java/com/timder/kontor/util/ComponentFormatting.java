@@ -103,6 +103,10 @@ public final class ComponentFormatting {
         return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)));
     }
 
+    public static Component lengthInDaysColored(long day) {
+        return Component.translatable("economy.createkontor.days", Component.literal(Long.toString(day)).withStyle(ChatFormatting.GOLD).withStyle(ChatFormatting.GRAY));
+    }
+
     public static Component lengthInDays(long day) {
         return Component.translatable("economy.createkontor.days", Component.literal(Long.toString(day)));
     }

@@ -84,7 +84,7 @@
   "chart.createkontor.today": "Today",
   "createkontor.configuration.title": "Create: Kontor Configs",
   "economy.createkontor.current_day": "§7Day %s",
-  "economy.createkontor.days": "%s §7Day(s)",
+  "economy.createkontor.days": "%s Day(s)",
   "employee_role.createkontor.buyer": "Buyer",
   "employee_role.createkontor.consultant": "Consultant",
   "employee_role.createkontor.finances_manager": "Finances Manager",

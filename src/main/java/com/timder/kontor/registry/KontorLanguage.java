@@ -669,7 +669,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("employee_role.createkontor.property_manager", "Property Manager");
 
         REGISTRATE.addRawLang("economy.createkontor.current_day", "§7Day %s");
-        REGISTRATE.addRawLang("economy.createkontor.days", "%s §7Day(s)");
+        REGISTRATE.addRawLang("economy.createkontor.days", "%s Day(s)");
 
         REGISTRATE.addRawLang("loan.createkontor.bank", "Bank Loan");
         REGISTRATE.addRawLang("loan.createkontor.founder", "Founder's Loan");
