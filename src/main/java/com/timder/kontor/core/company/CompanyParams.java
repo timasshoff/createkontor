@@ -5,6 +5,7 @@ import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseCatalog;
 import com.timder.kontor.core.company.license.LicenseParams;
+import com.timder.kontor.core.company.property.PropertyParams;
 import java.util.Objects;
 
 /**
@@ -26,6 +27,7 @@ import java.util.Objects;
  * @param purchaseMarkup Surcharge on the market price when a company buys goods, as a fraction (0.10 is 10 %)
  * @param storageFeePerItemDay Dollars a company pays per day for each stored item in the logistics network
  * @param bankLoans The bank loan parameters
+ * @param property The property parameters
  */
 public record CompanyParams(
         LegalForms legalForms,
@@ -44,7 +46,8 @@ public record CompanyParams(
         double purchaseMarkup,
         double autoPurchaseMarkup,
         double storageFeePerItemDay,
-        BankLoanParams bankLoans) {
+        BankLoanParams bankLoans,
+        PropertyParams property) {
 
     public CompanyParams {
         Objects.requireNonNull(legalForms, "legalForms must not be null.");
@@ -53,6 +56,7 @@ public record CompanyParams(
         Objects.requireNonNull(startDeposit, "startDeposit must not be null.");
         Objects.requireNonNull(founderLoan, "founderLoan must not be null.");
         Objects.requireNonNull(businessLicenseFee, "businessLicenseFee must not be null.");
+        Objects.requireNonNull(property, "property must not be null.");
         if (startDeposit.isNegative()) throw new IllegalArgumentException("startDeposit must not be negative.");
         if (founderLoan.isNegative()) throw new IllegalArgumentException("founderLoan must not be negative.");
         if (founderLoanFreeDays < 0) throw new IllegalArgumentException("founderLoanFreeDays must not be negative.");
@@ -100,6 +104,7 @@ public record CompanyParams(
                 0.1,
                 0.2,
                 0.002,
-                BankLoanParams.standard());
+                BankLoanParams.standard(),
+                PropertyParams.disabled());
     }
 }

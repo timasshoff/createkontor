@@ -1,15 +1,12 @@
 package com.timder.kontor.game.ui.element;
 
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
-import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture;
-import com.lowdragmc.lowdraglib2.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
-import com.lowdragmc.lowdraglib2.gui.ui.styletemplate.Sprites;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.util.ComponentFormatting;
@@ -34,7 +31,7 @@ public final class UiContainer {
                         .paddingAll(3)
                         .gapAll(4)
                         .alignItems(AlignItems.CENTER))
-                .style(style -> style.background(Sprites.BORDER_DARK));
+                .style(UiStyles.CARD);
 
         Label day = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER)
                 .textStyle(style -> style.textAlignVertical(Vertical.CENTER));
@@ -89,17 +86,17 @@ public final class UiContainer {
         return new UIElement()
                 .layout(layout ->
                         layout.widthPercent(50).heightPercent(50).paddingAll(8).gapAll(4))
-                .style(style -> style.background(Sprites.BORDER_DARK));
+                .style(UiStyles.PANEL);
     }
 
     public static ScrollerView smallScroller() {
         ScrollerView scroller = new ScrollerView();
         scroller.layout(layout -> layout.widthPercent(50).heightPercent(50).paddingAll(8));
-        scroller.style(style -> style.background(Sprites.BORDER_DARK));
+        scroller.style(UiStyles.PANEL);
 
         return scroller.scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
-                .viewPort(viewPort -> viewPort.layout(layout -> layout.paddingAll(0))
-                        .style(style -> style.background(IGuiTexture.EMPTY)))
+                .viewPort(viewPort ->
+                        viewPort.layout(layout -> layout.paddingAll(0)).style(UiStyles.TRANSPARENT))
                 .viewContainer(viewContainer -> viewContainer.layout(layout -> layout.gapAll(4)))
                 .verticalScroller(vs -> vs.layout(layout -> layout.marginLeft(4)));
     }
@@ -108,17 +105,17 @@ public final class UiContainer {
         return new UIElement()
                 .layout(layout ->
                         layout.widthPercent(95).heightPercent(95).paddingAll(8).gapAll(4))
-                .style(style -> style.background(Sprites.BORDER_DARK));
+                .style(UiStyles.PANEL);
     }
 
     public static ScrollerView largeScroller() {
         ScrollerView scroller = new ScrollerView();
         scroller.layout(layout -> layout.widthPercent(95).heightPercent(95).paddingAll(8));
-        scroller.style(style -> style.background(Sprites.BORDER_DARK));
+        scroller.style(UiStyles.PANEL);
 
         return scroller.scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
-                .viewPort(viewPort -> viewPort.layout(layout -> layout.paddingAll(0))
-                        .style(style -> style.background(IGuiTexture.EMPTY)))
+                .viewPort(viewPort ->
+                        viewPort.layout(layout -> layout.paddingAll(0)).style(UiStyles.TRANSPARENT))
                 .viewContainer(viewContainer -> viewContainer.layout(layout -> layout.gapAll(4)))
                 .verticalScroller(vs -> vs.layout(layout -> layout.marginLeft(4)));
     }
@@ -129,7 +126,7 @@ public final class UiContainer {
         tabView.tabScroller(UiContainer::fitTabScrollerHeight);
         tabView.tabContentContainer(content -> content.layout(
                         layout -> layout.paddingAll(8).gapAll(4).flexBasis(0))
-                .style(style -> style.background(Sprites.BORDER_DARK)));
+                .style(UiStyles.PANEL));
         return tabView;
     }
 
@@ -142,8 +139,8 @@ public final class UiContainer {
         scroller.layout(layout -> layout.widthPercent(100).heightPercent(100));
 
         return scroller.scrollerStyle(style -> style.mode(ScrollerMode.VERTICAL))
-                .viewPort(viewPort -> viewPort.layout(layout -> layout.paddingAll(0))
-                        .style(style -> style.background(IGuiTexture.EMPTY)))
+                .viewPort(viewPort ->
+                        viewPort.layout(layout -> layout.paddingAll(0)).style(UiStyles.TRANSPARENT))
                 .viewContainer(viewContainer -> viewContainer.layout(layout -> layout.gapAll(4)))
                 .verticalScroller(vs -> vs.layout(layout -> layout.marginLeft(4)));
     }
@@ -155,7 +152,7 @@ public final class UiContainer {
                         .widthFitContent()
                         .alignSelf(AlignItems.CENTER)
                         .alignItems(AlignItems.CENTER))
-                .style(style -> style.background(Sprites.BORDER_DARK));
+                .style(UiStyles.CARD);
         headerWithSubtitle.addChild(header);
         headerWithSubtitle.addChild(subtitle);
         return headerWithSubtitle;
@@ -181,7 +178,7 @@ public final class UiContainer {
     private static UIElement columnDivider() {
         return new UIElement()
                 .layout(layout -> layout.width(1).alignSelf(AlignItems.STRETCH))
-                .style(style -> style.background(new ColorRectTexture(0xFF555555)));
+                .style(UiStyles.DIVIDER);
     }
 
     private static UIElement column(List<? extends UIElement> elements) {
@@ -196,7 +193,7 @@ public final class UiContainer {
         return column;
     }
 
-    public static UIElement itemSlotRow(List<ItemStack> items) {
+    public static UIElement itemStackRow(List<ItemStack> items) {
         UIElement row = new UIElement()
                 .layout(layout -> layout.widthPercent(100)
                         .flexDirection(FlexDirection.ROW)
@@ -205,6 +202,19 @@ public final class UiContainer {
                         .gapAll(2));
         for (ItemStack stack : items) {
             row.addChild(new ItemSlot().setItem(stack));
+        }
+        return row;
+    }
+
+    public static UIElement itemSlotRow(List<ItemSlot> items) {
+        UIElement row = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexDirection(FlexDirection.ROW)
+                        .flexWrap(FlexWrap.WRAP)
+                        .alignItems(AlignItems.FLEX_START)
+                        .gapAll(2));
+        for (ItemSlot slot : items) {
+            row.addChild(slot);
         }
         return row;
     }

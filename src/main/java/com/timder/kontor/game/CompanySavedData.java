@@ -16,6 +16,7 @@ import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.RequestOrigin;
+import com.timder.kontor.core.company.property.*;
 import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.company.request.RequestArrivals;
 import com.timder.kontor.core.company.request.RequestBoard;
@@ -180,6 +181,12 @@ public class CompanySavedData extends SavedData {
 
         tag.put("Logistics", writeLogistics(state.logistics()));
 
+        ListTag properties = new ListTag();
+        for (PropertyHolding holding : state.properties()) {
+            properties.add(writePropertyHolding(holding));
+        }
+        tag.put("Properties", properties);
+
         return tag;
     }
 
@@ -256,6 +263,11 @@ public class CompanySavedData extends SavedData {
                 ? readLogistics(tag.getCompound("Logistics"))
                 : LogisticsState.disconnected();
 
+        List<PropertyHolding> properties = new ArrayList<>();
+        for (Tag t : tag.getList("Properties", Tag.TAG_COMPOUND)) {
+            properties.add(readPropertyHolding((CompoundTag) t));
+        }
+
         return new Company.SaveState(
                 id,
                 name,
@@ -281,7 +293,8 @@ public class CompanySavedData extends SavedData {
                 employees,
                 lastActiveDay,
                 departures,
-                logistics);
+                logistics,
+                properties);
     }
 
     private static CompoundTag writeAccount(Account.SaveState state) {
@@ -561,5 +574,26 @@ public class CompanySavedData extends SavedData {
                 tag.getLong("UnbilledItemTicks"),
                 tag.getLong("LastSampleItems"),
                 tag.getLong("LastSampleTick"));
+    }
+
+    private static CompoundTag writePropertyHolding(PropertyHolding holding) {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Dimension", holding.chunk().dimension().value());
+        tag.putInt("ChunkX", holding.chunk().x());
+        tag.putInt("ChunkZ", holding.chunk().z());
+        tag.putString("Biome", holding.biome().value());
+        tag.putString("Kind", holding.kind().name());
+        tag.putLong("AcquiredDay", holding.acquiredDay());
+        tag.putBoolean("Cancelled", holding.cancelled());
+        return tag;
+    }
+
+    private static PropertyHolding readPropertyHolding(CompoundTag tag) {
+        return new PropertyHolding(
+                new ChunkKey(new DimensionId(tag.getString("Dimension")), tag.getInt("ChunkX"), tag.getInt("ChunkZ")),
+                new BiomeId(tag.getString("Biome")),
+                HoldingKind.valueOf(tag.getString("Kind")),
+                tag.getLong("AcquiredDay"),
+                tag.getBoolean("Cancelled"));
     }
 }

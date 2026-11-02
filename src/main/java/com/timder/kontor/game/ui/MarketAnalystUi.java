@@ -3,11 +3,9 @@ package com.timder.kontor.game.ui;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
-import com.lowdragmc.lowdraglib2.gui.ui.UI;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
-import com.lowdragmc.lowdraglib2.gui.ui.style.StylesheetManager;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.CompanyParams;
@@ -29,6 +27,7 @@ import com.timder.kontor.game.ui.chart.classic.ChartHost;
 import com.timder.kontor.game.ui.chart.segment.SegmentBarElement;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
+import com.timder.kontor.game.ui.element.UiStyles;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.ObservableList;
 import dev.vfyjxf.taffy.style.AlignContent;
@@ -58,7 +57,7 @@ public class MarketAnalystUi {
                 rawMaterialsTab(context));
 
         var root = UiContainer.withHud(tabView, UiContainer.hudBox(context.company(), context.economy()));
-        return new ModularUI(UI.of(root, StylesheetManager.GDP), context.player());
+        return new ModularUI(UiStyles.ui(root), context.player());
     }
 
     public static UIElement marketsTab(EmployeeDeskContext context) {

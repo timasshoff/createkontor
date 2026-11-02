@@ -1,7 +1,6 @@
 package com.timder.kontor.game.ui.element;
 
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ProgressBar;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
 public class UiProgressBars {
@@ -13,8 +12,7 @@ public class UiProgressBars {
         ProgressBar bar = new ProgressBar();
         bar.setRange(0, 100);
         bar.setProgress(percent);
-        bar.label(label ->
-                label.setText(Component.literal(Math.round(percent) + " %").withStyle(ChatFormatting.GOLD)));
+        bar.label(label -> label.setText(Component.literal(Math.round(percent) + " %")));
         bar.layout(layout -> layout.height(HEIGHT));
         return bar;
     }

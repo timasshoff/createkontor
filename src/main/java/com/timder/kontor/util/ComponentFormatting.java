@@ -103,6 +103,14 @@ public final class ComponentFormatting {
         return Component.translatable("economy.createkontor.current_day", Component.literal(Long.toString(day)));
     }
 
+    public static Component lengthInDaysColored(long day) {
+        return Component.translatable(
+                "economy.createkontor.days",
+                Component.literal(Long.toString(day))
+                        .withStyle(ChatFormatting.GOLD)
+                        .withStyle(ChatFormatting.GRAY));
+    }
+
     public static Component lengthInDays(long day) {
         return Component.translatable("economy.createkontor.days", Component.literal(Long.toString(day)));
     }
@@ -119,8 +127,16 @@ public final class ComponentFormatting {
         return Component.literal(s);
     }
 
+    public static MutableComponent coloredCheck(boolean met) {
+        return met
+                ? Component.literal("\u2713").withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.BOLD)
+                : Component.literal("\u2717").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD);
+    }
+
     public static MutableComponent check(boolean met) {
-        return met ? Component.literal("\u2713") : Component.literal("\u2717");
+        return met
+                ? Component.literal("\u2713").withStyle(ChatFormatting.BOLD)
+                : Component.literal("\u2717").withStyle(ChatFormatting.BOLD);
     }
 
     public static MutableComponent progress(String actual, String required, boolean met) {

@@ -27,7 +27,8 @@ public final class KontorBlockEntities {
                     KontorBlocks.LAWYER_DESK,
                     KontorBlocks.MARKET_ANALYST_DESK,
                     KontorBlocks.CONSULTANT_DESK,
-                    KontorBlocks.FINANCES_MANAGER_DESK)
+                    KontorBlocks.FINANCES_MANAGER_DESK,
+                    KontorBlocks.PROPERTY_MANAGER_DESK)
             .register();
 
     public static final BlockEntityEntry<BuyerDeskBlockEntity> BUYER_DESK = REGISTRATE

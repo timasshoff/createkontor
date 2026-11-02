@@ -7,15 +7,17 @@ import dev.vfyjxf.taffy.style.AlignItems;
 import net.minecraft.network.chat.Component;
 
 public final class UiButtons {
+
     public static Button primary(Component text) {
+        return (Button) new Button().setText(text).addClass("kontor-primary").layout(layout -> layout.height(20));
+    }
+
+    public static Button secondary(Component text) {
         return (Button) new Button().setText(text).layout(layout -> layout.height(20));
     }
 
     public static Button critical(Component text) {
-        return (Button) new Button()
-                .setText(text)
-                .textStyle(style -> style.textColor(0xFF5555))
-                .layout(layout -> layout.height(20));
+        return (Button) new Button().setText(text).addClass("kontor-danger").layout(layout -> layout.height(20));
     }
 
     public static Button wrapping(Button button) {
@@ -31,6 +33,10 @@ public final class UiButtons {
 
     public static Button primaryWrapping(Component text) {
         return wrapping(primary(text));
+    }
+
+    public static Button secondaryWrapping(Component text) {
+        return wrapping(secondary(text));
     }
 
     public static Button criticalWrapping(Component text) {

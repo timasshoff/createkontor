@@ -12,11 +12,11 @@ public final class ChartColors {
 
     public static final int[] STACK = {BLUE, TEAL, ORANGE, GREEN, PURPLE, RED};
 
-    public static final int PANEL_BACKGROUND = 0xFF232224;
-    public static final int PLOT_BACKGROUND = 0xFF1B1B1B;
+    public static final int PANEL_BACKGROUND = 0x0023262a;
+    public static final int PLOT_BACKGROUND = 0xFF172420;
     public static final int GRID = 0xFF3A3A3A;
-    public static final int AXIS = 0xFF8A8A8A;
-    public static final int TEXT = 0xFFE0E0E0;
+    public static final int AXIS = 0xFFE6DFC8;
+    public static final int TEXT = 0xFFE6DFC8;
     public static final int TEXT_DIM = 0xFFA0A0A0;
     public static final int CURSOR = 0x80FFFFFF;
     public static final int DOT_OUTLINE = 0xFF000000;

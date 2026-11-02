@@ -10,16 +10,16 @@ import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.lowdragmc.lowdraglib2.gui.util.DrawerHelper;
 import com.timder.kontor.game.ui.chart.ChartColors;
 import dev.vfyjxf.taffy.style.TaffyPosition;
+import java.util.*;
+import java.util.function.DoubleFunction;
+import java.util.function.IntFunction;
+import javax.annotation.Nullable;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import org.joml.Vector2f;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.DoubleFunction;
-import java.util.function.IntFunction;
 
 public class ChartElement extends UIElement {
 
@@ -37,7 +37,8 @@ public class ChartElement extends UIElement {
 
     private record Dot(float x, float y, int color) {}
 
-    private record Plot(float left, float top, float right, float bottom, double xMin, double xMax, double yMin, double yMax) {
+    private record Plot(
+            float left, float top, float right, float bottom, double xMin, double xMax, double yMin, double yMax) {
         float width() {
             return right - left;
         }
@@ -81,21 +82,26 @@ public class ChartElement extends UIElement {
     private ChartKind kind = ChartKind.LINE;
     private List<ChartSeries> series = List.of();
     private final List<ReferenceLine> referenceLines = new ArrayList<>();
+
     @Nullable
     private Component title;
+
     private boolean includeZero = false;
 
     private ValueFormatter xFormatter = NiceScale::format;
     private ValueFormatter yFormatter = NiceScale::format;
     private DoubleFunction<String> tooltipValueFormatter = v -> String.format(Locale.ROOT, "%.2f", v);
+
     @Nullable
     private IntFunction<String> tooltipHeader;
 
     private List<ChartSeries> fullSeries = List.of();
     private List<String> fullPointLabels = List.of();
     private List<String> pointLabels = List.of();
+
     @Nullable
     private Selector<Integer> rangeSelector;
+
     private float rangeSelectorWidth = 0f;
     private int visibleRange = 0;
     private boolean showXAxis = true;
@@ -104,7 +110,6 @@ public class ChartElement extends UIElement {
     private final Set<String> hiddenLabels = new HashSet<>();
     private final List<LegendHit> legendHits = new ArrayList<>();
     private List<ChartSeries> shownSeries = List.of();
-
 
     public ChartElement() {
         style(s -> s.overflowVisible(false));
@@ -137,8 +142,9 @@ public class ChartElement extends UIElement {
         String xZeroLabel = spec.xZeroLabel();
         String yUnit = spec.yUnit();
         String tooltipFormat = "%." + spec.tooltipDecimals() + "f";
-        setXFormatter((value, decimals) ->
-                !xZeroLabel.isEmpty() && Math.abs(value) < 1e-9 ? xZeroLabel : NiceScale.format(value, decimals) + xUnit);
+        setXFormatter((value, decimals) -> !xZeroLabel.isEmpty() && Math.abs(value) < 1e-9
+                ? xZeroLabel
+                : NiceScale.format(value, decimals) + xUnit);
         setYFormatter((value, decimals) -> NiceScale.format(value, decimals) + yUnit);
         setTooltipValueFormatter(value -> String.format(Locale.ROOT, tooltipFormat, value) + yUnit);
 
@@ -253,9 +259,7 @@ public class ChartElement extends UIElement {
             if (value == null) {
                 return Component.literal("—");
             }
-            String text = labelUnit != null
-                    ? NiceScale.format(value, 0) + labelUnit
-                    : xFormatter.format(value, 0);
+            String text = labelUnit != null ? NiceScale.format(value, 0) + labelUnit : xFormatter.format(value, 0);
             return Component.literal(text);
         }));
         selector.setCandidates(options);
@@ -264,11 +268,8 @@ public class ChartElement extends UIElement {
             applyXRangeFilter();
         });
         selector.setSelected(defaultRange, false);
-        selector.layout(layout -> layout
-                .positionType(TaffyPosition.ABSOLUTE)
-                .top(PAD)
-                .right(PAD)
-                .width(selectorWidth));
+        selector.layout(layout ->
+                layout.positionType(TaffyPosition.ABSOLUTE).top(PAD).right(PAD).width(selectorWidth));
 
         addChild(selector);
         rangeSelector = selector;
@@ -408,7 +409,14 @@ public class ChartElement extends UIElement {
 
         float y = top + PAD;
         if (title != null) {
-            LDLibFonts.drawText(g, font, title, Math.round(left + PAD), Math.round(y), ChartColors.TEXT, false);
+            LDLibFonts.drawText(
+                    g,
+                    font,
+                    title.copy().withStyle(ChatFormatting.BOLD),
+                    Math.round(left + PAD),
+                    Math.round(y),
+                    ChartColors.TEXT,
+                    true);
             y += lineHeight + 4f;
         }
         if (!series.isEmpty()) {
@@ -426,18 +434,24 @@ public class ChartElement extends UIElement {
                 range[0],
                 range[1],
                 yScale.min(),
-                yScale.max()
-        );
+                yScale.max());
 
         if (plot.width() < MIN_PLOT_SIZE || plot.height() < MIN_PLOT_SIZE) {
             return; // too small to draw
         }
 
-        DrawerHelper.drawSolidRect(g, plot.left(), plot.top(), plot.width(), plot.height(), ChartColors.PLOT_BACKGROUND);
+        DrawerHelper.drawSolidRect(
+                g, plot.left(), plot.top(), plot.width(), plot.height(), ChartColors.PLOT_BACKGROUND);
         for (int i = 0; i < yTicks.length; i++) {
             float py = Math.round(plot.y(yTicks[i]));
             DrawerHelper.drawSolidRect(g, plot.left(), py, plot.width(), 1f, ChartColors.GRID);
-            drawText(g, font, yLabels[i], plot.left() - 4f - font.width(yLabels[i]), py - lineHeight / 2f + 1f, ChartColors.TEXT_DIM);
+            drawText(
+                    g,
+                    font,
+                    yLabels[i],
+                    plot.left() - 4f - font.width(yLabels[i]),
+                    py - lineHeight / 2f + 1f,
+                    ChartColors.TEXT_DIM);
         }
 
         for (double tick : xTicks) {
@@ -453,7 +467,7 @@ public class ChartElement extends UIElement {
             drawText(g, font, label, labelX, plot.bottom() + 4f, ChartColors.TEXT_DIM);
         }
         DrawerHelper.drawSolidRect(g, plot.left(), plot.top(), 1f, plot.height(), ChartColors.AXIS);
-        DrawerHelper.drawSolidRect(g, plot.left(), plot.bottom(), plot.width(),1f, ChartColors.AXIS);
+        DrawerHelper.drawSolidRect(g, plot.left(), plot.bottom(), plot.width(), 1f, ChartColors.AXIS);
         g.flush();
 
         for (ReferenceLine line : referenceLines) {
@@ -519,7 +533,8 @@ public class ChartElement extends UIElement {
                 yMax = Math.max(yMax, sum);
             }
             if (size >= 2) {
-                double spacing = (shownSeries.get(0).x(size - 1) - shownSeries.get(0).x(0)) / (size - 1);
+                double spacing =
+                        (shownSeries.get(0).x(size - 1) - shownSeries.get(0).x(0)) / (size - 1);
                 double halfSlot = spacing / 2.0;
                 xMin -= halfSlot;
                 xMax += halfSlot;
@@ -537,7 +552,7 @@ public class ChartElement extends UIElement {
             xMin -= 0.5;
             xMax += 0.5;
         }
-        return new double[]{xMin, xMax, yMin, yMax};
+        return new double[] {xMin, xMax, yMin, yMax};
     }
 
     private static void drawText(GuiGraphics g, Font font, String text, float x, float y, int color) {
@@ -619,7 +634,17 @@ public class ChartElement extends UIElement {
         return slotPx * BAR_WIDTH_FRACTION;
     }
 
-    private void drawHover(GUIContext ctx, GuiGraphics g, Font font, Plot plot, float mx, float my, float left, float top, float width, float height) {
+    private void drawHover(
+            GUIContext ctx,
+            GuiGraphics g,
+            Font font,
+            Plot plot,
+            float mx,
+            float my,
+            float left,
+            float top,
+            float width,
+            float height) {
         double hoverX = plot.xMin() + (mx - plot.left()) / plot.width() * (plot.xMax() - plot.xMin());
 
         List<TipLine> lines = new ArrayList<>();
@@ -663,7 +688,17 @@ public class ChartElement extends UIElement {
         ctx.postRendering(c -> drawTooltip(c.graphics, font, header, lines, mx, my, left, top, width, height));
     }
 
-    private static void drawTooltip(GuiGraphics g, Font font, String header, List<TipLine> lines, float mx, float my, float left, float top, float width, float height) {
+    private static void drawTooltip(
+            GuiGraphics g,
+            Font font,
+            String header,
+            List<TipLine> lines,
+            float mx,
+            float my,
+            float left,
+            float top,
+            float width,
+            float height) {
         float lineHeight = font.lineHeight;
         float textWidth = font.width(header);
         for (TipLine line : lines) {
@@ -688,7 +723,13 @@ public class ChartElement extends UIElement {
         drawText(g, font, header, bx + TOOLTIP_PAD, ty, ChartColors.TEXT_DIM);
         for (TipLine line : lines) {
             ty += lineHeight + 1f;
-            DrawerHelper.drawSolidRect(g, Math.round(bx + TOOLTIP_PAD), Math.round(ty + (lineHeight - SWATCH) / 2f), SWATCH, SWATCH, line.color());
+            DrawerHelper.drawSolidRect(
+                    g,
+                    Math.round(bx + TOOLTIP_PAD),
+                    Math.round(ty + (lineHeight - SWATCH) / 2f),
+                    SWATCH,
+                    SWATCH,
+                    line.color());
             drawText(g, font, line.text(), bx + TOOLTIP_PAD + SWATCH + 4f, ty, ChartColors.TEXT);
         }
     }
@@ -734,19 +775,27 @@ public class ChartElement extends UIElement {
             float textWidth = font.width(label);
             float entryWidth = LEGEND_SWATCH + LEGEND_GAP + textWidth;
 
-            LegendHit hit = new LegendHit(x - LEGEND_HIT_PAD, y - LEGEND_HIT_PAD, entryWidth + 2f * LEGEND_HIT_PAD, lineHeight + 2f * LEGEND_HIT_PAD, s.label());
+            LegendHit hit = new LegendHit(
+                    x - LEGEND_HIT_PAD,
+                    y - LEGEND_HIT_PAD,
+                    entryWidth + 2f * LEGEND_HIT_PAD,
+                    lineHeight + 2f * LEGEND_HIT_PAD,
+                    s.label());
             legendHits.add(hit);
             boolean hovered = hit.contains(mx, my);
 
             int swatchColor = hidden ? faded(s.color()) : s.color();
-            DrawerHelper.drawSolidRect(g, Math.round(x), Math.round(y + lineHeight / 2f - 1f), LEGEND_SWATCH, 2f, swatchColor);
+            DrawerHelper.drawSolidRect(
+                    g, Math.round(x), Math.round(y + lineHeight / 2f - 1f), LEGEND_SWATCH, 2f, swatchColor);
             float textX = x + LEGEND_SWATCH + LEGEND_GAP;
             drawText(g, font, label, textX, y, hidden ? ChartColors.TEXT_DIM : ChartColors.TEXT);
             if (hidden) {
-                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight / 2f), textWidth, 1f, ChartColors.TEXT_DIM);
+                DrawerHelper.drawSolidRect(
+                        g, Math.round(textX), Math.round(y + lineHeight / 2f), textWidth, 1f, ChartColors.TEXT_DIM);
             }
             if (hovered) {
-                DrawerHelper.drawSolidRect(g, Math.round(textX), Math.round(y + lineHeight), textWidth, 1f, ChartColors.TEXT);
+                DrawerHelper.drawSolidRect(
+                        g, Math.round(textX), Math.round(y + lineHeight), textWidth, 1f, ChartColors.TEXT);
             }
             x += entryWidth + LEGEND_ENTRY_GAP;
         }

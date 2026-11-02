@@ -2,17 +2,16 @@ package com.timder.kontor.data.provider;
 
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
+import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
 import com.timder.kontor.core.company.legalform.UpgradeRequirements;
-import com.timder.kontor.core.company.financial.Money;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class LegalFormDefDataProvider implements DataProvider {
 
@@ -26,7 +25,9 @@ public class LegalFormDefDataProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         List<CompletableFuture<?>> futures = new ArrayList<>();
 
-        futures.add(save(cache, "sole_proprietorship",
+        futures.add(save(
+                cache,
+                "sole_proprietorship",
                 1,
                 "sole_proprietorship",
                 2,
@@ -47,9 +48,12 @@ public class LegalFormDefDataProvider implements DataProvider {
                 Money.ZERO, // Free storage
                 true,
                 1,
+                6,
                 null));
 
-        futures.add(save(cache, "partnership",
+        futures.add(save(
+                cache,
+                "partnership",
                 2,
                 "partnership",
                 4,
@@ -70,16 +74,18 @@ public class LegalFormDefDataProvider implements DataProvider {
                 Money.ZERO, // Free storage
                 false,
                 2,
+                16,
                 new UpgradeRequirements(
                         Money.ofDollars(10_000), // Fee
                         Money.ofDollars(5000), // Net worth
                         1,
                         3,
                         24000,
-                        7
-                )));
+                        7)));
 
-        futures.add(save(cache, "limited_company",
+        futures.add(save(
+                cache,
+                "limited_company",
                 3,
                 "limited_company",
                 6,
@@ -93,23 +99,25 @@ public class LegalFormDefDataProvider implements DataProvider {
                 1.0,
                 16384,
                 2,
-                Money.ofDollars(20000),  // Overdraft limit
+                Money.ofDollars(20000), // Overdraft limit
                 Money.ofDollars(100000), // Bank loan limit
                 true,
                 true,
                 Money.ofDollars(20000), // Free storage
                 false,
                 3,
+                48,
                 new UpgradeRequirements(
                         Money.ofDollars(25_000), // Fee
                         Money.ofDollars(20_000), // Net worth
                         75,
                         3.5,
                         24000,
-                        7
-                )));
+                        7)));
 
-        futures.add(save(cache, "public_company",
+        futures.add(save(
+                cache,
+                "public_company",
                 4,
                 "public_company",
                 10,
@@ -123,49 +131,50 @@ public class LegalFormDefDataProvider implements DataProvider {
                 1.0,
                 65536,
                 3,
-                Money.ofDollars(100000),  // Overdraft limit
+                Money.ofDollars(100000), // Overdraft limit
                 Money.ofDollars(500000), // Bank loan limit
                 true,
                 true,
                 Money.ofDollars(40000), // Free storage
                 false,
                 6,
+                LegalFormDef.UNLIMITED,
                 new UpgradeRequirements(
                         Money.ofDollars(50_000), // Fee
                         Money.ofDollars(100_000), // Net worth
                         150,
                         4.0,
                         24000,
-                        7
-                )));
+                        7)));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
-    private CompletableFuture<?> save(CachedOutput cache,
-                                      String fileName,
-                                      int level,
-                                      String id,
-                                      int maxEmployees,
-                                      double employeeSalaryFactor,
-                                      int maxProductLicenses,
-                                      int maxOpenRequestsPerProduct,
-                                      int maxOpenRequestsTotal,
-                                      int maxOpenOrders,
-                                      int maxOpenContracts,
-                                      int maxOrderQuantity,
-                                      double deadlineFactor,
-                                      int maxGridConnection,
-                                      int feedInLicenseTier,
-                                      Money overdraftLimit,
-                                      Money bankloanLimit,
-                                      boolean autoAcceptRequests,
-                                      boolean logisticsNetwork,
-                                      Money freeStorage,
-                                      boolean founderProtection,
-                                      int maxShippingExits,
-                                      UpgradeRequirements entryRequirements
-    ) {
+    private CompletableFuture<?> save(
+            CachedOutput cache,
+            String fileName,
+            int level,
+            String id,
+            int maxEmployees,
+            double employeeSalaryFactor,
+            int maxProductLicenses,
+            int maxOpenRequestsPerProduct,
+            int maxOpenRequestsTotal,
+            int maxOpenOrders,
+            int maxOpenContracts,
+            int maxOrderQuantity,
+            double deadlineFactor,
+            int maxGridConnection,
+            int feedInLicenseTier,
+            Money overdraftLimit,
+            Money bankloanLimit,
+            boolean autoAcceptRequests,
+            boolean logisticsNetwork,
+            Money freeStorage,
+            boolean founderProtection,
+            int maxShippingExits,
+            int maxProperties,
+            UpgradeRequirements entryRequirements) {
         JsonObject json = new JsonObject();
         json.addProperty("level", level);
         json.addProperty("id", id);
@@ -187,11 +196,15 @@ public class LegalFormDefDataProvider implements DataProvider {
         json.addProperty("free_storage_value_in_dollars", Math.round(freeStorage.toDollars()));
         json.addProperty("founder_protection", founderProtection);
         json.addProperty("max_shipping_exits", maxShippingExits);
+        json.addProperty("max_properties", maxProperties);
 
         if (entryRequirements != null) {
             JsonObject requirements = new JsonObject();
-            requirements.addProperty("fee_in_dollars", Math.round(entryRequirements.fee().toDollars()));
-            requirements.addProperty("min_net_worth_in_dollars", Math.round(entryRequirements.minNetWorth().toDollars()));
+            requirements.addProperty(
+                    "fee_in_dollars", Math.round(entryRequirements.fee().toDollars()));
+            requirements.addProperty(
+                    "min_net_worth_in_dollars",
+                    Math.round(entryRequirements.minNetWorth().toDollars()));
             requirements.addProperty("min_fulfilled_orders", entryRequirements.minFulfilledOrders());
             requirements.addProperty("min_reputation_stars", entryRequirements.minReputationStars());
             requirements.addProperty("processing_ticks", entryRequirements.processingTicks());

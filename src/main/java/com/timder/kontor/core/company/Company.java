@@ -13,6 +13,9 @@ import com.timder.kontor.core.company.logistics.LogisticsState;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.RequestOrigin;
+import com.timder.kontor.core.company.property.ChunkKey;
+import com.timder.kontor.core.company.property.PropertyHolding;
+import com.timder.kontor.core.company.property.PropertyRules;
 import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.company.request.RequestBoard;
 import com.timder.kontor.core.company.request.RequestParams;
@@ -52,6 +55,8 @@ public final class Company {
     private UpgradeApplication upgradeApplication = null;
 
     private final Map<LicenseKey, LicenseHolding> licenses = new LinkedHashMap<>();
+
+    private final Map<ChunkKey, PropertyHolding> properties = new LinkedHashMap<>();
 
     private long nextEmployeeNumber = 1;
     private final Map<Long, Employee> employees = new LinkedHashMap<>();
@@ -334,6 +339,36 @@ public final class Company {
         return licenses.remove(key) != null;
     }
 
+    public List<PropertyHolding> properties() {
+        return List.copyOf(properties.values());
+    }
+
+    public Optional<PropertyHolding> property(ChunkKey chunk) {
+        Objects.requireNonNull(chunk, "chunk must not be null.");
+        return Optional.ofNullable(properties.get(chunk));
+    }
+
+    public void addProperty(PropertyHolding holding) {
+        Objects.requireNonNull(holding, "holding must not be null.");
+        if (properties.containsKey(holding.chunk())) {
+            throw new IllegalStateException("The company already holds the chunk " + holding.chunk() + ".");
+        }
+        properties.put(holding.chunk(), holding);
+    }
+
+    public void replaceProperty(PropertyHolding holding) {
+        Objects.requireNonNull(holding, "holding must not be null.");
+        if (!properties.containsKey(holding.chunk())) {
+            throw new IllegalStateException("The company does not hold the chunk " + holding.chunk() + ".");
+        }
+        properties.put(holding.chunk(), holding);
+    }
+
+    public boolean removeProperty(ChunkKey chunk) {
+        Objects.requireNonNull(chunk, "chunk must not be null.");
+        return properties.remove(chunk) != null;
+    }
+
     public List<Employee> employees() {
         return List.copyOf(employees.values());
     }
@@ -559,8 +594,9 @@ public final class Company {
         return debt;
     }
 
-    public Money netWorth() {
-        return account.getBalance().minus(totalDebt());
+    public Money netWorth(CompanyParams params) {
+        Objects.requireNonNull(params, "params must not be null.");
+        return account.getBalance().minus(totalDebt()).plus(PropertyRules.landValue(this, params));
     }
 
     public Liquidity liquidity() {
@@ -731,7 +767,8 @@ public final class Company {
             List<Employee> employees,
             long lastActiveDay,
             List<Departure> departures,
-            LogisticsState logistics) {
+            LogisticsState logistics,
+            List<PropertyHolding> properties) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
             Objects.requireNonNull(name, "name must not be null.");
@@ -797,6 +834,13 @@ public final class Company {
             }
 
             logistics = logistics == null ? LogisticsState.disconnected() : logistics;
+
+            properties = properties == null ? List.of() : List.copyOf(properties);
+            Set<ChunkKey> chunks = new HashSet<>();
+            for (PropertyHolding holding : properties) {
+                if (!chunks.add(holding.chunk()))
+                    throw new IllegalArgumentException("properties contains " + holding.chunk() + " twice.");
+            }
         }
     }
 
@@ -830,7 +874,8 @@ public final class Company {
                 List.copyOf(employees.values()),
                 lastActiveDay,
                 List.copyOf(departures),
-                logistics);
+                logistics,
+                List.copyOf(properties.values()));
     }
 
     public static Company restore(SaveState saveState) {
@@ -866,6 +911,11 @@ public final class Company {
         company.lastActiveDay = saveState.lastActiveDay();
         company.departures.addAll(saveState.departures());
         company.logistics = saveState.logistics();
+
+        for (PropertyHolding holding : saveState.properties()) {
+            company.properties.put(holding.chunk(), holding);
+        }
+
         return company;
     }
 }

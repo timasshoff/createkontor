@@ -8,6 +8,7 @@ import com.timder.kontor.game.ui.chart.ChartColors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -109,7 +110,7 @@ public class SegmentBarElement extends UIElement {
 
         float y = top + PAD;
         if (!spec.title().isEmpty()) {
-            drawText(g, font, spec.title(), barLeft, y, ChartColors.TEXT);
+            drawText(g, font, spec.title(), barLeft, y, ChartColors.TEXT, true);
             y += ROW_HEIGHT + GAP;
         }
         float barTop = y;
@@ -178,7 +179,8 @@ public class SegmentBarElement extends UIElement {
                         text,
                         x1 + (x2 - x1 - textWidth) / 2f,
                         textY,
-                        SegmentBarMath.readableTextColor(segment.color()));
+                        SegmentBarMath.readableTextColor(segment.color()),
+                        false);
             }
         }
 
@@ -229,7 +231,7 @@ public class SegmentBarElement extends UIElement {
                     g, Math.round(x), Math.round(swatchY), LEGEND_SWATCH, LEGEND_SWATCH, segment.color());
 
             float textX = x + LEGEND_SWATCH + LEGEND_GAP;
-            drawText(g, font, entry.text(), textX, y, ChartColors.TEXT);
+            drawText(g, font, entry.text(), textX, y, ChartColors.TEXT, false);
             if (entry.index() == hovered) {
                 DrawerHelper.drawSolidRect(
                         g,
@@ -282,7 +284,7 @@ public class SegmentBarElement extends UIElement {
             DrawerHelper.drawSolidRect(g, bx, by, boxWidth, boxHeight, ChartColors.TOOLTIP_BACKGROUND);
 
             float ty = by + TOOLTIP_PAD;
-            drawText(g, font, header, bx + TOOLTIP_PAD, ty, ChartColors.TEXT);
+            drawText(g, font, header, bx + TOOLTIP_PAD, ty, ChartColors.TEXT, false);
 
             ty += lineHeight + 1f;
             DrawerHelper.drawSolidRect(
@@ -292,11 +294,11 @@ public class SegmentBarElement extends UIElement {
                     SWATCH,
                     SWATCH,
                     color);
-            drawText(g, font, valueLine, bx + TOOLTIP_PAD + SWATCH + 4f, ty, ChartColors.TEXT);
+            drawText(g, font, valueLine, bx + TOOLTIP_PAD + SWATCH + 4f, ty, ChartColors.TEXT, false);
 
             if (shareLine != null) {
                 ty += lineHeight + 1f;
-                drawText(g, font, shareLine, bx + TOOLTIP_PAD + SWATCH + 4f, ty, ChartColors.TEXT_DIM);
+                drawText(g, font, shareLine, bx + TOOLTIP_PAD + SWATCH + 4f, ty, ChartColors.TEXT_DIM, false);
             }
             for (FormattedCharSequence line : description) {
                 ty += lineHeight + 1f;
@@ -326,8 +328,9 @@ public class SegmentBarElement extends UIElement {
         DrawerHelper.drawSolidRect(g, x + width - 1f, y, 1f, height, color);
     }
 
-    private static void drawText(GuiGraphics g, Font font, String text, float x, float y, int color) {
-        LDLibFonts.drawText(g, font, Component.literal(text), Math.round(x), Math.round(y), color, false);
+    private static void drawText(GuiGraphics g, Font font, String text, float x, float y, int color, boolean title) {
+        Component c = title ? Component.literal(text).withStyle(ChatFormatting.BOLD) : Component.literal(text);
+        LDLibFonts.drawText(g, font, c, Math.round(x), Math.round(y), color, title);
     }
 
     private static String fitLabel(Font font, String label, float maxWidth) {

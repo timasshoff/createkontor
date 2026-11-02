@@ -63,7 +63,7 @@ public class UpgradeCommands {
         Economy economy = EconomySavedData.get(source.getServer()).getEconomy();
         String target = forms.next(company.legalLevel()).id();
         UpgradeChecklist checklist = UpgradeRules.checkApplication(
-                company, forms.next(company.legalLevel()), economy.overallReputationInStars(company.id()));
+                company, forms.next(company.legalLevel()), economy.overallReputationInStars(company.id()), params);
 
         source.sendSuccess(() -> Component.literal(formatChecklist(company, target, checklist)), false);
         return 1;
