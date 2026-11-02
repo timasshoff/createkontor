@@ -20,6 +20,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public final class WikiUtils {
 
@@ -90,7 +91,9 @@ public final class WikiUtils {
         }
 
         var level = new TrackedDummyWorld();
-        level.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(state));
+        level.addBlock(
+                BlockPos.ZERO,
+                BlockInfo.fromBlockState(state.setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)));
         addSeatedVillager(level, new BlockPos(0, 0, 1), Direction.NORTH, DyeColor.RED);
 
         var scene = new Scene();

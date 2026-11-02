@@ -11,23 +11,49 @@ import com.timder.kontor.game.block.company.AbstractCompanyBlock;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.chunk.ChunkLoadingDesk;
 import com.timder.kontor.registry.KontorBlockEntities;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock implements IBE<EmployeeDeskBlockEntity>, ChunkLoadingDesk, BlockUIMenuType.BlockUI {
+public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
+        implements IBE<EmployeeDeskBlockEntity>, ChunkLoadingDesk, BlockUIMenuType.BlockUI {
 
     private final RoleId role;
     private final Supplier<Integer> baseSalaryInDollars;
+
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    private static final double TOP_X1 = 0, TOP_Z1 = 0, TOP_X2 = 16, TOP_Z2 = 16;
+    private static final double TOP_Y_START = 16;
+
+    private static final VoxelShape BASE = Block.box(0, 0, 0, 16, 16, 16);
+    private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
 
     protected AbstractEmployeeDeskBlock(Properties properties, RoleId role, Supplier<Integer> baseSalaryInDollars) {
         super(properties);
         this.role = Objects.requireNonNull(role, "role must not be null.");
         this.baseSalaryInDollars = Objects.requireNonNull(baseSalaryInDollars, "baseSalaryInDollars must not be null.");
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            shapes.put(facing, Shapes.or(BASE, itemsShape(facing)));
+        }
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
     public RoleId role() {
@@ -42,6 +68,10 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock imp
         return "employee_role.createkontor." + role.value();
     }
 
+    public int getTopY() {
+        return 19;
+    }
+
     protected abstract ModularUI createEmployeeUi(EmployeeDeskContext context);
 
     @Override
@@ -49,6 +79,57 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock imp
         return getBlockEntityOptional(holder.player.level(), holder.pos)
                 .map(desk -> createEmployeeUi(EmployeeDeskContext.of(holder, desk)))
                 .orElseGet(() -> new ModularUI(UI.empty(), holder.player));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return defaultBlockState()
+                .setValue(FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    protected BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
+    @Override
+    protected BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return shapes.get(state.getValue(FACING));
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(
+            BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return BASE;
+    }
+
+    private VoxelShape itemsShape(Direction facing) {
+        double x1 = TOP_X1, z1 = TOP_Z1, x2 = TOP_X2, z2 = TOP_Z2;
+        int steps = switch (facing) {
+            case EAST -> 0;
+            case SOUTH -> 1;
+            case WEST -> 2;
+            default -> 3;
+        };
+        for (int i = 0; i < steps; i++) {
+            double nx1 = 16 - z2, nx2 = 16 - z1, nz1 = x1, nz2 = x2;
+            x1 = nx1;
+            x2 = nx2;
+            z1 = nz1;
+            z2 = nz2;
+        }
+        return Block.box(x1, TOP_Y_START, z1, x2, getTopY(), z2);
     }
 
     public final boolean tryOpenUi(ServerPlayer player, ServerLevel level, BlockPos pos) {
@@ -73,8 +154,8 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock imp
     public boolean stillValid(BlockUIMenuType.BlockUIHolder holder) {
         return BlockUIMenuType.BlockUI.super.stillValid(holder)
                 && getBlockEntityOptional(holder.player.level(), holder.pos)
-                .map(EmployeeDeskBlockEntity::hasEmployee)
-                .orElse(false);
+                        .map(EmployeeDeskBlockEntity::hasEmployee)
+                        .orElse(false);
     }
 
     @Override
