@@ -141,7 +141,7 @@ public class KontorDeskBlock extends AbstractUIBlock<KontorDeskBlockEntity> impl
         return BASE;
     }
 
-    private static VoxelShape itemsShape(Direction facing) { // Rotating everything because I am an idiot and made the model facing east
+    private static VoxelShape itemsShape(Direction facing) {
         double x1 = ITEMS_X1, z1 = ITEMS_Z1, x2 = ITEMS_X2, z2 = ITEMS_Z2;
         int steps = switch (facing) { case EAST -> 0; case SOUTH -> 1; case WEST -> 2; default -> 3; };
         for (int i = 0; i < steps; i++) {

@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "createkontor:block/logistics_manager_desk"
-  }
-}

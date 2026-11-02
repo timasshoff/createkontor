@@ -7,6 +7,8 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import com.timder.kontor.game.block.*;
 import com.timder.kontor.game.block.buyer.BuyerDeskBlock;
 import com.timder.kontor.game.block.consultant.ConsultantDeskBlock;
+import com.tterrag.registrate.providers.DataGenContext;
+import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.core.registries.Registries;
@@ -14,6 +16,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -22,6 +25,8 @@ import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 public final class KontorBlocks {
+
+    private static final int DESK_MODEL_FRONT_OFFSET = 90;
 
     public static final BlockEntry<ShippingExitBlock> SHIPPING_EXIT = REGISTRATE
             .block("shipping_exit", ShippingExitBlock::new)
@@ -41,9 +46,8 @@ public final class KontorBlocks {
 
     public static final BlockEntry<KontorDeskBlock> KONTOR_DESK = REGISTRATE
             .block("kontor_desk", KontorDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion())
-            .blockstate((ctx, prov) -> prov.horizontalBlock(
-                    ctx.get(), prov.models().getExistingFile(prov.modLoc("block/" + ctx.getName())), 90))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_PICKAXE)
             .loot((loot, block) -> loot.add(
                     block,
@@ -59,9 +63,9 @@ public final class KontorBlocks {
 
     public static final BlockEntry<LawyerDeskBlock> LAWYER_DESK = REGISTRATE
             .block("lawyer_desk", LawyerDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_PICKAXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()
@@ -127,9 +131,9 @@ public final class KontorBlocks {
 
     public static final BlockEntry<LogisticsManagerDeskBlock> LOGISTICS_MANAGER_DESK = REGISTRATE
             .block("logistics_manager_desk", LogisticsManagerDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_PICKAXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()
@@ -179,5 +183,16 @@ public final class KontorBlocks {
     public static void tooltip(Block block) {
         Item item = block.asItem();
         TooltipModifier.REGISTRY.register(item, new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE));
+    }
+
+    private static BlockBehaviour.Properties deskProperties(BlockBehaviour.Properties p) {
+        return p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion();
+    }
+
+    private static <T extends Block> void deskBlockstate(DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov) {
+        prov.horizontalBlock(
+                ctx.get(),
+                prov.models().getExistingFile(prov.modLoc("block/" + ctx.getName())),
+                DESK_MODEL_FRONT_OFFSET);
     }
 }

@@ -32,6 +32,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
@@ -86,7 +87,7 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
 
         var level = new TrackedDummyWorld();
         level.addBlock(
-                new BlockPos(0, 0, 0), BlockInfo.fromBlockState(KontorBlocks.LOGISTICS_MANAGER_DESK.getDefaultState()));
+                new BlockPos(0, 0, 0), BlockInfo.fromBlockState(KontorBlocks.LOGISTICS_MANAGER_DESK.getDefaultState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)));
         WikiUtils.addSeatedVillager(level, new BlockPos(0, 0, 1), Direction.NORTH, DyeColor.RED);
 
         BlockState link = AllBlocks.STOCK_LINK
