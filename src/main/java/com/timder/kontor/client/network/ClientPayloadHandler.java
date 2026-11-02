@@ -8,15 +8,15 @@ import com.timder.kontor.game.network.ChartPayload;
 import com.timder.kontor.game.network.NotebookPayload;
 import com.timder.kontor.game.network.ToastPayload;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ClientPayloadHandler {
     public static void handleChart(ChartPayload payload, IPayloadContext context) {
-        Minecraft.getInstance().setScreen(new ModularUIScreen(
-                BasicChartUI.create(payload.spec()),
-                Component.literal(payload.spec().title())));
+        Minecraft.getInstance()
+                .setScreen(new ModularUIScreen(
+                        BasicChartUI.create(payload.spec()),
+                        Component.literal(payload.spec().title())));
     }
 
     public static void handleToast(ToastPayload payload, IPayloadContext context) {
@@ -26,7 +26,8 @@ public class ClientPayloadHandler {
     }
 
     public static void handleNotebook(NotebookPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> Minecraft.getInstance().setScreen(new ModularUIScreen(
-                NotebookUi.create(), Component.translatable("ui.createkontor.notebook.title"))));
+        context.enqueueWork(() -> Minecraft.getInstance()
+                .setScreen(new ModularUIScreen(
+                        NotebookUi.create(payload), Component.translatable("ui.createkontor.notebook.title"))));
     }
 }

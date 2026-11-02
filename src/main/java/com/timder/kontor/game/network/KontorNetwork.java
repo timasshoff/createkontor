@@ -8,8 +8,7 @@ public final class KontorNetwork {
 
     private static final String PROTOCOL_VERSION = "4";
 
-    private KontorNetwork() {
-    }
+    private KontorNetwork() {}
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);

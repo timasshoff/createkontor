@@ -140,6 +140,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.left_own_property", "§7You left your company's property.");
         REGISTRATE.addRawLang("message.createkontor.entered_foreign_property", "§e⚠ You entered the property of %s.");
         REGISTRATE.addRawLang("message.createkontor.left_foreign_property", "§7You left the property of %s.");
+        REGISTRATE.addRawLang("message.createkontor.notebook.not_member", "§cYou are not a member of a company.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -559,6 +560,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.cannot_afford", "§cCannot afford");
 
         REGISTRATE.addRawLang("ui.createkontor.notebook.title", "Notebook");
+        REGISTRATE.addRawLang("ui.createkontor.notebook.day_balance", "Day %s • %s");
+        REGISTRATE.addRawLang("ui.createkontor.notebook.open_orders", "Open Orders (%s):");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
