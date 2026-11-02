@@ -1130,6 +1130,17 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.finances_manager.p4",
                 "If you are eligible for a bank loan, you can set the loan amount and the finance manager presents you with different offers for bank loans. The repayment plan and daily interest rate depend on the chosen offer. Additionally, the interest rate is influenced by the policy rate and your reputation.");
+
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.property_manager.p1",
+                "The property manager allows you to buy, rent and manager company properties. Rented or owned land is protected against modifications from players outside of your company. The property manager can only manage land in a radius of %s chunks around his desk. Acquired land stays acquired, even if the Desk is removed.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.property_manager.b1", "Pricing & Property Value");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.property_manager.p2",
+                "The price of a property is controlled by the biome of the chunk. Create: Kontor measured the frequencies of all biomes when the world was first created. This data is used to calculate prices. Rare biomes are more expensive than frequent biomes.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.property_manager.p3",
+                "The rent of a property is %s of the purchase price. A property is valued at %s of the purchase price. This value counts towards your net worth. If you decide to sell a property, it is going to be sold at this value.");
     }
 
     static void touch() {}

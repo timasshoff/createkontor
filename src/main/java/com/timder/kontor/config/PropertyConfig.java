@@ -29,6 +29,7 @@ public class PropertyConfig {
     public static final ModConfigSpec.DoubleValue PRICING_MAX_FACTOR;
     public static final ModConfigSpec.DoubleValue DAILY_RENT_RATE;
     public static final ModConfigSpec.DoubleValue RESALE_SHARE;
+    public static final ModConfigSpec.IntValue MANAGER_RADIUS;
 
     private record DimensionSetting(
             String dimension,
@@ -105,6 +106,8 @@ public class PropertyConfig {
         RESALE_SHARE = builder.comment(
                         "Share of the current price a company gets when it sells a chunk, and at which owned land counts as net worth")
                 .defineInRange("resaleShare", 0.6, 0.0, 1.0);
+        MANAGER_RADIUS = builder.comment("The radius in chunks that a property manager can manage.")
+                .defineInRange("managerRadius", 8, 1, 32);
         builder.pop();
 
         SPEC = builder.build();

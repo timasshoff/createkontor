@@ -8,7 +8,9 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
+import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.lowdragmc.lowdraglib2.utils.search.IResultHandler;
+import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.timder.kontor.client.ui.KontorToasts;
 import com.timder.kontor.config.CompanyConfig;
@@ -248,6 +250,7 @@ public final class BuyerUi {
             ToastPayload.send(context.player(), result);
             if (result.isPresent() && result.get().kind() == ToastPayload.ToastKind.SUCCESS) {
                 purchases[0]++;
+                UISoundUtils.playSound(AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent());
             }
         });
         content.onMessage("c2s_address", tag -> be.setAddress(tag.getString("Address")));

@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ItemSlot;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
+import com.simibubi.create.AllSoundEvents;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import java.util.Map;
 import java.util.Optional;
@@ -14,8 +15,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.sounds.SoundEvent;
 
 public class UiPaper {
+
+    public static SoundEvent CONFIRM = AllSoundEvents.CLIPBOARD_CHECKMARK.getMainEvent();
 
     private static final int PRIMARY = 0x2A2418;
     private static final int SECONDARY = 0x5E5338;

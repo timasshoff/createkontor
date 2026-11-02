@@ -9,6 +9,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.SplitView;
 import com.timder.kontor.config.CompanyConfig;
+import com.timder.kontor.config.PropertyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
@@ -36,8 +37,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 
 public class PropertyManagerUi {
-
-    private static final int MAP_RADIUS_CHUNKS = 8;
 
     public static ModularUI create(EmployeeDeskContext context, PropertyManagerActions actions) {
         var tabView = UiContainer.largeTabView();
@@ -101,7 +100,7 @@ public class PropertyManagerUi {
 
         ownership.addListener(() -> {
             content.clearAllChildren();
-            WorldMapElement map = new WorldMapElement(MAP_RADIUS_CHUNKS)
+            WorldMapElement map = new WorldMapElement(PropertyConfig.MANAGER_RADIUS.get())
                     .setCenter(
                             context.desk().getBlockPos().getX(),
                             context.desk().getBlockPos().getZ())
@@ -413,8 +412,8 @@ public class PropertyManagerUi {
             for (PropertyHolding holding : company.properties()) {
                 ChunkKey chunk = holding.chunk();
                 if (!chunk.dimension().equals(dimension)
-                        || Math.abs(chunk.x() - desk.x) > MAP_RADIUS_CHUNKS
-                        || Math.abs(chunk.z() - desk.z) > MAP_RADIUS_CHUNKS) {
+                        || Math.abs(chunk.x() - desk.x) > PropertyConfig.MANAGER_RADIUS.get()
+                        || Math.abs(chunk.z() - desk.z) > PropertyConfig.MANAGER_RADIUS.get()) {
                     continue;
                 }
 

@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ScrollerView;
+import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
@@ -143,6 +144,7 @@ public class FinancesManagerUi {
                                 CompoundTag tag = new CompoundTag();
                                 tag.putString("Id", offer.id());
                                 content.sendMessage("c2s_accept_offer", tag);
+                                UISoundUtils.playSound(UiPaper.CONFIRM);
                             });
                     button.layout(layout -> layout.heightAuto()
                             .minHeight(20)

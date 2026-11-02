@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
+import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.mojang.authlib.GameProfile;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
@@ -579,6 +580,7 @@ public class KontorDeskBoundUi {
                                     requestsBox.sendMessage(
                                             "c2s_accept_request",
                                             tag); // Send accept message to request box (exists on client AND server)
+                                    UISoundUtils.playSound(UiPaper.CONFIRM);
                                 })
                                 .layout(layout -> layout.marginTop(4)));
 
