@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "create:brass_ingot"
+    },
+    "L": {
+      "tag": "minecraft:logs"
+    }
+  },
+  "pattern": [
+    "BBB",
+    "L L",
+    "L L"
+  ],
+  "result": {
+    "count": 1,
+    "id": "createkontor:kontor_desk"
+  }
+}

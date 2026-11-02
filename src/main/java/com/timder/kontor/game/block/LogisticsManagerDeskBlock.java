@@ -81,6 +81,11 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
         return LogisticsManagerUi.create(context);
     }
 
+    @Override
+    public int getTopY() {
+        return 22;
+    }
+
     private void buildWikiPage(UIElement page) {
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.logistics_manager.p1")));
         page.addChild(WikiUtils.heading(Component.translatable("wiki.createkontor.page.logistics_manager.b1")));
