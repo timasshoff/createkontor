@@ -11,6 +11,10 @@ import com.timder.kontor.game.block.company.AbstractCompanyBlock;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.chunk.ChunkLoadingDesk;
 import com.timder.kontor.registry.KontorBlockEntities;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -29,12 +33,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Supplier;
-
-public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock implements IBE<EmployeeDeskBlockEntity>, ChunkLoadingDesk, BlockUIMenuType.BlockUI {
+public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
+        implements IBE<EmployeeDeskBlockEntity>, ChunkLoadingDesk, BlockUIMenuType.BlockUI {
 
     private final RoleId role;
     private final Supplier<Integer> baseSalaryInDollars;
@@ -85,7 +85,8 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock imp
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return defaultBlockState()
+                .setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -104,16 +105,25 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock imp
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    protected VoxelShape getCollisionShape(
+            BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return BASE;
     }
 
     private static VoxelShape itemsShape(Direction facing) {
         double x1 = ITEMS_X1, z1 = ITEMS_Z1, x2 = ITEMS_X2, z2 = ITEMS_Z2;
-        int steps = switch (facing) { case EAST -> 0; case SOUTH -> 1; case WEST -> 2; default -> 3; };
+        int steps = switch (facing) {
+            case EAST -> 0;
+            case SOUTH -> 1;
+            case WEST -> 2;
+            default -> 3;
+        };
         for (int i = 0; i < steps; i++) {
             double nx1 = 16 - z2, nx2 = 16 - z1, nz1 = x1, nz2 = x2;
-            x1 = nx1; x2 = nx2; z1 = nz1; z2 = nz2;
+            x1 = nx1;
+            x2 = nx2;
+            z1 = nz1;
+            z2 = nz2;
         }
         return Block.box(x1, ITEMS_Y1, z1, x2, ITEMS_Y2, z2);
     }
@@ -140,8 +150,8 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock imp
     public boolean stillValid(BlockUIMenuType.BlockUIHolder holder) {
         return BlockUIMenuType.BlockUI.super.stillValid(holder)
                 && getBlockEntityOptional(holder.player.level(), holder.pos)
-                .map(EmployeeDeskBlockEntity::hasEmployee)
-                .orElse(false);
+                        .map(EmployeeDeskBlockEntity::hasEmployee)
+                        .orElse(false);
     }
 
     @Override

@@ -87,7 +87,10 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
 
         var level = new TrackedDummyWorld();
         level.addBlock(
-                new BlockPos(0, 0, 0), BlockInfo.fromBlockState(KontorBlocks.LOGISTICS_MANAGER_DESK.getDefaultState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)));
+                new BlockPos(0, 0, 0),
+                BlockInfo.fromBlockState(KontorBlocks.LOGISTICS_MANAGER_DESK
+                        .getDefaultState()
+                        .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)));
         WikiUtils.addSeatedVillager(level, new BlockPos(0, 0, 1), Direction.NORTH, DyeColor.RED);
 
         BlockState link = AllBlocks.STOCK_LINK

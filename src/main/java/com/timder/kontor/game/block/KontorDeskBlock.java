@@ -11,6 +11,9 @@ import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.block.ui.AbstractUIBlock;
 import com.timder.kontor.game.chunk.ChunkLoadingDesk;
 import com.timder.kontor.registry.KontorBlockEntities;
+import java.util.EnumMap;
+import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -33,10 +36,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nullable;
-import java.util.EnumMap;
-import java.util.Map;
-
 public class KontorDeskBlock extends AbstractUIBlock<KontorDeskBlockEntity> implements ChunkLoadingDesk {
 
     public static final String RESOURCE_KEY = "kontor_desk";
@@ -57,7 +56,8 @@ public class KontorDeskBlock extends AbstractUIBlock<KontorDeskBlockEntity> impl
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+    public void setPlacedBy(
+            Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
         CompanyBlockSupport.bindOnPlacement(level, pos, placer, bindGate());
     }
@@ -118,7 +118,8 @@ public class KontorDeskBlock extends AbstractUIBlock<KontorDeskBlockEntity> impl
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return defaultBlockState()
+                .setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -137,16 +138,25 @@ public class KontorDeskBlock extends AbstractUIBlock<KontorDeskBlockEntity> impl
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    protected VoxelShape getCollisionShape(
+            BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return BASE;
     }
 
     private static VoxelShape itemsShape(Direction facing) {
         double x1 = ITEMS_X1, z1 = ITEMS_Z1, x2 = ITEMS_X2, z2 = ITEMS_Z2;
-        int steps = switch (facing) { case EAST -> 0; case SOUTH -> 1; case WEST -> 2; default -> 3; };
+        int steps = switch (facing) {
+            case EAST -> 0;
+            case SOUTH -> 1;
+            case WEST -> 2;
+            default -> 3;
+        };
         for (int i = 0; i < steps; i++) {
             double nx1 = 16 - z2, nx2 = 16 - z1, nz1 = x1, nz2 = x2;
-            x1 = nx1; x2 = nx2; z1 = nz1; z2 = nz2;
+            x1 = nx1;
+            x2 = nx2;
+            z1 = nz1;
+            z2 = nz2;
         }
         return Block.box(x1, ITEMS_Y1, z1, x2, ITEMS_Y2, z2);
     }

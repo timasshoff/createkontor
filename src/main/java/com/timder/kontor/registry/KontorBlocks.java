@@ -186,10 +186,14 @@ public final class KontorBlocks {
     }
 
     private static BlockBehaviour.Properties deskProperties(BlockBehaviour.Properties p) {
-        return p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion();
+        return p.mapColor(MapColor.STONE)
+                .strength(2.0F, 6.0F)
+                .sound(SoundType.STONE)
+                .noOcclusion();
     }
 
-    private static <T extends Block> void deskBlockstate(DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov) {
+    private static <T extends Block> void deskBlockstate(
+            DataGenContext<Block, T> ctx, RegistrateBlockstateProvider prov) {
         prov.horizontalBlock(
                 ctx.get(),
                 prov.models().getExistingFile(prov.modLoc("block/" + ctx.getName())),

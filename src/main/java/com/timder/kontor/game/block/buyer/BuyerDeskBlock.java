@@ -73,7 +73,11 @@ public class BuyerDeskBlock extends AbstractEmployeeDeskBlock {
         page.addChild(WikiUtils.heading(Component.translatable("wiki.createkontor.page.buyer.b1")));
 
         var level = new TrackedDummyWorld();
-        level.addBlock(new BlockPos(0, 0, 0), BlockInfo.fromBlockState(KontorBlocks.BUYER_DESK.getDefaultState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)));
+        level.addBlock(
+                new BlockPos(0, 0, 0),
+                BlockInfo.fromBlockState(KontorBlocks.BUYER_DESK
+                        .getDefaultState()
+                        .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH)));
         WikiUtils.addSeatedVillager(level, new BlockPos(0, 0, 1), Direction.NORTH, DyeColor.RED);
         level.addBlock(
                 new BlockPos(-2, 0, 0),
