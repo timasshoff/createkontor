@@ -168,6 +168,12 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("goggle.createkontor.logistics_manager_desk.status", "Logistics network: %s");
         REGISTRATE.addRawLang("goggle.createkontor.logistics_manager_desk.ordering", "Ordering: %s");
 
+        REGISTRATE.addRawLang("createkontor.display_source.company_overview", "Company Overview");
+        REGISTRATE.addRawLang("display.createkontor.company_overview.balance", "Balance: %s");
+        REGISTRATE.addRawLang("display.createkontor.company_overview.open_requests", "Open Requests: %s");
+        REGISTRATE.addRawLang("display.createkontor.company_overview.open_orders", "Open Orders: %s");
+        REGISTRATE.addRawLang("display.createkontor.company_overview.grace_period_orders", "Late Open Orders: %s");
+
         REGISTRATE.addRawLang(
                 "ui.createkontor.chart.no_data.detailed",
                 "There is no data for the chart \"%s\" yet. You can try again later.");
