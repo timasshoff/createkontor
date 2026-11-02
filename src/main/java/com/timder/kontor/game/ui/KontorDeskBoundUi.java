@@ -61,6 +61,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class KontorDeskBoundUi {
@@ -524,7 +525,13 @@ public class KontorDeskBoundUi {
                         titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                Component.literal(request.getQuantity() + " "
+                                                        Component.literal(request.getQuantity() + " ("
+                                                                        + ComponentFormatting.breakAmount(
+                                                                        request.getQuantity(),
+                                                                                new ItemStack(BuiltInRegistries.ITEM.get(
+                                                                                        ResourceLocation.parse(request.getProduct().value()))).getMaxStackSize())
+                                                                        .getString()
+                                                                        + ") "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(request.getProduct()
                                                                         .value()))
@@ -646,15 +653,18 @@ public class KontorDeskBoundUi {
                                         .gapAll(4)
                                         .marginBottom(4)
                                         .widthPercent(100));
-                        titleRow.addChild(UiPaper.itemSlot()
-                                .setItem(new ItemStack(
-                                        BuiltInRegistries.ITEM.get(ResourceLocation.parse(
-                                                order.getProduct().value())),
-                                        order.getQuantity())));
+                        titleRow.addChild(UiPaper.itemSlot().setItem(new ItemStack(BuiltInRegistries.ITEM.get(
+                                ResourceLocation.parse(order.getProduct().value())), order.getQuantity())));
                         titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                Component.literal(order.getQuantity() + " "
+                                                Component.literal(order.getQuantity() + " ("
+                                                        + ComponentFormatting.breakAmount(
+                                                                        order.getQuantity(),
+                                                                        new ItemStack(BuiltInRegistries.ITEM.get(
+                                                                                ResourceLocation.parse(order.getProduct().value()))).getMaxStackSize())
+                                                                .getString()
+                                                        + ") "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(order.getProduct()
                                                                         .value()))
@@ -670,6 +680,8 @@ public class KontorDeskBoundUi {
                                 .layout(layout ->
                                         layout.widthAuto().flexBasis(0).flexGrow(1)));
                         orderElement.addChild(titleRow);
+
+                        orderElement.addChild(UiPaper.simpleDivider());
 
                         if (order.getPhase() == OrderPhase.OPEN) {
                             long expiresDeadlineAtTick = clientTick() + order.remainingDeadlineTicks();

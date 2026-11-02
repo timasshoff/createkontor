@@ -164,4 +164,28 @@ public final class ComponentFormatting {
         String value = Double.isFinite(stars) ? String.format(Locale.ROOT, "%.1f", stars) : "-";
         return stars(stars).append(Component.literal(" " + value).withStyle(DEFAULT));
     }
+
+    public static MutableComponent breakAmountWithTotal(int quantity, int stackSize) {
+        MutableComponent text = Component.literal(String.valueOf(quantity));
+        if (stackSize > 1 && quantity >= stackSize) {
+            text.append(Component.literal(" | " + quantity / stackSize + "▤"));
+            int remainder = quantity % stackSize;
+            if (remainder > 0) {
+                text.append(Component.literal(" +" + remainder));
+            }
+        }
+        return text;
+    }
+
+    public static MutableComponent breakAmount(int quantity, int stackSize) {
+        MutableComponent text = Component.empty();
+        if (stackSize > 1 && quantity >= stackSize) {
+            text = Component.literal(quantity / stackSize + "▤");
+            int remainder = quantity % stackSize;
+            if (remainder > 0) {
+                text.append(Component.literal(" +" + remainder));
+            }
+        }
+        return text;
+    }
 }
