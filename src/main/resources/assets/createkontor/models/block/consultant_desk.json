@@ -1,0 +1,11 @@
+{
+  "loader": "neoforge:composite",
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "createkontor:block/desk/base"
+  },
+  "children": {
+    "base": { "parent": "createkontor:block/desk/base" },
+    "top":  { "parent": "createkontor:block/desk/top_consultant" }
+  }
+}

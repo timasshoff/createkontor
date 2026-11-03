@@ -66,6 +66,11 @@ public class BuyerDeskBlock extends AbstractEmployeeDeskBlock {
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
+    @Override
+    public int getTopY() {
+        return 18;
+    }
+
     private void buildWikiPage(UIElement page) {
         page.addChild(WikiUtils.paragraph(Component.translatable(
                 "wiki.createkontor.page.buyer.p1",
