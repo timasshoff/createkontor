@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "minecraft:leather"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    }
+  },
+  "pattern": [
+    "NL",
+    "NP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "createkontor:notebook"
+  }
+}

@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
+import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
@@ -23,6 +24,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 
 public final class NotebookUi {
@@ -33,8 +35,8 @@ public final class NotebookUi {
     public static ModularUI create(NotebookPayload payload) {
         List<Order> orders = OrderBook.restore(CompanySavedData.readOrderBook(payload.orderBook())).allOrders().stream()
                 .sorted(Comparator.comparingLong(Order::remainingDeadlineTicks)
-                        .thenComparing(Order::remainingGracePeriodTicks)
-                        .thenComparing(Order::getNumber))
+                        .thenComparingLong(Order::remainingGracePeriodTicks)
+                        .thenComparingLong(Order::getNumber))
                 .toList();
 
         int pageCount = pageCount(orders.size());
@@ -69,16 +71,20 @@ public final class NotebookUi {
         prev.setOnClick(e -> {
             page[0]--;
             showPage(content, pageLabel, prev, next, payload, orders, page[0], pageCount);
+            UISoundUtils.playSound(SoundEvents.BOOK_PAGE_TURN);
         });
         next.setOnClick(e -> {
             page[0]++;
             showPage(content, pageLabel, prev, next, payload, orders, page[0], pageCount);
+            UISoundUtils.playSound(SoundEvents.BOOK_PAGE_TURN);
         });
 
         showPage(content, pageLabel, prev, next, payload, orders, page[0], pageCount);
 
         UIElement navigation = new UIElement()
-                .layout(layout -> layout.flexDirection(FlexDirection.ROW).gapAll(4));
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .gapAll(4));
         navigation.addChildren(prev, pageLabel, next);
 
         root.addChildren(content, navigation);
@@ -133,11 +139,9 @@ public final class NotebookUi {
                                                     order.getPhase() == OrderPhase.GRACE_PERIOD
                                                             ? ChatFormatting.RED
                                                             : ChatFormatting.RESET))
-                                    .append(Component.literal(order.getQuantity() + " ("
-                                            + ComponentFormatting.breakAmount(
-                                                            order.getQuantity(), stack.getMaxStackSize())
-                                                    .getString()
-                                            + ") "
+                                    .append(ComponentFormatting.quantityWithStacks(
+                                            order.getQuantity(), stack.getMaxStackSize()))
+                                    .append(Component.literal(" "
                                             + Component.translatable(stack.getDescriptionId())
                                                     .getString()))
                                     .append(Component.literal(" (#" + order.getNumber() + ")")

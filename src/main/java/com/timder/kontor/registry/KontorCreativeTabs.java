@@ -15,15 +15,15 @@ public final class KontorCreativeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CreateKontor.MODID);
 
-    public static final ResourceKey<CreativeModeTab> MAIN_KEY =
-            ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, "main"));
+    public static final ResourceKey<CreativeModeTab> MAIN_KEY = ResourceKey.create(
+            Registries.CREATIVE_MODE_TAB, ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, "main"));
 
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN = CREATIVE_TABS.register("main",
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN = CREATIVE_TABS.register(
+            "main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.createkontor"))
-                    .icon(() -> new ItemStack(KontorBlocks.SHIPPING_EXIT.get()))
+                    .icon(() -> new ItemStack(KontorItems.NOTEBOOK.get()))
                     .build());
 
-    private KontorCreativeTabs() {
-    }
+    private KontorCreativeTabs() {}
 }

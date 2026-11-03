@@ -188,4 +188,13 @@ public final class ComponentFormatting {
         }
         return text;
     }
+
+    public static MutableComponent quantityWithStacks(int quantity, int stackSize) {
+        MutableComponent text = Component.literal(String.valueOf(quantity));
+        MutableComponent stacks = breakAmount(quantity, stackSize);
+        if (!stacks.getString().isEmpty()) {
+            text.append(Component.literal(" (")).append(stacks).append(Component.literal(")"));
+        }
+        return text;
+    }
 }
