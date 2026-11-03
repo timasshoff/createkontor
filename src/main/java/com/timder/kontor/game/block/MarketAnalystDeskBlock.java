@@ -30,6 +30,11 @@ public class MarketAnalystDeskBlock extends AbstractEmployeeDeskBlock {
         return MarketAnalystUi.create(context, new MarketAnalystActions(context.desk()));
     }
 
+    @Override
+    public int getTopY() {
+        return 16;
+    }
+
     private void buildWikiPage(UIElement page) {
         page.addChild(WikiUtils.employeeScene(defaultBlockState()));
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.market_analyst.p1")));

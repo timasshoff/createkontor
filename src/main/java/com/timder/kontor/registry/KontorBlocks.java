@@ -113,9 +113,9 @@ public final class KontorBlocks {
 
     public static final BlockEntry<BuyerDeskBlock> BUYER_DESK = REGISTRATE
             .block("buyer_desk", BuyerDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_AXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()
@@ -139,9 +139,9 @@ public final class KontorBlocks {
 
     public static final BlockEntry<MarketAnalystDeskBlock> MARKET_ANALYST_DESK = REGISTRATE
             .block("market_analyst_desk", MarketAnalystDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_AXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()
@@ -165,9 +165,9 @@ public final class KontorBlocks {
 
     public static final BlockEntry<ConsultantDeskBlock> CONSULTANT_DESK = REGISTRATE
             .block("consultant_desk", ConsultantDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_AXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()
@@ -217,9 +217,9 @@ public final class KontorBlocks {
 
     public static final BlockEntry<FinancesManagerDeskBlock> FINANCES_MANAGER_DESK = REGISTRATE
             .block("finances_manager_desk", FinancesManagerDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_AXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()
@@ -243,9 +243,9 @@ public final class KontorBlocks {
 
     public static final BlockEntry<PropertyManagerDeskBlock> PROPERTY_MANAGER_DESK = REGISTRATE
             .block("property_manager_desk", PropertyManagerDeskBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .properties(KontorBlocks::deskProperties)
+            .blockstate(KontorBlocks::deskBlockstate)
             .tag(BlockTags.MINEABLE_WITH_AXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()
