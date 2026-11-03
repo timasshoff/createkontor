@@ -45,6 +45,7 @@ public class NotebookItem extends Item {
                         company.name(),
                         EconomySavedData.get(server).getEconomy().currentDay(),
                         company.account().getBalance().cents(),
+                        company.requestBoard().openRequestsTotal(),
                         CompanySavedData.writeOrderBook(company.orderBook().getSaveState())));
         return InteractionResultHolder.sidedSuccess(stack, false);
     }

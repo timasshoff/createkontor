@@ -40,6 +40,7 @@ import dev.vfyjxf.taffy.style.FlexDirection;
 import dev.vfyjxf.taffy.style.FlexWrap;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -132,6 +133,14 @@ public final class BuyerUi {
                 "ui.createkontor.buyer_desk.catalog_count", offers.get().size())));
         content.addChild(title);
 
+        Map<Component, Predicate<PurchaseOffer>> filters = new LinkedHashMap<>();
+        filters.put(
+                Component.translatable("ui.createkontor.buyer_desk.catalog.filter.only_raw"),
+                offer -> offer.kind() == PurchaseKind.RAW_MATERIAL);
+        filters.put(
+                Component.translatable("ui.createkontor.buyer_desk.catalog.filter.only_products"),
+                offer -> offer.kind() == PurchaseKind.PRODUCT);
+
         content.addChild(UiContainer.searchableGrid(
                 offers,
                 (PurchaseOffer offer) -> {
@@ -220,6 +229,7 @@ public final class BuyerUi {
                         .asItem()
                         .getDescription()
                         .getString()),
+                filters,
                 Component.translatable("ui.createkontor.buyer_desk.catalog.search"),
                 Component.translatable("ui.createkontor.buyer_desk.catalog.no_result"),
                 4,

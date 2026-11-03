@@ -818,7 +818,7 @@ public class KontorDeskBoundUi {
                         priceHeader.addChildren(listPriceLabel, marketPriceLabel);
                         element.addChild(priceHeader);
 
-                        UIElement priceSlider = UiSliders.labeledInlineLeft(
+                        UIElement priceSlider = UiSliders.labeledInline(
                                 Math.max(0.01f, (float) entry.marketPrice().toDollars() * 0.01f),
                                 (float) entry.marketPrice().toDollars() * 2f,
                                 (float)
