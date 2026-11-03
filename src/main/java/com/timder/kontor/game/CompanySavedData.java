@@ -449,7 +449,7 @@ public class CompanySavedData extends SavedData {
         return new RequestBoard.SaveState(requests, lostToday);
     }
 
-    private static CompoundTag writeOrderBook(OrderBook.SaveState state) {
+    public static CompoundTag writeOrderBook(OrderBook.SaveState state) {
         ListTag orders = new ListTag();
         for (Order.SaveState order : state.orders()) {
             orders.add(writeOrder(order));
@@ -459,7 +459,7 @@ public class CompanySavedData extends SavedData {
         return tag;
     }
 
-    private static OrderBook.SaveState readOrderBook(CompoundTag tag) {
+    public static OrderBook.SaveState readOrderBook(CompoundTag tag) {
         List<Order.SaveState> orders = new ArrayList<>();
         for (Tag t : tag.getList("Orders", Tag.TAG_COMPOUND)) {
             orders.add(readOrder((CompoundTag) t));

@@ -3,6 +3,7 @@ package com.timder.kontor.game.ui.element;
 import com.lowdragmc.lowdraglib2.gui.texture.ColorRectTexture;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
+import com.lowdragmc.lowdraglib2.gui.ui.data.TextWrap;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.ItemSlot;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
@@ -36,6 +37,19 @@ public class UiPaper {
             ChatFormatting.GRAY.getColor(), 0x5E5338);
 
     // LABELS
+
+    public static Label heading(Component text, Horizontal horizontalAlignment) {
+        return (Label) new Label()
+                .setText(text)
+                .textStyle(style -> style.fontSize(12)
+                        .textColor(PRIMARY)
+                        .textAlignHorizontal(horizontalAlignment)
+                        .textWrap(TextWrap.WRAP)
+                        .textShadow(false)
+                        .adaptiveHeight(true)
+                        .adaptiveWidth(true))
+                .layout(layout -> layout.marginAll(2));
+    }
 
     public static Label primary(Component text, Horizontal horizontalAlignment) {
         return label(text, horizontalAlignment, PRIMARY, false);

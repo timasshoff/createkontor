@@ -524,8 +524,7 @@ public class KontorDeskBoundUi {
                         titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                Component.literal(request.getQuantity() + " ("
-                                                        + ComponentFormatting.breakAmount(
+                                                Component.literal(ComponentFormatting.quantityWithStacks(
                                                                         request.getQuantity(),
                                                                         new ItemStack(BuiltInRegistries.ITEM.get(
                                                                                         ResourceLocation.parse(
@@ -533,7 +532,7 @@ public class KontorDeskBoundUi {
                                                                                                         .value())))
                                                                                 .getMaxStackSize())
                                                                 .getString()
-                                                        + ") "
+                                                        + " "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(request.getProduct()
                                                                         .value()))
@@ -562,15 +561,13 @@ public class KontorDeskBoundUi {
                         Label offerTimeLabel = UiPaper.paragraphSecondary(
                                 Component.translatable(
                                         "ui.createkontor.kontor_desk.request.offer_time",
-                                        ComponentFormatting.ticks(request.remainingOfferTicks())
-                                                .withStyle(ChatFormatting.GOLD)),
+                                        ComponentFormatting.ticks(request.remainingOfferTicks())),
                                 Horizontal.LEFT);
                         offerTimeLabel.addEventListener(
                                 UIEvents.TICK,
                                 event -> offerTimeLabel.setText(UiPaper.adapt(Component.translatable(
                                         "ui.createkontor.kontor_desk.request.offer_time",
-                                        ComponentFormatting.ticks(Math.max(0, expiresOfferAtTick - clientTick()))
-                                                .withStyle(ChatFormatting.GOLD)))));
+                                        ComponentFormatting.ticks(Math.max(0, expiresOfferAtTick - clientTick()))))));
                         requestElement.addChild(offerTimeLabel);
 
                         requestElement.addChild(UiPaper.paragraphSecondary(
@@ -663,8 +660,7 @@ public class KontorDeskBoundUi {
                         titleRow.addChild(UiPaper.paragraphPrimary(
                                         Component.translatable(
                                                 "ui.createkontor.kontor_desk.request.title",
-                                                Component.literal(order.getQuantity() + " ("
-                                                        + ComponentFormatting.breakAmount(
+                                                Component.literal(ComponentFormatting.quantityWithStacks(
                                                                         order.getQuantity(),
                                                                         new ItemStack(BuiltInRegistries.ITEM.get(
                                                                                         ResourceLocation.parse(
@@ -672,7 +668,7 @@ public class KontorDeskBoundUi {
                                                                                                         .value())))
                                                                                 .getMaxStackSize())
                                                                 .getString()
-                                                        + ") "
+                                                        + " "
                                                         + BuiltInRegistries.ITEM
                                                                 .get(ResourceLocation.parse(order.getProduct()
                                                                         .value()))
@@ -703,8 +699,8 @@ public class KontorDeskBoundUi {
                                     UIEvents.TICK,
                                     event -> orderDeadlineLabel.setText(UiPaper.adapt(Component.translatable(
                                             "ui.createkontor.kontor_desk.order.delivery_time",
-                                            ComponentFormatting.ticks(Math.max(0, expiresDeadlineAtTick - clientTick()))
-                                                    .withStyle(ChatFormatting.GOLD)))));
+                                            ComponentFormatting.ticks(
+                                                    Math.max(0, expiresDeadlineAtTick - clientTick()))))));
                             orderElement.addChild(orderDeadlineLabel);
                         } else {
                             orderElement.addChild(UiPaper.paragraphError(

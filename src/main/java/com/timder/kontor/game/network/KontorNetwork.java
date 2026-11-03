@@ -6,10 +6,9 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class KontorNetwork {
 
-    private static final String PROTOCOL_VERSION = "3";
+    private static final String PROTOCOL_VERSION = "4";
 
-    private KontorNetwork() {
-    }
+    private KontorNetwork() {}
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
@@ -23,5 +22,10 @@ public final class KontorNetwork {
                 ToastPayload.TYPE,
                 ToastPayload.STREAM_CODEC,
                 (payload, context) -> ClientPayloadHandler.handleToast(payload, context));
+
+        registrar.playToClient(
+                NotebookPayload.TYPE,
+                NotebookPayload.STREAM_CODEC,
+                (payload, context) -> ClientPayloadHandler.handleNotebook(payload, context));
     }
 }

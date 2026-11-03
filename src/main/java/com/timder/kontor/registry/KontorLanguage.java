@@ -140,6 +140,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.left_own_property", "§7You left your company's property.");
         REGISTRATE.addRawLang("message.createkontor.entered_foreign_property", "§e⚠ You entered the property of %s.");
         REGISTRATE.addRawLang("message.createkontor.left_foreign_property", "§7You left the property of %s.");
+        REGISTRATE.addRawLang("message.createkontor.notebook.not_member", "§c⚠ You are not a member of a company.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -558,6 +559,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.not_operational", "§c§l\u2717");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.cannot_afford", "§cCannot afford");
 
+        REGISTRATE.addRawLang("ui.createkontor.notebook.title", "Notebook");
+        REGISTRATE.addRawLang("ui.createkontor.notebook.day_balance", "Day %s • %s");
+        REGISTRATE.addRawLang("ui.createkontor.notebook.open_orders", "Open Orders (%s):");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -846,6 +851,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "block.createkontor.property_manager_desk.tooltip.action1",
                 "Opens the _Property Manager's Desk_ interface.");
+
+        REGISTRATE.addRawLang(
+                "item.createkontor.notebook.tooltip.summary", "Helps you keep track of your company's _open orders_.");
+        REGISTRATE.addRawLang("item.createkontor.notebook.tooltip.control1", "When R-Clicked");
+        REGISTRATE.addRawLang(
+                "item.createkontor.notebook.tooltip.action1",
+                "Opens the _Notebook_ and provides a _read-only view_ of your company's open orders.");
 
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
         REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");
