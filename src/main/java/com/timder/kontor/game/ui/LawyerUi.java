@@ -31,6 +31,7 @@ import dev.vfyjxf.taffy.style.AlignItems;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -425,6 +426,25 @@ public final class LawyerUi {
                 "c2s_buy_license",
                 tag -> ToastPayload.send(
                         context.player(), actions.buyLicense(LicenseKeyCodec.decode(tag.getString("Key")))));
+
+        Map<Component, Predicate<LicenseCard>> filters = new LinkedHashMap<>();
+        filters.put(
+                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.filter.only_buyable"),
+                offer -> offer.status() == AcquireResult.Status.ACQUIRED
+                        || offer.status() == AcquireResult.Status.REACTIVATED);
+        filters.put(
+                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.filter.no_revenue_share"),
+                offer -> offer.revenueShare() == 0.0);
+        filters.put(
+                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.filter.only_revenue_share"),
+                offer -> offer.revenueShare() > 0.0);
+        filters.put(
+                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.filter.no_bundles"),
+                offer -> offer.markets().size() <= 1);
+        filters.put(
+                Component.translatable("ui.createkontor.lawyer_desk.license_catalog.filter.only_bundles"),
+                offer -> offer.markets().size() > 1);
+
         content.addChild(UiContainer.searchableGrid(
                 catalog,
                 (LicenseCard offer) -> {
@@ -512,6 +532,7 @@ public final class LawyerUi {
                     }
                     return list;
                 },
+                filters,
                 Component.translatable("ui.createkontor.lawyer_desk.license_catalog.search"),
                 Component.translatable("ui.createkontor.lawyer_desk.license_catalog.no_result"),
                 5,

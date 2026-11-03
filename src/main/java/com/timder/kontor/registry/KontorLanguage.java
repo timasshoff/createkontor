@@ -175,6 +175,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("display.createkontor.company_overview.open_orders", "Open Orders: %s");
         REGISTRATE.addRawLang("display.createkontor.company_overview.grace_period_orders", "Late Open Orders: %s");
 
+        REGISTRATE.addRawLang("ui.createkontor.grid.filter.show_all", "Show all");
+
         REGISTRATE.addRawLang(
                 "ui.createkontor.chart.no_data.detailed",
                 "There is no data for the chart \"%s\" yet. You can try again later.");
@@ -321,6 +323,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.reactivate", "Reactivate cancelled license");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.no_result", "No matching license found.");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.search", "Search license catalog");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.filter.only_buyable", "Only Buyable");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.lawyer_desk.license_catalog.filter.no_revenue_share", "No Revenue Share");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.lawyer_desk.license_catalog.filter.only_revenue_share", "Only Revenue Share");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.filter.no_bundles", "No Bundles");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.license_catalog.filter.only_bundles", "Only Bundles");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses", "Licenses");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.licenses_count", "Licenses (%s)");
         REGISTRATE.addRawLang(
@@ -342,6 +351,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.raw_material", "Raw Material");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.product", "Product");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.add", "Add");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.filter.only_raw", "Only Raw Materials");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.filter.only_products", "Only Products");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.empty", "Empty");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.line", "%sx %s");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.total", "Total: %s");
@@ -561,6 +572,7 @@ public class KontorLanguage {
 
         REGISTRATE.addRawLang("ui.createkontor.notebook.title", "Notebook");
         REGISTRATE.addRawLang("ui.createkontor.notebook.day_balance", "Day %s • %s");
+        REGISTRATE.addRawLang("ui.createkontor.notebook.requests", "%s Open Requests");
         REGISTRATE.addRawLang("ui.createkontor.notebook.open_orders", "Open Orders (%s):");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");

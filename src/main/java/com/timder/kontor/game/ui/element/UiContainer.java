@@ -1,21 +1,31 @@
 package com.timder.kontor.game.ui.element;
 
+import com.lowdragmc.lowdraglib2.gui.LDLibFonts;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Vertical;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
+import com.lowdragmc.lowdraglib2.gui.ui.elements.TextField;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
+import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
 import dev.vfyjxf.taffy.style.*;
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import javax.annotation.Nullable;
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -227,13 +237,57 @@ public final class UiContainer {
             Component noResultsText,
             int maxColumns,
             float minCardWidth) {
+        return searchableGrid(
+                entries, cardFactory, searchTexts, null, searchPlaceholder, noResultsText, maxColumns, minCardWidth);
+    }
+
+    public static <T> UIElement searchableGrid(
+            ObservableList<T> entries,
+            Function<T, UIElement> cardFactory,
+            Function<T, List<String>> searchTexts,
+            @Nullable Map<Component, Predicate<T>> filters,
+            Component searchPlaceholder,
+            Component noResultsText,
+            int maxColumns,
+            float minCardWidth) {
 
         ObservableValue<String> query = new ObservableValue<>("");
+        Predicate<T> everything = entry -> true;
+        ObservableValue<Predicate<T>> filter = new ObservableValue<>(everything);
 
         TextField searchField = new TextField();
         searchField.textFieldStyle(style -> style.placeholder(searchPlaceholder));
         searchField.setTextResponder(query::set);
-        searchField.layout(layout -> layout.widthPercent(100));
+        searchField.layout(layout -> layout.flexBasis(0).flexGrow(1).minWidth(0));
+
+        UIElement searchRow = new UIElement()
+                .layout(layout -> layout.widthPercent(100)
+                        .flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .gapAll(4));
+        searchRow.addChild(searchField);
+
+        if (filter != null && !filters.isEmpty()) {
+            List<Component> options = new ArrayList<>();
+            options.add(Component.translatable("ui.createkontor.grid.filter.show_all"));
+            options.addAll(filters.keySet());
+
+            Font font = LDLibFonts.font();
+            int selectorWidth = options.stream()
+                            .mapToInt(option -> font.width(option.getString()))
+                            .max()
+                            .orElse(0)
+                    + 30; // Some space
+            Selector<Component> filterSelector = new Selector<>();
+            filterSelector.setCandidateUIProvider(
+                    UIElementProvider.text(option -> option == null ? Component.literal("-") : option));
+            filterSelector.setCandidates(options);
+            filterSelector.setOnValueChanged(
+                    option -> filter.set(option == null ? everything : filters.getOrDefault(option, everything)));
+            filterSelector.setSelected(options.get(0), false);
+            filterSelector.layout(layout -> layout.width(selectorWidth).flexShrink(0));
+            searchRow.addChild(filterSelector);
+        }
 
         ScrollerView scroller = tabScroller();
         scroller.layout(layout -> layout.heightAuto().flexBasis(0).flexGrow(1).minHeight(0));
@@ -272,6 +326,7 @@ public final class UiContainer {
 
             int shown = 0;
             for (T entry : entries.get()) {
+                if (!filter.get().test(entry)) continue;
                 if (!matchesAny(searchTexts.apply(entry), terms)) continue;
                 UIElement card = cardFactory.apply(entry);
                 card.layout(layout -> layout.marginAll(GRID_GAP / 2f));
@@ -289,6 +344,7 @@ public final class UiContainer {
         scroller.viewPort.addEventListener(UIEvents.LAYOUT_CHANGED, event -> applyLayout.run());
         query.addListener(rebuild);
         entries.addListener(rebuild);
+        filter.addListener(rebuild);
         rebuild.run();
 
         return new UIElement()
@@ -297,7 +353,7 @@ public final class UiContainer {
                         .flexGrow(1)
                         .minHeight(0)
                         .gapAll(4))
-                .addChildren(searchField, scroller);
+                .addChildren(searchRow, scroller);
     }
 
     public static <T> UIElement grid(

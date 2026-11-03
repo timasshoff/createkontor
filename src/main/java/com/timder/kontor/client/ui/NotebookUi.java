@@ -110,6 +110,9 @@ public final class NotebookUi {
                             payload.day(),
                             ComponentFormatting.moneyColored(Money.ofCents(payload.balanceCents()))),
                     Horizontal.CENTER));
+            content.addChild(UiPaper.primary(
+                    Component.translatable("ui.createkontor.notebook.requests", payload.requestsAmount()),
+                    Horizontal.CENTER));
             content.addChild(UiPaper.doubleDivider());
             content.addChild(UiPaper.primary(
                     Component.translatable("ui.createkontor.notebook.open_orders", orders.size()), Horizontal.LEFT));

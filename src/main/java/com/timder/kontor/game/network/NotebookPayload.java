@@ -9,7 +9,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-public record NotebookPayload(String companyName, long day, long balanceCents, CompoundTag orderBook)
+public record NotebookPayload(
+        String companyName, long day, long balanceCents, int requestsAmount, CompoundTag orderBook)
         implements CustomPacketPayload {
 
     public static final Type<NotebookPayload> TYPE =
@@ -22,6 +23,8 @@ public record NotebookPayload(String companyName, long day, long balanceCents, C
             NotebookPayload::day,
             ByteBufCodecs.VAR_LONG,
             NotebookPayload::balanceCents,
+            ByteBufCodecs.INT,
+            NotebookPayload::requestsAmount,
             ByteBufCodecs.COMPOUND_TAG,
             NotebookPayload::orderBook,
             NotebookPayload::new);
