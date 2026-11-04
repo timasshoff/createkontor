@@ -16,7 +16,12 @@ import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
-import net.minecraft.client.multiplayer.ClientLevel;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -36,13 +41,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
 
 public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
@@ -77,10 +75,17 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
                 }
             } else {
                 if (deliveryTicksRemaining == 12) {
-                    level.playSound(null, getBlockPos(), AllSoundEvents.STOCK_LINK.getMainEvent(), SoundSource.BLOCKS, 0.75f, 1.25f);
+                    level.playSound(
+                            null,
+                            getBlockPos(),
+                            AllSoundEvents.STOCK_LINK.getMainEvent(),
+                            SoundSource.BLOCKS,
+                            0.75f,
+                            1.25f);
                 }
                 if (deliveryTicksRemaining == 0) {
-                    level.updateNeighbourForOutputSignal(getBlockPos(), getBlockState().getBlock());
+                    level.updateNeighbourForOutputSignal(
+                            getBlockPos(), getBlockState().getBlock());
                     setDelivering(false);
                 }
             }
@@ -106,9 +111,9 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
     private void setDelivering(boolean delivering) {
         BlockState state = getBlockState();
-        if (level != null && !level.isClientSide()
-                && state.getValue(ShippingExitBlock.DELIVERING) != delivering) {
-            level.setBlock(getBlockPos(), state.setValue(ShippingExitBlock.DELIVERING, delivering), Block.UPDATE_CLIENTS);
+        if (level != null && !level.isClientSide() && state.getValue(ShippingExitBlock.DELIVERING) != delivering) {
+            level.setBlock(
+                    getBlockPos(), state.setValue(ShippingExitBlock.DELIVERING, delivering), Block.UPDATE_CLIENTS);
             level.playSound(null, getBlockPos(), SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.25f, 0.75f);
         }
     }
@@ -162,7 +167,13 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         }
     }
 
-    private boolean fulfillAsManyAsPossible(Company company, Economy economy, long day, ItemId product, List<IItemHandler> handlers, CompanyParams params) {
+    private boolean fulfillAsManyAsPossible(
+            Company company,
+            Economy economy,
+            long day,
+            ItemId product,
+            List<IItemHandler> handlers,
+            CompanyParams params) {
         Item item = itemOf(product);
         if (item == null) {
             return false;
@@ -208,7 +219,8 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
             if (!level.isLoaded(neighborPos)) {
                 continue;
             }
-            IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, direction.getOpposite());
+            IItemHandler handler =
+                    level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, direction.getOpposite());
             if (handler != null) {
                 handlers.add(handler);
             }
@@ -217,7 +229,8 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
     }
 
     private static int drainAcrossHandlers(List<IItemHandler> handlers, Item item, int needed, boolean simulate) {
-        Predicate<ItemStack> matches = stack -> stack.getItem() == item && stack.getComponentsPatch().isEmpty();
+        Predicate<ItemStack> matches =
+                stack -> stack.getItem() == item && stack.getComponentsPatch().isEmpty();
         if (simulate) {
             return countAcrossHandlers(handlers, matches, needed);
         }
@@ -225,7 +238,8 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         int collected = 0;
         for (IItemHandler handler : handlers) {
             while (collected < needed) {
-                ItemStack extracted = ItemHelper.extract(handler, matches, ItemHelper.ExtractionCountMode.UPTO, needed - collected, false);
+                ItemStack extracted = ItemHelper.extract(
+                        handler, matches, ItemHelper.ExtractionCountMode.UPTO, needed - collected, false);
                 if (extracted.isEmpty()) {
                     break;
                 }

@@ -46,21 +46,27 @@ public final class KontorBlocks {
     public static final BlockEntry<ShippingExitBlock> SHIPPING_EXIT = REGISTRATE
             .block("shipping_exit", ShippingExitBlock::new)
             .initialProperties(SharedProperties::softMetal)
-            .properties(p -> p.mapColor(MapColor.PODZOL).strength(2.0F, 6.0F).sound(SoundType.NETHERITE_BLOCK).noOcclusion())
+            .properties(p -> p.mapColor(MapColor.PODZOL)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .noOcclusion())
             .tag(BlockTags.MINEABLE_WITH_AXE)
             .tag(AllTags.AllBlockTags.WRENCH_PICKUP.tag)
             .blockstate((ctx, prov) -> {
                 ResourceLocation base = prov.modLoc("block/shipping_exit_base");
-                ModelFile idle = prov.models().withExistingParent("block/shipping_exit", base)
+                ModelFile idle = prov.models()
+                        .withExistingParent("block/shipping_exit", base)
                         .texture("0", prov.modLoc("block/shipping_exit"))
                         .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"))
                         .renderType("minecraft:cutout");
-                ModelFile active = prov.models().withExistingParent("block/shipping_exit_active", base)
+                ModelFile active = prov.models()
+                        .withExistingParent("block/shipping_exit_active", base)
                         .texture("0", prov.modLoc("block/shipping_exit_active"))
                         .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"));
-                prov.getVariantBuilder(ctx.get()).forAllStates(state -> ConfiguredModel.builder()
-                        .modelFile(state.getValue(ShippingExitBlock.DELIVERING) ? active : idle)
-                        .build());
+                prov.getVariantBuilder(ctx.get())
+                        .forAllStates(state -> ConfiguredModel.builder()
+                                .modelFile(state.getValue(ShippingExitBlock.DELIVERING) ? active : idle)
+                                .build());
             })
             .loot((loot, block) -> loot.add(
                     block,
