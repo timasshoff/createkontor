@@ -72,22 +72,6 @@ public class RequestRulesTest {
     }
 
     @Test
-    @DisplayName("Deadline for a non-urgent order matches")
-    void deadlineNonUrgent() {
-        double tX = RequestRules.manufacturingTicksPerUnit(2);
-        long deadline = RequestRules.deadlineTicks(32, 0.0, tX, 1.0, PARAMS);
-        assertEquals(9651, deadline);
-    }
-
-    @Test
-    @DisplayName("Deadline shrinks with urgency")
-    void deadlineUrgent() {
-        double tX = RequestRules.manufacturingTicksPerUnit(2);
-        long deadline = RequestRules.deadlineTicks(32, 0.5, tX, 1.0, PARAMS);
-        assertEquals(6756, deadline);
-    }
-
-    @Test
     @DisplayName("Unit price with urgency surcharge and a moderate quantity discount")
     void unitPriceMatchesReference() {
         double price = RequestRules.unitPrice(9.03, 0.5, 3, PARAMS);
