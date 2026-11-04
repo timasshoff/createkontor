@@ -83,7 +83,6 @@ public record RequestParams(
     The following code is AI generated
      */
 
-
     public static RequestParams standard() {
         return new RequestParams(
                 List.of(
@@ -94,20 +93,18 @@ public record RequestParams(
                         new QuantityStep(6, 0.08),
                         new QuantityStep(8, 0.06),
                         new QuantityStep(12, 0.04),
-                        new QuantityStep(16, 0.02)
-                ),
-                0.25,   // urgency probability
-                0.6,    // deadline urgency factor
-                0.3,    // price urgency factor
-                0.5,    // offer duration urgency factor
-                3000,   // deadline base ticks
-                2400,   // deadline floor ticks
-                6000,   // offer duration base ticks
-                0.25,   // grace period portion
-                0.95,   // quantity discount floor
-                0.005,  // quantity discount per step
-                1.2,     // walk-in price threshold
-                1
-        );
+                        new QuantityStep(16, 0.02)),
+                0.25, // urgency probability
+                0.6, // deadline urgency factor
+                0.3, // price urgency factor
+                0.5, // offer duration urgency factor
+                3000, // deadline base ticks
+                2400, // deadline floor ticks
+                6000, // offer duration base ticks
+                0.25, // grace period portion
+                0.95, // quantity discount floor
+                0.005, // quantity discount per step
+                1.2, // walk-in price threshold
+                1);
     }
 }
