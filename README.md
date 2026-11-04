@@ -1,14 +1,14 @@
 This work is licensed under 
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
 
-![Create: Kontor](https://cdn.modrinth.com/data/cached_images/82d1e08058c794b1b6e4bfafeee89079638c4a8f.png)
+![Create: Kontor](https://github.com/timasshoff/createkontor/blob/main/docs/Title%20Render.png?raw=true)
 
 **Create: Kontor expands your Create Mod World by giving you the best purpose ever to build a factory: Money! 💸<br> 
 Found a company, build factories, calculate prices, make informed decisions and grow your company!**
 
 <br><br>
 
-![Features](https://cdn.modrinth.com/data/cached_images/1cf70e148c00ed5e6622ce542033bcc9e00a84fd_0.webp)
+![Features](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20Features%20Render.png?raw=true)
 
 ### > 🖋️ | Found and manage a company in a fully simulated economy
 Create: Kontor simulates a full economy including, market, prices, demand, economic cycles and policy rates.
@@ -35,7 +35,7 @@ Fully customizable through data packs and configs.
 
 <br><br>
 
-![How it works](https://cdn.modrinth.com/data/cached_images/bdd2fb3e331a82ca21ba9ef49cf68c0c2d9ea9f9_0.webp)
+![How it works](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20How%20It%20Works%20Render.png?raw=true)
 
 Using Create: Kontor you can found a company to **sell your items on a simulated market**. You will need to produce items using the Create Mod (or any other mod) and buy a **license** for your products to start receiving **requests** for these items. Accept a request and you will need to produce the requested items. The price you set determines how many requests you will get. By hiring **employees**, you will be able to get access to more features and information about your business!
 
@@ -45,7 +45,7 @@ See **Getting started** or the wiki for more info. Or hire a **consultant** inga
 
 <br><br>
 
-![Getting Started](https://cdn.modrinth.com/data/cached_images/55abe659683ff5f744b75756f3f0078093d9afbd_0.webp)
+![Getting Started](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20Getting%20Started%20Render.png?raw=true)
 
 ### > 1️⃣ | Found a company
 Craft a **Kontor Desk** and right click it. Enter a name and decide whether you want to take the founders loan. After founding, you can right click the Kontor Desk to access the management UI.
@@ -69,7 +69,7 @@ See the wiki for more info or hire a **consultant** ingame and ask him.
 
 <br><br>
 
-![Requirements and Compatability](https://cdn.modrinth.com/data/cached_images/816c872e67fd06f70257bf73574eb66599a7e681_0.webp)
+![Requirements and Compatability](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20Requirements%20Render.png?raw=true)
 
 ### > ‼️ | Requirements and Dependencies
 - Create
@@ -91,7 +91,7 @@ If you find an incompatability with another mod, please let us know and create a
 
 <br><br>
 
-![Configuration](https://cdn.modrinth.com/data/cached_images/3d5992dd6dfab5b955a81d92caf0bfbf3dc48a93_0.webp)
+![Configuration](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20Configuration%20Render.png?raw=true)
 
 ### > ⚙️ | Config Files
 Most constant values are configurable through the config files. Note that changes are only applied after restarting or leaving / rejoining the world. /reload is not enough. Be careful when changing the default settings and **always make backups**!
@@ -112,12 +112,17 @@ See the wiki for more detailed info on how to create custom datapacks for Create
 
 <br><br>
 
-![FAQ](https://cdn.modrinth.com/data/cached_images/2aea85dd18951efe7079b88aa0e1c5da8eede349_0.webp)
+![FAQ](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20FAQ%20Render.png?raw=true)
 
 <details>
 <summary>Why is this mod a Create Addon?</summary>
 Create: Kontor only really makes sense when you have the ability to build a factory and automate item production. Create is therefore the best Fit for Create: Kontor because it offers wide automation capabilites and a full logistics system, that is heavily integrated into Create: Kontor. Additionally, Create has a huge addon ecosystem.<br>
 The core of Create: Kontor, which simulates the economy, is fully independent of Minecraft and Create. While not planned (!), it would be possible to extract this core and integrate it into other minecraft mods.
+</details>
+
+<details>
+<summary>What does "Kontor" mean?</summary>
+"Kontor" is an old german word and means something like the office of a business man. The closest english translation would be "Office", but Create: Office sounds really lame so we decided to stick with Create: Kontor.
 </details>
 
 <details>
@@ -168,7 +173,7 @@ All AI generated code has been marked with a comment saying, that the code is AI
 
 <br><br>
 
-![Links, Support and Credits](https://cdn.modrinth.com/data/cached_images/14f92795aa143c047392dc5242ac26bf28da9881_0.webp)
+![Links, Support and Credits](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20Links%20Credits%20Render.png?raw=true)
 
 If you find a bug or have a suggestion, please create a GitHub Issue [here](https://github.com/timasshoff/createkontor/issues).
 
