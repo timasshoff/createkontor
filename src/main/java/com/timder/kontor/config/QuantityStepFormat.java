@@ -20,10 +20,6 @@ final class QuantityStepFormat {
         return parse(entry) != null;
     }
 
-    static String format(QuantityStep step) {
-        return step.k() + ":" + step.probability();
-    }
-
     static List<QuantityStep> toSteps(List<? extends String> entries) {
         if (entries.isEmpty()) throw new IllegalArgumentException("There must be at least one quantity step.");
 

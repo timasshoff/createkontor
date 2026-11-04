@@ -8,14 +8,20 @@ import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
+import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A block entity that belongs to a company.
@@ -113,6 +120,35 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         if (changedAny) {
             data.setDirty();
         }
+    }
+
+    public Optional<S2CActionResult> setListPrice(ItemId market, long priceCents) { // For Kontor Desk and Market Analyst
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return S2CActionResult.illegalEnvironment();
+        }
+        MinecraftServer server = serverLevel.getServer();
+        Company company =
+                CompanySavedData.get(server).getRegistry().get(getCompanyId()).orElse(null);
+        if (company == null) {
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+        }
+
+        EconomySavedData economyData = EconomySavedData.get(server);
+        Economy economy = economyData.getEconomy();
+        if (!economy.isParticipant(market, company.id())) {
+            return S2CActionResult.error(
+                    ComponentFormatting.error("The company does not actively take part in " + market + "."));
+        }
+
+        try {
+            economy.updateListPrice(
+                    market, company.id(), Money.ofCents(priceCents).toDollars());
+        } catch (IllegalArgumentException e) {
+            return S2CActionResult.error(ComponentFormatting.error(e.getMessage()));
+        }
+        economyData.setDirty();
+        return S2CActionResult.empty();
     }
 
     @Override

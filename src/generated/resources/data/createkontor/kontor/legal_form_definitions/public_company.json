@@ -1,7 +1,7 @@
 {
   "auto_accept_requests": true,
   "bankloan_limit_in_dollars": 500000,
-  "deadline_factor": 1.0,
+  "deadline_factor": 0.7,
   "employee_salary_factor": 1.5,
   "feed_in_license_tier": 3,
   "founder_protection": false,

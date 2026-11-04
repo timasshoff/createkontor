@@ -5,6 +5,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.UIElement;
 import com.lowdragmc.lowdraglib2.gui.ui.data.Horizontal;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Button;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.order.Order;
@@ -77,6 +78,19 @@ public final class NotebookUi {
             page[0]++;
             showPage(content, pageLabel, prev, next, payload, orders, page[0], pageCount);
             UISoundUtils.playSound(SoundEvents.BOOK_PAGE_TURN);
+        });
+        root.addEventListener(UIEvents.MOUSE_WHEEL, event -> {
+            if (event.deltaY > 0 && page[0] > 0) {
+                page[0]--;
+                showPage(content, pageLabel, prev, next, payload, orders, page[0], pageCount);
+                UISoundUtils.playSound(SoundEvents.BOOK_PAGE_TURN);
+            } else if (event.deltaY < 0 && page[0] < pageCount - 1) {
+                page[0]++;
+                showPage(content, pageLabel, prev, next, payload, orders, page[0], pageCount);
+                UISoundUtils.playSound(SoundEvents.BOOK_PAGE_TURN);
+            }
+            event.stopPropagation();
+            event.stopPropagation();
         });
 
         showPage(content, pageLabel, prev, next, payload, orders, page[0], pageCount);

@@ -1,5 +1,6 @@
 package com.timder.kontor.config;
 
+import com.timder.kontor.core.company.request.QuantityStep;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.macro.MacroParams;
@@ -136,51 +137,48 @@ public class EconomyConfig {
                 .defineInRange("driftPerDay", 0.5, 0.0, 100.0);
         builder.pop();
 
-        RequestParams requestDefaults = RequestParams.standard();
         builder.comment(
-                        "Requests: what a request looks like (K 12.4). Changes apply to requests that arrive from now on")
+                        "Requests: what a request looks like. Changes apply to requests that arrive from now on")
                 .push("request");
         REQUEST_QUANTITY_STEPS = builder.comment(
                         "Quantity factors as 'factor:weight'. The weights are relative and are divided by their sum, they need not add up to 100")
                 .defineList(
                         "quantitySteps",
-                        requestDefaults.quantitySteps().stream()
-                                .map(QuantityStepFormat::format)
-                                .toList(),
+                        List.of("1:15", "2:20", "3:30", "4:20", "6:15", "8:15", "12:10", "16:10", "32:8"),
                         () -> "1:1",
                         QuantityStepFormat::isValid);
         REQUEST_URGENCY_PROBABILITY = builder.comment("Probability that a request is urgent")
-                .defineInRange("urgencyProbability", requestDefaults.urgencyProbability(), 0.0, 1.0);
+                .defineInRange("urgencyProbability", 0.25, 0.0, 1.0);
         REQUEST_DEADLINE_URGENCY_FACTOR = builder.comment(
                         "An urgent request has (1 - x*urgency) of the normal deadline")
-                .defineInRange("deadlineUrgencyFactor", requestDefaults.deadlineUrgencyFactor(), 0.0, 1.0);
+                .defineInRange("deadlineUrgencyFactor", 0.65, 0.0, 1.0);
         REQUEST_PRICE_URGENCY_FACTOR = builder.comment("An urgent request pays (1 + x*urgency) of the normal price")
-                .defineInRange("priceUrgencyFactor", requestDefaults.priceUrgencyFactor(), 0.0, Double.MAX_VALUE);
+                .defineInRange("priceUrgencyFactor", 0.4, 0.0, Double.MAX_VALUE);
         REQUEST_OFFER_DURATION_URGENCY_FACTOR = builder.comment(
                         "An urgent request stays (1 - x*urgency) of the normal time on the board")
-                .defineInRange("offerDurationUrgencyFactor", requestDefaults.offerDurationUrgencyFactor(), 0.0, 0.99);
+                .defineInRange("offerDurationUrgencyFactor", 0.5, 0.0, 0.99);
         REQUEST_DEADLINE_BASE_TICKS = builder.comment(
                         "Base of the deadline in ticks, before the manufacturing time of the quantity is added")
-                .defineInRange("deadlineBaseTicks", requestDefaults.deadlineBaseTicks(), 1L, Long.MAX_VALUE);
+                .defineInRange("deadlineBaseTicks", 3000, 1L, Long.MAX_VALUE);
         REQUEST_DEADLINE_FLOOR_TICKS = builder.comment("No deadline is shorter than this many ticks")
-                .defineInRange("deadlineFloorTicks", requestDefaults.deadlineFloorTicks(), 1L, Long.MAX_VALUE);
+                .defineInRange("deadlineFloorTicks", 2400, 1L, Long.MAX_VALUE);
         REQUEST_OFFER_DURATION_BASE_TICKS = builder.comment("How many ticks a normal request stays on the board")
                 .defineInRange(
-                        "offerDurationBaseTicks", requestDefaults.offerDurationBaseTicks(), 100L, Long.MAX_VALUE);
+                        "offerDurationBaseTicks", 6000, 100L, Long.MAX_VALUE);
         REQUEST_GRACE_PERIOD_PORTION = builder.comment("Portion of the deadline that is granted as grace period")
-                .defineInRange("gracePeriodPortion", requestDefaults.gracePeriodPortion(), 0.01, 0.99);
+                .defineInRange("gracePeriodPortion", 0.1, 0.01, 0.99);
         REQUEST_QUANTITY_DISCOUNT_FLOOR = builder.comment("Lowest price factor of the quantity discount")
-                .defineInRange("quantityDiscountFloor", requestDefaults.quantityDiscountFloor(), 0.01, 1.0);
+                .defineInRange("quantityDiscountFloor", 0.95, 0.01, 1.0);
         REQUEST_QUANTITY_DISCOUNT_PER_STEP = builder.comment("Discount per quantity factor above 1")
-                .defineInRange("quantityDiscountPerStep", requestDefaults.quantityDiscountPerStep(), 0.0, 1.0);
+                .defineInRange("quantityDiscountPerStep", 0.005, 0.0, 1.0);
         REQUEST_WALK_IN_PRICE_THRESHOLD = builder.comment(
                         "List price relative to the market price up to which at least one request per day is guaranteed")
                 .defineInRange(
-                        "walkInPriceThreshold", requestDefaults.walkInPriceThreshold(), 1.0001, Double.MAX_VALUE);
+                        "walkInPriceThreshold", 1.2, 1.0001, Double.MAX_VALUE);
         REQUEST_WALK_IN_REQUESTS_PER_DAY = builder.comment(
                         "Minimum number of requests per day guaranteed while the walk-in price threshold applies")
                 .defineInRange(
-                        "walkInRequestsPerDay", requestDefaults.walkInRequestsPerDay(), 1.0E-6, Double.MAX_VALUE);
+                        "walkInRequestsPerDay", 2, 1.0E-6, Double.MAX_VALUE);
         builder.pop();
 
         builder.comment("Technical Progress").push("progress");

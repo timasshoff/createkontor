@@ -1,5 +1,7 @@
 package com.timder.kontor.core.company.request;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,6 +59,18 @@ public record RequestParams(
         if (walkInRequestsPerDay <= 0) throw new IllegalArgumentException("walkInRequestsPerDay must be positive.");
     }
 
+    private static List<QuantityStep> stepsFromWeights(int[] factors, double[] weights) {
+        if (factors.length != weights.length) {
+            throw new IllegalArgumentException("factors and weights must have the same length.");
+        }
+        double sum = Arrays.stream(weights).sum();
+        List<QuantityStep> steps = new ArrayList<>();
+        for (int i = 0; i < factors.length; i++) {
+            steps.add(new QuantityStep(factors[i], weights[i] / sum));
+        }
+        return steps;
+    }
+
     /*
     The following code is AI generated
      */
@@ -64,14 +78,15 @@ public record RequestParams(
     public static RequestParams standard() {
         return new RequestParams(
                 List.of(
-                        new QuantityStep(1, 0.30),
-                        new QuantityStep(2, 0.25),
-                        new QuantityStep(3, 0.15),
-                        new QuantityStep(4, 0.10),
-                        new QuantityStep(6, 0.08),
-                        new QuantityStep(8, 0.06),
-                        new QuantityStep(12, 0.04),
-                        new QuantityStep(16, 0.02)
+                        new QuantityStep(1, 0.20),
+                        new QuantityStep(2, 0.30),
+                        new QuantityStep(3, 0.30),
+                        new QuantityStep(4, 0.20),
+                        new QuantityStep(6, 0.15),
+                        new QuantityStep(8, 0.15),
+                        new QuantityStep(12, 0.10),
+                        new QuantityStep(16, 0.05),
+                        new QuantityStep(32, 0.05)
                 ),
                 0.25,   // urgency probability
                 0.6,    // deadline urgency factor

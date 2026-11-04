@@ -1,5 +1,5 @@
 {
-  "base_demand": 3500.0,
+  "base_demand": 5600.0,
   "group": "food",
   "item": "minecraft:bread",
   "package_size": 32,

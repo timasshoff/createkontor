@@ -123,7 +123,7 @@ public final class RequestRules {
      */
     public static double manufacturingTicksPerUnit(int depth) {
         if (depth < 0) throw new IllegalArgumentException("depth must not be negative.");
-        return 40.0 * Math.pow(1 + depth, 1.5);
+        return 40.0 * Math.pow(1 + depth, 1.2); // TODO make this configurable
     }
 
     /**
