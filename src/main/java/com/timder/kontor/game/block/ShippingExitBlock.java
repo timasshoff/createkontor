@@ -19,6 +19,7 @@ import com.timder.kontor.registry.KontorBlockEntities;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -32,11 +33,12 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<ShippingExitBlockEntity> {
 
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final BooleanProperty DELIVERING = BooleanProperty.create("delivering");
     public static final String RESOURCE_KEY = "shipping_exit";
 
     public ShippingExitBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(DELIVERING, false));
         ConsultantWiki.register("shipping_exit", WikiCategory.BLOCKS, Component.translatable("block.createkontor.shipping_exit"), this::buildWikiPage);
     }
 
@@ -55,7 +57,7 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(POWERED);
+        builder.add(POWERED, DELIVERING);
     }
 
     @Override
@@ -97,6 +99,16 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
             blockEntity.onRedstonePulse();
         }
     }
+
+//    @Override
+//    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+//        return 1.0F;
+//    }
+//
+//    @Override
+//    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+//        return true;
+//    }
 
     private void buildWikiPage(UIElement page) {
         page.addChild(WikiUtils.blockScene(defaultBlockState()));

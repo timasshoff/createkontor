@@ -30,6 +30,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -45,10 +46,10 @@ import java.util.function.Predicate;
 
 public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
-    private static final String TAG_SIGNAL_TICKS = "SignalTicksRemaining";
-    private static final int SIGNAL_HOLD_TICKS = 6;
+    private static final String TAG_REMAINING_TICKS = "DeliveryTicksRemaining";
+    private static final int DELIVERY_DURATION = 20;
 
-    private int deliverySignalTicksRemaining = 0;
+    private int deliveryTicksRemaining = 0;
 
     public ShippingExitBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
         super(type, pos, blockState);
@@ -67,10 +68,21 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
 
     @Override
     public void tick() {
-        if (deliverySignalTicksRemaining > 0) {
-            deliverySignalTicksRemaining--;
-            if (deliverySignalTicksRemaining == 0 && !level.isClientSide()) {
-                level.updateNeighbourForOutputSignal(getBlockPos(), getBlockState().getBlock());
+        if (deliveryTicksRemaining > 0) {
+            deliveryTicksRemaining--;
+            if (level.isClientSide()) {
+                if (deliveryTicksRemaining == 12) {
+                    Vec3 center = Vec3.atCenterOf(getBlockPos()).add(0, 0.4, 0);
+                    level.addParticle(new WiFiParticle.Data(), center.x, center.y, center.z, 0, 1, 0);
+                }
+            } else {
+                if (deliveryTicksRemaining == 12) {
+                    level.playSound(null, getBlockPos(), AllSoundEvents.STOCK_LINK.getMainEvent(), SoundSource.BLOCKS, 0.75f, 1.25f);
+                }
+                if (deliveryTicksRemaining == 0) {
+                    level.updateNeighbourForOutputSignal(getBlockPos(), getBlockState().getBlock());
+                    setDelivering(false);
+                }
             }
         }
         super.tick();
@@ -79,27 +91,33 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
-        tag.putInt(TAG_SIGNAL_TICKS, deliverySignalTicksRemaining);
+        tag.putInt(TAG_REMAINING_TICKS, deliveryTicksRemaining);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
-        int syncedTicks = tag.getInt(TAG_SIGNAL_TICKS);
-
-        if (clientPacket && syncedTicks > deliverySignalTicksRemaining && level instanceof ClientLevel clientLevel) {
-            Vec3 center = Vec3.atCenterOf(getBlockPos()).add(0, 0.4, 0);
-            clientLevel.addParticle(new WiFiParticle.Data(), center.x, center.y, center.z, 0, 1, 0);
-        }
-
-        deliverySignalTicksRemaining = syncedTicks;
+        deliveryTicksRemaining = tag.getInt(TAG_REMAINING_TICKS);
     }
 
     public boolean isSignallingDelivery() {
-        return deliverySignalTicksRemaining > 0;
+        return deliveryTicksRemaining > 0;
+    }
+
+    private void setDelivering(boolean delivering) {
+        BlockState state = getBlockState();
+        if (level != null && !level.isClientSide()
+                && state.getValue(ShippingExitBlock.DELIVERING) != delivering) {
+            level.setBlock(getBlockPos(), state.setValue(ShippingExitBlock.DELIVERING, delivering), Block.UPDATE_CLIENTS);
+            level.playSound(null, getBlockPos(), SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.25f, 0.75f);
+        }
     }
 
     private void checkDeliveries(ServerLevel level, BlockPos pos) {
+        if (deliveryTicksRemaining > 0) {
+            return;
+        }
+
         CompanyId companyId = getCompanyId();
         if (companyId == null) {
             return;
@@ -135,15 +153,10 @@ public class ShippingExitBlockEntity extends AbstractCompanyBlockEntity {
         }
 
         if (anyDelivered) {
-            boolean wasAlreadySignalling = deliverySignalTicksRemaining > 0;
-            deliverySignalTicksRemaining = SIGNAL_HOLD_TICKS;
-            if (!wasAlreadySignalling) {
-                level.updateNeighbourForOutputSignal(pos, getBlockState().getBlock());
-            }
+            deliveryTicksRemaining = DELIVERY_DURATION;
+            level.updateNeighbourForOutputSignal(pos, getBlockState().getBlock());
 
-            level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.25f, 0.75f);
-            level.playSound(null, pos, AllSoundEvents.STOCK_LINK.getMainEvent(), SoundSource.BLOCKS, 0.75f, 1.25f);
-
+            setDelivering(true);
             companyData.setDirty();
             economyData.setDirty();
         }

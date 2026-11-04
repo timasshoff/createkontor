@@ -1,0 +1,7 @@
+{
+  "parent": "createkontor:block/shipping_exit_base",
+  "textures": {
+    "0": "createkontor:block/shipping_exit_active",
+    "particle": "create:block/andesite_casing"
+  }
+}

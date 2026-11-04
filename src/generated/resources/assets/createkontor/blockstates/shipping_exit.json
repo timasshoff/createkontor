@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "delivering=false,powered=false": {
       "model": "createkontor:block/shipping_exit"
+    },
+    "delivering=false,powered=true": {
+      "model": "createkontor:block/shipping_exit"
+    },
+    "delivering=true,powered=false": {
+      "model": "createkontor:block/shipping_exit_active"
+    },
+    "delivering=true,powered=true": {
+      "model": "createkontor:block/shipping_exit_active"
     }
   }
 }

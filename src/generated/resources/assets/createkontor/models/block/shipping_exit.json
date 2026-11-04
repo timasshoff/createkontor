@@ -1,6 +1,8 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "createkontor:block/shipping_exit_base",
+  "render_type": "minecraft:cutout",
   "textures": {
-    "all": "createkontor:block/shipping_exit"
+    "0": "createkontor:block/shipping_exit",
+    "particle": "create:block/andesite_casing"
   }
 }
