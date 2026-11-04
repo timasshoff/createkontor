@@ -1,14 +1,14 @@
 package com.timder.kontor.core.company;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.company.request.RequestRules;
 import com.timder.kontor.core.port.Rng;
 import com.timder.kontor.core.port.SeededRng;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RequestRulesTest {
     private static final RequestParams PARAMS = RequestParams.standard();
@@ -92,4 +92,3 @@ public class RequestRulesTest {
         assertEquals(7200, RequestRules.offerDurationTicks(0.4, 1.5, PARAMS));
     }
 }
-
