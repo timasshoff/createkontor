@@ -33,29 +33,37 @@ public record RequestParams(
         double quantityDiscountFloor,
         double quantityDiscountPerStep,
         double walkInPriceThreshold,
-        double walkInRequestsPerDay
-) {
+        double walkInRequestsPerDay) {
     public RequestParams {
         Objects.requireNonNull(quantitySteps, "quantitySteps must not be null.");
         quantitySteps = List.copyOf(quantitySteps);
         if (quantitySteps.isEmpty()) throw new IllegalArgumentException("quantitySteps must not be empty.");
 
-        double sum = quantitySteps.stream().mapToDouble(QuantityStep::probability).sum();
+        double sum =
+                quantitySteps.stream().mapToDouble(QuantityStep::probability).sum();
         if (Math.abs(sum - 1.0) > 1e-9) {
-            throw new IllegalArgumentException("quantitySteps probabilities must sum to 1.0, but summed to " + sum + ".");
+            throw new IllegalArgumentException(
+                    "quantitySteps probabilities must sum to 1.0, but summed to " + sum + ".");
         }
 
-        if (urgencyProbability < 0 || urgencyProbability > 1) throw new IllegalArgumentException("urgencyProbability must be between 0 and 1.");
-        if (deadlineUrgencyFactor < 0) throw new IllegalArgumentException("deadlineUrgencyFactor must not be negative.");
+        if (urgencyProbability < 0 || urgencyProbability > 1)
+            throw new IllegalArgumentException("urgencyProbability must be between 0 and 1.");
+        if (deadlineUrgencyFactor < 0)
+            throw new IllegalArgumentException("deadlineUrgencyFactor must not be negative.");
         if (priceUrgencyFactor < 0) throw new IllegalArgumentException("priceUrgencyFactor must not be negative.");
-        if (offerDurationUrgencyFactor < 0) throw new IllegalArgumentException("offerDurationUrgencyFactor must not be negative.");
+        if (offerDurationUrgencyFactor < 0)
+            throw new IllegalArgumentException("offerDurationUrgencyFactor must not be negative.");
         if (deadlineBaseTicks <= 0) throw new IllegalArgumentException("deadlineBaseTicks must be positive.");
         if (deadlineFloorTicks <= 0) throw new IllegalArgumentException("deadlineFloorTicks must be positive.");
         if (offerDurationBaseTicks <= 0) throw new IllegalArgumentException("offerDurationBaseTicks must be positive.");
-        if (gracePeriodPortion <= 0 || gracePeriodPortion >= 1) throw new IllegalArgumentException("gracePeriodPortion must be between 0 and 1 (exclusive).");
-        if (quantityDiscountFloor <= 0 || quantityDiscountFloor > 1) throw new IllegalArgumentException("quantityDiscountFloor must be between 0 (exclusive) and 1.");
-        if (quantityDiscountPerStep < 0) throw new IllegalArgumentException("quantityDiscountPerStep must not be negative.");
-        if (walkInPriceThreshold <= 1.0) throw new IllegalArgumentException("walkInPriceThreshold must be greater than 1.0.");
+        if (gracePeriodPortion <= 0 || gracePeriodPortion >= 1)
+            throw new IllegalArgumentException("gracePeriodPortion must be between 0 and 1 (exclusive).");
+        if (quantityDiscountFloor <= 0 || quantityDiscountFloor > 1)
+            throw new IllegalArgumentException("quantityDiscountFloor must be between 0 (exclusive) and 1.");
+        if (quantityDiscountPerStep < 0)
+            throw new IllegalArgumentException("quantityDiscountPerStep must not be negative.");
+        if (walkInPriceThreshold <= 1.0)
+            throw new IllegalArgumentException("walkInPriceThreshold must be greater than 1.0.");
         if (walkInRequestsPerDay <= 0) throw new IllegalArgumentException("walkInRequestsPerDay must be positive.");
     }
 
@@ -86,20 +94,18 @@ public record RequestParams(
                         new QuantityStep(8, 0.15),
                         new QuantityStep(12, 0.10),
                         new QuantityStep(16, 0.05),
-                        new QuantityStep(32, 0.05)
-                ),
-                0.25,   // urgency probability
-                0.6,    // deadline urgency factor
-                0.3,    // price urgency factor
-                0.5,    // offer duration urgency factor
-                3000,   // deadline base ticks
-                2400,   // deadline floor ticks
-                6000,   // offer duration base ticks
-                0.25,   // grace period portion
-                0.95,   // quantity discount floor
-                0.005,  // quantity discount per step
-                1.2,     // walk-in price threshold
-                1
-        );
+                        new QuantityStep(32, 0.05)),
+                0.25, // urgency probability
+                0.6, // deadline urgency factor
+                0.3, // price urgency factor
+                0.5, // offer duration urgency factor
+                3000, // deadline base ticks
+                2400, // deadline floor ticks
+                6000, // offer duration base ticks
+                0.25, // grace period portion
+                0.95, // quantity discount floor
+                0.005, // quantity discount per step
+                1.2, // walk-in price threshold
+                1);
     }
 }

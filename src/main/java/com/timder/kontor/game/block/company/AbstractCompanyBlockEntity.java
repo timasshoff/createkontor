@@ -16,6 +16,10 @@ import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
 import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.util.ComponentFormatting;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -26,19 +30,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 /**
  * A block entity that belongs to a company.
  * Stores, saves and synchs the company id.
  */
-public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implements CompanyBound, IHaveGoggleInformation {
+public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity
+        implements CompanyBound, IHaveGoggleInformation {
 
     @Nullable
     private CompanyId companyId;
+
     private String companyName = "";
 
     public AbstractCompanyBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
@@ -46,8 +47,7 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-    }
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
 
     @Nullable
     @Override
@@ -71,8 +71,7 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         onCompanyChanged(oldId, id);
     }
 
-    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
-    }
+    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {}
 
     protected boolean loadsChunks() {
         return false;
@@ -122,7 +121,8 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         }
     }
 
-    public Optional<S2CActionResult> setListPrice(ItemId market, long priceCents) { // For Kontor Desk and Market Analyst
+    public Optional<S2CActionResult> setListPrice(
+            ItemId market, long priceCents) { // For Kontor Desk and Market Analyst
         if (!(level instanceof ServerLevel serverLevel)) {
             return S2CActionResult.illegalEnvironment();
         }
@@ -175,7 +175,9 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         if (companyId == null || !(level instanceof ServerLevel serverLevel)) {
             return "";
         }
-        return CompanySavedData.get(serverLevel.getServer()).getRegistry().get(companyId)
+        return CompanySavedData.get(serverLevel.getServer())
+                .getRegistry()
+                .get(companyId)
                 .map(Company::name)
                 .orElse("");
     }

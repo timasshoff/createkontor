@@ -1,6 +1,5 @@
 package com.timder.kontor.config;
 
-import com.timder.kontor.core.company.request.QuantityStep;
 import com.timder.kontor.core.company.request.ReputationParams;
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.macro.MacroParams;
@@ -137,8 +136,7 @@ public class EconomyConfig {
                 .defineInRange("driftPerDay", 0.5, 0.0, 100.0);
         builder.pop();
 
-        builder.comment(
-                        "Requests: what a request looks like. Changes apply to requests that arrive from now on")
+        builder.comment("Requests: what a request looks like. Changes apply to requests that arrive from now on")
                 .push("request");
         REQUEST_QUANTITY_STEPS = builder.comment(
                         "Quantity factors as 'factor:weight'. The weights are relative and are divided by their sum, they need not add up to 100")
@@ -163,8 +161,7 @@ public class EconomyConfig {
         REQUEST_DEADLINE_FLOOR_TICKS = builder.comment("No deadline is shorter than this many ticks")
                 .defineInRange("deadlineFloorTicks", 2400, 1L, Long.MAX_VALUE);
         REQUEST_OFFER_DURATION_BASE_TICKS = builder.comment("How many ticks a normal request stays on the board")
-                .defineInRange(
-                        "offerDurationBaseTicks", 6000, 100L, Long.MAX_VALUE);
+                .defineInRange("offerDurationBaseTicks", 6000, 100L, Long.MAX_VALUE);
         REQUEST_GRACE_PERIOD_PORTION = builder.comment("Portion of the deadline that is granted as grace period")
                 .defineInRange("gracePeriodPortion", 0.1, 0.01, 0.99);
         REQUEST_QUANTITY_DISCOUNT_FLOOR = builder.comment("Lowest price factor of the quantity discount")
@@ -173,12 +170,10 @@ public class EconomyConfig {
                 .defineInRange("quantityDiscountPerStep", 0.005, 0.0, 1.0);
         REQUEST_WALK_IN_PRICE_THRESHOLD = builder.comment(
                         "List price relative to the market price up to which at least one request per day is guaranteed")
-                .defineInRange(
-                        "walkInPriceThreshold", 1.2, 1.0001, Double.MAX_VALUE);
+                .defineInRange("walkInPriceThreshold", 1.2, 1.0001, Double.MAX_VALUE);
         REQUEST_WALK_IN_REQUESTS_PER_DAY = builder.comment(
                         "Minimum number of requests per day guaranteed while the walk-in price threshold applies")
-                .defineInRange(
-                        "walkInRequestsPerDay", 2, 1.0E-6, Double.MAX_VALUE);
+                .defineInRange("walkInRequestsPerDay", 2, 1.0E-6, Double.MAX_VALUE);
         builder.pop();
 
         builder.comment("Technical Progress").push("progress");

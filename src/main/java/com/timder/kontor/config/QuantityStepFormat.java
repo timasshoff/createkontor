@@ -1,7 +1,6 @@
 package com.timder.kontor.config;
 
 import com.timder.kontor.core.company.request.QuantityStep;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +9,9 @@ final class QuantityStepFormat {
     static final double MIN_WEIGHT = 1.0E-6;
     static final double MAX_WEIGHT = 1.0E6;
 
-    private record Entry(int k, double weight) {
-    }
+    private record Entry(int k, double weight) {}
 
-    private QuantityStepFormat() {
-    }
+    private QuantityStepFormat() {}
 
     static boolean isValid(Object entry) {
         return parse(entry) != null;
@@ -59,4 +56,3 @@ final class QuantityStepFormat {
         }
     }
 }
-

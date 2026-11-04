@@ -214,7 +214,8 @@ public class MarketAnalystUi {
                 layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0));
 
         ScrollerView shareTab = (ScrollerView) UiContainer.tabScroller().layout(layout -> layout.gapAll(4));
-        UIElement infoBox = new UIElement().layout(layout -> layout.widthPercent(100).gapAll(4));
+        UIElement infoBox =
+                new UIElement().layout(layout -> layout.widthPercent(100).gapAll(4));
         UIElement editorBox = new UIElement().layout(layout -> layout.widthPercent(100));
         shareTab.addScrollViewChildren(infoBox, editorBox);
         ItemId[] editorMarket = {null};

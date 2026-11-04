@@ -2,14 +2,13 @@ package com.timder.kontor.data.provider;
 
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class MarketDefinitionDataProvider implements DataProvider {
 
@@ -74,9 +73,12 @@ public class MarketDefinitionDataProvider implements DataProvider {
         futures.add(save(cache, "warped_slab", "minecraft:warped_slab", "building", 4640, 0.80, 64));
 
         futures.add(save(cache, "polished_andesite", "minecraft:polished_andesite", "building", 4480, 0.80, 64));
-        futures.add(save(cache, "polished_andesite_stairs", "minecraft:polished_andesite_stairs", "building", 3200, 0.80, 64));
-        futures.add(save(cache, "polished_andesite_slab", "minecraft:polished_andesite_slab", "building", 3520, 0.80, 64));
-        futures.add(save(cache, "polished_andesite_wall", "minecraft:polished_andesite_wall", "building", 3200, 0.80, 64));
+        futures.add(save(
+                cache, "polished_andesite_stairs", "minecraft:polished_andesite_stairs", "building", 3200, 0.80, 64));
+        futures.add(
+                save(cache, "polished_andesite_slab", "minecraft:polished_andesite_slab", "building", 3520, 0.80, 64));
+        futures.add(
+                save(cache, "polished_andesite_wall", "minecraft:polished_andesite_wall", "building", 3200, 0.80, 64));
 
         futures.add(save(cache, "andesite_stairs", "minecraft:andesite_stairs", "building", 3200, 0.80, 64));
         futures.add(save(cache, "andesite_slab", "minecraft:andesite_slab", "building", 3520, 0.80, 64));
@@ -171,14 +173,14 @@ public class MarketDefinitionDataProvider implements DataProvider {
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
-    private CompletableFuture<?> save(CachedOutput cache,
-                                      String fileName,
-                                      String item,
-                                      String group,
-                                      double baseDemand,
-                                      double targetUtilisation,
-                                      int packageSize
-    ) {
+    private CompletableFuture<?> save(
+            CachedOutput cache,
+            String fileName,
+            String item,
+            String group,
+            double baseDemand,
+            double targetUtilisation,
+            int packageSize) {
         JsonObject json = new JsonObject();
         json.addProperty("item", item);
         json.addProperty("group", group);

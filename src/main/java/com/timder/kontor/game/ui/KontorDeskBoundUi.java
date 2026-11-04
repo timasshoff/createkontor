@@ -1021,7 +1021,8 @@ public class KontorDeskBoundUi {
 
         Label marketPriceLabel = UiLabels.secondary(
                 Component.translatable(
-                        "ui.createkontor.kontor_desk.markets.market_price", ComponentFormatting.moneyColored(marketPrice)),
+                        "ui.createkontor.kontor_desk.markets.market_price",
+                        ComponentFormatting.moneyColored(marketPrice)),
                 Horizontal.RIGHT);
 
         UIElement priceHeader = new UIElement()
