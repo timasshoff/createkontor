@@ -4,7 +4,9 @@ import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
+import com.simibubi.create.AllTags;
 import com.simibubi.create.api.behaviour.display.DisplaySource;
+import com.simibubi.create.foundation.data.SharedProperties;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.timder.kontor.game.block.*;
@@ -20,6 +22,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
@@ -33,6 +36,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
 
 public final class KontorBlocks {
 
@@ -40,9 +45,29 @@ public final class KontorBlocks {
 
     public static final BlockEntry<ShippingExitBlock> SHIPPING_EXIT = REGISTRATE
             .block("shipping_exit", ShippingExitBlock::new)
-            .properties(p -> p.mapColor(MapColor.STONE).strength(2.0F, 6.0F).sound(SoundType.STONE))
+            .initialProperties(SharedProperties::softMetal)
+            .properties(p -> p.mapColor(MapColor.PODZOL)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .noOcclusion())
             .tag(BlockTags.MINEABLE_WITH_AXE)
-            .blockstate((ctx, prov) -> prov.simpleBlockWithItem(ctx.get(), prov.cubeAll(ctx.get())))
+            .tag(AllTags.AllBlockTags.WRENCH_PICKUP.tag)
+            .blockstate((ctx, prov) -> {
+                ResourceLocation base = prov.modLoc("block/shipping_exit_base");
+                ModelFile idle = prov.models()
+                        .withExistingParent("block/shipping_exit", base)
+                        .texture("0", prov.modLoc("block/shipping_exit"))
+                        .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"))
+                        .renderType("minecraft:cutout");
+                ModelFile active = prov.models()
+                        .withExistingParent("block/shipping_exit_active", base)
+                        .texture("0", prov.modLoc("block/shipping_exit_active"))
+                        .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"));
+                prov.getVariantBuilder(ctx.get())
+                        .forAllStates(state -> ConfiguredModel.builder()
+                                .modelFile(state.getValue(ShippingExitBlock.DELIVERING) ? active : idle)
+                                .build());
+            })
             .loot((loot, block) -> loot.add(
                     block,
                     LootTable.lootTable()

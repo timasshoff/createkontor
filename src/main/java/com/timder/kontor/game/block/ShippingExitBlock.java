@@ -32,12 +32,18 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<ShippingExitBlockEntity> {
 
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final BooleanProperty DELIVERING = BooleanProperty.create("delivering");
     public static final String RESOURCE_KEY = "shipping_exit";
 
     public ShippingExitBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));
-        ConsultantWiki.register("shipping_exit", WikiCategory.BLOCKS, Component.translatable("block.createkontor.shipping_exit"), this::buildWikiPage);
+        this.registerDefaultState(
+                this.stateDefinition.any().setValue(POWERED, false).setValue(DELIVERING, false));
+        ConsultantWiki.register(
+                "shipping_exit",
+                WikiCategory.BLOCKS,
+                Component.translatable("block.createkontor.shipping_exit"),
+                this::buildWikiPage);
     }
 
     @Override
@@ -48,14 +54,16 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
             if (legalForm.allowsMoreShippingExits(company.boundResourceCount(RESOURCE_KEY))) {
                 return null;
             }
-            return Component.translatable("message.createkontor.shipping_exit.limit", ComponentFormatting.highlightError(String.valueOf(legalForm.maxShippingExits())));
+            return Component.translatable(
+                    "message.createkontor.shipping_exit.limit",
+                    ComponentFormatting.highlightError(String.valueOf(legalForm.maxShippingExits())));
         };
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(POWERED);
+        builder.add(POWERED, DELIVERING);
     }
 
     @Override
@@ -75,12 +83,19 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
 
     @Override
     protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
-        return getBlockEntityOptional(level, pos).map(pbe -> pbe.isSignallingDelivery() ? 15 : 0)
+        return getBlockEntityOptional(level, pos)
+                .map(pbe -> pbe.isSignallingDelivery() ? 15 : 0)
                 .orElse(0);
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+    protected void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
         super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
         if (level.isClientSide()) {
             return;
@@ -98,6 +113,16 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
         }
     }
 
+    //    @Override
+    //    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+    //        return 1.0F;
+    //    }
+    //
+    //    @Override
+    //    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    //        return true;
+    //    }
+
     private void buildWikiPage(UIElement page) {
         page.addChild(WikiUtils.blockScene(defaultBlockState()));
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p1")));
@@ -105,8 +130,14 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
         var level = new TrackedDummyWorld();
         level.addBlock(BlockPos.ZERO, BlockInfo.fromBlockState(defaultBlockState()));
         level.addBlock(new BlockPos(1, 0, 0), BlockInfo.fromBlockState(Blocks.CHEST.defaultBlockState()));
-        level.addBlock(new BlockPos(-1, 0, 0), BlockInfo.fromBlockState(AllBlocks.PULSE_TIMER.getDefaultState().rotate(Rotation.COUNTERCLOCKWISE_90)));
-        page.addChild(WikiUtils.scene(level, WikiUtils.SCENE_DEFAULT_HEIGHT, false, Component.translatable("wiki.createkontor.page.shipping_exit.scene1")));
+        level.addBlock(
+                new BlockPos(-1, 0, 0),
+                BlockInfo.fromBlockState(AllBlocks.PULSE_TIMER.getDefaultState().rotate(Rotation.COUNTERCLOCKWISE_90)));
+        page.addChild(WikiUtils.scene(
+                level,
+                WikiUtils.SCENE_DEFAULT_HEIGHT,
+                false,
+                Component.translatable("wiki.createkontor.page.shipping_exit.scene1")));
 
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p2")));
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.shipping_exit.p3")));
