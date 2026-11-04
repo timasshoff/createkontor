@@ -8,7 +8,6 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
-import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketParticipationRules;
@@ -164,35 +163,6 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
         economyData.setDirty();
         companyData.setDirty();
-        return S2CActionResult.empty();
-    }
-
-    public Optional<S2CActionResult> setListPrice(ItemId market, long priceCents) {
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return S2CActionResult.illegalEnvironment();
-        }
-        MinecraftServer server = serverLevel.getServer();
-        Company company =
-                CompanySavedData.get(server).getRegistry().get(getCompanyId()).orElse(null);
-        if (company == null) {
-            return S2CActionResult.error(
-                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
-        }
-
-        EconomySavedData economyData = EconomySavedData.get(server);
-        Economy economy = economyData.getEconomy();
-        if (!economy.isParticipant(market, company.id())) {
-            return S2CActionResult.error(
-                    ComponentFormatting.error("The company does not actively take part in " + market + "."));
-        }
-
-        try {
-            economy.updateListPrice(
-                    market, company.id(), Money.ofCents(priceCents).toDollars());
-        } catch (IllegalArgumentException e) {
-            return S2CActionResult.error(ComponentFormatting.error(e.getMessage()));
-        }
-        economyData.setDirty();
         return S2CActionResult.empty();
     }
 

@@ -1,5 +1,5 @@
 {
-  "base_demand": 2500.0,
+  "base_demand": 4000.0,
   "group": "building",
   "item": "create:industrial_iron_block",
   "package_size": 64,

@@ -8,30 +8,38 @@ import com.timder.kontor.CreateKontor;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
+import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.util.ComponentFormatting;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * A block entity that belongs to a company.
  * Stores, saves and synchs the company id.
  */
-public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implements CompanyBound, IHaveGoggleInformation {
+public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity
+        implements CompanyBound, IHaveGoggleInformation {
 
     @Nullable
     private CompanyId companyId;
+
     private String companyName = "";
 
     public AbstractCompanyBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
@@ -39,8 +47,7 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-    }
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
 
     @Nullable
     @Override
@@ -64,8 +71,7 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         onCompanyChanged(oldId, id);
     }
 
-    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
-    }
+    protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {}
 
     protected boolean loadsChunks() {
         return false;
@@ -115,6 +121,36 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         }
     }
 
+    public Optional<S2CActionResult> setListPrice(
+            ItemId market, long priceCents) { // For Kontor Desk and Market Analyst
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return S2CActionResult.illegalEnvironment();
+        }
+        MinecraftServer server = serverLevel.getServer();
+        Company company =
+                CompanySavedData.get(server).getRegistry().get(getCompanyId()).orElse(null);
+        if (company == null) {
+            return S2CActionResult.error(
+                    ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
+        }
+
+        EconomySavedData economyData = EconomySavedData.get(server);
+        Economy economy = economyData.getEconomy();
+        if (!economy.isParticipant(market, company.id())) {
+            return S2CActionResult.error(
+                    ComponentFormatting.error("The company does not actively take part in " + market + "."));
+        }
+
+        try {
+            economy.updateListPrice(
+                    market, company.id(), Money.ofCents(priceCents).toDollars());
+        } catch (IllegalArgumentException e) {
+            return S2CActionResult.error(ComponentFormatting.error(e.getMessage()));
+        }
+        economyData.setDirty();
+        return S2CActionResult.empty();
+    }
+
     @Override
     public void remove() {
         super.remove();
@@ -139,7 +175,9 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity implem
         if (companyId == null || !(level instanceof ServerLevel serverLevel)) {
             return "";
         }
-        return CompanySavedData.get(serverLevel.getServer()).getRegistry().get(companyId)
+        return CompanySavedData.get(serverLevel.getServer())
+                .getRegistry()
+                .get(companyId)
                 .map(Company::name)
                 .orElse("");
     }

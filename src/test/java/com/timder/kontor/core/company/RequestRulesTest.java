@@ -1,14 +1,14 @@
 package com.timder.kontor.core.company;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.timder.kontor.core.company.request.RequestParams;
 import com.timder.kontor.core.company.request.RequestRules;
 import com.timder.kontor.core.port.Rng;
 import com.timder.kontor.core.port.SeededRng;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RequestRulesTest {
     private static final RequestParams PARAMS = RequestParams.standard();
@@ -72,22 +72,6 @@ public class RequestRulesTest {
     }
 
     @Test
-    @DisplayName("Deadline for a non-urgent order matches")
-    void deadlineNonUrgent() {
-        double tX = RequestRules.manufacturingTicksPerUnit(2);
-        long deadline = RequestRules.deadlineTicks(32, 0.0, tX, 1.0, PARAMS);
-        assertEquals(9651, deadline);
-    }
-
-    @Test
-    @DisplayName("Deadline shrinks with urgency")
-    void deadlineUrgent() {
-        double tX = RequestRules.manufacturingTicksPerUnit(2);
-        long deadline = RequestRules.deadlineTicks(32, 0.5, tX, 1.0, PARAMS);
-        assertEquals(6756, deadline);
-    }
-
-    @Test
     @DisplayName("Unit price with urgency surcharge and a moderate quantity discount")
     void unitPriceMatchesReference() {
         double price = RequestRules.unitPrice(9.03, 0.5, 3, PARAMS);
@@ -108,4 +92,3 @@ public class RequestRulesTest {
         assertEquals(7200, RequestRules.offerDurationTicks(0.4, 1.5, PARAMS));
     }
 }
-

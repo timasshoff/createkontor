@@ -799,48 +799,8 @@ public class KontorDeskBoundUi {
                     element.addChild(titleRow);
 
                     if (entry.market().participating()) {
-                        Label listPriceLabel = UiLabels.paragraphPrimary(
-                                Component.translatable("ui.createkontor.kontor_desk.markets.list_price"),
-                                Horizontal.LEFT);
-                        listPriceLabel.layout(
-                                layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
-
-                        Label marketPriceLabel = UiLabels.secondary(
-                                Component.translatable(
-                                        "ui.createkontor.kontor_desk.markets.market_price",
-                                        ComponentFormatting.moneyColored(entry.marketPrice())),
-                                Horizontal.RIGHT);
-
-                        UIElement priceHeader = new UIElement()
-                                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
-                                        .alignItems(AlignItems.CENTER)
-                                        .widthPercent(100));
-                        priceHeader.addChildren(listPriceLabel, marketPriceLabel);
-                        element.addChild(priceHeader);
-
-                        UIElement priceSlider = UiSliders.labeledInline(
-                                Math.max(0.01f, (float) entry.marketPrice().toDollars() * 0.01f),
-                                (float) entry.marketPrice().toDollars() * 2f,
-                                (float)
-                                        (entry.listPrice() != null
-                                                ? entry.listPrice().toDollars()
-                                                : 0.0f),
-                                0.01f,
-                                2,
-                                true,
-                                400,
-                                value -> ComponentFormatting.moneyColored(Money.fromDollar((double) value)),
-                                value -> {},
-                                value -> {
-                                    CompoundTag tag = new CompoundTag();
-                                    tag.putString(
-                                            "Market", entry.market().market().value());
-                                    tag.putLong(
-                                            "PriceCents",
-                                            Money.fromDollar(value).cents());
-                                    content.sendMessage("c2s_set_list_price", tag);
-                                });
-                        element.addChild(priceSlider);
+                        element.addChild(listPriceEditor(
+                                content, entry.market().market(), entry.marketPrice(), entry.listPrice()));
                     }
 
                     return element;
@@ -1051,6 +1011,46 @@ public class KontorDeskBoundUi {
         isInsolvent.runListenersOnce();
 
         return content;
+    }
+
+    public static UIElement listPriceEditor(
+            UIElement content, ItemId market, Money marketPrice, @Nullable Money listPrice) {
+        Label listPriceLabel = UiLabels.paragraphPrimary(
+                Component.translatable("ui.createkontor.kontor_desk.markets.edit_list_price"), Horizontal.LEFT);
+        listPriceLabel.layout(layout -> layout.widthAuto().flexBasis(0).flexGrow(1));
+
+        Label marketPriceLabel = UiLabels.secondary(
+                Component.translatable(
+                        "ui.createkontor.kontor_desk.markets.market_price",
+                        ComponentFormatting.moneyColored(marketPrice)),
+                Horizontal.RIGHT);
+
+        UIElement priceHeader = new UIElement()
+                .layout(layout -> layout.flexDirection(FlexDirection.ROW)
+                        .alignItems(AlignItems.CENTER)
+                        .widthPercent(100));
+        priceHeader.addChildren(listPriceLabel, marketPriceLabel);
+
+        UIElement priceSlider = UiSliders.labeledInline(
+                Math.max(0.01f, (float) marketPrice.toDollars() * 0.01f),
+                (float) marketPrice.toDollars() * 2f,
+                (float) (listPrice != null ? listPrice.toDollars() : 0.0f),
+                0.01f,
+                2,
+                true,
+                400,
+                value -> ComponentFormatting.moneyColored(Money.fromDollar((double) value)),
+                value -> {},
+                value -> {
+                    CompoundTag tag = new CompoundTag();
+                    tag.putString("Market", market.value());
+                    tag.putLong("PriceCents", Money.fromDollar(value).cents());
+                    content.sendMessage("c2s_set_list_price", tag);
+                });
+
+        return new UIElement()
+                .layout(layout -> layout.widthPercent(100).gapAll(4))
+                .addChildren(priceHeader, priceSlider);
     }
 
     private static List<Booking> tagToBookings(Tag tag) {

@@ -1,5 +1,5 @@
 {
-  "base_demand": 2000.0,
+  "base_demand": 3200.0,
   "group": "building",
   "item": "minecraft:polished_andesite_stairs",
   "package_size": 64,

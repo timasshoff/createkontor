@@ -1,5 +1,5 @@
 {
-  "base_demand": 1600.0,
+  "base_demand": 2560.0,
   "group": "building",
   "item": "minecraft:glass",
   "package_size": 64,

@@ -37,7 +37,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 5,
                 3,
                 0,
-                64,
+                256,
                 1.5,
                 1024,
                 0,
@@ -63,9 +63,9 @@ public class LegalFormDefDataProvider implements DataProvider {
                 12,
                 10,
                 0,
-                256,
-                1.2,
-                4096,
+                512,
+                1.1,
+                1024,
                 1,
                 Money.ofDollars(5000), // Overdraft limit
                 Money.ofDollars(20000), // Bank loan limit
@@ -95,8 +95,8 @@ public class LegalFormDefDataProvider implements DataProvider {
                 30,
                 40,
                 6,
-                1024,
-                1.0,
+                2048,
+                0.8,
                 16384,
                 2,
                 Money.ofDollars(20000), // Overdraft limit
@@ -128,7 +128,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 150,
                 20,
                 4096,
-                1.0,
+                0.7,
                 65536,
                 3,
                 Money.ofDollars(100000), // Overdraft limit

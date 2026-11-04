@@ -267,7 +267,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.search", "Search licensed markets");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.participate", "Participate and receive requests");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.participate_short", "Active");
-        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.list_price", "Your current list price:");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.edit_list_price", "Edit List Price:");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.markets.market_price", "Current Market Price: %s");
 
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form", "Legal Form");

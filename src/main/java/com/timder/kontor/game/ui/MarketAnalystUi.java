@@ -22,6 +22,7 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.block.MarketAnalystActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.chart.*;
 import com.timder.kontor.game.ui.chart.classic.ChartHost;
 import com.timder.kontor.game.ui.chart.segment.SegmentBarElement;
@@ -169,6 +170,12 @@ public class MarketAnalystUi {
             selected[0] = id != null && context.economy().isMarket(id) ? id : null;
         });
 
+        content.onMessage(
+                "c2s_set_list_price",
+                tag -> ToastPayload.send(
+                        content.getModularUI().player,
+                        context.desk().setListPrice(new ItemId(tag.getString("Market")), tag.getLong("PriceCents"))));
+
         UIElement marketBox = new UIElement()
                 .layout(layout -> layout.widthPercent(100)
                         .flexBasis(0)
@@ -207,6 +214,11 @@ public class MarketAnalystUi {
                 layout -> layout.widthPercent(100).flexBasis(0).flexGrow(1).minHeight(0));
 
         ScrollerView shareTab = (ScrollerView) UiContainer.tabScroller().layout(layout -> layout.gapAll(4));
+        UIElement infoBox =
+                new UIElement().layout(layout -> layout.widthPercent(100).gapAll(4));
+        UIElement editorBox = new UIElement().layout(layout -> layout.widthPercent(100));
+        shareTab.addScrollViewChildren(infoBox, editorBox);
+        ItemId[] editorMarket = {null};
 
         TabView chartTabs = (TabView) UiContainer.largeTabView()
                 .layout(layout -> layout.widthPercent(100).flexGrow(1).flexBasis(0));
@@ -240,17 +252,17 @@ public class MarketAnalystUi {
                     double marketPrice = history.getLast().displayedPrice();
 
                     if (data.contains("OwnShare")) { // = company participates in market (or it would not have a share)
-                        shareTab.clearAllScrollViewChildren();
+                        infoBox.clearAllChildren();
                         MarketShareBreakdown breakdown = new MarketShareBreakdown(
                                 data.getDouble("OwnShare"),
                                 data.getDouble("OtherCompaniesShare"),
                                 data.getDouble("CompetitionShare"));
                         SegmentBarElement bar = SegmentBarElement.from(CompanyCharts.share(breakdown));
                         bar.layout(layout -> layout.widthPercent(100));
-                        shareTab.addScrollViewChildren(bar);
+                        infoBox.addChild(bar);
 
                         double expectedQuantity = data.getDouble("OwnExpectedQuantity");
-                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                        infoBox.addChild(UiLabels.secondary(
                                         Component.translatable(
                                                 "ui.createkontor.market_analyst_desk.expected_daily_quantity",
                                                 ComponentFormatting.highlightStandard(
@@ -260,7 +272,7 @@ public class MarketAnalystUi {
                                         "ui.createkontor.market_analyst_desk.expected_daily_quantity.tooltip"))));
 
                         double difference = marketPrice > 0.0 ? ownPrice / marketPrice - 1.0 : 0.0;
-                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                        infoBox.addChild(UiLabels.secondary(
                                         Component.translatable(
                                                 "ui.createkontor.market_analyst_desk.own_price",
                                                 ComponentFormatting.moneyColored(
@@ -271,7 +283,7 @@ public class MarketAnalystUi {
                                         "ui.createkontor.market_analyst_desk.own_price.tooltip"))));
 
                         double expectedRevenue = ownPrice * expectedQuantity;
-                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                        infoBox.addChild(UiLabels.secondary(
                                         Component.translatable(
                                                 "ui.createkontor.market_analyst_desk.expected_revenue",
                                                 ComponentFormatting.moneyColored(
@@ -280,7 +292,7 @@ public class MarketAnalystUi {
                                 .style(style -> style.tooltips(Component.translatable(
                                         "ui.createkontor.market_analyst_desk.expected_revenue.tooltip"))));
 
-                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                        infoBox.addChild(UiLabels.secondary(
                                         Component.translatable(
                                                 "ui.createkontor.market_analyst_desk.reputation",
                                                 ComponentFormatting.starsWithValue(data.getDouble("ReputationStars"))),
@@ -289,7 +301,7 @@ public class MarketAnalystUi {
                                         "ui.createkontor.market_analyst_desk.reputation.tooltip"))));
 
                         int lostRequests = data.getInt("LostRequestsToday");
-                        shareTab.addScrollViewChildren(UiLabels.secondary(
+                        infoBox.addChild(UiLabels.secondary(
                                         Component.translatable(
                                                 "ui.createkontor.market_analyst_desk.lost_requests",
                                                 Component.literal(String.valueOf(lostRequests))
@@ -303,9 +315,21 @@ public class MarketAnalystUi {
                                 .style(style -> style.tooltips(Component.translatable(
                                         "ui.createkontor.market_analyst_desk.lost_requests.tooltip"))));
 
+                        ItemId market = new ItemId(data.getString("Market"));
+                        if (!market.equals(editorMarket[0])) {
+                            editorBox.clearAllChildren();
+                            editorBox.addChild(KontorDeskBoundUi.listPriceEditor(
+                                            content, market, Money.fromDollar(marketPrice), Money.fromDollar(ownPrice))
+                                    .style(UiStyles.CARD)
+                                    .layout(layout -> layout.paddingAll(8)));
+                            editorMarket[0] = market;
+                        }
+
                     } else {
-                        shareTab.clearAllScrollViewChildren();
-                        shareTab.addScrollViewChild(UiLabels.secondary(
+                        infoBox.clearAllChildren();
+                        editorBox.clearAllChildren();
+                        editorMarket[0] = null;
+                        infoBox.addChild(UiLabels.secondary(
                                 Component.translatable("ui.createkontor.market_analyst_desk.no_participation"),
                                 Horizontal.LEFT));
                     }

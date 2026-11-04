@@ -32,13 +32,14 @@ public final class RequestRules {
      * @param params The request parameters
      * @return The arrival rate in requests per tick
      */
-    public static double rate(double expectedDailyQuantity,
-                              double frameworkContractQuantity,
-                              double overflowShare,
-                              double averageRequestSize,
-                              double listPrice,
-                              double displayedMarketPrice,
-                              RequestParams params) {
+    public static double rate(
+            double expectedDailyQuantity,
+            double frameworkContractQuantity,
+            double overflowShare,
+            double averageRequestSize,
+            double listPrice,
+            double displayedMarketPrice,
+            RequestParams params) {
         if (averageRequestSize <= 0) throw new IllegalArgumentException("averageRequestSize must be positive.");
         if (listPrice <= 0) throw new IllegalArgumentException("listPrice must be positive.");
         if (displayedMarketPrice <= 0) throw new IllegalArgumentException("displayedMarketPrice must be positive.");
@@ -100,7 +101,6 @@ public final class RequestRules {
         long raw = (long) quantityFactor * packageSize;
         long maxPackageQuantity = (long) (maxQuantity / packageSize) * packageSize;
         return (int) Math.min(raw, maxPackageQuantity);
-
     }
 
     /**
@@ -123,7 +123,7 @@ public final class RequestRules {
      */
     public static double manufacturingTicksPerUnit(int depth) {
         if (depth < 0) throw new IllegalArgumentException("depth must not be negative.");
-        return 40.0 * Math.pow(1 + depth, 1.5);
+        return 40.0 * Math.pow(1 + depth, 1.2); // TODO make this configurable
     }
 
     /**
@@ -135,13 +135,21 @@ public final class RequestRules {
      * @param params Request parameters
      * @return The deadline in ticks
      */
-    public static long deadlineTicks(int quantity, double urgency, double manufacturingTicksPerUnit, double deadlineFactor, RequestParams params) {
+    public static long deadlineTicks(
+            int quantity,
+            double urgency,
+            double manufacturingTicksPerUnit,
+            double deadlineFactor,
+            RequestParams params) {
         if (quantity <= 0) throw new IllegalArgumentException("quantity must be positive.");
         if (urgency < 0 || urgency > 1) throw new IllegalArgumentException("urgency must be between 0 and 1.");
-        if (manufacturingTicksPerUnit < 0) throw new IllegalArgumentException("manufacturingTicksPerUnit must not be negative.");
+        if (manufacturingTicksPerUnit < 0)
+            throw new IllegalArgumentException("manufacturingTicksPerUnit must not be negative.");
         if (deadlineFactor <= 0) throw new IllegalArgumentException("deadlineFactor must be positive.");
 
-        double raw = (params.deadlineBaseTicks() + quantity * manufacturingTicksPerUnit) * (1 - params.deadlineUrgencyFactor() * urgency) * deadlineFactor;
+        double raw = (params.deadlineBaseTicks() + quantity * manufacturingTicksPerUnit)
+                * (1 - params.deadlineUrgencyFactor() * urgency)
+                * deadlineFactor;
         return Math.round(Math.max(params.deadlineFloorTicks(), raw));
     }
 
@@ -158,7 +166,8 @@ public final class RequestRules {
         if (urgency < 0 || urgency > 1) throw new IllegalArgumentException("urgency must be between 0 and 1.");
         if (quantityFactor <= 0) throw new IllegalArgumentException("quantityFactor must be positive.");
 
-        double quantityDiscount = Math.max(params.quantityDiscountFloor(), 1 - params.quantityDiscountPerStep() * (quantityFactor - 1));
+        double quantityDiscount =
+                Math.max(params.quantityDiscountFloor(), 1 - params.quantityDiscountPerStep() * (quantityFactor - 1));
         return listPrice * (1 + params.priceUrgencyFactor() * urgency) * quantityDiscount;
     }
 
@@ -173,7 +182,8 @@ public final class RequestRules {
         if (urgency < 0 || urgency > 1) throw new IllegalArgumentException("urgency must be between 0 and 1.");
         if (salesRepFactor <= 0) throw new IllegalArgumentException("salesRepFactor must be positive.");
 
-        double raw = params.offerDurationBaseTicks() * (1 - params.offerDurationUrgencyFactor() * urgency) * salesRepFactor;
+        double raw =
+                params.offerDurationBaseTicks() * (1 - params.offerDurationUrgencyFactor() * urgency) * salesRepFactor;
         return Math.round(raw);
     }
 
