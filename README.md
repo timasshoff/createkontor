@@ -13,11 +13,12 @@
  <a href="https://modrinth.com/project/create-kontor"><img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
  <a href=""><img alt="discord-plural" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/social/discord-plural_vector.svg"></a>
  <a href=""><img alt="ghpages" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/ghpages_vector.svg"></a>
-
 </p>
 
- **Create: Kontor expands your Create Mod World by giving you the best purpose ever to build a factory: Money! 💸<br> 
-Found a company, build factories, calculate prices, make informed decisions and grow your company!**
+<p align="center">
+  <b>Create: Kontor expands your Create Mod World by giving you the best purpose ever to build a factory: Money! 💸<br> 
+  Found a company, build factories, calculate prices, make informed decisions and grow your company!</b>
+</p>
 
 <br><br>
 
@@ -190,4 +191,8 @@ All AI generated code has been marked with a comment saying, that the code is AI
 
 If you find a bug or have a suggestion, please create a GitHub Issue [here](https://github.com/timasshoff/createkontor/issues).
 
-You can find the official discord here.
+<p align="center">
+ <a href="https://github.com/timasshoff/createkontor/"><img alt="github" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg"></a>
+ <a href=""><img alt="discord-plural" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/social/discord-plural_vector.svg"></a>
+ <a href=""><img alt="ghpages" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/ghpages_vector.svg"></a>
+</p>
