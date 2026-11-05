@@ -29,5 +29,8 @@ public class KontorPonderPlugin implements PonderPlugin {
                         KontorBlocks.PROPERTY_MANAGER_DESK)
                 .addStoryBoard("employee_desk/hiring", EmployeeDeskScenes::hiring)
                 .addStoryBoard("employee_desk/chunk_loading", EmployeeDeskScenes::chunkLoading);
+
+        HELPER.forComponents(KontorBlocks.SHIPPING_EXIT)
+                .addStoryBoard("shipping_exit/delivery", ShippingExitScenes::delivery);
     }
 }

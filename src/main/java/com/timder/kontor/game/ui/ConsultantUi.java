@@ -8,21 +8,22 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.TreeList;
 import com.timder.kontor.CreateKontor;
 import com.timder.kontor.game.block.consultant.ConsultantWiki;
 import com.timder.kontor.game.block.employee.EmployeeDeskContext;
+import com.timder.kontor.game.ui.element.UiButtons;
 import com.timder.kontor.game.ui.element.UiContainer;
 import com.timder.kontor.game.ui.element.UiLabels;
 import com.timder.kontor.game.ui.element.UiStyles;
 import com.timder.kontor.game.wiki.WikiEntry;
 import com.timder.kontor.game.wiki.WikiIndex;
 import com.timder.kontor.game.wiki.WikiNode;
+import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
 import java.util.*;
+import net.createmod.ponder.command.SimplePonderActions;
 import net.minecraft.network.chat.Component;
 
 public final class ConsultantUi {
 
     private static final float TREE_WIDTH_PERCENT = 25;
-
-    private ConsultantUi() {}
 
     public static ModularUI create(EmployeeDeskContext context) {
         var tabView = UiContainer.largeTabView();
@@ -90,7 +91,28 @@ public final class ConsultantUi {
         UIElement page;
         try {
             page = new UIElement().layout(layout -> layout.widthPercent(100).gapAll(8));
-            page.addChild(UiLabels.h1(entry.title(), Horizontal.LEFT));
+
+            UIElement header = new UIElement()
+                    .layout(layout -> layout.widthPercent(100)
+                            .gapAll(4)
+                            .flexDirection(FlexDirection.ROW)
+                            .alignItems(AlignItems.CENTER));
+            header.addChild(UiLabels.h1(entry.title(), Horizontal.LEFT)
+                    .layout(layout -> layout.widthAuto()
+                            .flexBasis(0)
+                            .flexGrow(1)
+                            .flexShrink(1)
+                            .minWidth(0)));
+            if (entry.ponder() != null) {
+                header.addChild(UiButtons.secondary(Component.translatable("wiki.createkontor.show_ponder"))
+                        .setOnClick(e -> {
+                            if (header.getModularUI().player.level().isClientSide()) {
+                                SimplePonderActions.openPonder(entry.ponder().toString());
+                            }
+                        }));
+            }
+
+            page.addChild(header);
             entry.page().accept(page);
         } catch (RuntimeException e) {
             CreateKontor.LOGGER.error("The wiki page {} could not be built.", entry.id(), e);

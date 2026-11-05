@@ -11,6 +11,7 @@ import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.ui.PropertyManagerUi;
 import com.timder.kontor.game.ui.element.WikiUtils;
 import com.timder.kontor.game.wiki.WikiCategory;
+import com.timder.kontor.registry.KontorBlocks;
 import java.util.Locale;
 import net.minecraft.network.chat.Component;
 
@@ -24,7 +25,8 @@ public class PropertyManagerDeskBlock extends AbstractEmployeeDeskBlock {
                 "property_manager",
                 WikiCategory.EMPLOYEES,
                 Component.translatable("employee_role.createkontor.property_manager"),
-                this::buildWikiPage);
+                this::buildWikiPage,
+                KontorBlocks.PROPERTY_MANAGER_DESK.getId());
     }
 
     @Override

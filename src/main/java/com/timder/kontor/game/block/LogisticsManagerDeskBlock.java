@@ -46,7 +46,8 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
                 "logistics_manager",
                 WikiCategory.EMPLOYEES,
                 Component.translatable("employee_role.createkontor.logistics_manager"),
-                this::buildWikiPage);
+                this::buildWikiPage,
+                KontorBlocks.LOGISTICS_MANAGER_DESK.getId());
     }
 
     @Override
