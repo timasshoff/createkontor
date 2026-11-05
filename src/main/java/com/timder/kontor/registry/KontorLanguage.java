@@ -1172,27 +1172,28 @@ public class KontorLanguage {
                 "wiki.createkontor.page.property_manager.p3",
                 "The rent of a property is %s of the purchase price. A property is valued at %s of the purchase price. This value counts towards your net worth. If you decide to sell a property, it is going to be sold at this value.");
 
-        REGISTRATE.addRawLang("createkontor.ponder.employee_desk.header", "Hiring Employees");
+        REGISTRATE.addRawLang("createkontor.ponder.employee_desk_hiring.header", "Hiring Employees");
         REGISTRATE.addRawLang(
-                "createkontor.ponder.employee_desk.text_1",
+                "createkontor.ponder.employee_desk_hiring.text_1",
                 "To hire an employee, place down an employee desk. The desk determines the role of the employee.");
         REGISTRATE.addRawLang(
-                "createkontor.ponder.employee_desk.text_2", "Each desk needs exactly one seat right next to it.");
+                "createkontor.ponder.employee_desk_hiring.text_2",
+                "Each desk needs exactly one seat right next to it.");
         REGISTRATE.addRawLang("createkontor.ponder.employee_desk.text_3", "Place an adult villager on the seat.");
         REGISTRATE.addRawLang(
-                "createkontor.ponder.employee_desk.text_4",
+                "createkontor.ponder.employee_desk_hiring.text_4",
                 "The employee is automatically hired, if it is active, has a free slot in the company, and the company can pay the hiring bonus.");
         REGISTRATE.addRawLang(
-                "createkontor.ponder.employee_desk.text_5",
+                "createkontor.ponder.employee_desk_hiring.text_5",
                 "Once hired, the desk can be opened by interacting with the employee. The company pays his salary and the one-time hiring bonus automatically.");
         REGISTRATE.addRawLang(
-                "createkontor.ponder.employee_desk.text_6",
+                "createkontor.ponder.employee_desk_hiring.text_6",
                 "Use goggles to get info about the hiring status, salary and other details about the employee.");
         REGISTRATE.addRawLang(
-                "createkontor.ponder.employee_desk.text_7",
+                "createkontor.ponder.employee_desk_hiring.text_7",
                 "If you need more information about employees, ask a consultant.");
         REGISTRATE.addRawLang(
-                "createkontor.ponder.employee_desk.text_8",
+                "createkontor.ponder.employee_desk_hiring.text_8",
                 "If the seat stays empty for a few seconds, the employee is dismissed.");
 
         REGISTRATE.addRawLang("createkontor.ponder.employee_desk_chunks.header", "Chunk Loading of Employee Desks");
@@ -1206,6 +1207,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "createkontor.ponder.employee_desk_chunks.text_4",
                 "If you need more information about chunk loading, ask a consultant.");
+
+        REGISTRATE.addRawLang("createkontor.ponder.shipping_exit_delivery.header", "Delivering Orders");
     }
 
     static void touch() {}

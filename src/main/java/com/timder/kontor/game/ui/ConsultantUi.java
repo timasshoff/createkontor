@@ -22,8 +22,6 @@ public final class ConsultantUi {
 
     private static final float TREE_WIDTH_PERCENT = 25;
 
-    private ConsultantUi() {}
-
     public static ModularUI create(EmployeeDeskContext context) {
         var tabView = UiContainer.largeTabView();
         tabView.addTab(UiContainer.tab(Component.translatable("ui.createkontor.consultant_desk.wiki")), wikiTab());
@@ -90,7 +88,9 @@ public final class ConsultantUi {
         UIElement page;
         try {
             page = new UIElement().layout(layout -> layout.widthPercent(100).gapAll(8));
-            page.addChild(UiLabels.h1(entry.title(), Horizontal.LEFT));
+            UIElement header = new UIElement().layout(layout -> layout.widthPercent(100).gapAll(4).flexDirection(FlexDirection.ROW));
+            header.addChild(UiLabels.h1(entry.title(), Horizontal.LEFT));
+            page.addChild(header);
             entry.page().accept(page);
         } catch (RuntimeException e) {
             CreateKontor.LOGGER.error("The wiki page {} could not be built.", entry.id(), e);

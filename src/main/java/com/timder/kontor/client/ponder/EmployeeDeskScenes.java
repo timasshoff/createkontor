@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 public class EmployeeDeskScenes {
     public static void hiring(SceneBuilder builder, SceneBuildingUtil util) {
         CreateSceneBuilder scene = new CreateSceneBuilder(builder);
-        scene.title("employee_desk", "Hiring Employees");
+        scene.title("employee_desk_hiring", "Hiring Employees");
         scene.configureBasePlate(0, 0, 5);
         scene.showBasePlate();
         scene.idle(10);
