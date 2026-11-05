@@ -871,6 +871,7 @@ public class KontorLanguage {
                 "item.createkontor.notebook.tooltip.action1",
                 "Opens the _Notebook_ and provides a _read-only view_ of your company's open orders.");
 
+        REGISTRATE.addRawLang("wiki.createkontor.show_ponder", "Ponder");
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");
         REGISTRATE.addRawLang("wiki.createkontor.category.basics", "Basics");
         REGISTRATE.addRawLang("wiki.createkontor.category.employees", "Employees");
@@ -1209,6 +1210,27 @@ public class KontorLanguage {
                 "If you need more information about chunk loading, ask a consultant.");
 
         REGISTRATE.addRawLang("createkontor.ponder.shipping_exit_delivery.header", "Delivering Orders");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.shipping_exit_delivery.text_1",
+                "The Shipping Exit delivers open orders by taking items from adjacent inventories.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.shipping_exit_delivery.text_2",
+                "It will use every available adjacent inventory in every direction.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.shipping_exit_delivery.text_3",
+                "An order is only delivered if all required items are present.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.shipping_exit_delivery.text_4",
+                "A redstone pulse will check the order book and deliver as many orders as possible.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.shipping_exit_delivery.text_5",
+                "The required items are taken, the order is completed and the payout gets booked.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.shipping_exit_delivery.text_6",
+                "You can use a pulse timer to regularly deliver orders.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.shipping_exit_delivery.text_7",
+                "If you need more information about delivering orders, ask a consultant.");
     }
 
     static void touch() {}

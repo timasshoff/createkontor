@@ -10,6 +10,7 @@ import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.ui.FinancesManagerUi;
 import com.timder.kontor.game.ui.element.WikiUtils;
 import com.timder.kontor.game.wiki.WikiCategory;
+import com.timder.kontor.registry.KontorBlocks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
@@ -23,7 +24,8 @@ public class FinancesManagerDeskBlock extends AbstractEmployeeDeskBlock {
                 "finances_manager",
                 WikiCategory.EMPLOYEES,
                 Component.translatable("employee_role.createkontor.finances_manager"),
-                this::buildWikiPage);
+                this::buildWikiPage,
+                KontorBlocks.FINANCES_MANAGER_DESK.getId());
     }
 
     @Override

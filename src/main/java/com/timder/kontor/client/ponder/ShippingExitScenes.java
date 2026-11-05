@@ -38,7 +38,7 @@ public class ShippingExitScenes {
         scene.idle(10);
         scene.overlay()
                 .showText(80)
-                .text("It will use every adjacent inventory in every direction.")
+                .text("It will use every available adjacent inventory in every direction.")
                 .attachKeyFrame()
                 .pointAt(vaultSelection.getCenter())
                 .placeNearTarget();
@@ -65,7 +65,6 @@ public class ShippingExitScenes {
 
         scene.world().toggleRedstonePower(util.select().position(leverPos));
         scene.effects().indicateRedstone(leverPos);
-        scene.idle(10);
         scene.world().modifyBlock(exitPos, state -> state.setValue(ShippingExitBlock.POWERED, true), false);
         scene.idle(10);
         scene.world().modifyBlock(exitPos, state -> state.setValue(ShippingExitBlock.DELIVERING, true), false);

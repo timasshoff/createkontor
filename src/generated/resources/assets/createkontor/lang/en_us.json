@@ -702,5 +702,6 @@
   "wiki.createkontor.page.shipping_exit.p1": "The shipping exit allows you to fulfill orders. When powered it will try to fulfill as many orders as possible sorted by urgency. To fulfill an order, all required items need to be present in an adjacent inventory. The items will then be pulled from those inventories.",
   "wiki.createkontor.page.shipping_exit.p2": "Orders that are in their grace period (= deadline expired) have the highest priority and will be fulfilled first. All other orders come next sorted by their remaining time until the deadline is reached.",
   "wiki.createkontor.page.shipping_exit.p3": "A comparator can be used to check whether an order has been completed or not. If an order has been completed it will output a power level of 15 for 20 ticks.",
-  "wiki.createkontor.page.shipping_exit.scene1": "A basic shipping exit setup. The pulse timer powers the shipping exit regularly."
+  "wiki.createkontor.page.shipping_exit.scene1": "A basic shipping exit setup. The pulse timer powers the shipping exit regularly.",
+  "wiki.createkontor.show_ponder": "Ponder"
 }

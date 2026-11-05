@@ -10,6 +10,7 @@ import com.timder.kontor.game.block.employee.EmployeeDeskContext;
 import com.timder.kontor.game.ui.MarketAnalystUi;
 import com.timder.kontor.game.ui.element.WikiUtils;
 import com.timder.kontor.game.wiki.WikiCategory;
+import com.timder.kontor.registry.KontorBlocks;
 import net.minecraft.network.chat.Component;
 
 public class MarketAnalystDeskBlock extends AbstractEmployeeDeskBlock {
@@ -22,7 +23,8 @@ public class MarketAnalystDeskBlock extends AbstractEmployeeDeskBlock {
                 "market_analyst",
                 WikiCategory.EMPLOYEES,
                 Component.translatable("employee_role.createkontor.market_analyst"),
-                this::buildWikiPage);
+                this::buildWikiPage,
+                KontorBlocks.MARKET_ANALYST_DESK.getId());
     }
 
     @Override

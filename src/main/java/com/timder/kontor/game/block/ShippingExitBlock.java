@@ -16,6 +16,7 @@ import com.timder.kontor.game.block.consultant.ConsultantWiki;
 import com.timder.kontor.game.ui.element.WikiUtils;
 import com.timder.kontor.game.wiki.WikiCategory;
 import com.timder.kontor.registry.KontorBlockEntities;
+import com.timder.kontor.registry.KontorBlocks;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -43,7 +44,8 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
                 "shipping_exit",
                 WikiCategory.BLOCKS,
                 Component.translatable("block.createkontor.shipping_exit"),
-                this::buildWikiPage);
+                this::buildWikiPage,
+                KontorBlocks.SHIPPING_EXIT.getId());
     }
 
     @Override
@@ -112,16 +114,6 @@ public class ShippingExitBlock extends AbstractCompanyBlock implements IBE<Shipp
             blockEntity.onRedstonePulse();
         }
     }
-
-    //    @Override
-    //    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
-    //        return 1.0F;
-    //    }
-    //
-    //    @Override
-    //    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
-    //        return true;
-    //    }
 
     private void buildWikiPage(UIElement page) {
         page.addChild(WikiUtils.blockScene(defaultBlockState()));
