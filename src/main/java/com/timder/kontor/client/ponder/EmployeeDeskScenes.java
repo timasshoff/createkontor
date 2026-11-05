@@ -8,7 +8,6 @@ import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.element.EntityElement;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
-import net.createmod.ponder.api.scene.Selection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -136,7 +135,10 @@ public class EmployeeDeskScenes {
                 .placeNearTarget();
         scene.idle(90);
 
-        scene.world().showSection(util.select().everywhere().substract(util.select().fromTo(16, 0, 16, 31, 16, 31)), Direction.UP);
+        scene.world()
+                .showSection(
+                        util.select().everywhere().substract(util.select().fromTo(16, 0, 16, 31, 16, 31)),
+                        Direction.UP);
         scene.overlay().chaseBoundingBoxOutline(PonderPalette.GREEN, "chunks", new AABB(0, 0, 0, 48, 16, 48), 240);
         scene.overlay()
                 .showText(80)
