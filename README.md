@@ -96,12 +96,12 @@ Create: Kontor has integrations with many other mods, including:
 - C
 
 ### > ⚠️ | Incompatibilities
-If you find an incompatibility with another mod, please let me know and create a GitHub issue [here](https://github.com/timasshoff/createkontor/issues).
+If you find an incompatibility with another mod, please let me know and create a GitHub issue <a href="https://github.com/timasshoff/createkontor/issues">here</a>.
 - A
 - B
 
 ### > 🚨 | Updating to new versions
-**ALWAYS** create a **backup** before updating Create: Kontor. This mod has a lot of save data. Changing versions might break this save data and therefore your economy / companies. Although I try my best to not break existing worlds with updates, I do not take responsibility for any damage that might happen when updating Create: Kontor. You can use a backup mod like [Simple Backups](https://modrinth.com/mod/simple-backups) to automatically create backups of your world.
+**ALWAYS** create a **backup** before updating Create: Kontor. This mod has a lot of save data. Changing versions might break this save data and therefore your economy / companies. Although I try my best to not break existing worlds with updates, I do not take responsibility for any damage that might happen when updating Create: Kontor. You can use a backup mod like <a href="https://modrinth.com/mod/simple-backups">Simple Backups</a> to automatically create backups of your world.
 
 <br><br>
 
@@ -142,7 +142,8 @@ The core of Create: Kontor, which simulates the economy, is fully independent of
 
 <details>
 <summary>How performant is Create: Kontor?</summary>
-After the creation of a new world, Create: Kontor will measure biome frequencies to calculate land prices. This process might take a few minutes and hurt performance a bit, but it's a one-time process. Additionally, the desks of employees load 3x3 chunks around them. I have not observed any other performance issues. If you find any severe performance issues, please create a GitHub Issue [here](https://github.com/timasshoff/createkontor/issues).
+
+After the creation of a new world, Create: Kontor will measure biome frequencies to calculate land prices. This process might take a few minutes and hurt performance a bit, but it's a one-time process. Additionally, the desks of employees load 3x3 chunks around them. I have not observed any other performance issues. If you find any severe performance issues, please create a GitHub Issue <a href="https://github.com/timasshoff/createkontor/issues">here</a>.
 </details>
 
 <details>
@@ -191,7 +192,7 @@ All AI-generated code has been marked with a comment saying that the code is AI-
 
 ![Links, Support and Credits](https://github.com/timasshoff/createkontor/blob/main/docs/Subtitle%20Links%20Credits%20Render.png?raw=true)
 
-If you find a bug or have a suggestion, please create a GitHub Issue [here](https://github.com/timasshoff/createkontor/issues).
+If you find a bug or have a suggestion, please create a GitHub Issue <a href="https://github.com/timasshoff/createkontor/issues">here</a>.
 
 <p align="center">
  <a href="https://github.com/timasshoff/createkontor/"><img alt="github" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg"></a>
