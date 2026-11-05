@@ -8,6 +8,7 @@ import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.element.EntityElement;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
+import net.createmod.ponder.api.scene.Selection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -117,16 +118,16 @@ public class EmployeeDeskScenes {
 
     public static void chunkLoading(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("employee_desk_chunks", "Chunk Loading");
-        scene.configureBasePlate(0, 0, 16);
         scene.scaleSceneView(0.2f);
-        scene.showBasePlate();
+        scene.world().showSection(util.select().fromTo(16, 0, 16, 31, 1, 31), Direction.UP);
+        scene.removeShadow();
         scene.idle(10);
 
-        BlockPos deskPos = util.grid().at(7, 1, 7);
+        BlockPos deskPos = util.grid().at(24, 2, 23);
         scene.world().showSection(util.select().position(deskPos), Direction.DOWN);
         scene.idle(20);
 
-        scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, "chunks", new AABB(0, 1, 0, 16, 1.01, 16), 80);
+        scene.overlay().chaseBoundingBoxOutline(PonderPalette.GREEN, "chunks", new AABB(16, 0, 16, 32, 16, 32), 80);
         scene.overlay()
                 .showText(80)
                 .text("An employee desk keeps its own chunk loaded.")
@@ -135,7 +136,8 @@ public class EmployeeDeskScenes {
                 .placeNearTarget();
         scene.idle(90);
 
-        scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, "chunks", new AABB(-16, 1, -16, 32, 1.01, 32), 160);
+        scene.world().showSection(util.select().everywhere().substract(util.select().fromTo(16, 0, 16, 31, 16, 31)), Direction.UP);
+        scene.overlay().chaseBoundingBoxOutline(PonderPalette.GREEN, "chunks", new AABB(0, 0, 0, 48, 16, 48), 240);
         scene.overlay()
                 .showText(80)
                 .text("It also loads the eight chunks around it.")
