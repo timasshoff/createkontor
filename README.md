@@ -1,9 +1,22 @@
-This work is licensed under 
-<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+<p align="center">
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0"><img alt="CC" height="24" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg"></a>
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0"><img alt="BY" height="24" src="https://mirrors.creativecommons.org/presskit/icons/by.svg"></a>
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0"><img alt="NC" height="24" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg"></a>
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0"><img alt="SA" height="24" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg"></a>
+</p>
 
 ![Create: Kontor](https://github.com/timasshoff/createkontor/blob/main/docs/Title%20Render.png?raw=true)
 
-**Create: Kontor expands your Create Mod World by giving you the best purpose ever to build a factory: Money! 💸<br> 
+<p align="center">
+ <a href="https://github.com/timasshoff/createkontor/"><img alt="github" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg"></a>
+ <a href=""><img alt="curseforge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg"></a>
+ <a href="https://modrinth.com/project/create-kontor"><img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
+ <a href=""><img alt="discord-plural" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/social/discord-plural_vector.svg"></a>
+ <a href=""><img alt="ghpages" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/documentation/ghpages_vector.svg"></a>
+
+</p>
+
+ **Create: Kontor expands your Create Mod World by giving you the best purpose ever to build a factory: Money! 💸<br> 
 Found a company, build factories, calculate prices, make informed decisions and grow your company!**
 
 <br><br>
