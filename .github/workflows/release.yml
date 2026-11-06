@@ -61,18 +61,24 @@ jobs:
         id: meta
         env:
           DEV_RELEASE: ${{ inputs.dev_release }}
+          VERSION_TYPE: ${{ inputs.version_type }}
           RUN_NUMBER: ${{ github.run_number }}
         run: |
-          VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
+          BASE=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
           if [ "$DEV_RELEASE" = "true" ]; then
-            TAG="v$VERSION-dev.$RUN_NUMBER"
+            VERSION="$BASE-dev.$RUN_NUMBER"
+          elif [ "$VERSION_TYPE" = "release" ]; then
+            VERSION="$BASE"
           else
-            TAG="v$VERSION"
+            COUNT=$(git tag --list "v$BASE-$VERSION_TYPE.*" | wc -l)
+            VERSION="$BASE-$VERSION_TYPE.$((COUNT + 1))"
           fi
+          TAG="v$VERSION"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists. Bump mod_version in gradle.properties first."
             exit 1
           fi
+          echo "Version: $VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
@@ -124,13 +130,15 @@ jobs:
           cat notes.md
 
       - name: Build
-        run: ./gradlew build
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: ./gradlew build -Pmod_version="$VERSION"
 
       - name: Publish to Modrinth and CurseForge
         if: ${{ !inputs.dev_release }}
         uses: Kira-NT/mc-publish@v3
         with:
-          modrinth-id: hwnXq0GO
+          modrinth-id: YOUR_MODRINTH_PROJECT_ID
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: YOUR_CURSEFORGE_PROJECT_ID
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
