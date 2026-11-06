@@ -279,6 +279,20 @@ public class KontorLanguage {
                 "ui.createkontor.lawyer_desk.legal_form.no_next_legal_form", "No next legal form available :(");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_to", "Upgrade legal form to");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats", "Legal Form Stats");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.max_employees", "Max. Employees");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.employee_salary", "Employee Salary %");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.overdraft_limit", "Overdraft Limit");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.bank_loan_limit", "Bank Loan Limit");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.max_properties", "Max. Properties");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.logistics_network", "Logistics Network");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.max_licenses", "Max. Licenses");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.lawyer_desk.legal_form.stats.max_open_requests", "Max. Open Requests Total");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.lawyer_desk.legal_form.stats.max_open_requests_products",
+                "Max. Open Requests Per Product");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.order_book_size", "Order Book Size");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.max_shipping_exits", "Max. Shipping Exits");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.application_fee", "Application Fee: %s");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_requirements", "Upgrade Requirements");
         REGISTRATE.addRawLang(
