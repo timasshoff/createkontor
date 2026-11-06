@@ -7,6 +7,10 @@ on:
         description: Dev release (GitHub only, no Modrinth/CurseForge)
         type: boolean
         default: false
+      expected_version:
+        description: Safety check, base version you expect in gradle.properties (e.g. 0.2.0). Required unless dev release
+        type: string
+        required: false
       version_type:
         description: Release channel (Modrinth/CurseForge)
         type: choice
@@ -62,9 +66,16 @@ jobs:
         env:
           DEV_RELEASE: ${{ inputs.dev_release }}
           VERSION_TYPE: ${{ inputs.version_type }}
+          EXPECTED: ${{ inputs.expected_version }}
           RUN_NUMBER: ${{ github.run_number }}
         run: |
           BASE=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
+          if [ "$DEV_RELEASE" != "true" ] || [ -n "$EXPECTED" ]; then
+            if [ "$EXPECTED" != "$BASE" ]; then
+              echo "mod_version in gradle.properties is '$BASE', but you entered '$EXPECTED'. Nothing was published."
+              exit 1
+            fi
+          fi
           if [ "$DEV_RELEASE" = "true" ]; then
             VERSION="$BASE-dev.$RUN_NUMBER"
           elif [ "$VERSION_TYPE" = "release" ]; then
@@ -79,6 +90,18 @@ jobs:
             exit 1
           fi
           echo "Version: $VERSION"
+          if [ "$DEV_RELEASE" = "true" ]; then
+            TARGETS="GitHub only (dev release)"
+          else
+            TARGETS="GitHub, Modrinth and CurseForge as $VERSION_TYPE"
+          fi
+          {
+            echo "## Releasing $VERSION"
+            echo
+            echo "* Tag: \`$TAG\`"
+            echo "* Base version in gradle.properties: \`$BASE\`"
+            echo "* Target: $TARGETS"
+          } >> "$GITHUB_STEP_SUMMARY"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
