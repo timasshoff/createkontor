@@ -1,0 +1,166 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dev_release:
+        description: Dev release (GitHub only, no Modrinth/CurseForge)
+        type: boolean
+        default: false
+      version_type:
+        description: Release channel (Modrinth/CurseForge)
+        type: choice
+        options:
+          - release
+          - beta
+          - alpha
+        default: release
+      highlights:
+        description: Highlights (free text, shown at the top)
+        type: string
+        required: false
+      additions:
+        description: Additions (separate entries with |)
+        type: string
+        required: false
+      balancing:
+        description: Balancing (separate entries with |)
+        type: string
+        required: false
+      bugs:
+        description: Bugs (separate entries with |)
+        type: string
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Read version
+        id: meta
+        env:
+          DEV_RELEASE: ${{ inputs.dev_release }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
+          if [ "$DEV_RELEASE" = "true" ]; then
+            TAG="v$VERSION-dev.$RUN_NUMBER"
+          else
+            TAG="v$VERSION"
+          fi
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Bump mod_version in gradle.properties first."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build patch notes
+        env:
+          DEV_RELEASE: ${{ inputs.dev_release }}
+          HIGHLIGHTS: ${{ inputs.highlights }}
+          ADDITIONS: ${{ inputs.additions }}
+          BALANCING: ${{ inputs.balancing }}
+          BUGS: ${{ inputs.bugs }}
+        run: |
+          trim() {
+            printf '%s' "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+          }
+
+          section() {
+            local title="$1" text="$2" item
+            if [ -z "$(trim "$text")" ]; then
+              return
+            fi
+            printf '## %s\n' "$title"
+            IFS='|' read -ra items <<< "$text"
+            for item in "${items[@]}"; do
+              item="$(trim "$item")"
+              if [ -n "$item" ]; then
+                printf '* %s\n' "$item"
+              fi
+            done
+            printf '\n'
+          }
+
+          {
+            if [ -n "$(trim "$HIGHLIGHTS")" ]; then
+              printf '%s\n\n' "$(trim "$HIGHLIGHTS")"
+            fi
+            section "Additions" "$ADDITIONS"
+            section "Balancing" "$BALANCING"
+            section "Bugs" "$BUGS"
+          } > notes.md
+
+          if [ ! -s notes.md ]; then
+            if [ "$DEV_RELEASE" = "true" ]; then
+              echo "Dev build." > notes.md
+            else
+              echo "No patch notes given. Fill at least one field."
+              exit 1
+            fi
+          fi
+          cat notes.md
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Publish to Modrinth and CurseForge
+        if: ${{ !inputs.dev_release }}
+        uses: Kira-NT/mc-publish@v3
+        with:
+          modrinth-id: hwnXq0GO
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-id: YOUR_CURSEFORGE_PROJECT_ID
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          name: Create Kontor ${{ steps.meta.outputs.version }}
+          version: ${{ steps.meta.outputs.version }}
+          version-type: ${{ inputs.version_type }}
+          changelog-file: notes.md
+
+          loaders: neoforge
+          game-versions: 1.21.1
+          java: 21
+          dependencies: |
+            create(required){modrinth:create}{curseforge:create}#(ignore:github)
+            ldlib2(required){modrinth:LDLIB2_MODRINTH_ID}{curseforge:LDLIB2_CURSEFORGE_ID}#(ignore:github)
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          DEV_RELEASE: ${{ inputs.dev_release }}
+          VERSION_TYPE: ${{ inputs.version_type }}
+        run: |
+          FLAGS=()
+          if [ "$DEV_RELEASE" = "true" ] || [ "$VERSION_TYPE" != "release" ]; then
+            FLAGS+=(--prerelease)
+          fi
+          gh release create "$TAG" build/libs/createkontor-$VERSION.jar \
+            --target "$GITHUB_SHA" \
+            --title "Create: Kontor $TAG" \
+            --notes-file notes.md \
+            "${FLAGS[@]}"
