@@ -544,52 +544,53 @@ public final class LawyerUi {
     private static UIElement statsElement(LegalFormDef current, @Nullable LegalFormDef next) {
         List<UIElement> left = List.of(
                 statRow(
-                        "Max. Employees",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.max_employees"),
                         count(current.maxEmployees(), nextOf(next, LegalFormDef::maxEmployees), true)),
                 statRow(
-                        "Employee Salary %",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.employee_salary"),
                         percent(
                                 current.employeeSalaryFactor(),
                                 nextOf(next, LegalFormDef::employeeSalaryFactor),
                                 false)),
                 statRow(
-                        "Overdraft Limit",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.overdraft_limit"),
                         money(current.overdraftLimit(), nextOf(next, LegalFormDef::overdraftLimit), true)),
                 statRow(
-                        "Bank Loan Limit",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.bank_loan_limit"),
                         money(current.bankLoanLimit(), nextOf(next, LegalFormDef::bankLoanLimit), true)),
                 statRow(
-                        "Max. Properties",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.max_properties"),
                         count(current.maxProperties(), nextOf(next, LegalFormDef::maxProperties), true)),
                 statRow(
-                        "Logistics Network Integration",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.logistics_network"),
                         flag(current.logisticsNetwork(), nextOf(next, LegalFormDef::logisticsNetwork))));
 
         List<UIElement> right = List.of(
                 statRow(
-                        "Max. Licenses",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.max_licenses"),
                         count(current.maxProductLicenses(), nextOf(next, LegalFormDef::maxProductLicenses), true)),
                 statRow(
-                        "Max. Open Requests Total",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.max_open_requests"),
                         count(current.maxOpenRequestsTotal(), nextOf(next, LegalFormDef::maxOpenRequestsTotal), true)),
                 statRow(
-                        "Max. Open Requests Per Product",
+                        Component.translatable(
+                                "ui.createkontor.lawyer_desk.legal_form.stats.max_open_requests_products"),
                         count(
                                 current.maxOpenRequestsPerProduct(),
                                 nextOf(next, LegalFormDef::maxOpenRequestsPerProduct),
                                 true)),
                 statRow(
-                        "Order Book Size",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.order_book_size"),
                         count(current.maxOpenOrders(), nextOf(next, LegalFormDef::maxOpenOrders), true)),
                 statRow(
-                        "Max. Shipping Exits",
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.max_shipping_exits"),
                         count(current.maxShippingExits(), nextOf(next, LegalFormDef::maxShippingExits), true)));
 
         return UiContainer.twoColumns(left, right);
     }
 
-    private static UIElement statRow(String label, Component value) {
-        return UiLabels.labelValue(Component.literal(label), value);
+    private static UIElement statRow(Component label, Component value) {
+        return UiLabels.labelValue(label, value);
     }
 
     private static <T> T nextOf(@Nullable LegalFormDef next, Function<LegalFormDef, T> getter) {
