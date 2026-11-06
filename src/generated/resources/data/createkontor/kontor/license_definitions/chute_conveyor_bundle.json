@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "chute_conveyor_bundle",
+  "markets": [
+    "create:chute",
+    "create:chain_conveyor",
+    "create:cardboard"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

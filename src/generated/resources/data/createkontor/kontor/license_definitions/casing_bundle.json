@@ -5,7 +5,8 @@
   "markets": [
     "create:andesite_casing",
     "create:copper_casing",
-    "create:brass_casing"
+    "create:brass_casing",
+    "create:railway_casing"
   ],
   "min_legal_level": 3,
   "revenue_share": 0.0

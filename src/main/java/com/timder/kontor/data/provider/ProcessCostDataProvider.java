@@ -2,16 +2,15 @@ package com.timder.kontor.data.provider;
 
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 
 public class ProcessCostDataProvider implements DataProvider {
 
@@ -61,7 +60,8 @@ public class ProcessCostDataProvider implements DataProvider {
         json.addProperty("cost", cost);
 
         ResourceLocation type = ResourceLocation.parse(recipeTypeId);
-        ResourceLocation fileId = ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, type.getNamespace() + "_" + type.getPath());
+        ResourceLocation fileId =
+                ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, type.getNamespace() + "_" + type.getPath());
         return DataProvider.saveStable(cache, json, pathProvider.json(fileId));
     }
 

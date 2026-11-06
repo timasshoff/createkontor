@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.16,
+  "fee_factor": 0.8,
+  "id": "polished_blackstone_bundle",
+  "markets": [
+    "polished_blackstone",
+    "polished_blackstone_slab",
+    "polished_blackstone_stairs",
+    "polished_blackstone_wall"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.12
+}

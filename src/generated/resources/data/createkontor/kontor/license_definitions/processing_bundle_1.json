@@ -1,0 +1,16 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "processing_bundle_1",
+  "markets": [
+    "create:basin",
+    "create:depot",
+    "create:item_drain",
+    "create:mechanical_mixer",
+    "create:mechanical_press",
+    "create:spout",
+    "create:millstone"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

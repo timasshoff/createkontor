@@ -1,0 +1,17 @@
+{
+  "daily_fraction": 0.12,
+  "fee_factor": 0.8,
+  "id": "granite_diorite_bundle",
+  "markets": [
+    "granite",
+    "granite_slab",
+    "granite_stairs",
+    "granite_wall",
+    "diorite",
+    "diorite_slab",
+    "diorite_stairs",
+    "diorite_wall"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.07
+}

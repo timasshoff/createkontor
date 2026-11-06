@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "dark_oak_accessories_bundle",
+  "markets": [
+    "dark_oak_fence_gate",
+    "dark_oak_door",
+    "dark_oak_trapdoor",
+    "create:dark_oak_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}

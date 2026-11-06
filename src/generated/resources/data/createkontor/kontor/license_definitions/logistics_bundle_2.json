@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.8,
+  "id": "logistics_bundle_2",
+  "markets": [
+    "create:item_vault",
+    "create:fluid_tank",
+    "create:fluid_pipe",
+    "create:mechanical_pump"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}

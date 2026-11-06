@@ -5,7 +5,8 @@
   "markets": [
     "cherry_planks",
     "cherry_stairs",
-    "cherry_slab"
+    "cherry_slab",
+    "cherry_fence"
   ],
   "min_legal_level": 1,
   "revenue_share": 0.0

@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.8,
+  "id": "cut_rock_bundle",
+  "markets": [
+    "create:cut_diorite",
+    "create:cut_diorite_slab",
+    "create:cut_diorite_stairs",
+    "create:cut_granite",
+    "create:cut_granite_slab",
+    "create:cut_granite_stairs"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.08
+}

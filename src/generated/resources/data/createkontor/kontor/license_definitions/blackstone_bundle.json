@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.16,
+  "fee_factor": 0.8,
+  "id": "blackstone_bundle",
+  "markets": [
+    "blackstone",
+    "blackstone_stairs",
+    "blackstone_slab",
+    "blackstone_wall"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.14
+}

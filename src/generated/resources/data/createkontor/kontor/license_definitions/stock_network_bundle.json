@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.9,
+  "id": "stock_network_bundle",
+  "markets": [
+    "create:stock_link",
+    "create:stock_ticker",
+    "create:redstone_requester"
+  ],
+  "min_legal_level": 4,
+  "revenue_share": 0.0
+}

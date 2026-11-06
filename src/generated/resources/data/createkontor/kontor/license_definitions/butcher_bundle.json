@@ -1,0 +1,14 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "butcher_bundle",
+  "markets": [
+    "cooked_beef",
+    "cooked_porkchop",
+    "cooked_mutton",
+    "cooked_chicken",
+    "cooked_rabbit"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}

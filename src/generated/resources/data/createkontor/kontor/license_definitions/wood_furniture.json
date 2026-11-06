@@ -1,0 +1,14 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.7,
+  "id": "wood_furniture",
+  "markets": [
+    "barrel",
+    "chest",
+    "crafting_table",
+    "ladder",
+    "stick"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.1
+}

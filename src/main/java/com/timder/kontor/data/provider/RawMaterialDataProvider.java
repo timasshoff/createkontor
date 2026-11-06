@@ -2,14 +2,13 @@ package com.timder.kontor.data.provider;
 
 import com.google.gson.JsonObject;
 import com.timder.kontor.CreateKontor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class RawMaterialDataProvider implements DataProvider {
 
@@ -29,13 +28,13 @@ public class RawMaterialDataProvider implements DataProvider {
         futures.add(save(cache, "wheat", "minecraft:wheat", 1.0, 0.02, 6000.0));
         futures.add(save(cache, "cocoa_beans", "minecraft:cocoa_beans", 3.5, 0.037, 3500.0));
         futures.add(save(cache, "kelp", "minecraft:kelp", 0.3, 0.02, 8000.0));
-        futures.add(save(cache, "sugar_cane", "minecraft:sugar_cane", 0.5,0.02, 8000.0));
-        futures.add(save(cache, "melon_slice", "minecraft:melon_slice", 0.4,0.02, 8000.0));
-        futures.add(save(cache, "potato", "minecraft:potato", 0.8,0.02, 6000.0));
-        futures.add(save(cache, "carrot", "minecraft:carrot", 0.8,0.02, 6000.0));
-        futures.add(save(cache, "beetroot", "minecraft:beetroot", 0.8,0.02, 6000.0));
-        futures.add(save(cache, "sweet_berries", "minecraft:sweet_berries", 0.8,0.02, 6000.0));
-        futures.add(save(cache, "apple", "minecraft:apple", 1.0,0.02, 5000.0));
+        futures.add(save(cache, "sugar_cane", "minecraft:sugar_cane", 0.5, 0.02, 8000.0));
+        futures.add(save(cache, "melon_slice", "minecraft:melon_slice", 0.4, 0.02, 8000.0));
+        futures.add(save(cache, "potato", "minecraft:potato", 0.8, 0.02, 6000.0));
+        futures.add(save(cache, "carrot", "minecraft:carrot", 0.8, 0.02, 6000.0));
+        futures.add(save(cache, "beetroot", "minecraft:beetroot", 0.8, 0.02, 6000.0));
+        futures.add(save(cache, "sweet_berries", "minecraft:sweet_berries", 0.8, 0.02, 6000.0));
+        futures.add(save(cache, "apple", "minecraft:apple", 1.0, 0.02, 5000.0));
         futures.add(save(cache, "beef", "minecraft:beef", 2.25, 0.02, 5000.0));
         futures.add(save(cache, "porkchop", "minecraft:porkchop", 2.0, 0.02, 5000.0));
         futures.add(save(cache, "chicken", "minecraft:chicken", 2.0, 0.02, 5000.0));
@@ -162,7 +161,13 @@ public class RawMaterialDataProvider implements DataProvider {
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
-    private CompletableFuture<?> save(CachedOutput cache, String fileName, String item, double baseValue, double dailyVolatility, double referenceVolume) {
+    private CompletableFuture<?> save(
+            CachedOutput cache,
+            String fileName,
+            String item,
+            double baseValue,
+            double dailyVolatility,
+            double referenceVolume) {
         JsonObject json = new JsonObject();
         json.addProperty("item", item);
         json.addProperty("base_value", baseValue);

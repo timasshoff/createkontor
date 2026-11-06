@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "spruce_accessories_bundle",
+  "markets": [
+    "spruce_fence_gate",
+    "spruce_door",
+    "spruce_trapdoor",
+    "create:spruce_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}
