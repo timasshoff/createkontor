@@ -1,0 +1,7 @@
+{
+  "base_demand": 2800.0,
+  "group": "building",
+  "item": "minecraft:yellow_concrete_powder",
+  "package_size": 32,
+  "target_utilisation": 0.8
+}

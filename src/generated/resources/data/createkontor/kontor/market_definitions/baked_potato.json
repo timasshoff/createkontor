@@ -1,0 +1,7 @@
+{
+  "base_demand": 4000.0,
+  "group": "food",
+  "item": "minecraft:baked_potato",
+  "package_size": 32,
+  "target_utilisation": 0.85
+}

@@ -1,0 +1,7 @@
+{
+  "base_demand": 2800.0,
+  "group": "building",
+  "item": "create:cherry_window",
+  "package_size": 32,
+  "target_utilisation": 0.8
+}

@@ -24,24 +24,29 @@ public class ProcessCostDataProvider implements DataProvider {
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         Map<String, Double> entries = new LinkedHashMap<>();
-        entries.put("minecraft:crafting", 5.00);
-        entries.put("minecraft:smelting", 7.50);
-        entries.put("minecraft:blasting", 8.20);
-        entries.put("minecraft:smoking", 7.90);
-        entries.put("minecraft:campfire_cooking", 6.60);
-        entries.put("minecraft:stonecutting", 3.50);
-        entries.put("create:pressing", 4.25);
-        entries.put("create:crushing", 6.50);
-        entries.put("create:milling", 5.50);
-        entries.put("create:mixing", 4.00);
-        entries.put("create:cutting", 4.25);
-        entries.put("create:deploying", 5.50);
-        entries.put("create:mechanical_crafting", 5.00);
-        entries.put("create:splashing", 7.00);
-        entries.put("create:haunting", 8.00);
-        entries.put("create:filling", 6.50);
-        entries.put("create:emptying", 3.50);
-        entries.put("create:sandpaper_polishing", 5.25);
+
+        entries.put("minecraft:crafting", 2.50);
+        entries.put("minecraft:smelting", 3.75);
+        entries.put("minecraft:blasting", 4.10);
+        entries.put("minecraft:smoking", 3.95);
+        entries.put("minecraft:campfire_cooking", 3.30);
+        entries.put("minecraft:stonecutting", 1.75);
+        entries.put("minecraft:smithing", 1.75);
+        entries.put("create:pressing", 2.10);
+        entries.put("create:crushing", 3.25);
+        entries.put("create:milling", 2.75);
+        entries.put("create:mixing", 2.00);
+        entries.put("create:cutting", 2.10);
+        entries.put("create:deploying", 2.75);
+        entries.put("create:mechanical_crafting", 2.50);
+        entries.put("create:splashing", 3.50);
+        entries.put("create:haunting", 4.00);
+        entries.put("create:filling", 3.25);
+        entries.put("create:emptying", 1.75);
+        entries.put("create:sandpaper_polishing", 2.60);
+        entries.put("create:compacting", 2.40);
+        entries.put("create:item_application", 3.25);
+        entries.put("create:sequenced_assembly", 5.50);
 
         List<CompletableFuture<?>> futures = new ArrayList<>();
         for (Map.Entry<String, Double> entry : entries.entrySet()) {
