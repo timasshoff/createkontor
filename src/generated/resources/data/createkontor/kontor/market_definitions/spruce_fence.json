@@ -1,0 +1,7 @@
+{
+  "base_demand": 3680.0,
+  "group": "building",
+  "item": "minecraft:spruce_fence",
+  "package_size": 64,
+  "target_utilisation": 0.8
+}

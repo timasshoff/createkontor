@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "logistics_bundle_3",
+  "markets": [
+    "create:factory_gauge",
+    "create:brass_funnel",
+    "create:brass_tunnel"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.03
+}

@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 0.2,
+  "fee_factor": 0.8,
+  "id": "cut_ore_stone_bundle_2",
+  "markets": [
+    "create:cut_crimsite",
+    "create:cut_crimsite_slab",
+    "create:cut_crimsite_stairs",
+    "create:cut_ochrum",
+    "create:cut_ochrum_slab",
+    "create:cut_ochrum_stairs"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.08
+}

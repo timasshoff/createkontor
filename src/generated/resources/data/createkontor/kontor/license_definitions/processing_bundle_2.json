@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "processing_bundle_2",
+  "markets": [
+    "create:mechanical_plough",
+    "create:mechanical_saw",
+    "create:mechanical_piston",
+    "create:sticky_mechanical_piston",
+    "create:encased_fan",
+    "create:mechanical_harvester"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.0
+}

@@ -5,8 +5,9 @@
   "markets": [
     "create:andesite_alloy",
     "create:shaft",
-    "create:cogwheel"
+    "create:cogwheel",
+    "create:large_cogwheel"
   ],
-  "min_legal_level": 2,
+  "min_legal_level": 1,
   "revenue_share": 0.0
 }

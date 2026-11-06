@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "soft_stone_bundle",
+  "markets": [
+    "sandstone_slab",
+    "sandstone_stairs",
+    "sandstone_wall",
+    "tuff_slab",
+    "tuff_stairs",
+    "tuff_wall"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.06
+}

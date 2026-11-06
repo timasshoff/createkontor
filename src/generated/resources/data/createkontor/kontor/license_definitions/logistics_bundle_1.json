@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "logistics_bundle_1",
+  "markets": [
+    "create:andesite_funnel",
+    "create:andesite_tunnel",
+    "create:belt_connector",
+    "hopper"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

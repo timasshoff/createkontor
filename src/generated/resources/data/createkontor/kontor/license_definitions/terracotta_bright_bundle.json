@@ -1,0 +1,20 @@
+{
+  "daily_fraction": 0.12,
+  "fee_factor": 0.9,
+  "id": "terracotta_bright_bundle",
+  "markets": [
+    "red_terracotta",
+    "orange_terracotta",
+    "yellow_terracotta",
+    "lime_terracotta",
+    "green_terracotta",
+    "cyan_terracotta",
+    "light_blue_terracotta",
+    "blue_terracotta",
+    "purple_terracotta",
+    "magenta_terracotta",
+    "pink_terracotta"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.07
+}

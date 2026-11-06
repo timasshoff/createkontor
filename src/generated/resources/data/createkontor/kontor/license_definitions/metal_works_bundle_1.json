@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "metal_works_bundle_1",
+  "markets": [
+    "create:industrial_iron_block",
+    "create:metal_girder",
+    "create:andesite_bars",
+    "iron_bars"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

@@ -1,0 +1,7 @@
+{
+  "base_demand": 3200.0,
+  "group": "mechanical",
+  "item": "create:track",
+  "package_size": 32,
+  "target_utilisation": 0.8
+}

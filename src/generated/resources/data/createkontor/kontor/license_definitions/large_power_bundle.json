@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.2,
+  "fee_factor": 0.9,
+  "id": "large_power_bundle",
+  "markets": [
+    "create:speedometer",
+    "create:stressometer",
+    "create:steam_engine",
+    "create:rotation_speed_controller"
+  ],
+  "min_legal_level": 4,
+  "revenue_share": 0.12
+}

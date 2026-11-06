@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "jungle_accessories_bundle",
+  "markets": [
+    "jungle_fence_gate",
+    "jungle_door",
+    "jungle_trapdoor",
+    "create:jungle_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}

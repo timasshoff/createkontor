@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "advanced_mechanical_bundle",
+  "markets": [
+    "create:gearbox",
+    "create:gearshift",
+    "create:clutch",
+    "create:mechanical_bearing"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

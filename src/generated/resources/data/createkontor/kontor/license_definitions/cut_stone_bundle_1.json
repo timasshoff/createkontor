@@ -1,0 +1,18 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "cut_stone_bundle_1",
+  "markets": [
+    "create:cut_andesite",
+    "create:cut_andesite_slab",
+    "create:cut_andesite_stairs",
+    "create:cut_tuff",
+    "create:cut_tuff_slab",
+    "create:cut_tuff_stairs",
+    "create:cut_calcite",
+    "create:cut_calcite_slab",
+    "create:cut_calcite_stairs"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

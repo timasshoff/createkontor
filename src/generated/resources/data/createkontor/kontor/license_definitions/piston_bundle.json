@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "piston_bundle",
+  "markets": [
+    "piston",
+    "sticky_piston",
+    "observer"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

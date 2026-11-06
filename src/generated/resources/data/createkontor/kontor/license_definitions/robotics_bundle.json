@@ -1,0 +1,11 @@
+{
+  "daily_fraction": 0.4,
+  "fee_factor": 0.9,
+  "id": "robotics_bundle",
+  "markets": [
+    "create:mechanical_arm",
+    "create:clockwork_bearing"
+  ],
+  "min_legal_level": 4,
+  "revenue_share": 0.05
+}

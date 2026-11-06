@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.9,
+  "id": "precision_electronics_bundle",
+  "markets": [
+    "create:electron_tube",
+    "create:nixie_tube",
+    "create:precision_mechanism"
+  ],
+  "min_legal_level": 4,
+  "revenue_share": 0.1
+}

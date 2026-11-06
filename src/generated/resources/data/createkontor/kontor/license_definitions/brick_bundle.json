@@ -1,0 +1,14 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.8,
+  "id": "brick_bundle",
+  "markets": [
+    "brick",
+    "brick_stairs",
+    "brick_slab",
+    "brick_wall",
+    "bricks"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.08
+}

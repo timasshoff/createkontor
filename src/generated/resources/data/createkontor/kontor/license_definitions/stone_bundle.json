@@ -3,9 +3,9 @@
   "fee_factor": 0.8,
   "id": "stone_bundle",
   "markets": [
+    "stone",
     "stone_stairs",
     "stone_slab",
-    "stone_wall",
     "stone_bricks",
     "stone_brick_stairs",
     "stone_brick_slab",

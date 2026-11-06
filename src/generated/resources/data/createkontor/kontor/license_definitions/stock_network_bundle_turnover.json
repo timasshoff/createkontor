@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 0.08,
+  "fee_factor": 0.9,
+  "id": "stock_network_bundle_turnover",
+  "markets": [
+    "create:stock_link",
+    "create:stock_ticker",
+    "create:redstone_requester"
+  ],
+  "min_legal_level": 4,
+  "revenue_share": 0.14
+}

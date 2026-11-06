@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "cut_nether_stone_bundle",
+  "markets": [
+    "create:cut_scoria",
+    "create:cut_scoria_slab",
+    "create:cut_scoria_stairs",
+    "create:cut_scorchia",
+    "create:cut_scorchia_slab",
+    "create:cut_scorchia_stairs"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.0
+}

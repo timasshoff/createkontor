@@ -1,0 +1,7 @@
+{
+  "base_demand": 2000.0,
+  "group": "mechanical",
+  "item": "create:mechanical_press",
+  "package_size": 4,
+  "target_utilisation": 0.7
+}

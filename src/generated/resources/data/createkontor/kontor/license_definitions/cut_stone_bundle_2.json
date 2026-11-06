@@ -1,0 +1,18 @@
+{
+  "daily_fraction": 0.12,
+  "fee_factor": 0.8,
+  "id": "cut_stone_bundle_2",
+  "markets": [
+    "create:cut_dripstone",
+    "create:cut_dripstone_slab",
+    "create:cut_dripstone_stairs",
+    "create:cut_limestone",
+    "create:cut_limestone_slab",
+    "create:cut_limestone_stairs",
+    "create:cut_deepslate",
+    "create:cut_deepslate_slab",
+    "create:cut_deepslate_stairs"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.07
+}

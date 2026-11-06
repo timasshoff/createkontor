@@ -1,0 +1,17 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "nether_wood_accessories_bundle",
+  "markets": [
+    "crimson_fence_gate",
+    "crimson_door",
+    "crimson_trapdoor",
+    "create:crimson_window",
+    "warped_fence_gate",
+    "warped_door",
+    "warped_trapdoor",
+    "create:warped_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}

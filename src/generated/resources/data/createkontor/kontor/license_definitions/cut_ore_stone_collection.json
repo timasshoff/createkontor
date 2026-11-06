@@ -1,0 +1,21 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.9,
+  "id": "cut_ore_stone_collection",
+  "markets": [
+    "create:cut_asurine",
+    "create:cut_asurine_slab",
+    "create:cut_asurine_stairs",
+    "create:cut_veridium",
+    "create:cut_veridium_slab",
+    "create:cut_veridium_stairs",
+    "create:cut_crimsite",
+    "create:cut_crimsite_slab",
+    "create:cut_crimsite_stairs",
+    "create:cut_ochrum",
+    "create:cut_ochrum_slab",
+    "create:cut_ochrum_stairs"
+  ],
+  "min_legal_level": 4,
+  "revenue_share": 0.09
+}

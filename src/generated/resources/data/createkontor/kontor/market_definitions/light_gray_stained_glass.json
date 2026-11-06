@@ -1,0 +1,7 @@
+{
+  "base_demand": 2400.0,
+  "group": "building",
+  "item": "minecraft:light_gray_stained_glass",
+  "package_size": 32,
+  "target_utilisation": 0.75
+}

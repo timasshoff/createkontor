@@ -1,0 +1,10 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "charcoal",
+  "markets": [
+    "charcoal"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}

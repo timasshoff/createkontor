@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "cherry_accessories_bundle",
+  "markets": [
+    "cherry_fence_gate",
+    "cherry_door",
+    "cherry_trapdoor",
+    "create:cherry_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}
