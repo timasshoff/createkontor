@@ -373,7 +373,7 @@ public final class LawyerUi {
                                 UiLabels.primary(
                                         Component.translatable(
                                                 "ui.createkontor.lawyer_desk.licenses.revenue_share",
-                                                revenueShare * 100 + "%"),
+                                                String.format(Locale.ROOT, "%.1f%%", revenueShare * 100)),
                                         Horizontal.CENTER)))
                         .layout(layout ->
                                 layout.justifyContent(AlignContent.FLEX_START).gapAll(0)));
@@ -472,7 +472,7 @@ public final class LawyerUi {
                             Component.literal(offer.dailyFee().toString())));
                     element.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.lawyer_desk.license_catalog.revenue_share"),
-                            Component.literal(offer.revenueShare() * 100 + "%")));
+                            Component.literal(String.format(Locale.ROOT, "%.1f%%", offer.revenueShare() * 100))));
                     element.addChild(UiPaper.labelValueNoWrap(
                             Component.translatable("ui.createkontor.lawyer_desk.license_catalog.application_fee"),
                             Component.literal(offer.applicationFee().toString())));

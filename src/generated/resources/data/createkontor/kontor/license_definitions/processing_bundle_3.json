@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.5,
+  "fee_factor": 0.9,
+  "id": "processing_bundle_3",
+  "markets": [
+    "create:deployer",
+    "create:mechanical_drill",
+    "create:mechanical_crafter",
+    "create:crushing_wheel"
+  ],
+  "min_legal_level": 4,
+  "revenue_share": 0.1
+}

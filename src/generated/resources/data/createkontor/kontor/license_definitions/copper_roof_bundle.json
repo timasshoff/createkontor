@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "copper_roof_bundle",
+  "markets": [
+    "create:copper_shingles",
+    "create:copper_shingle_slab",
+    "create:copper_shingle_stairs",
+    "create:copper_tiles",
+    "create:copper_tile_slab",
+    "create:copper_tile_stairs"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.08
+}

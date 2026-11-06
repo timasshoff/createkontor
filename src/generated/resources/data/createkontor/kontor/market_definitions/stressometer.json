@@ -1,0 +1,7 @@
+{
+  "base_demand": 2400.0,
+  "group": "mechanical",
+  "item": "create:stressometer",
+  "package_size": 8,
+  "target_utilisation": 0.75
+}

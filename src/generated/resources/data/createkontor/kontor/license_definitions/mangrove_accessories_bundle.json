@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "mangrove_accessories_bundle",
+  "markets": [
+    "mangrove_fence_gate",
+    "mangrove_door",
+    "mangrove_trapdoor",
+    "create:mangrove_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.15
+}

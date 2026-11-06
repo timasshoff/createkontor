@@ -5,7 +5,8 @@
   "markets": [
     "spruce_planks",
     "spruce_stairs",
-    "spruce_slab"
+    "spruce_slab",
+    "spruce_fence"
   ],
   "min_legal_level": 1,
   "revenue_share": 0.0

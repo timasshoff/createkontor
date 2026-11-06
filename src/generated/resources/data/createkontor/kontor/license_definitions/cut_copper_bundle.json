@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.8,
+  "id": "cut_copper_bundle",
+  "markets": [
+    "cut_copper",
+    "cut_copper_slab",
+    "cut_copper_stairs"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.07
+}

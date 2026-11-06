@@ -1,0 +1,14 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "small_power_bundle",
+  "markets": [
+    "create:speedometer",
+    "create:stressometer",
+    "create:water_wheel",
+    "create:large_water_wheel",
+    "create:windmill_bearing"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

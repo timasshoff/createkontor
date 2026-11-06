@@ -1,0 +1,7 @@
+{
+  "base_demand": 1600.0,
+  "group": "mechanical",
+  "item": "create:repackager",
+  "package_size": 4,
+  "target_utilisation": 0.7
+}

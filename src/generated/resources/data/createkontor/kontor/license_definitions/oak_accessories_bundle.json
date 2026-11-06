@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "oak_accessories_bundle",
+  "markets": [
+    "oak_fence_gate",
+    "oak_door",
+    "oak_trapdoor",
+    "create:oak_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}

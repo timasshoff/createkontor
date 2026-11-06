@@ -1,0 +1,14 @@
+{
+  "daily_fraction": 0.17,
+  "fee_factor": 0.8,
+  "id": "metal_works_bundle_2",
+  "markets": [
+    "create:industrial_iron_window",
+    "create:ornate_iron_window",
+    "create:weathered_iron_window",
+    "create:brass_bars",
+    "create:copper_bars"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.18
+}

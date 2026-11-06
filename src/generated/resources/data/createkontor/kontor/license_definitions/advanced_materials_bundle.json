@@ -1,0 +1,11 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "advanced_materials_bundle",
+  "markets": [
+    "create:sturdy_sheet",
+    "create:rose_quartz"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.12
+}

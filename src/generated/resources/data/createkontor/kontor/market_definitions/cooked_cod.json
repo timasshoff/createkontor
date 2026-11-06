@@ -1,0 +1,7 @@
+{
+  "base_demand": 4000.0,
+  "group": "food",
+  "item": "minecraft:cooked_cod",
+  "package_size": 32,
+  "target_utilisation": 0.85
+}

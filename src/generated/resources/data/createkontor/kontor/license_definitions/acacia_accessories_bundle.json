@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "acacia_accessories_bundle",
+  "markets": [
+    "acacia_fence_gate",
+    "acacia_door",
+    "acacia_trapdoor",
+    "create:acacia_window"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.1
+}

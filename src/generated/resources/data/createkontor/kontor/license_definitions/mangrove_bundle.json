@@ -5,7 +5,8 @@
   "markets": [
     "mangrove_planks",
     "mangrove_stairs",
-    "mangrove_slab"
+    "mangrove_slab",
+    "mangrove_fence"
   ],
   "min_legal_level": 1,
   "revenue_share": 0.0

@@ -1,0 +1,16 @@
+{
+  "daily_fraction": 0.1,
+  "fee_factor": 0.8,
+  "id": "grill_bundle",
+  "markets": [
+    "cooked_beef",
+    "cooked_porkchop",
+    "cooked_mutton",
+    "cooked_chicken",
+    "cooked_rabbit",
+    "cooked_cod",
+    "cooked_salmon"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.06
+}

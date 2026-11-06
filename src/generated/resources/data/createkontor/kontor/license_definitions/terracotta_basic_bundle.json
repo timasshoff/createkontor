@@ -1,0 +1,14 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "terracotta_basic_bundle",
+  "markets": [
+    "white_terracotta",
+    "light_gray_terracotta",
+    "gray_terracotta",
+    "black_terracotta",
+    "brown_terracotta"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

@@ -1,0 +1,15 @@
+{
+  "daily_fraction": 0.15,
+  "fee_factor": 0.9,
+  "id": "wool_warm_bundle",
+  "markets": [
+    "red_wool",
+    "orange_wool",
+    "yellow_wool",
+    "pink_wool",
+    "brown_wool",
+    "magenta_wool"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.07
+}

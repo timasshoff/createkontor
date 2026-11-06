@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "wool_basic_bundle",
+  "markets": [
+    "white_wool",
+    "light_gray_wool",
+    "gray_wool",
+    "black_wool"
+  ],
+  "min_legal_level": 2,
+  "revenue_share": 0.0
+}

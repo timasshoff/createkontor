@@ -1,0 +1,25 @@
+{
+  "daily_fraction": 0.08,
+  "fee_factor": 0.8,
+  "id": "terracotta_collection",
+  "markets": [
+    "black_terracotta",
+    "blue_terracotta",
+    "brown_terracotta",
+    "cyan_terracotta",
+    "gray_terracotta",
+    "green_terracotta",
+    "light_blue_terracotta",
+    "light_gray_terracotta",
+    "lime_terracotta",
+    "magenta_terracotta",
+    "orange_terracotta",
+    "pink_terracotta",
+    "purple_terracotta",
+    "red_terracotta",
+    "white_terracotta",
+    "yellow_terracotta"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.09
+}

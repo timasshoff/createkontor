@@ -5,7 +5,8 @@
   "markets": [
     "oak_planks",
     "oak_stairs",
-    "oak_slab"
+    "oak_slab",
+    "oak_fence"
   ],
   "min_legal_level": 1,
   "revenue_share": 0.0

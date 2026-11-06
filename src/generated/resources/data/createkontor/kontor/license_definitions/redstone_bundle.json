@@ -1,0 +1,12 @@
+{
+  "daily_fraction": 0.12,
+  "fee_factor": 0.8,
+  "id": "redstone_bundle",
+  "markets": [
+    "repeater",
+    "comparator",
+    "redstone_lamp"
+  ],
+  "min_legal_level": 3,
+  "revenue_share": 0.09
+}

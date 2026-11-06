@@ -1,0 +1,13 @@
+{
+  "daily_fraction": 1.0,
+  "fee_factor": 0.8,
+  "id": "clear_glass_bundle",
+  "markets": [
+    "glass",
+    "glass_pane",
+    "create:framed_glass",
+    "create:tiled_glass"
+  ],
+  "min_legal_level": 1,
+  "revenue_share": 0.0
+}
