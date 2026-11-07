@@ -19,7 +19,6 @@ import com.timder.kontor.core.raw.*;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.core.value.ValueResult;
 import com.timder.kontor.core.value.ValueRules;
-
 import java.util.*;
 
 public final class Economy {
@@ -36,6 +35,7 @@ public final class Economy {
 
     /** How many days of history to keep per market/raw material. Oldest entries drop first. */
     public static final int HISTORY_LENGTH_DAYS = 360;
+
     public static final int HISTORY_LENGTH_TICKS = HISTORY_LENGTH_DAYS * MarketRules.TRADING_TICKS_PER_DAY;
 
     private final Map<ItemId, Deque<MarketHistoryEntry>> marketHistory = new LinkedHashMap<>();
@@ -88,8 +88,7 @@ public final class Economy {
             Map<ItemId, DayResult> lastDayResults,
             Map<ItemId, List<MarketHistoryEntry>> marketHistory,
             Map<ItemId, List<RawMaterialHistoryEntry>> rawMaterialHistory,
-            List<MacroHistoryEntry> macroHistory
-    ) {
+            List<MacroHistoryEntry> macroHistory) {
         public SaveState {
             rawMaterialStates = Map.copyOf(rawMaterialStates);
             marketStates = Map.copyOf(marketStates);
@@ -173,25 +172,35 @@ public final class Economy {
      * @param rng A source of randomness
      * @return
      */
-    public static Economy restore(List<RawMaterialDefinition> rawMaterialDefinitions,
-                                  List<MarketDefinition> marketDefinitions,
-                                  Map<ItemId, Double> valueOverrides,
-                                  EconomyParams params,
-                                  ReputationParams reputationParams,
-                                  RecipeGraph graph,
-                                  Rng rng,
-                                  SaveState saveState) {
-        return new Economy(rawMaterialDefinitions, marketDefinitions, valueOverrides, params, reputationParams, graph, rng, saveState);
+    public static Economy restore(
+            List<RawMaterialDefinition> rawMaterialDefinitions,
+            List<MarketDefinition> marketDefinitions,
+            Map<ItemId, Double> valueOverrides,
+            EconomyParams params,
+            ReputationParams reputationParams,
+            RecipeGraph graph,
+            Rng rng,
+            SaveState saveState) {
+        return new Economy(
+                rawMaterialDefinitions,
+                marketDefinitions,
+                valueOverrides,
+                params,
+                reputationParams,
+                graph,
+                rng,
+                saveState);
     }
 
-    private Economy(List<RawMaterialDefinition> rawMaterialDefinitions,
-                    List<MarketDefinition> marketDefinitions,
-                    Map<ItemId, Double> valueOverrides,
-                    EconomyParams params,
-                    ReputationParams reputationParams,
-                    RecipeGraph graph,
-                    Rng rng,
-                    SaveState saveState) {
+    private Economy(
+            List<RawMaterialDefinition> rawMaterialDefinitions,
+            List<MarketDefinition> marketDefinitions,
+            Map<ItemId, Double> valueOverrides,
+            EconomyParams params,
+            ReputationParams reputationParams,
+            RecipeGraph graph,
+            Rng rng,
+            SaveState saveState) {
         this.rawMaterialDefinitions = List.copyOf(rawMaterialDefinitions);
         this.marketDefinitions = List.copyOf(marketDefinitions);
         this.valueOverrides = Map.copyOf(valueOverrides);
@@ -202,25 +211,26 @@ public final class Economy {
 
         for (RawMaterialDefinition def : this.rawMaterialDefinitions) {
             RawMaterialState.SaveState saved = saveState.rawMaterialStates().get(def.id());
-            rawMaterialStates.put(def.id(), saved != null
-                    ? RawMaterialState.restore(saved)
-                    : RawMaterialState.fresh(def.params()));
-            List<RawMaterialHistoryEntry> savedHistory = saveState.rawMaterialHistory().getOrDefault(def.id(), List.of());
+            rawMaterialStates.put(
+                    def.id(), saved != null ? RawMaterialState.restore(saved) : RawMaterialState.fresh(def.params()));
+            List<RawMaterialHistoryEntry> savedHistory =
+                    saveState.rawMaterialHistory().getOrDefault(def.id(), List.of());
             rawMaterialHistory.put(def.id(), new ArrayDeque<>(savedHistory));
         }
 
         for (MarketDefinition def : this.marketDefinitions) {
             MarketState.SaveState saved = saveState.marketStates().get(def.id());
-            marketStates.put(def.id(), saved != null
-                    ? MarketState.restore(saved)
-                    : MarketState.fresh(def.params()));
+            marketStates.put(def.id(), saved != null ? MarketState.restore(saved) : MarketState.fresh(def.params()));
 
-            MarketParticipants.SaveState savedParticipants = saveState.marketParticipants().get(def.id());
-            marketParticipants.put(def.id(), savedParticipants != null
-                    ? MarketParticipants.restore(savedParticipants)
-                    : MarketParticipants.empty());
+            MarketParticipants.SaveState savedParticipants =
+                    saveState.marketParticipants().get(def.id());
+            marketParticipants.put(
+                    def.id(),
+                    savedParticipants != null
+                            ? MarketParticipants.restore(savedParticipants)
+                            : MarketParticipants.empty());
 
-            marketParamsMap.put(def.id(), saveState.marketParams().getOrDefault(def.id(), def.params()));
+            marketParamsMap.put(def.id(), saveState.marketParams().getOrDefault(def.id(), scaledParams(def)));
             List<MarketHistoryEntry> savedHistory = saveState.marketHistory().getOrDefault(def.id(), List.of());
             marketHistory.put(def.id(), new ArrayDeque<>(savedHistory));
         }
@@ -231,18 +241,26 @@ public final class Economy {
         lastDayResults.putAll(saveState.lastDayResults());
         manufacturingDepths.putAll(saveState.manufacturingDepths());
 
-        for (Map.Entry<ItemId, Set<CompanyId>> entry : saveState.fulfilledToday().entrySet()) {
+        for (Map.Entry<ItemId, Set<CompanyId>> entry :
+                saveState.fulfilledToday().entrySet()) {
             fulfilledToday.put(entry.getKey(), new LinkedHashSet<>(entry.getValue()));
         }
 
-        List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
+        List<ItemId> roots =
+                this.marketDefinitions.stream().map(MarketDefinition::id).toList();
         this.discoveredScope = ValueRules.discover(roots, graph);
 
         this.macro = MacroState.restore(saveState.macro());
         for (MarketDefinition def : this.marketDefinitions) {
             if (!currentDemand.containsKey(def.id())) {
                 MarketParams marketParams = marketParamsMap.get(def.id());
-                currentDemand.put(def.id(), MacroRules.demand(def.baseDemand(), macro, params.macro(), marketParams.cycleSensitivity()));
+                currentDemand.put(
+                        def.id(),
+                        MacroRules.demand(
+                                def.baseDemand() * params.demandScale(),
+                                macro,
+                                params.macro(),
+                                marketParams.cycleSensitivity()));
             }
         }
         this.ticksElapsed = saveState.ticksElapsed();
@@ -257,13 +275,14 @@ public final class Economy {
      * @param graph The recipe graph
      * @param rng A source of randomness
      */
-    public Economy(List<RawMaterialDefinition> rawMaterialDefinitions,
-                   List<MarketDefinition> marketDefinitions,
-                   Map<ItemId, Double> valueOverrides,
-                   EconomyParams params,
-                   ReputationParams reputationParams,
-                   RecipeGraph graph,
-                   Rng rng) {
+    public Economy(
+            List<RawMaterialDefinition> rawMaterialDefinitions,
+            List<MarketDefinition> marketDefinitions,
+            Map<ItemId, Double> valueOverrides,
+            EconomyParams params,
+            ReputationParams reputationParams,
+            RecipeGraph graph,
+            Rng rng) {
         this.rawMaterialDefinitions = List.copyOf(rawMaterialDefinitions);
         this.marketDefinitions = List.copyOf(marketDefinitions);
         this.valueOverrides = Map.copyOf(valueOverrides);
@@ -280,13 +299,14 @@ public final class Economy {
         for (MarketDefinition def : this.marketDefinitions) {
             marketStates.put(def.id(), MarketState.fresh(def.params()));
             marketParticipants.put(def.id(), MarketParticipants.empty());
-            marketParamsMap.put(def.id(), def.params());
+            marketParamsMap.put(def.id(), scaledParams(def));
             marketHistory.put(def.id(), new ArrayDeque<>());
         }
 
         macroHistory = new ArrayDeque<>();
 
-        List<ItemId> roots = this.marketDefinitions.stream().map(MarketDefinition::id).toList();
+        List<ItemId> roots =
+                this.marketDefinitions.stream().map(MarketDefinition::id).toList();
         this.discoveredScope = ValueRules.discover(roots, graph);
 
         this.macro = MacroState.fresh(params.macro(), rng);
@@ -335,42 +355,15 @@ public final class Economy {
         MarketDynamicsParams dynamics = this.params.marketDynamics();
         for (MarketDefinition def : marketDefinitions) {
             MarketState state = marketStates.get(def.id());
-            MarketParams params = marketParamsMap.get(def.id());
             double demandPerTick = currentDemand.get(def.id()) / MarketRules.TRADING_TICKS_PER_DAY;
 
             double actual = state.getDeliveredThisTick();
             double purchased = state.getPurchasedThisTick();
-            double expected = expectedTickDelivery(def.id(), state, params);
 
-            MarketRules.advanceTradingTick(state, actual, purchased, expected, demandPerTick, dynamics);
+            MarketRules.advanceTradingTick(state, 0.0, purchased, 0.0, demandPerTick, dynamics);
 
             recordMarketHistory(def.id(), state, actual);
         }
-    }
-
-    /**
-     * The expected delivery from registered competitors in this trading tick.
-     * @param market The market
-     * @param state The current state of the market
-     * @param marketParams The parameters of the market
-     * @return The expected delivery for this one trading tick
-     */
-    private double expectedTickDelivery(ItemId market, MarketState state, MarketParams marketParams) {
-        Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
-        if (attractiveness.byCompany().isEmpty()) {
-            return 0.0;
-        }
-
-        double demand = currentDemand.get(market);
-        double expectedDaily = 0.0;
-        for (Map.Entry<CompanyId, Double> entry : attractiveness.byCompany().entrySet()) {
-            double own = entry.getValue();
-            double other = attractiveness.total() - own;
-            double share = MarketRules.shareFrom(own, other, state, marketParams);
-            expectedDaily += share * demand;
-        }
-
-        return expectedDaily / MarketRules.TRADING_TICKS_PER_DAY;
     }
 
     public double expectedDailyQuantity(ItemId market, CompanyId company) {
@@ -399,7 +392,8 @@ public final class Economy {
         MarketParticipant participant = participantsOf(market).get(company);
         Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
 
-        double own = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+        double own = MarketRules.attractiveness(
+                participant.listPrice(), participant.reputationInStars(), state, marketParams);
         Double counted = attractiveness.byCompany().get(company);
         double others = counted == null ? attractiveness.total() : attractiveness.total() - counted;
 
@@ -411,7 +405,8 @@ public final class Economy {
         MarketParams marketParams = marketParamsMap.get(market);
         Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
 
-        double own = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+        double own = MarketRules.attractiveness(
+                participant.listPrice(), participant.reputationInStars(), state, marketParams);
         Double counted = attractiveness.byCompany().get(participant.companyId());
         double other = counted == null ? attractiveness.total() : attractiveness.total() - counted;
         double share = MarketRules.shareFrom(own, other, state, marketParams);
@@ -425,7 +420,8 @@ public final class Economy {
             if (inactiveCompanies.contains(participant.companyId())) {
                 continue;
             }
-            double a = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+            double a = MarketRules.attractiveness(
+                    participant.listPrice(), participant.reputationInStars(), state, marketParams);
             byCompany.put(participant.companyId(), a);
             total += a;
         }
@@ -459,7 +455,8 @@ public final class Economy {
             total = attractiveness.total();
         } else {
             MarketParticipant participant = participantsOf(market).get(company);
-            own = MarketRules.attractiveness(participant.listPrice(), participant.reputationInStars(), state, marketParams);
+            own = MarketRules.attractiveness(
+                    participant.listPrice(), participant.reputationInStars(), state, marketParams);
             total = attractiveness.total() + own;
         }
         if (total <= 0) {
@@ -516,7 +513,8 @@ public final class Economy {
             MarketState state = marketStates.get(def.id());
             MarketParams marketParams = marketParamsMap.get(def.id());
 
-            DayResult result = MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()), params.marketDynamics());
+            DayResult result =
+                    MarketRules.advanceDay(state, marketParams, currentDemand.get(def.id()), params.marketDynamics());
             lastDayResults.put(def.id(), result);
             backfillOverflow(def.id(), day, result.overflow());
 
@@ -538,7 +536,7 @@ public final class Economy {
         MacroRules.advanceDay(macro, params.macro(), rng);
 
         for (RawMaterialDefinition def : rawMaterialDefinitions) {
-            RawMaterialRules.advanceDay(rawMaterialStates.get(def.id()), def.params(), params.priceProcess(), rng);
+            RawMaterialRules.advanceDay(rawMaterialStates.get(def.id()), scaledParams(def), params.priceProcess(), rng);
         }
 
         double technicalProgress = MacroRules.technicalProgress(macro, params.progress());
@@ -554,7 +552,8 @@ public final class Economy {
             marketPrices.put(def.id(), marketStates.get(def.id()).getPriceLevel());
         }
 
-        ValueResult result = ValueRules.computeValues(discoveredScope, graph, params.processCosts(), leafValues, marketPrices, technicalProgress);
+        ValueResult result = ValueRules.computeValues(
+                discoveredScope, graph, params.processCosts(), leafValues, marketPrices, technicalProgress);
 
         double trend = MacroRules.trend(macro, params.macro());
         for (MarketDefinition def : marketDefinitions) {
@@ -562,19 +561,34 @@ public final class Economy {
             MarketParams previous = marketParamsMap.get(def.id());
 
             double referenceCost = newCost != null ? newCost : previous.referenceCost();
-            double plantSize = def.params().plantSize() * trend; // Grows plant size with trend & therefor with demand
-            MarketParams updated = new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
+            double plantSize = def.params().plantSize() * params.demandScale() * trend;
+            MarketParams updated =
+                    new MarketParams(referenceCost, plantSize, previous.targetUtilisation(), previous.group());
             marketParamsMap.put(def.id(), updated);
-            MarketRules.passCostChange(marketStates.get(def.id()), previous.referenceCost(), referenceCost, params.marketDynamics());
+            MarketRules.passCostChange(
+                    marketStates.get(def.id()), previous.referenceCost(), referenceCost, params.marketDynamics());
 
             Integer depth = result.depth().get(def.id());
             if (depth != null) {
                 manufacturingDepths.put(def.id(), depth);
             }
 
-            double demand = MacroRules.demand(def.baseDemand(), macro, params.macro(), updated.cycleSensitivity());
+            double demand = MacroRules.demand(
+                    def.baseDemand() * params.demandScale(), macro, params.macro(), updated.cycleSensitivity());
             currentDemand.put(def.id(), demand);
         }
+    }
+
+    private RawMaterialParams scaledParams(RawMaterialDefinition def) {
+        RawMaterialParams base = def.params();
+        return new RawMaterialParams(
+                base.baseValue(), base.dailyVolatility(), base.referenceVolume() * params.demandScale());
+    }
+
+    private MarketParams scaledParams(MarketDefinition def) {
+        MarketParams base = def.params();
+        return new MarketParams(
+                base.referenceCost(), base.plantSize() * params.demandScale(), base.targetUtilisation(), base.group());
     }
 
     private void applyReputationDrift(ItemId market) {
@@ -594,7 +608,8 @@ public final class Economy {
 
     private void recordRawMaterialHistory(ItemId id, long day) {
         Deque<RawMaterialHistoryEntry> history = rawMaterialHistory.get(id);
-        history.addLast(new RawMaterialHistoryEntry(id, day, rawMaterialStates.get(id).getPrice()));
+        history.addLast(
+                new RawMaterialHistoryEntry(id, day, rawMaterialStates.get(id).getPrice()));
         if (history.size() > HISTORY_LENGTH_DAYS) {
             history.removeFirst();
         }
@@ -612,8 +627,7 @@ public final class Economy {
                 state.getCompetitors(),
                 delivered,
                 currentDemand.get(id),
-                Double.NaN
-        ));
+                Double.NaN));
         if (history.size() > HISTORY_LENGTH_TICKS) {
             history.removeFirst();
         }
@@ -687,12 +701,16 @@ public final class Economy {
      */
     public void recordOrderCompleted(ItemId market, CompanyId company, Order order, boolean late) {
         Objects.requireNonNull(order, "order must not be null.");
-        MarketParticipant participant = participantsOf(market).stored(company)
-                .orElseThrow(() -> new IllegalArgumentException(company + " is not registered on market " + market + "."));
+        MarketParticipant participant = participantsOf(market)
+                .stored(company)
+                .orElseThrow(
+                        () -> new IllegalArgumentException(company + " is not registered on market " + market + "."));
         double structuralPrice = stateOf(market).getPriceLevel();
         double newReputation = late
-                ? ReputationRules.changeLate(participant.reputation(), order, packageSize(market), structuralPrice, reputationParams)
-                : ReputationRules.changeOnTime(participant.reputation(), order, packageSize(market), structuralPrice, reputationParams);
+                ? ReputationRules.changeLate(
+                        participant.reputation(), order, packageSize(market), structuralPrice, reputationParams)
+                : ReputationRules.changeOnTime(
+                        participant.reputation(), order, packageSize(market), structuralPrice, reputationParams);
         updateReputation(market, company, newReputation);
     }
 
@@ -907,7 +925,8 @@ public final class Economy {
         MarketParams marketParams = marketParamsMap.get(market);
         DayResult result = lastDayResults.get(market);
 
-        return new MarketSnapshot(market,
+        return new MarketSnapshot(
+                market,
                 state.getPriceLevel(),
                 state.getDeviation(),
                 state.getDisplayedPrice(),
@@ -986,21 +1005,20 @@ public final class Economy {
 
     @Override
     public String toString() {
-        return "Economy{" +
-                "graph=" + graph +
-                ", params=" + params +
-                ", rng=" + rng +
-                ", rawMaterialDefinitions=" + rawMaterialDefinitions +
-                ", marketDefinitions=" + marketDefinitions +
-                ", valueOverrides=" + valueOverrides +
-                ", rawMaterialStates=" + rawMaterialStates +
-                ", marketStates=" + marketStates +
-                ", marketParamsMap=" + marketParamsMap +
-                ", currentDemand=" + currentDemand +
-                ", lastDayResults=" + lastDayResults +
-                ", discoveredScope=" + discoveredScope +
-                ", macro=" + macro +
-                ", ticksElapsed=" + ticksElapsed +
-                '}';
+        return "Economy{" + "graph="
+                + graph + ", params="
+                + params + ", rng="
+                + rng + ", rawMaterialDefinitions="
+                + rawMaterialDefinitions + ", marketDefinitions="
+                + marketDefinitions + ", valueOverrides="
+                + valueOverrides + ", rawMaterialStates="
+                + rawMaterialStates + ", marketStates="
+                + marketStates + ", marketParamsMap="
+                + marketParamsMap + ", currentDemand="
+                + currentDemand + ", lastDayResults="
+                + lastDayResults + ", discoveredScope="
+                + discoveredScope + ", macro="
+                + macro + ", ticksElapsed="
+                + ticksElapsed + '}';
     }
 }
