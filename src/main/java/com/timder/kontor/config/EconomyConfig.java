@@ -73,6 +73,8 @@ public class EconomyConfig {
     public static final ModConfigSpec.DoubleValue COST_PASS_THROUGH;
     public static final ModConfigSpec.DoubleValue COST_PASS_THROUGH_DOWN;
 
+    public static final ModConfigSpec.DoubleValue DEMAND_SCALE;
+
     public static final ModConfigSpec.DoubleValue DEFAULT_PROCESS_COST;
 
     static {
@@ -201,7 +203,7 @@ public class EconomyConfig {
                 .defineInRange("deviationDecay", 0.95, 0.0, 0.999999);
         DEVIATION_STRENGTH = builder.comment(
                         "How strongly a surprise (delivered - expected - weighted purchases, relative to the tick demand) moves the deviation")
-                .defineInRange("deviationStrength", 0.045, 0.0, Double.MAX_VALUE);
+                .defineInRange("deviationStrength", 0.037, 0.0, Double.MAX_VALUE);
         DEVIATION_BOUND = builder.comment(
                         "Largest short-term deviation of the displayed price from the price level, as a fraction")
                 .defineInRange("deviationBound", 0.4, 1.0E-6, 0.999999);
@@ -220,6 +222,12 @@ public class EconomyConfig {
         COST_PASS_THROUGH_DOWN = builder.comment(
                         "How much of a fall of a product's reference cost is passed on to its price level. 0 = none, 1 = fully. Values below costPassThrough make prices sticky downwards; the gap lets prices drift upwards over time")
                 .defineInRange("costPassThroughDown", 0.3, 0.0, 1.0);
+        builder.pop();
+
+        builder.comment("Demand").push("demand");
+        DEMAND_SCALE = builder.comment(
+                        "Factor applied to the demand of every market. Use this to scale demand for servers with more players / companies.")
+                .defineInRange("demandScale", 1.0, 0.01, 1000.0);
         builder.pop();
 
         builder.comment("Processing cost").push("processCosts");

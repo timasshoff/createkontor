@@ -1,6 +1,5 @@
 package com.timder.kontor.game;
 
-import com.timder.kontor.CreateKontor;
 import com.timder.kontor.config.EconomyConfig;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.economy.Economy;
@@ -15,6 +14,7 @@ import com.timder.kontor.core.raw.RawMaterialState;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.core.value.ProcessCosts;
 import com.timder.kontor.data.KontorData;
+import java.util.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
@@ -23,8 +23,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
-
-import java.util.*;
 
 public class EconomySavedData extends SavedData {
 
@@ -56,7 +54,7 @@ public class EconomySavedData extends SavedData {
         SavedData.Factory<EconomySavedData> factory = new SavedData.Factory<>(
                 () -> create(server), // No file found -> create new economy
                 (tag, registries) -> load(tag, server) // File found -> load existing economy
-        );
+                );
         return overworld.getDataStorage().computeIfAbsent(factory, NAME);
     }
 
@@ -83,15 +81,14 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toProgressParams(),
                         EconomyConfig.toPriceProcessParams(),
                         EconomyConfig.toMarketDynamicsParams(),
-                        new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
-                ),
+                        new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get()),
+                        EconomyConfig.DEMAND_SCALE.get()),
                 EconomyConfig.toReputationParams(),
                 FullRecipeGraph.createRecipeGraph(server),
                 rng,
                 saveState);
-        long lastSyncedGameTime = tag.contains("LastSyncedGameTime")
-                ? tag.getLong("LastSyncedGameTime")
-                : economy.ticksElapsed();
+        long lastSyncedGameTime =
+                tag.contains("LastSyncedGameTime") ? tag.getLong("LastSyncedGameTime") : economy.ticksElapsed();
 
         return new EconomySavedData(economy, lastSyncedGameTime);
     }
@@ -114,8 +111,8 @@ public class EconomySavedData extends SavedData {
                         EconomyConfig.toProgressParams(),
                         EconomyConfig.toPriceProcessParams(),
                         EconomyConfig.toMarketDynamicsParams(),
-                        new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get())
-                ),
+                        new ProcessCosts(KontorData.getProcessCosts(), EconomyConfig.DEFAULT_PROCESS_COST.get()),
+                        EconomyConfig.DEMAND_SCALE.get()),
                 EconomyConfig.toReputationParams(),
                 FullRecipeGraph.createRecipeGraph(server),
                 rng);
@@ -130,19 +127,23 @@ public class EconomySavedData extends SavedData {
         tag.put("Macro", writeMacro(saveState.macro()));
 
         ListTag rawMaterials = new ListTag();
-        for (Map.Entry<ItemId, RawMaterialState.SaveState> entry : saveState.rawMaterialStates().entrySet()) {
+        for (Map.Entry<ItemId, RawMaterialState.SaveState> entry :
+                saveState.rawMaterialStates().entrySet()) {
             ItemId id = entry.getKey();
             CompoundTag entryTag = new CompoundTag();
             entryTag.putString("Id", id.value());
             entryTag.putDouble("Price", entry.getValue().price());
             entryTag.putDouble("PurchasedToday", entry.getValue().purchasedToday());
-            entryTag.put("History", writeRawMaterialHistory(saveState.rawMaterialHistory().getOrDefault(id, List.of())));
+            entryTag.put(
+                    "History",
+                    writeRawMaterialHistory(saveState.rawMaterialHistory().getOrDefault(id, List.of())));
             rawMaterials.add(entryTag);
         }
         tag.put("RawMaterials", rawMaterials);
 
         ListTag markets = new ListTag();
-        for (Map.Entry<ItemId, MarketState.SaveState> entry : saveState.marketStates().entrySet()) {
+        for (Map.Entry<ItemId, MarketState.SaveState> entry :
+                saveState.marketStates().entrySet()) {
             ItemId id = entry.getKey();
             MarketState.SaveState s = entry.getValue();
             MarketParams params = saveState.marketParams().get(id);
@@ -166,7 +167,9 @@ public class EconomySavedData extends SavedData {
                 fulfilledCompanies.add(IntTag.valueOf(companyId.value()));
             }
             entryTag.put("FulfilledToday", fulfilledCompanies);
-            entryTag.put("Participants", writeParticipants(saveState.marketParticipants().get(id)));
+            entryTag.put(
+                    "Participants",
+                    writeParticipants(saveState.marketParticipants().get(id)));
             entryTag.put("History", writeMarketHistory(saveState.marketHistory().getOrDefault(id, List.of())));
             markets.add(entryTag);
         }
@@ -187,8 +190,9 @@ public class EconomySavedData extends SavedData {
         for (Tag t : tag.getList("RawMaterials", Tag.TAG_COMPOUND)) {
             CompoundTag entryTag = (CompoundTag) t;
             ItemId id = new ItemId(entryTag.getString("Id"));
-            rawMaterialStates.put(id, new RawMaterialState.SaveState(
-                    entryTag.getDouble("Price"), entryTag.getDouble("PurchasedToday")));
+            rawMaterialStates.put(
+                    id,
+                    new RawMaterialState.SaveState(entryTag.getDouble("Price"), entryTag.getDouble("PurchasedToday")));
             rawMaterialHistory.put(id, readRawMaterialHistory(id, entryTag.getList("History", Tag.TAG_COMPOUND)));
         }
 
@@ -204,22 +208,26 @@ public class EconomySavedData extends SavedData {
             CompoundTag entryTag = (CompoundTag) t;
             ItemId id = new ItemId(entryTag.getString("Id"));
 
-            marketStates.put(id, new MarketState.SaveState(
-                    entryTag.getDouble("PriceLevel"),
-                    entryTag.getDouble("Competitors"),
-                    entryTag.getDouble("CompetitorReputation"),
-                    entryTag.getDouble("Deviation"),
-                    entryTag.getDouble("DeliveredToday"),
-                    entryTag.getDouble("DeliveredThisTick"),
-                    entryTag.getDouble("PurchasedToday"),
-                    entryTag.getDouble("PurchasedThisTick")));
+            marketStates.put(
+                    id,
+                    new MarketState.SaveState(
+                            entryTag.getDouble("PriceLevel"),
+                            entryTag.getDouble("Competitors"),
+                            entryTag.getDouble("CompetitorReputation"),
+                            entryTag.getDouble("Deviation"),
+                            entryTag.getDouble("DeliveredToday"),
+                            entryTag.getDouble("DeliveredThisTick"),
+                            entryTag.getDouble("PurchasedToday"),
+                            entryTag.getDouble("PurchasedThisTick")));
 
             MarketDefinition def = definitionsById.get(id);
-            marketParams.put(id, new MarketParams(
-                    entryTag.getDouble("ReferenceCost"),
-                    entryTag.getDouble("PlantSize"),
-                    def != null ? def.params().targetUtilisation() : 0.80,
-                    def != null ? def.params().group() : GroupDef.metal()));
+            marketParams.put(
+                    id,
+                    new MarketParams(
+                            entryTag.getDouble("ReferenceCost"),
+                            entryTag.getDouble("PlantSize"),
+                            def != null ? def.params().targetUtilisation() : 0.80,
+                            def != null ? def.params().group() : GroupDef.metal()));
 
             manufacturingDepths.put(id, entryTag.getInt("Depth"));
 
@@ -249,8 +257,7 @@ public class EconomySavedData extends SavedData {
                 Map.of(),
                 marketHistory,
                 rawMaterialHistory,
-                macroHistory
-        );
+                macroHistory);
     }
 
     private static CompoundTag writeMacro(MacroState.SaveState saveState) {
@@ -305,7 +312,8 @@ public class EconomySavedData extends SavedData {
         List<MarketHistoryEntry> history = new ArrayList<>();
         for (Tag t : historyTag) {
             CompoundTag entryTag = (CompoundTag) t;
-            history.add(new MarketHistoryEntry(id,
+            history.add(new MarketHistoryEntry(
+                    id,
                     entryTag.getLong("Tick"),
                     entryTag.getLong("Day"),
                     entryTag.getDouble("PriceLevel"),
@@ -342,7 +350,8 @@ public class EconomySavedData extends SavedData {
         List<MacroHistoryEntry> history = new ArrayList<>();
         for (Tag t : historyTag) {
             CompoundTag entryTag = (CompoundTag) t;
-            double policyRate = entryTag.contains("PolicyRate", Tag.TAG_DOUBLE) ? entryTag.getDouble("PolicyRate") : fallback;
+            double policyRate =
+                    entryTag.contains("PolicyRate", Tag.TAG_DOUBLE) ? entryTag.getDouble("PolicyRate") : fallback;
             history.add(new MacroHistoryEntry(entryTag.getLong("Day"), entryTag.getDouble("Index"), policyRate));
         }
         return history;
@@ -366,7 +375,8 @@ public class EconomySavedData extends SavedData {
         for (Tag t : participantsTag) {
             CompoundTag entryTag = (CompoundTag) t;
             CompanyId companyId = new CompanyId(entryTag.getInt("CompanyId"));
-            MarketParticipant participant = new MarketParticipant(companyId, entryTag.getDouble("ListPrice"), entryTag.getDouble("Reputation"));
+            MarketParticipant participant =
+                    new MarketParticipant(companyId, entryTag.getDouble("ListPrice"), entryTag.getDouble("Reputation"));
             if (entryTag.getBoolean("Paused")) {
                 paused.put(companyId, participant);
             } else {
