@@ -96,10 +96,6 @@ public final class MarketRules {
         advanceTradingTick(state, actualDelivered, 0.0, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
     }
 
-    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick) {
-        advanceTradingTick(state, actualDelivered, actualPurchased, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
-    }
-
     /**
      * Advanced the trading tick forward. Moves the trading deviation.
      * @param state The market state
@@ -109,7 +105,7 @@ public final class MarketRules {
      * @param demandThisTick The demand for this tick
      */
     public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick, MarketDynamicsParams params) {
-        double surprise = actualDelivered - expectedDelivered - params.purchaseImpact() * actualPurchased;
+        double surprise = actualDelivered - expectedDelivered - actualPurchased;
         double reference = demandThisTick > 0 ? demandThisTick : 1.0;
 
         double deviation = params.deviationDecay() * state.getDeviation() - params.deviationStrength() * surprise / reference;

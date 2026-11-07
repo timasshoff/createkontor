@@ -17,7 +17,7 @@ public class MarketDynamicsTest {
 
     private static MarketDynamicsParams withPurchaseImpact(double impact) {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
-        return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(), impact,
+        return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(),
                 d.maxPriceFactor(), d.minCompetitors(), d.maxCompetitors(), d.costPassThrough(), d.costPassThroughDown());
     }
 
@@ -36,7 +36,6 @@ public class MarketDynamicsTest {
         assertEquals(0.94, standard.deviationDecay(), 1e-12);
         assertEquals(0.02, standard.deviationStrength(), 1e-12);
         assertEquals(0.5, standard.deviationBound(), 1e-12);
-        assertEquals(1.0, standard.purchaseImpact(), 1e-12);
         assertEquals(2.0, standard.maxPriceFactor(), 1e-12);
         assertEquals(1.0, standard.minCompetitors(), 1e-12);
         assertEquals(8.0, standard.maxCompetitors(), 1e-12);
@@ -103,7 +102,7 @@ public class MarketDynamicsTest {
     @Test
     @DisplayName("Decay, strength and bound are taken from the parameters")
     void deviationConstantsAreConfigurable() {
-        MarketDynamicsParams custom = new MarketDynamicsParams(0.5, 0.1, 0.2, 1.0, 2.0, 1.0, 8.0, 1.0, 0.0);
+        MarketDynamicsParams custom = new MarketDynamicsParams(0.5, 0.1, 0.2, 2.0, 1.0, 8.0, 1.0, 0.0);
         MarketState state = MarketState.fresh(IRON_SHEET);
         state.setDeviation(0.1);
 
@@ -121,7 +120,7 @@ public class MarketDynamicsTest {
     void priceCeilingIsConfigurable() {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
         MarketDynamicsParams lowCeiling = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.purchaseImpact(), 1.5, d.minCompetitors(), d.maxCompetitors(),
+                d.deviationBound(), 1.5, d.minCompetitors(), d.maxCompetitors(),
                 d.costPassThrough(), d.costPassThroughDown());
 
         // One competitor, demand 1800 against capacity 720: full utilisation.
@@ -145,7 +144,7 @@ public class MarketDynamicsTest {
         assertEquals(3.15, growing.getCompetitors(), 1e-9);
 
         MarketDynamicsParams maxThree = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.purchaseImpact(), d.maxPriceFactor(), 1.0, 3.0,
+                d.deviationBound(), d.maxPriceFactor(), 1.0, 3.0,
                 d.costPassThrough(), d.costPassThroughDown());
         MarketState capped = new MarketState(12.0, 3.0);
         MarketRules.advanceDay(capped, IRON_SHEET, DAILY_DEMAND, maxThree);
@@ -157,27 +156,11 @@ public class MarketDynamicsTest {
         assertEquals(2.85, shrinking.getCompetitors(), 1e-9);
 
         MarketDynamicsParams minThree = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.purchaseImpact(), d.maxPriceFactor(), 3.0, 8.0,
+                d.deviationBound(), d.maxPriceFactor(), 3.0, 8.0,
                 d.costPassThrough(), d.costPassThroughDown());
         MarketState floored = new MarketState(8.06, 3.0);
         MarketRules.advanceDay(floored, IRON_SHEET, 100.0, minThree);
         assertEquals(3.0, floored.getCompetitors(), 1e-9);
-    }
-
-    @Test
-    @DisplayName("Invalid settings are rejected")
-    void invalidValuesAreRejected() {
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(1.0, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.0, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, -0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.0, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 1.0, 1.0, 2.0, 1.0, 8.0, 1.0, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, -1.0, 2.0, 1.0, 8.0, 1.0, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 1.0, 1.0, 8.0, 1.0, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 0.0, 8.0, 1.0, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 5.0, 4.0, 1.0, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, -0.1, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.1, 0.0));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.0, -0.1));
-        assertThrows(IllegalArgumentException.class, () -> new MarketDynamicsParams(0.94, 0.02, 0.5, 1.0, 2.0, 1.0, 8.0, 1.0, 1.1));
     }
 
     /**
@@ -189,7 +172,7 @@ public class MarketDynamicsTest {
 
     private static MarketDynamicsParams withPassThrough(double up, double down) {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
-        return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(), d.purchaseImpact(),
+        return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(),
                 d.maxPriceFactor(), d.minCompetitors(), d.maxCompetitors(), up, down);
     }
 

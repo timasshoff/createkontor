@@ -355,42 +355,15 @@ public final class Economy {
         MarketDynamicsParams dynamics = this.params.marketDynamics();
         for (MarketDefinition def : marketDefinitions) {
             MarketState state = marketStates.get(def.id());
-            MarketParams params = marketParamsMap.get(def.id());
             double demandPerTick = currentDemand.get(def.id()) / MarketRules.TRADING_TICKS_PER_DAY;
 
             double actual = state.getDeliveredThisTick();
             double purchased = state.getPurchasedThisTick();
-            double expected = expectedTickDelivery(def.id(), state, params);
 
-            MarketRules.advanceTradingTick(state, actual, purchased, expected, demandPerTick, dynamics);
+            MarketRules.advanceTradingTick(state, 0.0, purchased, 0.0, demandPerTick, dynamics);
 
             recordMarketHistory(def.id(), state, actual);
         }
-    }
-
-    /**
-     * The expected delivery from registered competitors in this trading tick.
-     * @param market The market
-     * @param state The current state of the market
-     * @param marketParams The parameters of the market
-     * @return The expected delivery for this one trading tick
-     */
-    private double expectedTickDelivery(ItemId market, MarketState state, MarketParams marketParams) {
-        Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
-        if (attractiveness.byCompany().isEmpty()) {
-            return 0.0;
-        }
-
-        double demand = currentDemand.get(market);
-        double expectedDaily = 0.0;
-        for (Map.Entry<CompanyId, Double> entry : attractiveness.byCompany().entrySet()) {
-            double own = entry.getValue();
-            double other = attractiveness.total() - own;
-            double share = MarketRules.shareFrom(own, other, state, marketParams);
-            expectedDaily += share * demand;
-        }
-
-        return expectedDaily / MarketRules.TRADING_TICKS_PER_DAY;
     }
 
     public double expectedDailyQuantity(ItemId market, CompanyId company) {
