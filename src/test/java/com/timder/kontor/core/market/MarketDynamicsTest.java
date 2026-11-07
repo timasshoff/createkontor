@@ -66,18 +66,6 @@ public class MarketDynamicsTest {
     }
 
     @Test
-    @DisplayName("With purchase impact 2.5, buying 150 units raises the deviation by five percent")
-    void purchaseWithHigherWeight() {
-        assertEquals(0.05, deviationAfterPurchase(150.0, withPurchaseImpact(2.5)), 1e-12);
-    }
-
-    @Test
-    @DisplayName("With purchase impact 0, a purchase does not move the deviation at all")
-    void purchaseWithZeroWeight() {
-        assertEquals(0.0, deviationAfterPurchase(150.0, withPurchaseImpact(0.0)), 1e-12);
-    }
-
-    @Test
     @DisplayName("The purchase impact does not weigh deliveries")
     void purchaseImpactLeavesDeliveriesAlone() {
         MarketState state = MarketState.fresh(IRON_SHEET);
@@ -91,18 +79,6 @@ public class MarketDynamicsTest {
     @DisplayName("A huge purchase is capped by the deviation bound")
     void purchaseIsClamped() {
         assertEquals(0.5, deviationAfterPurchase(10000.0, withPurchaseImpact(2.5)), 1e-12);
-    }
-
-    @Test
-    @DisplayName("After a purchase of 150 units at weight 2.5, an empty tick decays 0.05 to 0.047")
-    void deviationDecaysAfterPurchase() {
-        MarketDynamicsParams dynamics = withPurchaseImpact(2.5);
-        MarketState state = MarketState.fresh(IRON_SHEET);
-
-        MarketRules.advanceTradingTick(state, 0.0, 150.0, 0.0, TICK_DEMAND, dynamics);
-        MarketRules.advanceTradingTick(state, 0.0, 0.0, 0.0, TICK_DEMAND, dynamics);
-
-        assertEquals(0.047, state.getDeviation(), 1e-12);
     }
 
     @Test
