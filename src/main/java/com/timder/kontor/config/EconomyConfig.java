@@ -200,8 +200,7 @@ public class EconomyConfig {
         DEVIATION_DECAY = builder.comment(
                         "How much of the short-term price deviation survives from one trading tick (100 s) to the next")
                 .defineInRange("deviationDecay", 0.95, 0.0, 0.999999);
-        DEVIATION_STRENGTH = builder.comment(
-                        "How strongly a purchase moves the deviation")
+        DEVIATION_STRENGTH = builder.comment("How strongly a purchase moves the deviation")
                 .defineInRange("deviationStrength", 0.063, 0.0, Double.MAX_VALUE);
         DEVIATION_BOUND = builder.comment(
                         "Largest short-term deviation of the displayed price from the price level, as a fraction")

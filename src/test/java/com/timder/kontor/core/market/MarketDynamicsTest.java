@@ -1,10 +1,9 @@
 package com.timder.kontor.core.market;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /*
 The following code is AI generated
@@ -17,8 +16,15 @@ public class MarketDynamicsTest {
 
     private static MarketDynamicsParams withPurchaseImpact(double impact) {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
-        return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(),
-                d.maxPriceFactor(), d.minCompetitors(), d.maxCompetitors(), d.costPassThrough(), d.costPassThroughDown());
+        return new MarketDynamicsParams(
+                d.deviationDecay(),
+                d.deviationStrength(),
+                d.deviationBound(),
+                d.maxPriceFactor(),
+                d.minCompetitors(),
+                d.maxCompetitors(),
+                d.costPassThrough(),
+                d.costPassThroughDown());
     }
 
     private static double deviationAfterPurchase(double purchased, MarketDynamicsParams dynamics) {
@@ -119,9 +125,15 @@ public class MarketDynamicsTest {
     @DisplayName("The ceiling of the price level is taken from the parameters")
     void priceCeilingIsConfigurable() {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
-        MarketDynamicsParams lowCeiling = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), 1.5, d.minCompetitors(), d.maxCompetitors(),
-                d.costPassThrough(), d.costPassThroughDown());
+        MarketDynamicsParams lowCeiling = new MarketDynamicsParams(
+                d.deviationDecay(),
+                d.deviationStrength(),
+                d.deviationBound(),
+                1.5,
+                d.minCompetitors(),
+                d.maxCompetitors(),
+                d.costPassThrough(),
+                d.costPassThroughDown());
 
         // One competitor, demand 1800 against capacity 720: full utilisation.
         MarketState standard = new MarketState(15.0, 1.0);
@@ -143,9 +155,15 @@ public class MarketDynamicsTest {
         MarketRules.advanceDay(growing, IRON_SHEET, DAILY_DEMAND);
         assertEquals(3.15, growing.getCompetitors(), 1e-9);
 
-        MarketDynamicsParams maxThree = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.maxPriceFactor(), 1.0, 3.0,
-                d.costPassThrough(), d.costPassThroughDown());
+        MarketDynamicsParams maxThree = new MarketDynamicsParams(
+                d.deviationDecay(),
+                d.deviationStrength(),
+                d.deviationBound(),
+                d.maxPriceFactor(),
+                1.0,
+                3.0,
+                d.costPassThrough(),
+                d.costPassThroughDown());
         MarketState capped = new MarketState(12.0, 3.0);
         MarketRules.advanceDay(capped, IRON_SHEET, DAILY_DEMAND, maxThree);
         assertEquals(3.0, capped.getCompetitors(), 1e-9);
@@ -155,9 +173,15 @@ public class MarketDynamicsTest {
         MarketRules.advanceDay(shrinking, IRON_SHEET, 100.0);
         assertEquals(2.85, shrinking.getCompetitors(), 1e-9);
 
-        MarketDynamicsParams minThree = new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(),
-                d.deviationBound(), d.maxPriceFactor(), 3.0, 8.0,
-                d.costPassThrough(), d.costPassThroughDown());
+        MarketDynamicsParams minThree = new MarketDynamicsParams(
+                d.deviationDecay(),
+                d.deviationStrength(),
+                d.deviationBound(),
+                d.maxPriceFactor(),
+                3.0,
+                8.0,
+                d.costPassThrough(),
+                d.costPassThroughDown());
         MarketState floored = new MarketState(8.06, 3.0);
         MarketRules.advanceDay(floored, IRON_SHEET, 100.0, minThree);
         assertEquals(3.0, floored.getCompetitors(), 1e-9);
@@ -172,8 +196,15 @@ public class MarketDynamicsTest {
 
     private static MarketDynamicsParams withPassThrough(double up, double down) {
         MarketDynamicsParams d = MarketDynamicsParams.standard();
-        return new MarketDynamicsParams(d.deviationDecay(), d.deviationStrength(), d.deviationBound(),
-                d.maxPriceFactor(), d.minCompetitors(), d.maxCompetitors(), up, down);
+        return new MarketDynamicsParams(
+                d.deviationDecay(),
+                d.deviationStrength(),
+                d.deviationBound(),
+                d.maxPriceFactor(),
+                d.minCompetitors(),
+                d.maxCompetitors(),
+                up,
+                down);
     }
 
     @Test

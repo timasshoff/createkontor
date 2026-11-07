@@ -8,18 +8,22 @@ public record MarketDynamicsParams(
         double minCompetitors,
         double maxCompetitors,
         double costPassThrough,
-        double costPassThroughDown
-) {
+        double costPassThroughDown) {
 
     public MarketDynamicsParams {
-        if (deviationDecay < 0 || deviationDecay >= 1) throw new IllegalArgumentException("deviationDecay must be within [0, 1).");
+        if (deviationDecay < 0 || deviationDecay >= 1)
+            throw new IllegalArgumentException("deviationDecay must be within [0, 1).");
         if (deviationStrength < 0) throw new IllegalArgumentException("deviationStrength must not be negative.");
-        if (deviationBound <= 0 || deviationBound >= 1) throw new IllegalArgumentException("deviationBound must be within (0, 1).");
+        if (deviationBound <= 0 || deviationBound >= 1)
+            throw new IllegalArgumentException("deviationBound must be within (0, 1).");
         if (maxPriceFactor <= 1) throw new IllegalArgumentException("maxPriceFactor must be larger than 1.");
         if (minCompetitors <= 0) throw new IllegalArgumentException("minCompetitors must be positive.");
-        if (maxCompetitors < minCompetitors) throw new IllegalArgumentException("maxCompetitors must not be smaller than minCompetitors.");
-        if (costPassThrough < 0 || costPassThrough > 1) throw new IllegalArgumentException("costPassThrough must be within [0, 1].");
-        if (costPassThroughDown < 0 || costPassThroughDown > 1) throw new IllegalArgumentException("costPassThroughDown must be within [0, 1].");
+        if (maxCompetitors < minCompetitors)
+            throw new IllegalArgumentException("maxCompetitors must not be smaller than minCompetitors.");
+        if (costPassThrough < 0 || costPassThrough > 1)
+            throw new IllegalArgumentException("costPassThrough must be within [0, 1].");
+        if (costPassThroughDown < 0 || costPassThroughDown > 1)
+            throw new IllegalArgumentException("costPassThroughDown must be within [0, 1].");
     }
 
     /*

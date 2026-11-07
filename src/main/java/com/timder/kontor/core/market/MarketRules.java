@@ -25,7 +25,7 @@ public final class MarketRules {
         double reputationFactor = Math.pow(reputation / MarketParams.NEUTRAL_REPUTATION, params.reputationWeight());
         double priceFactor = Math.pow(price / state.getDisplayedPrice(), -params.priceSensitivity());
 
-        return  reputationFactor * priceFactor;
+        return reputationFactor * priceFactor;
     }
 
     /**
@@ -39,7 +39,8 @@ public final class MarketRules {
      * @return The attractiveness of all competitors combined
      */
     public static double competitorAttractiveness(MarketState state, MarketParams params) {
-        double reputationFactor = Math.pow(state.getCompetitorReputation() / MarketParams.NEUTRAL_REPUTATION, params.reputationWeight());
+        double reputationFactor =
+                Math.pow(state.getCompetitorReputation() / MarketParams.NEUTRAL_REPUTATION, params.reputationWeight());
         return state.getCompetitors() * reputationFactor;
     }
 
@@ -66,7 +67,8 @@ public final class MarketRules {
      * @param params The parameters of the market
      * @return The share of the daily demand this supplier receives
      */
-    public static double shareFrom(double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
+    public static double shareFrom(
+            double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
         double total = ownAttractiveness + otherCompaniesAttractiveness + competitorAttractiveness(state, params);
         return total > 0 ? ownAttractiveness / total : 0.0;
     }
@@ -81,7 +83,8 @@ public final class MarketRules {
      * @param params The parameters of the market
      * @return The three shares, adding up to one
      */
-    public static MarketShareBreakdown shareBreakdown(double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
+    public static MarketShareBreakdown shareBreakdown(
+            double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
         double own = shareFrom(ownAttractiveness, otherCompaniesAttractiveness, state, params);
         double others = shareFrom(otherCompaniesAttractiveness, ownAttractiveness, state, params);
         double competition = competitorShare(ownAttractiveness + otherCompaniesAttractiveness, state, params);
@@ -92,8 +95,10 @@ public final class MarketRules {
         return shareFrom(attractiveness(price, reputation, state, params), 0.0, state, params);
     }
 
-    public static void advanceTradingTick(MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
-        advanceTradingTick(state, actualDelivered, 0.0, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
+    public static void advanceTradingTick(
+            MarketState state, double actualDelivered, double expectedDelivered, double demandThisTick) {
+        advanceTradingTick(
+                state, actualDelivered, 0.0, expectedDelivered, demandThisTick, MarketDynamicsParams.standard());
     }
 
     /**
@@ -104,11 +109,18 @@ public final class MarketRules {
      * @param expectedDelivered The expected amount of delivered product by all competitors and concurrence, based on their market shared
      * @param demandThisTick The demand for this tick
      */
-    public static void advanceTradingTick(MarketState state, double actualDelivered, double actualPurchased, double expectedDelivered, double demandThisTick, MarketDynamicsParams params) {
+    public static void advanceTradingTick(
+            MarketState state,
+            double actualDelivered,
+            double actualPurchased,
+            double expectedDelivered,
+            double demandThisTick,
+            MarketDynamicsParams params) {
         double surprise = actualDelivered - expectedDelivered - actualPurchased;
         double reference = demandThisTick > 0 ? demandThisTick : 1.0;
 
-        double deviation = params.deviationDecay() * state.getDeviation() - params.deviationStrength() * surprise / reference;
+        double deviation =
+                params.deviationDecay() * state.getDeviation() - params.deviationStrength() * surprise / reference;
 
         state.setDeviation(clamp(deviation, -params.deviationBound(), params.deviationBound()));
         state.clearDeliveredThisTick();
@@ -122,7 +134,8 @@ public final class MarketRules {
      * @param newCost The reference cost after recalculation
      * @param dynamics The dynamic market parameters
      */
-    public static void passCostChange(MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
+    public static void passCostChange(
+            MarketState state, double previousCost, double newCost, MarketDynamicsParams dynamics) {
         if (previousCost <= 0 || newCost <= 0 || newCost == previousCost) {
             return;
         }
@@ -135,7 +148,8 @@ public final class MarketRules {
         return advanceDay(state, params, demand, MarketDynamicsParams.standard());
     }
 
-    public static DayResult advanceDay(MarketState state, MarketParams params, double demand, MarketDynamicsParams dynamicsParams) {
+    public static DayResult advanceDay(
+            MarketState state, MarketParams params, double demand, MarketDynamicsParams dynamicsParams) {
         double priceBefore = state.getPriceLevel();
         double competitorsBefore = state.getCompetitors();
 
@@ -165,14 +179,26 @@ public final class MarketRules {
         double relative = clamp((profitability - target) / target, -1.0, 1.0);
 
         // Adapt amount of competitors
-        double competitors = clamp(competitorsBefore * (1.0 + params.capacityResponse() * relative), dynamicsParams.minCompetitors(), dynamicsParams.maxCompetitors());
+        double competitors = clamp(
+                competitorsBefore * (1.0 + params.capacityResponse() * relative),
+                dynamicsParams.minCompetitors(),
+                dynamicsParams.maxCompetitors());
         state.setCompetitors(competitors);
 
         // Clearing counters
         state.clearDeliveredToday();
         state.clearPurchasedToday();
 
-        return new DayResult(demand, soldByCompanies, soldByCompetitors, overflow, utilisation, priceBefore, price, competitorsBefore, competitors);
+        return new DayResult(
+                demand,
+                soldByCompanies,
+                soldByCompetitors,
+                overflow,
+                utilisation,
+                priceBefore,
+                price,
+                competitorsBefore,
+                competitors);
     }
 
     public static double clamp(double value, double min, double max) {

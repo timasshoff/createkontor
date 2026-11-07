@@ -581,7 +581,8 @@ public final class Economy {
 
     private RawMaterialParams scaledParams(RawMaterialDefinition def) {
         RawMaterialParams base = def.params();
-        return new RawMaterialParams(base.baseValue(), base.dailyVolatility(), base.referenceVolume() * params.demandScale());
+        return new RawMaterialParams(
+                base.baseValue(), base.dailyVolatility(), base.referenceVolume() * params.demandScale());
     }
 
     private MarketParams scaledParams(MarketDefinition def) {
