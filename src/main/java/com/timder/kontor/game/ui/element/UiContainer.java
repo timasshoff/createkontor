@@ -274,9 +274,9 @@ public final class UiContainer {
             options.add(Component.translatable("ui.createkontor.grid.filter.show_all"));
             options.addAll(filters.keySet());
 
-            Font font = LDLibFonts.font();
             int selectorWidth;
             if (FMLEnvironment.dist == Dist.CLIENT) { // Crashes otherwise
+                Font font = LDLibFonts.font();
                 selectorWidth = options.stream()
                                 .mapToInt(option -> font.width(option.getString()))
                                 .max()
