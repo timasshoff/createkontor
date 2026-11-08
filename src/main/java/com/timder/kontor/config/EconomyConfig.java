@@ -319,6 +319,6 @@ public class EconomyConfig {
                 REQUEST_QUANTITY_DISCOUNT_FLOOR.get(),
                 REQUEST_QUANTITY_DISCOUNT_PER_STEP.get(),
                 REQUEST_WALK_IN_PRICE_THRESHOLD.get(),
-                REQUEST_WALK_IN_PRICE_THRESHOLD.get());
+                REQUEST_WALK_IN_REQUESTS_PER_DAY.get());
     }
 }
