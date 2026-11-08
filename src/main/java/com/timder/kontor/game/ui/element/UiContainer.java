@@ -28,6 +28,8 @@ import javax.annotation.Nullable;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 public final class UiContainer {
 
@@ -273,11 +275,16 @@ public final class UiContainer {
             options.addAll(filters.keySet());
 
             Font font = LDLibFonts.font();
-            int selectorWidth = options.stream()
-                            .mapToInt(option -> font.width(option.getString()))
-                            .max()
-                            .orElse(0)
-                    + 30; // Some space
+            int selectorWidth;
+            if (FMLEnvironment.dist == Dist.CLIENT) { // Crashes otherwise
+                selectorWidth = options.stream()
+                                .mapToInt(option -> font.width(option.getString()))
+                                .max()
+                                .orElse(0)
+                        + 30; // Some space
+            } else {
+                selectorWidth = 80;
+            }
             Selector<Component> filterSelector = new Selector<>();
             filterSelector.setCandidateUIProvider(
                     UIElementProvider.text(option -> option == null ? Component.literal("-") : option));
