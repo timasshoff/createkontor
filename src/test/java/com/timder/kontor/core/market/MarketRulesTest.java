@@ -1,26 +1,29 @@
 package com.timder.kontor.core.market;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 public class MarketRulesTest {
 
-    private static final MarketParams IRON_SHEET = new MarketParams(
-        8.06,
-        720.0,
-        0.80,
-        GroupDef.metal()
-    );
+    private static final MarketParams IRON_SHEET = new MarketParams(8.06, 720.0, 0.80, GroupDef.metal());
 
     private static final double DEMAND = 1800.0;
+
+    /**
+     * The dynamics these tests were written for, stated here so they do not move when the defaults move.
+     * Order: deviationDecay, deviationStrength, deviationBound, maxPriceFactor, minCompetitors, maxCompetitors,
+     * costPassThrough, costPassThroughDown, trustThreshold (0 = off), trustWidth, maxShare (1 = off).
+     */
+    private static final MarketDynamicsParams DYNAMICS =
+            new MarketDynamicsParams(0.94, 0.02, 0.5, 2.0, 1.0, 8.0, 1.0, 0.0, 0.0, 0.2, 1.0);
 
     private static MarketState runDays(MarketParams params, double demand, int days) {
         MarketState state = MarketState.fresh(params);
         for (int i = 0; i < days; i++) {
-            MarketRules.advanceDay(state, params, demand);
+            MarketRules.advanceDay(state, params, demand, DYNAMICS);
         }
         return state;
     }
@@ -48,7 +51,7 @@ public class MarketRulesTest {
         MarketState state = MarketState.fresh(IRON_SHEET);
         state.recordDelivery(500);
 
-        DayResult result = MarketRules.advanceDay(state, IRON_SHEET, DEMAND);
+        DayResult result = MarketRules.advanceDay(state, IRON_SHEET, DEMAND, DYNAMICS);
 
         assertEquals(500.0, result.soldByCompanies());
         assertEquals(1300.0, result.soldByCompetitors());
@@ -60,7 +63,7 @@ public class MarketRulesTest {
     void overflowWhenShortage() {
         MarketState state = new MarketState(IRON_SHEET.equilibriumPrice(), 1.0);
 
-        DayResult result = MarketRules.advanceDay(state, IRON_SHEET, DEMAND);
+        DayResult result = MarketRules.advanceDay(state, IRON_SHEET, DEMAND, DYNAMICS);
 
         assertEquals(720.0, result.soldByCompetitors(), 0.001);
         assertEquals(1080.0, result.overflow(), 0.001);
@@ -72,12 +75,12 @@ public class MarketRulesTest {
     void priceFollowsUtilitsation() {
         MarketState high = new MarketState(9.50, 2.0);
         double before = high.getPriceLevel();
-        MarketRules.advanceDay(high, IRON_SHEET, DEMAND);
+        MarketRules.advanceDay(high, IRON_SHEET, DEMAND, DYNAMICS);
         assertTrue(high.getPriceLevel() > before);
 
         MarketState low = new MarketState(9.50, 6.0);
         before = low.getPriceLevel();
-        MarketRules.advanceDay(low, IRON_SHEET, DEMAND);
+        MarketRules.advanceDay(low, IRON_SHEET, DEMAND, DYNAMICS);
         assertTrue(low.getPriceLevel() < before);
     }
 }

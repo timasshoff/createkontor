@@ -8,5 +8,7 @@ public class MarketShareWikiPage {
     public static void build(UIElement page) {
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.market_share.p1")));
         page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.market_share.p2")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.market_share.p3")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.market_share.p4")));
     }
 }

@@ -1067,7 +1067,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("wiki.createkontor.page.markets.b1", "Price");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.markets.p2",
-                "The price of a market is made up of two components: Price Level and Price Deviation. Price Level is the structural level of a product depending on competitor utilisation and reference cost (= the minimum cost of a product derived from the recipe tree). It is updated once per trading day. The Price Deviation is added onto the price level and makes prices respond directly when a company sells or buys large amounts of items. It is updated several times during a trading day. A price deviation is only temporary and prices will sooner or later return to their price level.");
+                "The price of a market is made up of two components: Price Level and Price Deviation. Price Level is the structural level of a product depending on competitor utilisation and reference cost (= the minimum cost of a product derived from the recipe tree). It is updated once per trading day. The Price Deviation is added onto the price level and makes prices respond directly when a company buys large amounts of items from the market. It is updated several times during a trading day. A price deviation is only temporary and prices will sooner or later return to their price level.");
         REGISTRATE.addRawLang("wiki.createkontor.page.markets.b2", "Demand");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.markets.p3",
@@ -1134,7 +1134,13 @@ public class KontorLanguage {
                 "The market share determines how much of the daily demand you will receive in the form of requests. You can see your market share using a market analyst.");
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.market_share.p2",
-                "The market share is made up of your price and your reputation. Selling below market price with a high reputation will get you more market share than selling above market price with a low reputation.");
+                "The market share is made up of your price and your reputation. Customers compare your price with the current market price and your reputation with the competitors reputation. Selling below market price with a high reputation will get you more market share than selling above market price with a low reputation.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_share.p3",
+                "A lower price attracts more customers. The reaction of customers to your price depends on the market. In some markets customers prefer lower prices, in others they are willing to pay more for a higher reputation. Customers will become suspicious when an offer is far below market price, so be careful when setting a price far below market price. At some point a lower price brings you fewer customers.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.market_share.p4",
+                "It is impossible to create a monopoly. Customers will always spread their orders, so you will never reach 100% market share.");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.managers.title", "Managers");
         REGISTRATE.addRawLang(

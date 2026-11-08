@@ -8,7 +8,10 @@ public record MarketDynamicsParams(
         double minCompetitors,
         double maxCompetitors,
         double costPassThrough,
-        double costPassThroughDown) {
+        double costPassThroughDown,
+        double trustThreshold,
+        double trustWidth,
+        double maxShare) {
 
     public MarketDynamicsParams {
         if (deviationDecay < 0 || deviationDecay >= 1)
@@ -24,6 +27,10 @@ public record MarketDynamicsParams(
             throw new IllegalArgumentException("costPassThrough must be within [0, 1].");
         if (costPassThroughDown < 0 || costPassThroughDown > 1)
             throw new IllegalArgumentException("costPassThroughDown must be within [0, 1].");
+        if (trustThreshold < 0 || trustThreshold >= 1)
+            throw new IllegalArgumentException("trustThreshold must be within [0, 1).");
+        if (trustWidth <= 0) throw new IllegalArgumentException("trustWidth must be positive.");
+        if (maxShare <= 0 || maxShare > 1) throw new IllegalArgumentException("maxShare must be within (0, 1].");
     }
 
     /*
@@ -31,6 +38,6 @@ public record MarketDynamicsParams(
      */
 
     public static MarketDynamicsParams standard() {
-        return new MarketDynamicsParams(0.94, 0.02, 0.5, 2.0, 1.0, 8.0, 1.0, 0.0);
+        return new MarketDynamicsParams(0.94, 0.02, 0.5, 2.0, 1.0, 8.0, 1.0, 0.0, 0.0, 0.2, 1.0);
     }
 }

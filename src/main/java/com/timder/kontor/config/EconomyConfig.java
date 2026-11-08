@@ -71,6 +71,9 @@ public class EconomyConfig {
     public static final ModConfigSpec.DoubleValue MAX_COMPETITORS;
     public static final ModConfigSpec.DoubleValue COST_PASS_THROUGH;
     public static final ModConfigSpec.DoubleValue COST_PASS_THROUGH_DOWN;
+    public static final ModConfigSpec.DoubleValue TRUST_THRESHOLD;
+    public static final ModConfigSpec.DoubleValue TRUST_WIDTH;
+    public static final ModConfigSpec.DoubleValue MAX_CUSTOMER_SHARE;
 
     public static final ModConfigSpec.DoubleValue DEMAND_SCALE;
 
@@ -208,20 +211,29 @@ public class EconomyConfig {
         MAX_PRICE_FACTOR = builder.comment("Ceiling of the daily price level relative to the reference cost")
                 .defineInRange("maxPriceFactor", 2.5, 1.0001, Double.MAX_VALUE);
         MIN_COMPETITORS = builder.comment("Lowest number of competitors a market can fall to")
-                .defineInRange("minCompetitors", 2.0, 1.0E-6, Double.MAX_VALUE);
+                .defineInRange("minCompetitors", 1.0, 1.0E-6, Double.MAX_VALUE);
         MAX_COMPETITORS = builder.comment("Highest number of competitors a market can grow to")
-                .defineInRange("maxCompetitors", 9.0, 1.0E-6, Double.MAX_VALUE);
+                .defineInRange("maxCompetitors", 10.0, 1.0E-6, Double.MAX_VALUE);
         COST_PASS_THROUGH = builder.comment(
                         "How much of a rise of a product's reference cost (checked once per day) is passed on to its price level. 0 = none, 1 = fully")
                 .defineInRange("costPassThrough", 0.5, 0.0, 1.0);
         COST_PASS_THROUGH_DOWN = builder.comment(
                         "How much of a fall of a product's reference cost is passed on to its price level. 0 = none, 1 = fully. Values below costPassThrough make prices sticky downwards; the gap lets prices drift upwards over time")
                 .defineInRange("costPassThroughDown", 0.3, 0.0, 1.0);
+        TRUST_THRESHOLD = builder.comment(
+                        "Price ratio (own price / displayed price) below which customers start to distrust an offer as too cheap. 0 = off")
+                .defineInRange("trustThreshold", 0.85, 0.0, 0.999999);
+        TRUST_WIDTH = builder.comment(
+                        "How quickly reputations falls when below the trust threshold. Smaller = quicker.")
+                .defineInRange("trustWidth", 0.2, 1.0E-6, Double.MAX_VALUE);
+        MAX_CUSTOMER_SHARE = builder.comment(
+                        "Largest share of a market's demand customers give to one single supplier (soft limit, customers spread their orders). 1.0 = off. The share bends towards this value, at 0.7 the real maximum is about 0.66")
+                .defineInRange("maxCustomerShare", 0.7, 1.0E-6, 1.0);
         builder.pop();
 
         builder.comment("Demand").push("demand");
         DEMAND_SCALE = builder.comment(
-                        "Factor applied to the demand of every market. Use this to scale demand for servers with more players / companies.")
+                        "Factor applied to the demand of every market. Use this to scale demand for servers with more players / companies. Rule of thumb: The share of all player-companies in a market should never be above 70%.")
                 .defineInRange("demandScale", 1.0, 0.01, 1000.0);
         builder.pop();
 
@@ -287,7 +299,10 @@ public class EconomyConfig {
                 MIN_COMPETITORS.get(),
                 MAX_COMPETITORS.get(),
                 COST_PASS_THROUGH.get(),
-                COST_PASS_THROUGH_DOWN.get());
+                COST_PASS_THROUGH_DOWN.get(),
+                TRUST_THRESHOLD.get(),
+                TRUST_WIDTH.get(),
+                MAX_CUSTOMER_SHARE.get());
     }
 
     public static RequestParams toRequestParams() {
