@@ -393,11 +393,11 @@ public final class Economy {
         Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
 
         double own = MarketRules.attractiveness(
-                participant.listPrice(), participant.reputationInStars(), state, marketParams);
+                participant.listPrice(), participant.reputationInStars(), state, marketParams, params.marketDynamics());
         Double counted = attractiveness.byCompany().get(company);
         double others = counted == null ? attractiveness.total() : attractiveness.total() - counted;
 
-        return MarketRules.shareBreakdown(own, Math.max(0.0, others), state, marketParams);
+        return MarketRules.shareBreakdown(own, Math.max(0.0, others), state, marketParams, params.marketDynamics());
     }
 
     private double dailyQuantityOf(ItemId market, MarketParticipant participant) {
@@ -406,10 +406,10 @@ public final class Economy {
         Attractiveness attractiveness = attractivenessOf(market, state, marketParams);
 
         double own = MarketRules.attractiveness(
-                participant.listPrice(), participant.reputationInStars(), state, marketParams);
+                participant.listPrice(), participant.reputationInStars(), state, marketParams, params.marketDynamics());
         Double counted = attractiveness.byCompany().get(participant.companyId());
         double other = counted == null ? attractiveness.total() : attractiveness.total() - counted;
-        double share = MarketRules.shareFrom(own, other, state, marketParams);
+        double share = MarketRules.shareFrom(own, other, state, marketParams, params.marketDynamics());
         return share * currentDemand.get(market);
     }
 
@@ -421,7 +421,11 @@ public final class Economy {
                 continue;
             }
             double a = MarketRules.attractiveness(
-                    participant.listPrice(), participant.reputationInStars(), state, marketParams);
+                    participant.listPrice(),
+                    participant.reputationInStars(),
+                    state,
+                    marketParams,
+                    params.marketDynamics());
             byCompany.put(participant.companyId(), a);
             total += a;
         }
@@ -456,7 +460,11 @@ public final class Economy {
         } else {
             MarketParticipant participant = participantsOf(market).get(company);
             own = MarketRules.attractiveness(
-                    participant.listPrice(), participant.reputationInStars(), state, marketParams);
+                    participant.listPrice(),
+                    participant.reputationInStars(),
+                    state,
+                    marketParams,
+                    params.marketDynamics());
             total = attractiveness.total() + own;
         }
         if (total <= 0) {

@@ -1,35 +1,39 @@
 package com.timder.kontor.core.market;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 public class MarketShareTest {
 
-    private static final MarketParams IRON_SHEET = new MarketParams(
-            8.06,
-            720.0,
-            0.80,
-            GroupDef.metal()
-    );
+    private static final MarketParams IRON_SHEET = new MarketParams(8.06, 720.0, 0.80, GroupDef.metal());
 
     private static final double DEMAND = 1800.0;
     private static final double NEUTRAL = MarketParams.NEUTRAL_REPUTATION;
 
+    /**
+     * Without trust penalty and share limit, so the shares are exactly the plain attractiveness ratios.
+     * The damping has its own tests (UndercutDampingTest).
+     * Order: deviationDecay, deviationStrength, deviationBound, maxPriceFactor, minCompetitors, maxCompetitors,
+     * costPassThrough, costPassThroughDown, trustThreshold (0 = off), trustWidth, maxShare (1 = off).
+     */
+    private static final MarketDynamicsParams DYNAMICS =
+            new MarketDynamicsParams(0.94, 0.02, 0.5, 2.0, 1.0, 8.0, 1.0, 0.0, 0.0, 0.2, 1.0);
+
     private DayResult tradeOneDay(MarketState state, double priceFactor, double stars) {
         double price = priceFactor * state.getDisplayedPrice();
-        double share = MarketRules.share(price, stars, state, IRON_SHEET);
+        double share = MarketRules.share(price, stars, state, IRON_SHEET, DYNAMICS);
         state.recordDelivery(share * DEMAND);
-        return MarketRules.advanceDay(state, IRON_SHEET, DEMAND);
+        return MarketRules.advanceDay(state, IRON_SHEET, DEMAND, DYNAMICS);
     }
 
     @Test
     @DisplayName("Market price and three stars score exactly one")
     void neutralSupplierScoresOne() {
         MarketState state = MarketState.fresh(IRON_SHEET);
-        double value = MarketRules.attractiveness(state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET);
+        double value = MarketRules.attractiveness(state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET, DYNAMICS);
         assertEquals(1.0, value, 1e-9);
     }
 
@@ -46,7 +50,7 @@ public class MarketShareTest {
     @DisplayName("Three stars at market price against three competitors gives a quarter")
     void neutralSupplierGetsAQuarter() {
         MarketState state = MarketState.fresh(IRON_SHEET);
-        double share = MarketRules.share(state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET);
+        double share = MarketRules.share(state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET, DYNAMICS);
         assertEquals(0.25, share, 1e-9);
     }
 
@@ -54,7 +58,7 @@ public class MarketShareTest {
     @DisplayName("10 percent below market price raises the share to about a third")
     void undercuttingRaisesShare() {
         MarketState state = MarketState.fresh(IRON_SHEET);
-        double share = MarketRules.share(0.90 * state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET);
+        double share = MarketRules.share(0.90 * state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET, DYNAMICS);
         assertEquals(0.325, share, 0.005);
     }
 
@@ -64,11 +68,11 @@ public class MarketShareTest {
         MarketState state = MarketState.fresh(IRON_SHEET);
         double market = state.getDisplayedPrice();
 
-        double a = MarketRules.attractiveness(0.95 * market, 4.0, state, IRON_SHEET);
-        double b = MarketRules.attractiveness(1.05 * market, 2.0, state, IRON_SHEET);
+        double a = MarketRules.attractiveness(0.95 * market, 4.0, state, IRON_SHEET, DYNAMICS);
+        double b = MarketRules.attractiveness(1.05 * market, 2.0, state, IRON_SHEET, DYNAMICS);
 
-        double shareA = MarketRules.shareFrom(a, b, state, IRON_SHEET);
-        double shareB = MarketRules.shareFrom(b, a, state, IRON_SHEET);
+        double shareA = MarketRules.shareFrom(a, b, state, IRON_SHEET, DYNAMICS);
+        double shareB = MarketRules.shareFrom(b, a, state, IRON_SHEET, DYNAMICS);
         double shareCompetition = MarketRules.competitorShare(a + b, state, IRON_SHEET);
 
         assertEquals(1.0, shareA + shareB + shareCompetition, 1e-9);
@@ -83,7 +87,11 @@ public class MarketShareTest {
             tradeOneDay(state, 0.90, NEUTRAL);
         }
 
-        assertTrue(state.getCompetitors() < 1.5, "expected the competition to shrink, but it is " + state.getCompetitors());
-        assertTrue(MarketRules.share(0.90 * state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET) > 0.50, "expected the supplier to hold more than half the market");
+        assertTrue(
+                state.getCompetitors() < 1.5,
+                "expected the competition to shrink, but it is " + state.getCompetitors());
+        assertTrue(
+                MarketRules.share(0.90 * state.getDisplayedPrice(), NEUTRAL, state, IRON_SHEET, DYNAMICS) > 0.50,
+                "expected the supplier to hold more than half the market");
     }
 }

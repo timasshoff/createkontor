@@ -3,6 +3,7 @@ package com.timder.kontor.core.market;
 public final class MarketRules {
 
     public static final int TRADING_TICKS_PER_DAY = 12;
+    public static final double SHARE_LIMIT_SHARPNESS = 4.0;
 
     /**
      * How appealing a supplier is to customers.
@@ -10,6 +11,7 @@ public final class MarketRules {
      * A supplier with a neutral reputation asking the exact market price scores 1.0.
      * A higher price sensitivity means customers chase the cheapest offer, a high reputation weight means
      * customers pay for a good name.
+     * Without trust penalty.
      *
      * @param price The price per unit the supplier asks for
      * @param reputation The reputation of the supplier
@@ -18,14 +20,68 @@ public final class MarketRules {
      * @return The attractiveness of that supplier. 1.0 means neutral.
      */
     public static double attractiveness(double price, double reputation, MarketState state, MarketParams params) {
+        return attractiveness(price, reputation, state, params, MarketDynamicsParams.standard());
+    }
+
+    /**
+     * How appealing a supplier is to customers.
+     * Built from reputation and price. Both factors are relative to a neutral point.
+     * A supplier with a neutral reputation asking the exact market price scores 1.0.
+     * A higher price sensitivity means customers chase the cheapest offer, a high reputation weight means
+     * customers pay for a good name.
+     * With trust penalty.
+     *
+     * @param price The price per unit the supplier asks for
+     * @param reputation The reputation of the supplier
+     * @param state The current state of the market
+     * @param params The dynamic parameters of the markets
+     * @return The attractiveness of that supplier. 1.0 means neutral.
+     */
+    public static double attractiveness(
+            double price, double reputation, MarketState state, MarketParams params, MarketDynamicsParams dynamics) {
         if (price <= 0) {
             throw new IllegalArgumentException("price must be positive.");
         }
 
+        double priceRatio = price / state.getDisplayedPrice();
         double reputationFactor = Math.pow(reputation / MarketParams.NEUTRAL_REPUTATION, params.reputationWeight());
-        double priceFactor = Math.pow(price / state.getDisplayedPrice(), -params.priceSensitivity());
+        double priceFactor = Math.pow(priceRatio, -params.priceSensitivity());
 
-        return reputationFactor * priceFactor;
+        return reputationFactor * priceFactor * trustFactor(priceRatio, dynamics);
+    }
+
+    /**
+     * How many customers trust an offer.
+     * @param priceRatio Price of the supplier divided by market price
+     * @param dynamics The dynamic parameters of the markets
+     * @return The trust factor
+     */
+    public static double trustFactor(double priceRatio, MarketDynamicsParams dynamics) {
+        double threshold = dynamics.trustThreshold();
+        if (threshold <= 0 || priceRatio >= threshold) {
+            return 1.0;
+        }
+        double distance = (threshold - priceRatio) / dynamics.trustWidth();
+        return Math.pow(0.5, distance * distance);
+    }
+
+    /**
+     * Limits the share of a single company.
+     * @param share The share someone would get without the limit
+     * @param dynamics The dynamic parameters of the markets
+     * @return The share after the limit
+     */
+    public static double limitShare(double share, MarketDynamicsParams dynamics) {
+        double limit = dynamics.maxShare();
+        if (share <= 0) {
+            return 0.0;
+        }
+        if (limit >= 1.0) {
+            return share;
+        }
+        return Math.pow(
+                Math.pow(share, -SHARE_LIMIT_SHARPNESS) + Math.pow(limit, -SHARE_LIMIT_SHARPNESS),
+                -1.0 / SHARE_LIMIT_SHARPNESS);
     }
 
     /**
@@ -69,8 +125,22 @@ public final class MarketRules {
      */
     public static double shareFrom(
             double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
-        double total = ownAttractiveness + otherCompaniesAttractiveness + competitorAttractiveness(state, params);
-        return total > 0 ? ownAttractiveness / total : 0.0;
+        return shareFrom(
+                ownAttractiveness, otherCompaniesAttractiveness, state, params, MarketDynamicsParams.standard());
+    }
+
+    public static double shareFrom(
+            double ownAttractiveness,
+            double otherCompaniesAttractiveness,
+            MarketState state,
+            MarketParams params,
+            MarketDynamicsParams dynamics) {
+        double companies = ownAttractiveness + otherCompaniesAttractiveness;
+        double total = companies + competitorAttractiveness(state, params);
+        if (total <= 0 || companies <= 0) {
+            return 0.0;
+        }
+        return ownAttractiveness / companies * limitShare(companies / total, dynamics);
     }
 
     /**
@@ -84,15 +154,24 @@ public final class MarketRules {
      * @return The three shares, adding up to one
      */
     public static MarketShareBreakdown shareBreakdown(
-            double ownAttractiveness, double otherCompaniesAttractiveness, MarketState state, MarketParams params) {
-        double own = shareFrom(ownAttractiveness, otherCompaniesAttractiveness, state, params);
-        double others = shareFrom(otherCompaniesAttractiveness, ownAttractiveness, state, params);
-        double competition = competitorShare(ownAttractiveness + otherCompaniesAttractiveness, state, params);
+            double ownAttractiveness,
+            double otherCompaniesAttractiveness,
+            MarketState state,
+            MarketParams params,
+            MarketDynamicsParams dynamics) {
+        double own = shareFrom(ownAttractiveness, otherCompaniesAttractiveness, state, params, dynamics);
+        double others = shareFrom(otherCompaniesAttractiveness, ownAttractiveness, state, params, dynamics);
+        double competition = Math.max(0.0, 1.0 - own - others);
         return new MarketShareBreakdown(own, others, competition);
     }
 
     public static double share(double price, double reputation, MarketState state, MarketParams params) {
-        return shareFrom(attractiveness(price, reputation, state, params), 0.0, state, params);
+        return share(price, reputation, state, params, MarketDynamicsParams.standard());
+    }
+
+    public static double share(
+            double price, double reputation, MarketState state, MarketParams params, MarketDynamicsParams dynamics) {
+        return shareFrom(attractiveness(price, reputation, state, params, dynamics), 0.0, state, params, dynamics);
     }
 
     public static void advanceTradingTick(
