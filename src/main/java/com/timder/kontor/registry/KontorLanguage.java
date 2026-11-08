@@ -1267,7 +1267,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "createkontor.ponder.employee_desk_hiring.text_2",
                 "Each desk needs exactly one seat right next to it.");
-        REGISTRATE.addRawLang("createkontor.ponder.employee_desk_hiring.text_3", "Place an adult villager on the seat.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.employee_desk_hiring.text_3", "Place an adult villager on the seat.");
         REGISTRATE.addRawLang(
                 "createkontor.ponder.employee_desk_hiring.text_4",
                 "The employee is automatically hired, if it is active, has a free slot in the company, and the company can pay the hiring bonus.");

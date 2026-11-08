@@ -278,9 +278,9 @@ public final class UiContainer {
             int selectorWidth;
             if (FMLEnvironment.dist == Dist.CLIENT) { // Crashes otherwise
                 selectorWidth = options.stream()
-                        .mapToInt(option -> font.width(option.getString()))
-                        .max()
-                        .orElse(0)
+                                .mapToInt(option -> font.width(option.getString()))
+                                .max()
+                                .orElse(0)
                         + 30; // Some space
             } else {
                 selectorWidth = 80;

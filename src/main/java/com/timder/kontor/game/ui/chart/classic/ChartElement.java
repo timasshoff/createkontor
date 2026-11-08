@@ -247,7 +247,8 @@ public class ChartElement extends UIElement {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             Font font = LDLibFonts.font();
             for (Integer option : options) {
-                String text = labelUnit != null ? NiceScale.format(option, 0) + labelUnit : xFormatter.format(option, 0);
+                String text =
+                        labelUnit != null ? NiceScale.format(option, 0) + labelUnit : xFormatter.format(option, 0);
                 maxTextWidth = Math.max(maxTextWidth, font.width(text));
             }
         }
