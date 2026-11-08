@@ -19,6 +19,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.joml.Vector2f;
 
 public class ChartElement extends UIElement {
@@ -230,10 +232,6 @@ public class ChartElement extends UIElement {
         return this;
     }
 
-    public ChartElement enableRangeFilter(List<Integer> options, int defaultRange) {
-        return enableRangeFilter(options, defaultRange, null);
-    }
-
     public ChartElement enableRangeFilter(List<Integer> options, int defaultRange, @Nullable String labelUnit) {
         if (options.isEmpty()) {
             throw new IllegalArgumentException("options must not be empty.");
@@ -245,11 +243,13 @@ public class ChartElement extends UIElement {
             removeChild(rangeSelector);
         }
 
-        Font font = LDLibFonts.font();
         int maxTextWidth = 0;
-        for (Integer option : options) {
-            String text = labelUnit != null ? NiceScale.format(option, 0) + labelUnit : xFormatter.format(option, 0);
-            maxTextWidth = Math.max(maxTextWidth, font.width(text));
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            Font font = LDLibFonts.font();
+            for (Integer option : options) {
+                String text = labelUnit != null ? NiceScale.format(option, 0) + labelUnit : xFormatter.format(option, 0);
+                maxTextWidth = Math.max(maxTextWidth, font.width(text));
+            }
         }
         int selectorWidth = maxTextWidth + 30;
         this.rangeSelectorWidth = selectorWidth;
