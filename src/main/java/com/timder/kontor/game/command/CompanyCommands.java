@@ -305,7 +305,7 @@ public class CompanyCommands {
         company.account()
                 .book(
                         economy.currentDay(),
-                        BookingKind.DEPOSIT,
+                        BookingKind.ORDER_REVENUE,
                         Money.fromDollar(DoubleArgumentType.getDouble(context, "amount")),
                         "fraud");
         data.setDirty();

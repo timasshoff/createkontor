@@ -2,10 +2,7 @@ package com.timder.kontor.game;
 
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
-import com.timder.kontor.core.company.Company;
-import com.timder.kontor.core.company.CompanyId;
-import com.timder.kontor.core.company.CompanyParams;
-import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.*;
 import com.timder.kontor.core.company.employee.EmployeeEvent;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
@@ -169,6 +166,7 @@ public class KontorTickHandler {
         int orphanDays = CompanyConfig.EMPLOYEE_ORPHAN_DAYS.get();
         long minActiveTicks = CompanyConfig.CONTRACT_CHECK_MIN_ACTIVE_TICKS.get();
         List<UpgradeEvent> upgradeEvents = new ArrayList<>();
+        Map<CompanyId, CompanyHistoryEntry> latestEntries = new LinkedHashMap<>();
         for (MacroHistoryEntry entry : newDays) {
             long day = entry.day();
             for (Company company : registry.all()) {
@@ -185,12 +183,13 @@ public class KontorTickHandler {
                 }
             }
 
-            registry.settleDay(day, entry.policyRate(), params, economy);
+            latestEntries.putAll(registry.settleDay(day, entry.policyRate(), params, economy));
             upgradeEvents.addAll(registry.advanceUpgradeDay(day, params));
         }
         if (!upgradeEvents.isEmpty()) {
             PlayerNotifications.sendUpgradeEventNotifications(server, companyData.getRegistry(), upgradeEvents, params);
         }
+        PlayerNotifications.sendSettlementHud(server, registry, latestEntries);
         companyData.setDirty();
         economyData.setDirty();
     }

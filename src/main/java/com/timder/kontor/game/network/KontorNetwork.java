@@ -6,7 +6,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public final class KontorNetwork {
 
-    private static final String PROTOCOL_VERSION = "4";
+    private static final String PROTOCOL_VERSION = "5";
 
     private KontorNetwork() {}
 
@@ -27,5 +27,10 @@ public final class KontorNetwork {
                 NotebookPayload.TYPE,
                 NotebookPayload.STREAM_CODEC,
                 (payload, context) -> ClientPayloadHandler.handleNotebook(payload, context));
+
+        registrar.playToClient(
+                SettlementPayload.TYPE,
+                SettlementPayload.STREAM_CODEC,
+                (payload, context) -> ClientPayloadHandler.handleSettlement(payload, context));
     }
 }

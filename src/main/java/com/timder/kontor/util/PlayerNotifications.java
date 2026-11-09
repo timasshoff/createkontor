@@ -1,17 +1,18 @@
 package com.timder.kontor.util;
 
-import com.timder.kontor.core.company.Company;
-import com.timder.kontor.core.company.CompanyParams;
-import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.*;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
+import com.timder.kontor.game.network.SettlementPayload;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class PlayerNotifications {
 
@@ -55,6 +56,29 @@ public final class PlayerNotifications {
         Component message = Component.translatable(
                 "message.createkontor.new_day", ComponentFormatting.highlightStandard(String.valueOf(day)));
         server.getPlayerList().broadcastSystemMessage(message, false);
+    }
+
+    public static void sendSettlementHud(
+            MinecraftServer server, CompanyRegistry registry, Map<CompanyId, CompanyHistoryEntry> entries) {
+        for (Map.Entry<CompanyId, CompanyHistoryEntry> entry : entries.entrySet()) {
+            Company company = registry.get(entry.getKey()).orElse(null);
+            if (company == null) {
+                continue;
+            }
+
+            List<UUID> members = new ArrayList<>();
+            members.add(company.owner());
+            members.addAll(company.managers());
+            for (UUID member : members) {
+                ServerPlayer player = server.getPlayerList().getPlayer(member);
+                if (player != null) {
+                    boolean recordDay = CompanyRules.isRecordDay(company.history(), entry.getValue());
+                    int profitStreak = CompanyRules.profitStreak(company.history(), entry.getValue());
+                    PacketDistributor.sendToPlayer(
+                            player, SettlementPayload.of(company.name(), entry.getValue(), recordDay, profitStreak));
+                }
+            }
+        }
     }
 
     public static void sendUpgradeCancelledNotification(
