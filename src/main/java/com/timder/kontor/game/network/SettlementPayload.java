@@ -9,7 +9,14 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
 public record SettlementPayload(
-        String companyName, long day, Money revenue, Money costs, Money result, boolean recordDay, int profitStreak)
+        String companyName,
+        long day,
+        Money revenue,
+        Money costs,
+        Money result,
+        boolean recordDay,
+        int profitStreak,
+        boolean comeback)
         implements CustomPacketPayload {
 
     public static final Type<SettlementPayload> TYPE =
@@ -26,6 +33,7 @@ public record SettlementPayload(
         buf.writeVarLong(payload.result().cents());
         buf.writeBoolean(payload.recordDay());
         buf.writeVarInt(payload.profitStreak());
+        buf.writeBoolean(payload.comeback());
     }
 
     private static SettlementPayload read(RegistryFriendlyByteBuf buf) {
@@ -36,17 +44,25 @@ public record SettlementPayload(
                 Money.ofCents(buf.readVarLong()),
                 Money.ofCents(buf.readVarLong()),
                 buf.readBoolean(),
-                buf.readVarInt());
+                buf.readVarInt(),
+                buf.readBoolean());
     }
 
     public static SettlementPayload of(
-            String companyName, CompanyHistoryEntry entry, boolean recordDay, int profitStreak) {
+            String companyName, CompanyHistoryEntry entry, boolean recordDay, int profitStreak, boolean comeback) {
         Money costs = Money.ZERO;
         for (Money kindCost : entry.costsByKind().values()) {
             costs = costs.plus(kindCost);
         }
         return new SettlementPayload(
-                companyName, entry.day(), entry.revenue(), costs.negate(), entry.result(), recordDay, profitStreak);
+                companyName,
+                entry.day(),
+                entry.revenue(),
+                costs.negate(),
+                entry.result(),
+                recordDay,
+                profitStreak,
+                comeback);
     }
 
     @Override

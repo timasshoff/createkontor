@@ -74,8 +74,10 @@ public final class PlayerNotifications {
                 if (player != null) {
                     boolean recordDay = CompanyRules.isRecordDay(company.history(), entry.getValue());
                     int profitStreak = CompanyRules.profitStreak(company.history(), entry.getValue());
+                    boolean comeback = CompanyRules.isComeback(company.history(), entry.getValue());
                     PacketDistributor.sendToPlayer(
-                            player, SettlementPayload.of(company.name(), entry.getValue(), recordDay, profitStreak));
+                            player,
+                            SettlementPayload.of(company.name(), entry.getValue(), recordDay, profitStreak, comeback));
                 }
             }
         }

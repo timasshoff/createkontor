@@ -149,6 +149,32 @@ public final class CompanyRules {
         return streak;
     }
 
+    public static boolean isComeback(List<CompanyHistoryEntry> history, CompanyHistoryEntry entry) {
+        Objects.requireNonNull(history, "history must not be null.");
+        Objects.requireNonNull(entry, "entry must not be null.");
+        if (!entry.result().isPositive()) {
+            return false;
+        }
+
+        int daysWithoutProfit = 0;
+        List<CompanyHistoryEntry> earlier = new ArrayList<>();
+        for (CompanyHistoryEntry other : history) {
+            if (other.day() < entry.day()) {
+                earlier.add(other);
+            }
+        }
+        earlier.sort(Comparator.comparingLong(CompanyHistoryEntry::day).reversed());
+
+        for (CompanyHistoryEntry other : earlier) {
+            if (other.result().isPositive()) {
+                break;
+            }
+            daysWithoutProfit++;
+        }
+
+        return daysWithoutProfit >= 3;
+    }
+
     private static void bookLicenseFees(Company company, long day, CompanyParams params) {
         for (HeldLicense held : LicenseHoldingRules.holdings(company, params.licenses())) {
             if (!held.billed()) {

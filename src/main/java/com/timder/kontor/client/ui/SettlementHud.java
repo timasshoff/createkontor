@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.lowdragmc.lowdraglib2.math.interpolate.Eases;
 import com.lowdragmc.lowdraglib2.math.interpolate.IEase;
 import com.simibubi.create.AllSoundEvents;
+import com.timder.kontor.config.ClientConfig;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.game.network.SettlementPayload;
 import com.timder.kontor.game.ui.element.UiPaper;
@@ -32,6 +33,9 @@ public class SettlementHud implements ModularHudLayer {
 
     public static final SettlementHud INSTANCE = new SettlementHud();
 
+    private static final float START_TILT_DEGREES = 4f;
+    private static final float EXIT_TILT_DEGREES = -3f;
+
     private static final float SLIDE_IN_SECONDS = 0.45f;
     private static final float HOLD_SECONDS = 6.25f;
     private static final float SLIDE_OUT_SECONDS = 0.35f;
@@ -43,20 +47,25 @@ public class SettlementHud implements ModularHudLayer {
     private static final float ROLL_SECONDS = 0.5f;
     private static final float ROLL_START_SCALE = 1.35f;
 
+    private static final int COUNT_TICKS = 6;
+    private static final float COUNT_TICK_VOLUME = 0.25f;
+
     public static final float HIDDEN_OFFSET_PERCENT = 110f;
     public static final float MIN_LABEL_WIDTH = 40f;
     public static final int MIN_STREAK_SHOWN = 3;
 
-    public record Slip(ModularUI ui, UIElement paper) {}
+    public record Hud(ModularUI ui, UIElement paper) {}
 
     private final Deque<SettlementPayload> queue = new ArrayDeque<>();
-    private Slip current;
+    private Hud current;
     private ClientLevel level;
 
     @Override
     public @Nullable ModularUI getModularUI() {
         dropStateIfWorldChanged();
-        if (current == null && !queue.isEmpty()) {
+        Minecraft minecraft = Minecraft.getInstance();
+        boolean canShow = minecraft.screen == null && !minecraft.options.hideGui;
+        if (current == null && !queue.isEmpty() && canShow) {
             show(queue.poll());
         }
         return current == null ? null : current.ui();
@@ -64,32 +73,42 @@ public class SettlementHud implements ModularHudLayer {
 
     public void enqueue(SettlementPayload payload) {
         dropStateIfWorldChanged();
+        if (!ClientConfig.SETTLEMENT_HUD_ENABLED.get()) {
+            return;
+        }
         queue.add(payload);
     }
 
     private void show(SettlementPayload payload) {
-        Slip slip = create(payload);
-        current = slip;
+        Hud hud = create(payload);
+        current = hud;
 
-        slip.paper().animation(animation -> {
+        hud.paper().animation(animation -> {
             UISoundUtils.playSound(AllSoundEvents.DEPOT_SLIDE.getMainEvent(), 1.1f, 0.5f);
             animation
                     .duration(SLIDE_IN_SECONDS)
                     .ease(Eases.QUART_OUT)
-                    .style(PropertyRegistry.TRANSFORM_2D, new Transform2D().translatePercent(0, 0))
-                    .onFinished(element -> slideOut(slip))
+                    .style(
+                            PropertyRegistry.TRANSFORM_2D,
+                            new Transform2D().translatePercent(0, 0).rotation(0).pivot(0.5f, 0.5f))
+                    .onFinished(element -> slideOut(hud))
                     .start();
         });
     }
 
-    private void slideOut(Slip slip) {
+    private void slideOut(Hud hud) {
         boolean[] soundPlayed = {false};
-        slip.paper()
+        hud.paper()
                 .animation()
                 .delay(HOLD_SECONDS)
                 .duration(SLIDE_OUT_SECONDS)
                 .ease(Eases.QUAD_IN)
-                .style(PropertyRegistry.TRANSFORM_2D, new Transform2D().translatePercent(HIDDEN_OFFSET_PERCENT, 0))
+                .style(
+                        PropertyRegistry.TRANSFORM_2D,
+                        new Transform2D()
+                                .translatePercent(HIDDEN_OFFSET_PERCENT, 0)
+                                .rotation(EXIT_TILT_DEGREES)
+                                .pivot(0.5f, 0.5f))
                 .onInterpolate((runtime, element) -> {
                     if (!soundPlayed[0]) {
                         soundPlayed[0] = true;
@@ -97,7 +116,7 @@ public class SettlementHud implements ModularHudLayer {
                     }
                 })
                 .onFinished(element -> {
-                    if (current == slip) {
+                    if (current == hud) {
                         current = null;
                     }
                 })
@@ -113,7 +132,7 @@ public class SettlementHud implements ModularHudLayer {
         }
     }
 
-    public static Slip create(SettlementPayload payload) {
+    public static Hud create(SettlementPayload payload) {
         UIElement paper = new UIElement()
                 .layout(layout -> layout.positionType(TaffyPosition.ABSOLUTE)
                         .right(8f)
@@ -123,12 +142,14 @@ public class SettlementHud implements ModularHudLayer {
                         .paddingAll(8)
                         .gapAll(2))
                 .style(UiStyles.PAPER)
-                .transform(t -> t.translatePercent(0, HIDDEN_OFFSET_PERCENT));
+                .transform(t -> t.translatePercent(0, HIDDEN_OFFSET_PERCENT)
+                        .rotation(START_TILT_DEGREES)
+                        .pivot(0.5f, 0.5f));
 
         Label revenueValue =
-                UiPaper.primary(UiPaper.adapt(ComponentFormatting.moneyPositive(payload.revenue())), Horizontal.RIGHT);
-        Label costsValue =
-                UiPaper.primary(UiPaper.adapt(ComponentFormatting.moneyNegative(payload.costs())), Horizontal.RIGHT);
+                UiPaper.primary(UiPaper.adapt(ComponentFormatting.moneyColored(payload.revenue())), Horizontal.RIGHT);
+        Label costsValue = UiPaper.primary(
+                UiPaper.adapt(ComponentFormatting.moneyColored(payload.costs().negate())), Horizontal.RIGHT);
         Label resultValue =
                 UiPaper.primary(UiPaper.adapt(ComponentFormatting.moneyColored(payload.result())), Horizontal.RIGHT);
 
@@ -136,7 +157,7 @@ public class SettlementHud implements ModularHudLayer {
         rollIn(
                 revenueValue,
                 payload.revenue(),
-                ComponentFormatting::moneyPositive,
+                ComponentFormatting::moneyColored,
                 REVEAL_START_SECONDS,
                 ROLL_SECONDS,
                 ROLL_START_SCALE,
@@ -144,8 +165,8 @@ public class SettlementHud implements ModularHudLayer {
                 () -> playTick(positiveResult ? 1.0f : 1.498f, positiveResult));
         rollIn(
                 costsValue,
-                payload.costs(),
-                ComponentFormatting::moneyNegative,
+                payload.costs().negate(),
+                ComponentFormatting::moneyColored,
                 REVEAL_START_SECONDS + REVEAL_STEP_SECONDS,
                 ROLL_SECONDS,
                 ROLL_START_SCALE,
@@ -177,6 +198,11 @@ public class SettlementHud implements ModularHudLayer {
 
         Label bonusLabel = UiPaper.paragraphPrimary(Component.literal(" "), Horizontal.CENTER);
         bonusLabel.setVisible(false);
+
+        if (payload.comeback()) {
+            bonusLabel.setText(UiPaper.adapt(Component.translatable("hud.createkontor.settlement.comeback")
+                    .withStyle(ChatFormatting.GOLD)));
+        }
         if (payload.profitStreak() >= MIN_STREAK_SHOWN) {
             bonusLabel.setText(UiPaper.adapt(
                     Component.translatable("hud.createkontor.settlement.profit_streak", payload.profitStreak())
@@ -187,7 +213,7 @@ public class SettlementHud implements ModularHudLayer {
                     .withStyle(ChatFormatting.GOLD)));
         }
 
-        if (payload.recordDay() || payload.profitStreak() >= MIN_STREAK_SHOWN) {
+        if (payload.recordDay() || payload.profitStreak() >= MIN_STREAK_SHOWN || payload.comeback()) {
             bonusLabel.transform(t -> t.scale(1.5f).pivot(0.5f, 0.5f));
             bonusLabel.animation(animation -> animation
                     .delay(REVEAL_START_SECONDS + 3 * REVEAL_STEP_SECONDS)
@@ -200,10 +226,13 @@ public class SettlementHud implements ModularHudLayer {
                             if (payload.recordDay()) {
                                 UISoundUtils.playSound(SoundEvents.PLAYER_LEVELUP, 1.0f, 0.5f);
                                 UISoundUtils.playSound(SoundEvents.NOTE_BLOCK_BELL.value(), 2.0f, 0.5f);
-                            } else {
+                            } else if (payload.profitStreak() >= MIN_STREAK_SHOWN) {
                                 float pitch = (float)
                                         Math.pow(2.0, Math.min(payload.profitStreak() - MIN_STREAK_SHOWN, 12) / 12.0);
                                 UISoundUtils.playSound(SoundEvents.NOTE_BLOCK_CHIME.value(), pitch, 0.5f);
+                            } else {
+                                UISoundUtils.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0f, 0.6f);
+                                UISoundUtils.playSound(SoundEvents.NOTE_BLOCK_BELL.value(), 1.498f, 0.4f);
                             }
                         }
                     })
@@ -228,7 +257,7 @@ public class SettlementHud implements ModularHudLayer {
         UIElement root =
                 new UIElement().layout(layout -> layout.widthPercent(100).heightPercent(100));
         root.addChild(paper);
-        return new Slip(ModularUI.of(UiStyles.ui(root)), paper);
+        return new Hud(ModularUI.of(UiStyles.ui(root)), paper);
     }
 
     private static void rollIn(
@@ -242,6 +271,8 @@ public class SettlementHud implements ModularHudLayer {
             Runnable onReveal) {
         label.setVisible(false);
         label.transform(t -> t.scale(startScale).pivot(1f, 0.5f));
+        boolean ticks = !target.isZero();
+        int[] lastStep = {0};
         label.animation(animation -> animation
                 .delay(delaySeconds)
                 .duration(durationSeconds)
@@ -257,7 +288,18 @@ public class SettlementHud implements ModularHudLayer {
                     }
                     float progress = runtime.getInterpolator().getNormalizedTime();
                     Money shown = target.scaled(Eases.QUAD_OUT.interpolate(progress));
+                    double eased = Eases.QUAD_OUT.interpolate(progress);
                     label.setValue(UiPaper.adapt(format.apply(shown)));
+
+                    if (ticks) {
+                        int step = Math.min(COUNT_TICKS, (int) (eased * COUNT_TICKS + 1e-6));
+                        if (step > lastStep[0]) {
+                            lastStep[0] = step;
+                            float pitch = (float) Math.pow(2.0, (target.isPositive() ? step : -step) / 12.0);
+                            UISoundUtils.playSound(
+                                    AllSoundEvents.SCROLL_VALUE.getMainEvent(), pitch, COUNT_TICK_VOLUME);
+                        }
+                    }
                 })
                 .start());
     }

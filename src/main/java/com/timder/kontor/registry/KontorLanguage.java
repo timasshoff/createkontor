@@ -183,6 +183,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("hud.createkontor.settlement.result", "Result");
         REGISTRATE.addRawLang("hud.createkontor.settlement.best_day", "★ Best day so far!");
         REGISTRATE.addRawLang("hud.createkontor.settlement.profit_streak", "%s days without loss!");
+        REGISTRATE.addRawLang("hud.createkontor.settlement.comeback", "Loss streak broken!");
 
         REGISTRATE.addRawLang(
                 "ui.createkontor.chart.no_data.detailed",

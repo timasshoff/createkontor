@@ -302,12 +302,9 @@ public class CompanyCommands {
         Company company = found.get();
         Economy economy = EconomySavedData.get(context.getSource().getServer()).getEconomy();
 
-        company.account()
-                .book(
-                        economy.currentDay(),
-                        BookingKind.ORDER_REVENUE,
-                        Money.fromDollar(DoubleArgumentType.getDouble(context, "amount")),
-                        "fraud");
+        Money amount = Money.fromDollar(DoubleArgumentType.getDouble(context, "amount"));
+        BookingKind kind = amount.isPositive() ? BookingKind.ORDER_REVENUE : BookingKind.PURCHASE;
+        company.account().book(economy.currentDay(), kind, amount, "fraud");
         data.setDirty();
 
         source.sendSuccess(() -> Component.literal("Successfully booked."), false);
