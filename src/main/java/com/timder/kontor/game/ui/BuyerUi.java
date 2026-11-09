@@ -260,7 +260,6 @@ public final class BuyerUi {
             ToastPayload.send(context.player(), result);
             if (result.isPresent() && result.get().kind() == ToastPayload.ToastKind.SUCCESS) {
                 purchases[0]++;
-                UISoundUtils.playSound(AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent());
             }
         });
         content.onMessage("c2s_address", tag -> be.setAddress(tag.getString("Address")));

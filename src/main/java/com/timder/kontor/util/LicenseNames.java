@@ -21,7 +21,7 @@ public final class LicenseNames {
         };
     }
 
-    private static Component itemName(ItemId market) {
+    public static Component itemName(ItemId market) {
         ResourceLocation location = ResourceLocation.tryParse(market.value());
         if (location != null) {
             Optional<Item> item = BuiltInRegistries.ITEM.getOptional(location);

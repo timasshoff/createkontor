@@ -9,6 +9,8 @@ import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.order.Order;
+import com.timder.kontor.core.company.order.OrderRules;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketParticipationRules;
 import com.timder.kontor.core.value.ItemId;
@@ -21,6 +23,7 @@ import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.game.ui.KontorDeskBoundUi;
 import com.timder.kontor.game.ui.KontorDeskUnboundUi;
 import com.timder.kontor.util.ComponentFormatting;
+import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.PlayerNotifications;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -122,8 +125,9 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
                     ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
 
+        Order order;
         try {
-            company.acceptRequest(
+            order = company.acceptRequest(
                     number,
                     CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())),
                     EconomyConfig.toRequestParams());
@@ -133,7 +137,12 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
                     ComponentFormatting.highlightError("#" + number),
                     ComponentFormatting.error(e.getMessage())));
         }
-        return S2CActionResult.empty();
+        return S2CActionResult.success(Component.translatable(
+                "message.createkontor.kontor_desk.request_accepted",
+                ComponentFormatting.highlightStandard("#" + order.getNumber()),
+                ComponentFormatting.highlightStandard(order.getQuantity() + "×"),
+                LicenseNames.itemName(order.getProduct()),
+                ComponentFormatting.moneyPositive(OrderRules.fullValue(order))));
     }
 
     public Optional<S2CActionResult> setMarketParticipation(ItemId market, boolean participate) {
@@ -163,7 +172,11 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
         economyData.setDirty();
         companyData.setDirty();
-        return S2CActionResult.empty();
+        return participate
+                ? S2CActionResult.success(
+                Component.translatable("message.createkontor.kontor_desk.market_joined", LicenseNames.itemName(market)))
+                : S2CActionResult.info(
+                Component.translatable("message.createkontor.kontor_desk.market_paused", LicenseNames.itemName(market)));
     }
 
     public Optional<S2CActionResult> declareBankruptcy(ServerPlayer player, boolean confirmed) {

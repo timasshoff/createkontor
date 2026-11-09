@@ -83,7 +83,7 @@ public final class OrderRules {
         }
     }
 
-    private static Money fullValue(Order order) {
+    public static Money fullValue(Order order) {
         return Money.fromDollar(order.getUnitPrice()).multipliedBy(order.getQuantity());
     }
 

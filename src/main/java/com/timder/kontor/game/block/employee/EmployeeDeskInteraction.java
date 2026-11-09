@@ -3,6 +3,7 @@ package com.timder.kontor.game.block.employee;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
@@ -29,7 +30,11 @@ public class EmployeeDeskInteraction {
         if (event.getLevel() instanceof ServerLevel level
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockState(deskPos.get()).getBlock() instanceof AbstractEmployeeDeskBlock desk) {
-            desk.tryOpenUi(serverPlayer, level, deskPos.get());
+            if (desk.tryOpenUi(serverPlayer, level, deskPos.get())) {
+                villager.playSound(SoundEvents.VILLAGER_YES, 0.8f, 1.0f + (villager.getRandom().nextFloat() - 0.5f) * 0.2f);
+            } else {
+                villager.playSound(SoundEvents.VILLAGER_NO, 0.8f, 1.0f + (villager.getRandom().nextFloat() - 0.5f) * 0.2f);
+            }
         }
     }
 }

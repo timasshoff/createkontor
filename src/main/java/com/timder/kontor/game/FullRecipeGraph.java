@@ -26,7 +26,7 @@ public class FullRecipeGraph implements RecipeGraph {
 
     /**
      * A map that stores all recipes.
-     * Maps a ressource location (id) to all recipes that output this item.
+     * Maps a resource location (id) to all recipes that output this item.
      */
     private final Map<String, List<RecipeNode>> graph = new HashMap<>();
 

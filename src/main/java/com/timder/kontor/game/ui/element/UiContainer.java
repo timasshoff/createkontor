@@ -11,8 +11,12 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextField;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.ui.utils.UIElementProvider;
+import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
+import com.simibubi.create.AllSoundEvents;
 import com.timder.kontor.core.company.Company;
+import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.game.ui.UiAnimations;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.ObservableList;
 import com.timder.kontor.util.ObservableValue;
@@ -52,11 +56,26 @@ public final class UiContainer {
                 .build()
                 .getSyncValue());
 
+        Money[] lastBalance = {null};
         Label balance = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER)
                 .textStyle(style -> style.textAlignVertical(Vertical.CENTER));
-        balance.addSyncValue(DataBindingBuilder.componentS2C(
-                        () -> ComponentFormatting.moneyColored(company.account().getBalance()))
-                .onRemoteSyncReceived(balance::setText)
+        balance.addSyncValue(DataBindingBuilder.longValS2C(() -> company.account().getBalance().cents())
+                .onRemoteSyncReceived(cents -> {
+                    Money target = Money.ofCents(cents);
+                    Money from = lastBalance[0];
+                    lastBalance[0] = target;
+                    if (from == null || from.equals(target) || balance.getModularUI() == null) {
+                        balance.setText(ComponentFormatting.moneyColored(target));
+                    } else {
+                        UiAnimations.rollValue(balance, from, target, ComponentFormatting::moneyColored, () -> {
+                            if (target.isPositive()) {
+                                UISoundUtils.playSound(AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent(), 1.0f, 1.0f);
+                            } else {
+                                UISoundUtils.playSound(AllSoundEvents.DENY.getMainEvent(), 0.63f, 1.0f);
+                            }
+                        });
+                    }
+                })
                 .build()
                 .getSyncValue());
 

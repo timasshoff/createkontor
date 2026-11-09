@@ -26,9 +26,9 @@ public record ToastPayload(ToastKind kind, Component message) implements CustomP
             ToastPayload::new);
 
     public enum ToastKind {
-        ERROR("error", ChatFormatting.DARK_RED, 8000L),
+        ERROR("error", ChatFormatting.DARK_RED, 7000L),
         INFO("info", ChatFormatting.AQUA, 5000L),
-        SUCCESS("success", ChatFormatting.GREEN, 5000L);
+        SUCCESS("success", ChatFormatting.GREEN, 3000L);
 
         public static final StreamCodec<ByteBuf, ToastKind> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(index -> values()[index], ToastKind::ordinal);
 
