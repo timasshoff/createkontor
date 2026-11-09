@@ -166,7 +166,7 @@ public final class CompanyRules {
         earlier.sort(Comparator.comparingLong(CompanyHistoryEntry::day).reversed());
 
         for (CompanyHistoryEntry other : earlier) {
-            if (other.result().isPositive()) {
+            if (!other.result().isNegative()) {
                 break;
             }
             daysWithoutProfit++;
