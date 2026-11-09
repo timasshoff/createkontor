@@ -7,6 +7,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Slider;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextField;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
+import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
+import com.simibubi.create.AllSoundEvents;
 import dev.vfyjxf.taffy.style.AlignContent;
 import dev.vfyjxf.taffy.style.AlignItems;
 import dev.vfyjxf.taffy.style.FlexDirection;
@@ -21,6 +23,10 @@ public final class UiSliders {
     private static final long MIN_TYPING_COMMIT_DELAY_MILLIS = 1000;
     private static final float CENTER_TICK_WIDTH = 1;
     private static final int CENTER_TICK_COLOR = 0xFFFFFFFF;
+
+    private static final int TICKS_PER_RANGE = 20;
+    private static final float TICK_SPAN_SEMITONES = 8f;
+    private static final float TICK_VOLUME = 0.2f;
 
     private enum Layout {
         STACKED,
@@ -182,6 +188,7 @@ public final class UiSliders {
         long[] lastChange = {0L};
         long[] delay = {commitDelayMillis};
         boolean[] pending = {false};
+        int[] lastTick = {Math.round((snap(initial, min, max, step) - min) / (max - min) * TICKS_PER_RANGE)};
 
         slider.setOnValueChanged(value -> {
             float snapped = snap(value, min, max, step);
@@ -193,6 +200,13 @@ public final class UiSliders {
             lastChange[0] = System.currentTimeMillis();
             delay[0] = commitDelayMillis;
             pending[0] = true;
+
+            int tick = Math.round((snapped - min) / (max - min) * TICKS_PER_RANGE);
+            if (tick != lastTick[0]) {
+                lastTick[0] = tick;
+                float pitch = (float) Math.pow(2.0, tick * TICK_SPAN_SEMITONES / TICKS_PER_RANGE / 12.0);
+                UISoundUtils.playSound(AllSoundEvents.SCROLL_VALUE.getMainEvent(), pitch, TICK_VOLUME);
+            }
         });
 
         field.setTextResponder(text -> {

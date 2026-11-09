@@ -20,11 +20,14 @@ import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,6 +35,7 @@ import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.UUID;
 
 public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
@@ -42,6 +46,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
     private static final long NO_EMPLOYEE = 0L;
 
+    private static final String TAG_DRESSED_VILLAGER = "DressedVillager";
     private static final String TAG_EMPLOYEE = "EmployeeNumber";
     private static final String TAG_SEATED = "Seated";
     private static final String TAG_STATUS = "Status";
@@ -65,6 +70,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private Status status = Status.NO_COMPANY;
     private long salaryCents = 0;
     private long bonusCents = 0;
+    private @Nullable UUID dressedVillager = null;
 
     public EmployeeDeskBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -96,6 +102,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             });
         }
         employeeNumber = NO_EMPLOYEE;
+        undressVillager();
         emptyChecks = 0;
     }
 
@@ -138,6 +145,26 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
                 if (hireStatus != Status.EMPLOYED) {
                     showOffer(true, hireStatus, company, day, params);
                     return;
+                }
+                Villager villager = seatedAdultVillager(level);
+                villager.playSound(
+                        SoundEvents.VILLAGER_CELEBRATE, 1.0f, 1.0f + (villager.getRandom().nextFloat() - 0.5f) * 0.2f);
+                level.sendParticles(
+                        ParticleTypes.HAPPY_VILLAGER,
+                        villager.getX(),
+                        villager.getEyeY() + 0.3,
+                        villager.getZ(),
+                        7,
+                        0.3,
+                        0.2,
+                        0.3,
+                        0.0);
+
+                if (villager.getVillagerData().getProfession() == VillagerProfession.NONE) {
+                    villager.setVillagerData(villager.getVillagerData().setProfession(VillagerProfession.LIBRARIAN));
+                    villager.setVillagerXp(1);
+                    dressedVillager = villager.getUUID();
+                    setChanged();
                 }
                 data.setDirty();
             } else {
@@ -198,30 +225,36 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private void forgetEmployee() {
         if (employeeNumber != NO_EMPLOYEE) {
             employeeNumber = NO_EMPLOYEE;
+            undressVillager();
             setChanged();
         }
         emptyChecks = 0;
     }
 
-    private boolean isAdultVillagerSeated(Level level) {
+    private @Nullable Villager seatedAdultVillager(Level level) {
         for (Direction side : Direction.Plane.HORIZONTAL) {
             BlockPos seatPos = worldPosition.relative(side);
             for (SeatEntity seat : level.getEntitiesOfClass(SeatEntity.class, new AABB(seatPos))) {
-                if (hasAdultVillager(seat.getPassengers()) && EmployeeSeats.singleAdjacentDesk(level, seatPos).isPresent()) {
-                    return true;
+                Villager villager = adultVillager(seat.getPassengers());
+                if (villager != null && EmployeeSeats.singleAdjacentDesk(level, seatPos).isPresent()) {
+                    return villager;
                 }
             }
         }
-        return false;
+        return null;
     }
 
-    private static boolean hasAdultVillager(List<Entity> passengers) {
+    private boolean isAdultVillagerSeated(Level level) {
+        return seatedAdultVillager(level) != null;
+    }
+
+    private static @Nullable Villager adultVillager(List<Entity> passengers) {
         for (Entity passenger : passengers) {
             if (passenger instanceof Villager villager && !villager.isBaby()) {
-                return true;
+                return villager;
             }
         }
-        return false;
+        return null;
     }
 
     private void showOffer(boolean seated, Status status, Company company, long day, CompanyParams params) {
@@ -243,6 +276,21 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         this.salaryCents = salaryCents;
         this.bonusCents = bonusCents;
         notifyUpdate();
+    }
+
+    private void undressVillager() {
+        if (dressedVillager == null || !(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        if (serverLevel.getEntity(dressedVillager) instanceof Villager villager
+                && villager.getVillagerXp() <= 1
+                && villager.getVillagerData().getLevel() <= 1) {
+            villager.setVillagerData(villager.getVillagerData().setProfession(VillagerProfession.NONE));
+            villager.setVillagerXp(0);
+        }
+        dressedVillager = null;
+        setChanged();
     }
 
     @Override
@@ -321,6 +369,9 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             tag.putLong(TAG_SALARY, salaryCents);
             tag.putLong(TAG_BONUS, bonusCents);
         }
+        if (!clientPacket && dressedVillager != null) {
+            tag.putUUID(TAG_DRESSED_VILLAGER, dressedVillager);
+        }
     }
 
     @Override
@@ -337,5 +388,6 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             salaryCents = tag.getLong(TAG_SALARY);
             bonusCents = tag.getLong(TAG_BONUS);
         }
+        dressedVillager = tag.hasUUID(TAG_DRESSED_VILLAGER) ? tag.getUUID(TAG_DRESSED_VILLAGER) : null;
     }
 }
