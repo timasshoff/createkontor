@@ -136,7 +136,7 @@ public final class UiLabels {
                 .layout(layout -> layout.marginAll(2));
     }
 
-    static UIElement labelValueRow(Label labelElement, Label valueLabel, boolean wrap) {
+    static UIElement labelValueRow(Label labelElement, Label valueLabel, boolean wrap, float minLabelWidth) {
         UIElement row = new UIElement().layout(layout -> {
             layout.flexDirection(FlexDirection.ROW)
                     .alignItems(AlignItems.FLEX_START)
@@ -153,12 +153,16 @@ public final class UiLabels {
         labelElement.layout(layout -> {
             layout.widthAuto().flexBasis(0).flexGrow(1);
             if (wrap) {
-                layout.minWidth(MIN_LABEL_WIDTH);
+                layout.minWidth(minLabelWidth);
             }
         });
         valueLabel.layout(layout -> layout.alignSelf(AlignItems.FLEX_END));
         row.addChild(labelElement);
         row.addChild(valueLabel);
         return row;
+    }
+
+    static UIElement labelValueRow(Label labelElement, Label valueLabel, boolean wrap) {
+        return labelValueRow(labelElement, valueLabel, wrap, MIN_LABEL_WIDTH);
     }
 }

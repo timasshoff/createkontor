@@ -5,8 +5,10 @@ import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.timder.kontor.client.ui.BasicChartUI;
 import com.timder.kontor.client.ui.KontorToasts;
 import com.timder.kontor.client.ui.NotebookUi;
+import com.timder.kontor.client.ui.SettlementHud;
 import com.timder.kontor.game.network.ChartPayload;
 import com.timder.kontor.game.network.NotebookPayload;
+import com.timder.kontor.game.network.SettlementPayload;
 import com.timder.kontor.game.network.ToastPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -34,5 +36,9 @@ public class ClientPayloadHandler {
                     .setScreen(new ModularUIScreen(
                             NotebookUi.create(payload), Component.translatable("ui.createkontor.notebook.title")));
         });
+    }
+
+    public static void handleSettlement(SettlementPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> SettlementHud.INSTANCE.enqueue(payload));
     }
 }

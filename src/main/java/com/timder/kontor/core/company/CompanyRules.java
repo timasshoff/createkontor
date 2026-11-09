@@ -9,9 +9,7 @@ import com.timder.kontor.core.company.license.LicenseHoldingRules;
 import com.timder.kontor.core.company.logistics.LogisticsStorageRules;
 import com.timder.kontor.core.company.property.PropertyHolding;
 import com.timder.kontor.core.company.property.PropertyRules;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public final class CompanyRules {
 
@@ -88,6 +86,93 @@ public final class CompanyRules {
         account.prune(params.bookingRetentionDays());
 
         return historyEntry;
+    }
+
+    /**
+     * Checks if a history entry is a record day
+     * @param history The entire history
+     * @param entry The entry to check
+     * @return True, if it was a record day
+     */
+    public static boolean isRecordDay(List<CompanyHistoryEntry> history, CompanyHistoryEntry entry) {
+        Objects.requireNonNull(history, "history must not be null.");
+        Objects.requireNonNull(entry, "entry must not be null.");
+        if (!entry.result().isPositive()) {
+            return false;
+        }
+
+        int earlierDays = 0;
+        Money best = null;
+        for (CompanyHistoryEntry other : history) {
+            if (other.day() >= entry.day()) {
+                continue;
+            }
+            earlierDays++;
+            if (best == null || other.result().compareTo(best) > 0) {
+                best = other.result();
+            }
+        }
+        if (earlierDays + 1 < 5) { // Only do the comparison when there are at least 5 earlier days
+            return false;
+        }
+        return best == null || entry.result().compareTo(best) > 0;
+    }
+
+    /**
+     * How many profitable days in a row the company has had
+     * @param history The entire history
+     * @param entry The last settled day
+     * @return The length of the streak
+     */
+    public static int profitStreak(List<CompanyHistoryEntry> history, CompanyHistoryEntry entry) {
+        Objects.requireNonNull(history, "history must not be null.");
+        Objects.requireNonNull(entry, "entry must not be null.");
+        if (!entry.result().isPositive()) {
+            return 0;
+        }
+
+        List<CompanyHistoryEntry> earlier = new ArrayList<>();
+        for (CompanyHistoryEntry other : history) {
+            if (other.day() < entry.day()) {
+                earlier.add(other);
+            }
+        }
+        earlier.sort(Comparator.comparingLong(CompanyHistoryEntry::day).reversed());
+
+        int streak = 1;
+        for (CompanyHistoryEntry other : earlier) {
+            if (!other.result().isPositive()) {
+                break;
+            }
+            streak++;
+        }
+        return streak;
+    }
+
+    public static boolean isComeback(List<CompanyHistoryEntry> history, CompanyHistoryEntry entry) {
+        Objects.requireNonNull(history, "history must not be null.");
+        Objects.requireNonNull(entry, "entry must not be null.");
+        if (!entry.result().isPositive()) {
+            return false;
+        }
+
+        int daysWithoutProfit = 0;
+        List<CompanyHistoryEntry> earlier = new ArrayList<>();
+        for (CompanyHistoryEntry other : history) {
+            if (other.day() < entry.day()) {
+                earlier.add(other);
+            }
+        }
+        earlier.sort(Comparator.comparingLong(CompanyHistoryEntry::day).reversed());
+
+        for (CompanyHistoryEntry other : earlier) {
+            if (!other.result().isNegative()) {
+                break;
+            }
+            daysWithoutProfit++;
+        }
+
+        return daysWithoutProfit >= 3;
     }
 
     private static void bookLicenseFees(Company company, long day, CompanyParams params) {

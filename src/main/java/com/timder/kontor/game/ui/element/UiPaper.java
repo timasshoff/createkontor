@@ -96,6 +96,10 @@ public class UiPaper {
         return UiLabels.labelValueRow(secondary(adapt(label), Horizontal.LEFT), valueLabel, true);
     }
 
+    public static UIElement labelValue(Component label, Label valueLabel, float minLabelWidth) {
+        return UiLabels.labelValueRow(secondary(adapt(label), Horizontal.LEFT), valueLabel, true, minLabelWidth);
+    }
+
     public static UIElement labelValueNoWrap(Component label, Component value) {
         return UiLabels.labelValueRow(
                 secondary(adapt(label), Horizontal.LEFT), primary(adapt(value), Horizontal.RIGHT), false);

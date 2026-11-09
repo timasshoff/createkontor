@@ -177,6 +177,14 @@ public class KontorLanguage {
 
         REGISTRATE.addRawLang("ui.createkontor.grid.filter.show_all", "Show all");
 
+        REGISTRATE.addRawLang("hud.createkontor.settlement.title", "Settlement of Trading Day %s");
+        REGISTRATE.addRawLang("hud.createkontor.settlement.revenue", "Revenue");
+        REGISTRATE.addRawLang("hud.createkontor.settlement.costs", "Costs");
+        REGISTRATE.addRawLang("hud.createkontor.settlement.result", "Result");
+        REGISTRATE.addRawLang("hud.createkontor.settlement.best_day", "★ Best day so far!");
+        REGISTRATE.addRawLang("hud.createkontor.settlement.profit_streak", "%s days without loss!");
+        REGISTRATE.addRawLang("hud.createkontor.settlement.comeback", "Loss streak broken!");
+
         REGISTRATE.addRawLang(
                 "ui.createkontor.chart.no_data.detailed",
                 "There is no data for the chart \"%s\" yet. You can try again later.");
