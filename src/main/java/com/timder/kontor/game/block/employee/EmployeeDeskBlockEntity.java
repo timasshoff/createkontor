@@ -14,6 +14,7 @@ import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.EmployeeContracts;
+import com.timder.kontor.game.advancements.Milestones;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.util.ComponentFormatting;
 import net.minecraft.core.BlockPos;
@@ -182,6 +183,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             return Status.NOT_AFFORDABLE;
         }
         Employee employee = EmployeeRules.hire(company, desk.roleSpec(), day, params);
+        Milestones.awardToMembers(getLevel().getServer(), company, "first_employee");
         employeeNumber = employee.number();
         emptyChecks = 0;
         setChanged();

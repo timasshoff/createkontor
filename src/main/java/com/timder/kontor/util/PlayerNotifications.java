@@ -3,6 +3,7 @@ package com.timder.kontor.util;
 import com.timder.kontor.core.company.*;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
+import com.timder.kontor.game.advancements.Milestones;
 import com.timder.kontor.game.network.SettlementPayload;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,21 +26,22 @@ public final class PlayerNotifications {
             }
 
             Component message = switch (event) {
-                case UpgradeEvent.Completed completed ->
-                    Component.translatable(
+                case UpgradeEvent.Completed completed:
+                    Milestones.awardToMembers(server, company, "legal_form_upgrade");
+                    yield Component.translatable(
                             "message.createkontor.upgrade.completed",
                             ComponentFormatting.highlightStandard(company.name()),
                             legalFormName(params, completed.newLevel()));
-                case UpgradeEvent.Resting resting ->
-                    Component.translatable(
+                case UpgradeEvent.Resting resting:
+                    yield Component.translatable(
                             "message.createkontor.upgrade.resting",
                             ComponentFormatting.highlightStandard(company.name()),
                             legalFormName(params, resting.targetLevel()),
                             ComponentFormatting.highlightStandard(String.valueOf(resting.restingDays())),
                             ComponentFormatting.highlightStandard(minimumNetWorth(params, resting.targetLevel())
                                     .toString()));
-                case UpgradeEvent.Rejected rejected ->
-                    Component.translatable(
+                case UpgradeEvent.Rejected rejected:
+                    yield Component.translatable(
                             "message.createkontor.upgrade.rejected",
                             ComponentFormatting.highlightError(company.name()),
                             legalFormName(params, rejected.targetLevel()),
@@ -75,6 +77,17 @@ public final class PlayerNotifications {
                     boolean recordDay = CompanyRules.isRecordDay(company.history(), entry.getValue());
                     int profitStreak = CompanyRules.profitStreak(company.history(), entry.getValue());
                     boolean comeback = CompanyRules.isComeback(company.history(), entry.getValue());
+
+                    if (profitStreak > 0) {
+                        Milestones.awardToMembers(server, company, "first_profit");
+                    }
+                    if (profitStreak == 360) {
+                        Milestones.awardToMembers(server, company, "max_profit_streak");
+                    }
+                    if (recordDay) {
+                        Milestones.awardToMembers(server, company, "record_day");
+                    }
+
                     PacketDistributor.sendToPlayer(
                             player,
                             SettlementPayload.of(company.name(), entry.getValue(), recordDay, profitStreak, comeback));

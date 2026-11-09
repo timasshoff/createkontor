@@ -67,13 +67,8 @@ public final class UiContainer {
                     if (from == null || from.equals(target) || balance.getModularUI() == null) {
                         balance.setText(ComponentFormatting.moneyColored(target));
                     } else {
-                        UiAnimations.rollValue(balance, from, target, ComponentFormatting::moneyColored, () -> {
-                            if (target.isPositive()) {
-                                UISoundUtils.playSound(AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent(), 1.0f, 1.0f);
-                            } else {
-                                UISoundUtils.playSound(AllSoundEvents.DENY.getMainEvent(), 0.63f, 1.0f);
-                            }
-                        });
+                        UiAnimations.rollValue(balance, from, target, ComponentFormatting::moneyColored, () ->
+                                UISoundUtils.playSound(AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent(), 1.0f, 1.0f));
                     }
                 })
                 .build()

@@ -1,0 +1,29 @@
+{
+  "parent": "createkontor:first_order_completed",
+  "criteria": {
+    "first_profit": {
+      "conditions": {
+        "milestone": "first_profit"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.first_profit.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:paper"
+    },
+    "title": {
+      "translate": "advancements.createkontor.first_profit.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_profit"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

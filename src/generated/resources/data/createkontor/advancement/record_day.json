@@ -1,0 +1,30 @@
+{
+  "parent": "createkontor:first_profit",
+  "criteria": {
+    "record_day": {
+      "conditions": {
+        "milestone": "record_day"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.record_day.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:paper"
+    },
+    "title": {
+      "translate": "advancements.createkontor.record_day.title"
+    }
+  },
+  "requirements": [
+    [
+      "record_day"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

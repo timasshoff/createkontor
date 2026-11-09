@@ -1,0 +1,33 @@
+{
+  "criteria": {
+    "has_kontor_desk": {
+      "conditions": {
+        "items": [
+          {
+            "items": "createkontor:kontor_desk"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+    "description": {
+      "translate": "advancements.createkontor.root.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "createkontor:kontor_desk"
+    },
+    "title": {
+      "translate": "advancements.createkontor.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_kontor_desk"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

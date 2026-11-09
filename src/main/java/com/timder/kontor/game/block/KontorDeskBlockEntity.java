@@ -17,6 +17,7 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.advancements.Milestones;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.network.S2CActionResult;
@@ -108,6 +109,7 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanyBlockSupport.message(
                 player, CompanyBlockSupport.MESSAGE_BOUND, ComponentFormatting.highlightStandard(company.name()));
         player.closeContainer();
+        Milestones.award(player, "found_company");
         return S2CActionResult.success(Component.translatable(
                 "ui.createkontor.kontor_desk.founded", ComponentFormatting.highlightStandard(company.name())));
     }

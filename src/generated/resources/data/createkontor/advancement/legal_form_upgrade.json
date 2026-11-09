@@ -1,0 +1,30 @@
+{
+  "parent": "createkontor:first_employee",
+  "criteria": {
+    "legal_form_upgrade": {
+      "conditions": {
+        "milestone": "legal_form_upgrade"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.legal_form_upgrade.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:writable_book"
+    },
+    "title": {
+      "translate": "advancements.createkontor.legal_form_upgrade.title"
+    }
+  },
+  "requirements": [
+    [
+      "legal_form_upgrade"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
