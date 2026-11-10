@@ -71,23 +71,24 @@ public final class PlayerNotifications {
             List<UUID> members = new ArrayList<>();
             members.add(company.owner());
             members.addAll(company.managers());
+
+            boolean recordDay = CompanyRules.isRecordDay(company.history(), entry.getValue());
+            int profitStreak = CompanyRules.profitStreak(company.history(), entry.getValue());
+            boolean comeback = CompanyRules.isComeback(company.history(), entry.getValue());
+
+            if (profitStreak > 0) {
+                Milestones.awardToMembers(server, company, "first_profit");
+            }
+            if (profitStreak >= 360) {
+                Milestones.awardToMembers(server, company, "max_profit_streak");
+            }
+            if (recordDay) {
+                Milestones.awardToMembers(server, company, "record_day");
+            }
+
             for (UUID member : members) {
                 ServerPlayer player = server.getPlayerList().getPlayer(member);
                 if (player != null) {
-                    boolean recordDay = CompanyRules.isRecordDay(company.history(), entry.getValue());
-                    int profitStreak = CompanyRules.profitStreak(company.history(), entry.getValue());
-                    boolean comeback = CompanyRules.isComeback(company.history(), entry.getValue());
-
-                    if (profitStreak > 0) {
-                        Milestones.awardToMembers(server, company, "first_profit");
-                    }
-                    if (profitStreak == 360) {
-                        Milestones.awardToMembers(server, company, "max_profit_streak");
-                    }
-                    if (recordDay) {
-                        Milestones.awardToMembers(server, company, "record_day");
-                    }
-
                     PacketDistributor.sendToPlayer(
                             player,
                             SettlementPayload.of(company.name(), entry.getValue(), recordDay, profitStreak, comeback));

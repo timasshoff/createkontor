@@ -149,6 +149,7 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
                     ComponentFormatting.highlightError("#" + number),
                     ComponentFormatting.error(e.getMessage())));
         }
+        CompanySavedData.get(server).setDirty();
         return S2CActionResult.success(Component.translatable(
                 "message.createkontor.kontor_desk.request_accepted",
                 ComponentFormatting.highlightStandard("#" + order.getNumber()),
