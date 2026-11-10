@@ -31,21 +31,31 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
@@ -110,6 +120,7 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
                 player, CompanyBlockSupport.MESSAGE_BOUND, ComponentFormatting.highlightStandard(company.name()));
         player.closeContainer();
         Milestones.award(player, "found_company");
+        launchFirework(serverLevel);
         return S2CActionResult.success(Component.translatable(
                 "ui.createkontor.kontor_desk.founded", ComponentFormatting.highlightStandard(company.name())));
     }
@@ -374,5 +385,16 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private void launchFirework(ServerLevel level) {
+        BlockPos pos = getBlockPos();
+        int y = Math.max(pos.getY() + 1, level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ()));
+
+        ItemStack stack = new ItemStack(Items.FIREWORK_ROCKET);
+        stack.set(DataComponents.FIREWORKS, new Fireworks(2, List.of(
+                new FireworkExplosion(FireworkExplosion.Shape.LARGE_BALL, IntList.of(0xFFC926, 0xFFFFFF), IntList.of(0xFF6A00), false, true),
+                new FireworkExplosion(FireworkExplosion.Shape.STAR, IntList.of(0x4FC3F7, 0xFFFFFF), IntList.of(), true, false))));
+        level.addFreshEntity(new FireworkRocketEntity(level, pos.getX() + 0.5, y, pos.getZ() + 0.5, stack));
     }
 }
