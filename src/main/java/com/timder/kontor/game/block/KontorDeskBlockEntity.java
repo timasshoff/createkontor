@@ -9,24 +9,30 @@ import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.CompanyRegistry;
 import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.order.Order;
+import com.timder.kontor.core.company.order.OrderRules;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.market.MarketParticipationRules;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
+import com.timder.kontor.game.advancements.Milestones;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.game.ui.KontorDeskBoundUi;
 import com.timder.kontor.game.ui.KontorDeskUnboundUi;
 import com.timder.kontor.util.ComponentFormatting;
+import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.PlayerNotifications;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -34,14 +40,21 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
 
@@ -105,6 +118,8 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         CompanyBlockSupport.message(
                 player, CompanyBlockSupport.MESSAGE_BOUND, ComponentFormatting.highlightStandard(company.name()));
         player.closeContainer();
+        Milestones.award(player, "found_company");
+        launchFirework(serverLevel);
         return S2CActionResult.success(Component.translatable(
                 "ui.createkontor.kontor_desk.founded", ComponentFormatting.highlightStandard(company.name())));
     }
@@ -122,8 +137,9 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
                     ComponentFormatting.errorTranslatable(CompanyBlockSupport.MESSAGE_COMPANY_GONE));
         }
 
+        Order order;
         try {
-            company.acceptRequest(
+            order = company.acceptRequest(
                     number,
                     CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions())),
                     EconomyConfig.toRequestParams());
@@ -133,7 +149,13 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
                     ComponentFormatting.highlightError("#" + number),
                     ComponentFormatting.error(e.getMessage())));
         }
-        return S2CActionResult.empty();
+        CompanySavedData.get(server).setDirty();
+        return S2CActionResult.success(Component.translatable(
+                "message.createkontor.kontor_desk.request_accepted",
+                ComponentFormatting.highlightStandard("#" + order.getNumber()),
+                ComponentFormatting.highlightStandard(order.getQuantity() + "×"),
+                LicenseNames.itemName(order.getProduct()),
+                ComponentFormatting.moneyPositive(OrderRules.fullValue(order))));
     }
 
     public Optional<S2CActionResult> setMarketParticipation(ItemId market, boolean participate) {
@@ -163,7 +185,11 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
         economyData.setDirty();
         companyData.setDirty();
-        return S2CActionResult.empty();
+        return participate
+                ? S2CActionResult.success(Component.translatable(
+                        "message.createkontor.kontor_desk.market_joined", LicenseNames.itemName(market)))
+                : S2CActionResult.info(Component.translatable(
+                        "message.createkontor.kontor_desk.market_paused", LicenseNames.itemName(market)));
     }
 
     public Optional<S2CActionResult> declareBankruptcy(ServerPlayer player, boolean confirmed) {
@@ -359,5 +385,30 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private void launchFirework(ServerLevel level) {
+        BlockPos pos = getBlockPos();
+        int y = Math.max(pos.getY() + 1, level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ()));
+
+        ItemStack stack = new ItemStack(Items.FIREWORK_ROCKET);
+        stack.set(
+                DataComponents.FIREWORKS,
+                new Fireworks(
+                        2,
+                        List.of(
+                                new FireworkExplosion(
+                                        FireworkExplosion.Shape.LARGE_BALL,
+                                        IntList.of(0xFFC926, 0xFFFFFF),
+                                        IntList.of(0xFF6A00),
+                                        false,
+                                        true),
+                                new FireworkExplosion(
+                                        FireworkExplosion.Shape.STAR,
+                                        IntList.of(0x4FC3F7, 0xFFFFFF),
+                                        IntList.of(),
+                                        true,
+                                        false))));
+        level.addFreshEntity(new FireworkRocketEntity(level, pos.getX() + 0.5, y, pos.getZ() + 0.5, stack));
     }
 }

@@ -14,23 +14,27 @@ import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.EmployeeContracts;
+import com.timder.kontor.game.advancements.Milestones;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.util.ComponentFormatting;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
@@ -41,6 +45,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
     private static final long NO_EMPLOYEE = 0L;
 
+    private static final String TAG_DRESSED_VILLAGER = "DressedVillager";
     private static final String TAG_EMPLOYEE = "EmployeeNumber";
     private static final String TAG_SEATED = "Seated";
     private static final String TAG_STATUS = "Status";
@@ -64,6 +69,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private Status status = Status.NO_COMPANY;
     private long salaryCents = 0;
     private long bonusCents = 0;
+    private @Nullable UUID dressedVillager = null;
 
     public EmployeeDeskBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -84,7 +90,8 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
         if (oldId != null && employeeNumber != NO_EMPLOYEE && level instanceof ServerLevel serverLevel) {
             CompanySavedData data = CompanySavedData.get(serverLevel.getServer());
-            long day = EconomySavedData.get(serverLevel.getServer()).getEconomy().currentDay();
+            long day =
+                    EconomySavedData.get(serverLevel.getServer()).getEconomy().currentDay();
             CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
             data.getRegistry().get(oldId).ifPresent(company -> {
                 if (company.employee(employeeNumber).isPresent()) {
@@ -95,6 +102,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             });
         }
         employeeNumber = NO_EMPLOYEE;
+        undressVillager();
         emptyChecks = 0;
     }
 
@@ -110,7 +118,8 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         boolean nowSeated = isAdultVillagerSeated(level);
         CompanyId companyId = getCompanyId();
         CompanySavedData data = CompanySavedData.get(level.getServer());
-        Company company = companyId == null ? null : data.getRegistry().get(companyId).orElse(null);
+        Company company =
+                companyId == null ? null : data.getRegistry().get(companyId).orElse(null);
 
         if (company == null) {
             forgetEmployee();
@@ -137,6 +146,28 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
                 if (hireStatus != Status.EMPLOYED) {
                     showOffer(true, hireStatus, company, day, params);
                     return;
+                }
+                Villager villager = seatedAdultVillager(level);
+                villager.playSound(
+                        SoundEvents.VILLAGER_CELEBRATE,
+                        1.0f,
+                        1.0f + (villager.getRandom().nextFloat() - 0.5f) * 0.2f);
+                level.sendParticles(
+                        ParticleTypes.HAPPY_VILLAGER,
+                        villager.getX(),
+                        villager.getEyeY() + 0.3,
+                        villager.getZ(),
+                        7,
+                        0.3,
+                        0.2,
+                        0.3,
+                        0.0);
+
+                if (villager.getVillagerData().getProfession() == VillagerProfession.NONE) {
+                    villager.setVillagerData(villager.getVillagerData().setProfession(VillagerProfession.LIBRARIAN));
+                    villager.setVillagerXp(1);
+                    dressedVillager = villager.getUUID();
+                    setChanged();
                 }
                 data.setDirty();
             } else {
@@ -182,6 +213,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             return Status.NOT_AFFORDABLE;
         }
         Employee employee = EmployeeRules.hire(company, desk.roleSpec(), day, params);
+        Milestones.awardToMembers(getLevel().getServer(), company, "first_employee");
         employeeNumber = employee.number();
         emptyChecks = 0;
         setChanged();
@@ -196,30 +228,37 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private void forgetEmployee() {
         if (employeeNumber != NO_EMPLOYEE) {
             employeeNumber = NO_EMPLOYEE;
+            undressVillager();
             setChanged();
         }
         emptyChecks = 0;
     }
 
-    private boolean isAdultVillagerSeated(Level level) {
+    private @Nullable Villager seatedAdultVillager(Level level) {
         for (Direction side : Direction.Plane.HORIZONTAL) {
             BlockPos seatPos = worldPosition.relative(side);
             for (SeatEntity seat : level.getEntitiesOfClass(SeatEntity.class, new AABB(seatPos))) {
-                if (hasAdultVillager(seat.getPassengers()) && EmployeeSeats.singleAdjacentDesk(level, seatPos).isPresent()) {
-                    return true;
+                Villager villager = adultVillager(seat.getPassengers());
+                if (villager != null
+                        && EmployeeSeats.singleAdjacentDesk(level, seatPos).isPresent()) {
+                    return villager;
                 }
             }
         }
-        return false;
+        return null;
     }
 
-    private static boolean hasAdultVillager(List<Entity> passengers) {
+    private boolean isAdultVillagerSeated(Level level) {
+        return seatedAdultVillager(level) != null;
+    }
+
+    private static @Nullable Villager adultVillager(List<Entity> passengers) {
         for (Entity passenger : passengers) {
             if (passenger instanceof Villager villager && !villager.isBaby()) {
-                return true;
+                return villager;
             }
         }
-        return false;
+        return null;
     }
 
     private void showOffer(boolean seated, Status status, Company company, long day, CompanyParams params) {
@@ -233,7 +272,10 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     }
 
     private void show(boolean seated, Status status, long salaryCents, long bonusCents) {
-        if (this.seated == seated && this.status == status && this.salaryCents == salaryCents && this.bonusCents == bonusCents) {
+        if (this.seated == seated
+                && this.status == status
+                && this.salaryCents == salaryCents
+                && this.bonusCents == bonusCents) {
             return;
         }
         this.seated = seated;
@@ -243,32 +285,54 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         notifyUpdate();
     }
 
+    private void undressVillager() {
+        if (dressedVillager == null || !(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        if (serverLevel.getEntity(dressedVillager) instanceof Villager villager
+                && villager.getVillagerXp() <= 1
+                && villager.getVillagerData().getLevel() <= 1) {
+            villager.setVillagerData(villager.getVillagerData().setProfession(VillagerProfession.NONE));
+            villager.setVillagerXp(0);
+        }
+        dressedVillager = null;
+        setChanged();
+    }
+
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);
 
         if (getBlockState().getBlock() instanceof AbstractEmployeeDeskBlock desk) {
             CreateLang.builder()
-                    .add(Component.translatable("goggle.createkontor.employee_desk.role",
-                            ComponentFormatting.highlightStandardTranslatable(desk.roleTranslationKey())).withStyle(ComponentFormatting.DEFAULT))
+                    .add(Component.translatable(
+                                    "goggle.createkontor.employee_desk.role",
+                                    ComponentFormatting.highlightStandardTranslatable(desk.roleTranslationKey()))
+                            .withStyle(ComponentFormatting.DEFAULT))
                     .forGoggles(tooltip, 1);
         }
 
         if (!seated) {
             CreateLang.builder()
-                    .add(ComponentFormatting.standardTranslatable( "goggle.createkontor.employee_desk.seat_empty"))
+                    .add(ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.seat_empty"))
                     .forGoggles(tooltip, 1);
         }
 
         switch (status) {
             case EMPLOYED -> {
                 CreateLang.builder()
-                        .add(Component.translatable("goggle.createkontor.employee_desk.employed",
-                                ComponentFormatting.highlightStandard("#" + employeeNumber)).withStyle(ComponentFormatting.DEFAULT))
+                        .add(Component.translatable(
+                                        "goggle.createkontor.employee_desk.employed",
+                                        ComponentFormatting.highlightStandard("#" + employeeNumber))
+                                .withStyle(ComponentFormatting.DEFAULT))
                         .forGoggles(tooltip, 1);
                 CreateLang.builder()
-                        .add(Component.translatable("goggle.createkontor.employee_desk.salary",
-                                ComponentFormatting.highlightStandard(Money.ofCents(salaryCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                        .add(Component.translatable(
+                                        "goggle.createkontor.employee_desk.salary",
+                                        ComponentFormatting.highlightStandard(
+                                                Money.ofCents(salaryCents).toString()))
+                                .withStyle(ComponentFormatting.DEFAULT))
                         .forGoggles(tooltip, 2);
             }
             case VACANT -> {
@@ -280,14 +344,19 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
                 offer(tooltip);
             }
             case NOT_OPERATIONAL -> {
-                line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_operational"));
+                line(
+                        tooltip,
+                        ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_operational"));
                 offer(tooltip);
             }
             case NOT_AFFORDABLE -> {
-                line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_affordable"));
+                line(
+                        tooltip,
+                        ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_affordable"));
                 offer(tooltip);
             }
-            case INACTIVE -> line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.inactive"));
+            case INACTIVE ->
+                line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.inactive"));
             case NO_COMPANY -> {}
         }
 
@@ -300,12 +369,18 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
     private void offer(List<Component> tooltip) {
         CreateLang.builder()
-                .add(Component.translatable("goggle.createkontor.employee_desk.offer_salary",
-                        ComponentFormatting.highlightStandard(Money.ofCents(salaryCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                .add(Component.translatable(
+                                "goggle.createkontor.employee_desk.offer_salary",
+                                ComponentFormatting.highlightStandard(
+                                        Money.ofCents(salaryCents).toString()))
+                        .withStyle(ComponentFormatting.DEFAULT))
                 .forGoggles(tooltip, 2);
         CreateLang.builder()
-                .add(Component.translatable("goggle.createkontor.employee_desk.offer_bonus",
-                        ComponentFormatting.highlightStandard(Money.ofCents(bonusCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                .add(Component.translatable(
+                                "goggle.createkontor.employee_desk.offer_bonus",
+                                ComponentFormatting.highlightStandard(
+                                        Money.ofCents(bonusCents).toString()))
+                        .withStyle(ComponentFormatting.DEFAULT))
                 .forGoggles(tooltip, 2);
     }
 
@@ -318,6 +393,9 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             tag.putString(TAG_STATUS, status.name());
             tag.putLong(TAG_SALARY, salaryCents);
             tag.putLong(TAG_BONUS, bonusCents);
+        }
+        if (!clientPacket && dressedVillager != null) {
+            tag.putUUID(TAG_DRESSED_VILLAGER, dressedVillager);
         }
     }
 
@@ -335,5 +413,6 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             salaryCents = tag.getLong(TAG_SALARY);
             bonusCents = tag.getLong(TAG_BONUS);
         }
+        dressedVillager = tag.hasUUID(TAG_DRESSED_VILLAGER) ? tag.getUUID(TAG_DRESSED_VILLAGER) : null;
     }
 }

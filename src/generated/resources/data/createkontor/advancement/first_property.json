@@ -1,0 +1,29 @@
+{
+  "parent": "createkontor:first_employee",
+  "criteria": {
+    "first_property": {
+      "conditions": {
+        "milestone": "first_property"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.first_property.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:map"
+    },
+    "title": {
+      "translate": "advancements.createkontor.first_property.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_property"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

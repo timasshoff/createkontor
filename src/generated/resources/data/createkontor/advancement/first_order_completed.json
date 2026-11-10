@@ -1,0 +1,30 @@
+{
+  "parent": "createkontor:first_employee",
+  "criteria": {
+    "first_order_completed": {
+      "conditions": {
+        "milestone": "first_order_completed"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.first_order_completed.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "createkontor:shipping_exit"
+    },
+    "title": {
+      "translate": "advancements.createkontor.first_order_completed.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_order_completed"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,29 @@
+{
+  "parent": "createkontor:found_company",
+  "criteria": {
+    "first_employee": {
+      "conditions": {
+        "milestone": "first_employee"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.first_employee.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "createkontor:lawyer_desk"
+    },
+    "title": {
+      "translate": "advancements.createkontor.first_employee.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_employee"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

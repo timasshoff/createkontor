@@ -1,0 +1,30 @@
+{
+  "parent": "createkontor:root",
+  "criteria": {
+    "found_company": {
+      "conditions": {
+        "milestone": "found_company"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.found_company.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "createkontor:kontor_desk"
+    },
+    "title": {
+      "translate": "advancements.createkontor.found_company.title"
+    }
+  },
+  "requirements": [
+    [
+      "found_company"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -7,6 +7,7 @@ import com.timder.kontor.core.company.property.BiomeId;
 import com.timder.kontor.core.company.property.ChunkKey;
 import com.timder.kontor.core.company.property.PropertyRules;
 import com.timder.kontor.data.KontorData;
+import com.timder.kontor.game.advancements.Milestones;
 import com.timder.kontor.game.block.employee.EmployeeActions;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
 import com.timder.kontor.game.network.S2CActionResult;
@@ -42,6 +43,7 @@ public class PropertyManagerActions extends EmployeeActions {
         }
         comapnyData.setDirty();
         PropertyProtection.onAcquired(key, company);
+        Milestones.awardToMembers(serverLevel.getServer(), company, "first_property");
         return S2CActionResult.success(Component.translatable(
                 "message.createkontor.property_manager."
                         + result.status().name().toLowerCase(),

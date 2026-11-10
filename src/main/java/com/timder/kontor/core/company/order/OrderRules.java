@@ -7,7 +7,6 @@ import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.license.LicenseDef;
 import com.timder.kontor.core.company.license.LicenseHoldingRules;
 import com.timder.kontor.core.company.license.LicenseRules;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -45,7 +44,8 @@ public final class OrderRules {
         Objects.requireNonNull(company, "company must not be null.");
         Objects.requireNonNull(order, "order must not be null.");
         if (!order.isFullyDelivered()) throw new IllegalStateException("Order is not fully delivered.");
-        if (order.getPhase() != OrderPhase.GRACE_PERIOD || order.remainingGracePeriodTicks() <= 0) throw new IllegalStateException("Order is not within its grace period.");
+        if (order.getPhase() != OrderPhase.GRACE_PERIOD || order.remainingGracePeriodTicks() <= 0)
+            throw new IllegalStateException("Order is not within its grace period.");
 
         Money revenue = fullValue(order).scaled(0.5); // TODO make this configurable
         bookIfPositive(company, day, BookingKind.ORDER_REVENUE, revenue, order);
@@ -66,14 +66,17 @@ public final class OrderRules {
         Objects.requireNonNull(order, "order must not be null.");
 
         int deliveredQuantity = order.getDeliveredQuantity();
-        Money revenue = Money.fromDollar(order.getUnitPrice()).multipliedBy(deliveredQuantity).scaled(0.5);
+        Money revenue = Money.fromDollar(order.getUnitPrice())
+                .multipliedBy(deliveredQuantity)
+                .scaled(0.5);
         bookIfPositive(company, day, BookingKind.PARTIAL_PAYMENT, revenue, order);
         return new OrderSettlementResult(OrderSettlementOutcome.FAILED, deliveredQuantity, revenue);
     }
 
     private static void bookLicenseShare(Company company, long day, Order order, Money revenue, CompanyParams params) {
         List<LicenseDef> active = LicenseHoldingRules.activeLicenses(company, params.licenses());
-        LicenseDef license = LicenseRules.cheapestApplicable(active, order.getProduct()).orElse(null);
+        LicenseDef license =
+                LicenseRules.cheapestApplicable(active, order.getProduct()).orElse(null);
         if (license == null) {
             return;
         }
@@ -83,7 +86,7 @@ public final class OrderRules {
         }
     }
 
-    private static Money fullValue(Order order) {
+    public static Money fullValue(Order order) {
         return Money.fromDollar(order.getUnitPrice()).multipliedBy(order.getQuantity());
     }
 

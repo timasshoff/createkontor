@@ -15,5 +15,7 @@ public final class KontorRegistries {
         KontorItems.touch();
         KontorCreativeTabs.CREATIVE_TABS.register(modEventBus);
         KontorPackagePortTargets.register(modEventBus);
+        KontorTriggers.touch();
+        KontorAdvancements.touch();
     }
 }

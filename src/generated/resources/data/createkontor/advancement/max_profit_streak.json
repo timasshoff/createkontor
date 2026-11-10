@@ -1,0 +1,30 @@
+{
+  "parent": "createkontor:first_profit",
+  "criteria": {
+    "max_profit_streak": {
+      "conditions": {
+        "milestone": "max_profit_streak"
+      },
+      "trigger": "createkontor:milestone"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.createkontor.max_profit_streak.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:paper"
+    },
+    "title": {
+      "translate": "advancements.createkontor.max_profit_streak.title"
+    }
+  },
+  "requirements": [
+    [
+      "max_profit_streak"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
