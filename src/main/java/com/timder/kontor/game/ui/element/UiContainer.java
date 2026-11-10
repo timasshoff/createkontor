@@ -59,7 +59,8 @@ public final class UiContainer {
         Money[] lastBalance = {null};
         Label balance = (Label) UiLabels.primary(Component.empty(), Horizontal.CENTER)
                 .textStyle(style -> style.textAlignVertical(Vertical.CENTER));
-        balance.addSyncValue(DataBindingBuilder.longValS2C(() -> company.account().getBalance().cents())
+        balance.addSyncValue(DataBindingBuilder.longValS2C(
+                        () -> company.account().getBalance().cents())
                 .onRemoteSyncReceived(cents -> {
                     Money target = Money.ofCents(cents);
                     Money from = lastBalance[0];
@@ -67,8 +68,13 @@ public final class UiContainer {
                     if (from == null || from.equals(target) || balance.getModularUI() == null) {
                         balance.setText(ComponentFormatting.moneyColored(target));
                     } else {
-                        UiAnimations.rollValue(balance, from, target, ComponentFormatting::moneyColored, () ->
-                                UISoundUtils.playSound(AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent(), 1.0f, 1.0f));
+                        UiAnimations.rollValue(
+                                balance,
+                                from,
+                                target,
+                                ComponentFormatting::moneyColored,
+                                () -> UISoundUtils.playSound(
+                                        AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent(), 1.0f, 1.0f));
                     }
                 })
                 .build()

@@ -17,6 +17,9 @@ import com.timder.kontor.game.EmployeeContracts;
 import com.timder.kontor.game.advancements.Milestones;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.util.ComponentFormatting;
+import java.util.List;
+import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -32,10 +35,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.UUID;
 
 public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
@@ -91,7 +90,8 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     protected void onCompanyChanged(@Nullable CompanyId oldId, @Nullable CompanyId newId) {
         if (oldId != null && employeeNumber != NO_EMPLOYEE && level instanceof ServerLevel serverLevel) {
             CompanySavedData data = CompanySavedData.get(serverLevel.getServer());
-            long day = EconomySavedData.get(serverLevel.getServer()).getEconomy().currentDay();
+            long day =
+                    EconomySavedData.get(serverLevel.getServer()).getEconomy().currentDay();
             CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
             data.getRegistry().get(oldId).ifPresent(company -> {
                 if (company.employee(employeeNumber).isPresent()) {
@@ -118,7 +118,8 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         boolean nowSeated = isAdultVillagerSeated(level);
         CompanyId companyId = getCompanyId();
         CompanySavedData data = CompanySavedData.get(level.getServer());
-        Company company = companyId == null ? null : data.getRegistry().get(companyId).orElse(null);
+        Company company =
+                companyId == null ? null : data.getRegistry().get(companyId).orElse(null);
 
         if (company == null) {
             forgetEmployee();
@@ -148,7 +149,9 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
                 }
                 Villager villager = seatedAdultVillager(level);
                 villager.playSound(
-                        SoundEvents.VILLAGER_CELEBRATE, 1.0f, 1.0f + (villager.getRandom().nextFloat() - 0.5f) * 0.2f);
+                        SoundEvents.VILLAGER_CELEBRATE,
+                        1.0f,
+                        1.0f + (villager.getRandom().nextFloat() - 0.5f) * 0.2f);
                 level.sendParticles(
                         ParticleTypes.HAPPY_VILLAGER,
                         villager.getX(),
@@ -236,7 +239,8 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             BlockPos seatPos = worldPosition.relative(side);
             for (SeatEntity seat : level.getEntitiesOfClass(SeatEntity.class, new AABB(seatPos))) {
                 Villager villager = adultVillager(seat.getPassengers());
-                if (villager != null && EmployeeSeats.singleAdjacentDesk(level, seatPos).isPresent()) {
+                if (villager != null
+                        && EmployeeSeats.singleAdjacentDesk(level, seatPos).isPresent()) {
                     return villager;
                 }
             }
@@ -268,7 +272,10 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     }
 
     private void show(boolean seated, Status status, long salaryCents, long bonusCents) {
-        if (this.seated == seated && this.status == status && this.salaryCents == salaryCents && this.bonusCents == bonusCents) {
+        if (this.seated == seated
+                && this.status == status
+                && this.salaryCents == salaryCents
+                && this.bonusCents == bonusCents) {
             return;
         }
         this.seated = seated;
@@ -299,26 +306,33 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
         if (getBlockState().getBlock() instanceof AbstractEmployeeDeskBlock desk) {
             CreateLang.builder()
-                    .add(Component.translatable("goggle.createkontor.employee_desk.role",
-                            ComponentFormatting.highlightStandardTranslatable(desk.roleTranslationKey())).withStyle(ComponentFormatting.DEFAULT))
+                    .add(Component.translatable(
+                                    "goggle.createkontor.employee_desk.role",
+                                    ComponentFormatting.highlightStandardTranslatable(desk.roleTranslationKey()))
+                            .withStyle(ComponentFormatting.DEFAULT))
                     .forGoggles(tooltip, 1);
         }
 
         if (!seated) {
             CreateLang.builder()
-                    .add(ComponentFormatting.standardTranslatable( "goggle.createkontor.employee_desk.seat_empty"))
+                    .add(ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.seat_empty"))
                     .forGoggles(tooltip, 1);
         }
 
         switch (status) {
             case EMPLOYED -> {
                 CreateLang.builder()
-                        .add(Component.translatable("goggle.createkontor.employee_desk.employed",
-                                ComponentFormatting.highlightStandard("#" + employeeNumber)).withStyle(ComponentFormatting.DEFAULT))
+                        .add(Component.translatable(
+                                        "goggle.createkontor.employee_desk.employed",
+                                        ComponentFormatting.highlightStandard("#" + employeeNumber))
+                                .withStyle(ComponentFormatting.DEFAULT))
                         .forGoggles(tooltip, 1);
                 CreateLang.builder()
-                        .add(Component.translatable("goggle.createkontor.employee_desk.salary",
-                                ComponentFormatting.highlightStandard(Money.ofCents(salaryCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                        .add(Component.translatable(
+                                        "goggle.createkontor.employee_desk.salary",
+                                        ComponentFormatting.highlightStandard(
+                                                Money.ofCents(salaryCents).toString()))
+                                .withStyle(ComponentFormatting.DEFAULT))
                         .forGoggles(tooltip, 2);
             }
             case VACANT -> {
@@ -330,14 +344,19 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
                 offer(tooltip);
             }
             case NOT_OPERATIONAL -> {
-                line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_operational"));
+                line(
+                        tooltip,
+                        ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_operational"));
                 offer(tooltip);
             }
             case NOT_AFFORDABLE -> {
-                line(tooltip, ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_affordable"));
+                line(
+                        tooltip,
+                        ComponentFormatting.errorTranslatable("goggle.createkontor.employee_desk.not_affordable"));
                 offer(tooltip);
             }
-            case INACTIVE -> line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.inactive"));
+            case INACTIVE ->
+                line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.inactive"));
             case NO_COMPANY -> {}
         }
 
@@ -350,12 +369,18 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
 
     private void offer(List<Component> tooltip) {
         CreateLang.builder()
-                .add(Component.translatable("goggle.createkontor.employee_desk.offer_salary",
-                        ComponentFormatting.highlightStandard(Money.ofCents(salaryCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                .add(Component.translatable(
+                                "goggle.createkontor.employee_desk.offer_salary",
+                                ComponentFormatting.highlightStandard(
+                                        Money.ofCents(salaryCents).toString()))
+                        .withStyle(ComponentFormatting.DEFAULT))
                 .forGoggles(tooltip, 2);
         CreateLang.builder()
-                .add(Component.translatable("goggle.createkontor.employee_desk.offer_bonus",
-                        ComponentFormatting.highlightStandard(Money.ofCents(bonusCents).toString())).withStyle(ComponentFormatting.DEFAULT))
+                .add(Component.translatable(
+                                "goggle.createkontor.employee_desk.offer_bonus",
+                                ComponentFormatting.highlightStandard(
+                                        Money.ofCents(bonusCents).toString()))
+                        .withStyle(ComponentFormatting.DEFAULT))
                 .forGoggles(tooltip, 2);
     }
 

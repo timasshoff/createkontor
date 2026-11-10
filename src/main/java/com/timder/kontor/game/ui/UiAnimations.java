@@ -7,10 +7,8 @@ import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.lowdragmc.lowdraglib2.math.interpolate.Eases;
 import com.simibubi.create.AllSoundEvents;
 import com.timder.kontor.core.company.financial.Money;
-import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-
 import java.util.function.Function;
+import net.minecraft.network.chat.Component;
 
 public class UiAnimations {
 
@@ -19,7 +17,8 @@ public class UiAnimations {
     private static final int COUNT_TICKS = 6;
     private static final float COUNT_TICK_VOLUME = 0.25f;
 
-    public static void rollValue(Label label, Money from, Money target, Function<Money, Component> format, Runnable onReveal) {
+    public static void rollValue(
+            Label label, Money from, Money target, Function<Money, Component> format, Runnable onReveal) {
         long delta = target.cents() - from.cents();
         boolean positive = delta > 0;
         boolean[] revealed = {false};
@@ -35,7 +34,8 @@ public class UiAnimations {
                         revealed[0] = true;
                         onReveal.run();
                     }
-                    double eased = Eases.QUAD_OUT.interpolate(runtime.getInterpolator().getNormalizedTime());
+                    double eased =
+                            Eases.QUAD_OUT.interpolate(runtime.getInterpolator().getNormalizedTime());
                     label.setText(format.apply(Money.ofCents(from.cents() + Math.round(delta * eased))));
 
                     int step = Math.min(COUNT_TICKS, (int) (eased * COUNT_TICKS + 1e-6));

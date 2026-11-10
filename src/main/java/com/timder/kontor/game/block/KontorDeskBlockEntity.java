@@ -26,6 +26,7 @@ import com.timder.kontor.game.ui.KontorDeskUnboundUi;
 import com.timder.kontor.util.ComponentFormatting;
 import com.timder.kontor.util.LicenseNames;
 import com.timder.kontor.util.PlayerNotifications;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -37,8 +38,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -186,10 +185,10 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         economyData.setDirty();
         companyData.setDirty();
         return participate
-                ? S2CActionResult.success(
-                Component.translatable("message.createkontor.kontor_desk.market_joined", LicenseNames.itemName(market)))
-                : S2CActionResult.info(
-                Component.translatable("message.createkontor.kontor_desk.market_paused", LicenseNames.itemName(market)));
+                ? S2CActionResult.success(Component.translatable(
+                        "message.createkontor.kontor_desk.market_joined", LicenseNames.itemName(market)))
+                : S2CActionResult.info(Component.translatable(
+                        "message.createkontor.kontor_desk.market_paused", LicenseNames.itemName(market)));
     }
 
     public Optional<S2CActionResult> declareBankruptcy(ServerPlayer player, boolean confirmed) {
@@ -392,9 +391,23 @@ public class KontorDeskBlockEntity extends AbstractCompanyBlockEntity {
         int y = Math.max(pos.getY() + 1, level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ()));
 
         ItemStack stack = new ItemStack(Items.FIREWORK_ROCKET);
-        stack.set(DataComponents.FIREWORKS, new Fireworks(2, List.of(
-                new FireworkExplosion(FireworkExplosion.Shape.LARGE_BALL, IntList.of(0xFFC926, 0xFFFFFF), IntList.of(0xFF6A00), false, true),
-                new FireworkExplosion(FireworkExplosion.Shape.STAR, IntList.of(0x4FC3F7, 0xFFFFFF), IntList.of(), true, false))));
+        stack.set(
+                DataComponents.FIREWORKS,
+                new Fireworks(
+                        2,
+                        List.of(
+                                new FireworkExplosion(
+                                        FireworkExplosion.Shape.LARGE_BALL,
+                                        IntList.of(0xFFC926, 0xFFFFFF),
+                                        IntList.of(0xFF6A00),
+                                        false,
+                                        true),
+                                new FireworkExplosion(
+                                        FireworkExplosion.Shape.STAR,
+                                        IntList.of(0x4FC3F7, 0xFFFFFF),
+                                        IntList.of(),
+                                        true,
+                                        false))));
         level.addFreshEntity(new FireworkRocketEntity(level, pos.getX() + 0.5, y, pos.getZ() + 0.5, stack));
     }
 }

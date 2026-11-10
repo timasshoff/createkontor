@@ -2,12 +2,11 @@ package com.timder.kontor.game.advancements;
 
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.registry.KontorTriggers;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 
 public class Milestones {
 

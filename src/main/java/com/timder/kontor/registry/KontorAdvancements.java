@@ -1,9 +1,13 @@
 package com.timder.kontor.registry;
 
+import static com.lowdragmc.lowdraglib2.LDLib2.id;
+import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
+
 import com.timder.kontor.CreateKontor;
 import com.timder.kontor.game.advancements.MilestoneTrigger;
 import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.providers.RegistrateAdvancementProvider;
+import java.util.Optional;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
@@ -12,11 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-
-import java.util.Optional;
-
-import static com.lowdragmc.lowdraglib2.LDLib2.id;
-import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
 public class KontorAdvancements {
     public static final String ROOT = "root";
@@ -40,7 +39,8 @@ public class KontorAdvancements {
                         true,
                         false)
                 .addCriterion(
-                        "has_kontor_desk", InventoryChangeTrigger.TriggerInstance.hasItems(KontorBlocks.KONTOR_DESK.get()))
+                        "has_kontor_desk",
+                        InventoryChangeTrigger.TriggerInstance.hasItems(KontorBlocks.KONTOR_DESK.get()))
                 .build(id(ROOT));
         provider.accept(root);
 
@@ -146,7 +146,9 @@ public class KontorAdvancements {
                         false)
                 .addCriterion(
                         key,
-                        KontorTriggers.MILESTONE.get().createCriterion(new MilestoneTrigger.Instance(Optional.empty(), key)))
+                        KontorTriggers.MILESTONE
+                                .get()
+                                .createCriterion(new MilestoneTrigger.Instance(Optional.empty(), key)))
                 .build(id(key));
         provider.accept(holder);
         return holder;

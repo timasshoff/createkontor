@@ -2,6 +2,7 @@ package com.timder.kontor.game.network;
 
 import com.timder.kontor.CreateKontor;
 import io.netty.buffer.ByteBuf;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -14,15 +15,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.Optional;
-
 public record ToastPayload(ToastKind kind, Component message) implements CustomPacketPayload {
 
-    public static final Type<ToastPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, "toast"));
+    public static final Type<ToastPayload> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, "toast"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ToastPayload> STREAM_CODEC = StreamCodec.composite(
-            ToastKind.STREAM_CODEC, ToastPayload::kind,
-            ComponentSerialization.STREAM_CODEC, ToastPayload::message,
+            ToastKind.STREAM_CODEC,
+            ToastPayload::kind,
+            ComponentSerialization.STREAM_CODEC,
+            ToastPayload::message,
             ToastPayload::new);
 
     public enum ToastKind {
@@ -30,7 +32,8 @@ public record ToastPayload(ToastKind kind, Component message) implements CustomP
         INFO("info", ChatFormatting.AQUA, 5000L),
         SUCCESS("success", ChatFormatting.GREEN, 3000L);
 
-        public static final StreamCodec<ByteBuf, ToastKind> STREAM_CODEC = ByteBufCodecs.VAR_INT.map(index -> values()[index], ToastKind::ordinal);
+        public static final StreamCodec<ByteBuf, ToastKind> STREAM_CODEC =
+                ByteBufCodecs.VAR_INT.map(index -> values()[index], ToastKind::ordinal);
 
         private final String key;
         private final ChatFormatting titleColor;
@@ -42,9 +45,17 @@ public record ToastPayload(ToastKind kind, Component message) implements CustomP
             this.displayMillis = displayMillis;
         }
 
-        public String key() { return key; }
-        public ChatFormatting titleColor() { return titleColor; }
-        public long displayMillis() { return displayMillis; }
+        public String key() {
+            return key;
+        }
+
+        public ChatFormatting titleColor() {
+            return titleColor;
+        }
+
+        public long displayMillis() {
+            return displayMillis;
+        }
     }
 
     @Override
@@ -54,7 +65,9 @@ public record ToastPayload(ToastKind kind, Component message) implements CustomP
 
     public static void send(Player player, Optional<S2CActionResult> result) {
         if (result.isPresent() && player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, new ToastPayload(result.get().kind(), result.get().message()));
+            PacketDistributor.sendToPlayer(
+                    serverPlayer,
+                    new ToastPayload(result.get().kind(), result.get().message()));
         }
     }
 

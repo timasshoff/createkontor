@@ -10,6 +10,7 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.core.value.RecipeInput;
 import com.timder.kontor.core.value.RecipeNode;
 import com.timder.kontor.core.value.RecipeOutput;
+import java.util.*;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
@@ -20,8 +21,6 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-import java.util.*;
-
 public class FullRecipeGraph implements RecipeGraph {
 
     /**
@@ -31,7 +30,7 @@ public class FullRecipeGraph implements RecipeGraph {
     private final Map<String, List<RecipeNode>> graph = new HashMap<>();
 
     public static FullRecipeGraph createRecipeGraph(MinecraftServer server) {
-        return new  FullRecipeGraph(server.getRecipeManager().getRecipes());
+        return new FullRecipeGraph(server.getRecipeManager().getRecipes());
     }
 
     public FullRecipeGraph(Collection<RecipeHolder<?>> recipeHolders) {
@@ -50,7 +49,8 @@ public class FullRecipeGraph implements RecipeGraph {
             RecipeNode node = new RecipeNode(outputs, inputsOf(recipe, context), processIdOf(recipe));
 
             for (RecipeOutput output : outputs) {
-                graph.computeIfAbsent(output.item().value(), key -> new ArrayList<>()).add(node);
+                graph.computeIfAbsent(output.item().value(), key -> new ArrayList<>())
+                        .add(node);
             }
 
             CreateKontor.LOGGER.info("Recipe loaded: {}", recipeHolder.id());
@@ -181,5 +181,4 @@ public class FullRecipeGraph implements RecipeGraph {
     private static ItemId itemIdOf(Item item) {
         return new ItemId(BuiltInRegistries.ITEM.getKey(item).toString());
     }
-
 }

@@ -17,7 +17,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-public abstract class AbstractUIBlock<BE extends BlockEntity> extends Block implements IBE<BE>, BlockUIMenuType.BlockUI {
+public abstract class AbstractUIBlock<BE extends BlockEntity> extends Block
+        implements IBE<BE>, BlockUIMenuType.BlockUI {
     protected AbstractUIBlock(Properties properties) {
         super(properties);
     }
@@ -43,7 +44,8 @@ public abstract class AbstractUIBlock<BE extends BlockEntity> extends Block impl
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }

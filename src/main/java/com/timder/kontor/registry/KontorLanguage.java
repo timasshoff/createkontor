@@ -143,7 +143,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.notebook.not_member", "§c⚠ You are not a member of a company.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.request_accepted", "Order %s accepted: %s %s for %s");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.market_joined", "Participating in the %s market.");
-        REGISTRATE.addRawLang("message.createkontor.kontor_desk.market_paused", "Paused participation in the %s market.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.kontor_desk.market_paused", "Paused participation in the %s market.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.upgrade_applied", "Application for %s submitted.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_acquired", "License %s acquired.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_reactivated", "License %s reactivated.");
@@ -641,9 +642,12 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.upgrade_criterion.reputation", "Reputation");
         REGISTRATE.addRawLang("enum.createkontor.upgrade_criterion.liquidity", "No payment difficulties");
 
-        REGISTRATE.addRawLang("enum.createkontor.apply_result.already_pending", "An application is already being processed.");
-        REGISTRATE.addRawLang("enum.createkontor.apply_result.no_next_form", "Your company is already in the highest legal form.");
-        REGISTRATE.addRawLang("enum.createkontor.apply_result.requirements_not_met", "The requirements are not fulfilled.");
+        REGISTRATE.addRawLang(
+                "enum.createkontor.apply_result.already_pending", "An application is already being processed.");
+        REGISTRATE.addRawLang(
+                "enum.createkontor.apply_result.no_next_form", "Your company is already in the highest legal form.");
+        REGISTRATE.addRawLang(
+                "enum.createkontor.apply_result.requirements_not_met", "The requirements are not fulfilled.");
 
         REGISTRATE.addRawLang(
                 "enum.createkontor.license_cancel_result.already_cancelled", "License already cancelled.");

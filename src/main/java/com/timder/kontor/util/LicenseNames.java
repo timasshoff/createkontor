@@ -2,13 +2,12 @@ package com.timder.kontor.util;
 
 import com.timder.kontor.core.company.license.LicenseKey;
 import com.timder.kontor.core.value.ItemId;
+import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-
-import java.util.Optional;
 
 public final class LicenseNames {
 
@@ -17,7 +16,8 @@ public final class LicenseNames {
     public static MutableComponent of(LicenseKey key) {
         return switch (key) {
             case LicenseKey.Defined defined -> Component.translatable(defined.translationKey());
-            case LicenseKey.Generated generated -> Component.translatable(GENERATED_TRANSLATION_KEY, itemName(generated.market()));
+            case LicenseKey.Generated generated ->
+                Component.translatable(GENERATED_TRANSLATION_KEY, itemName(generated.market()));
         };
     }
 
