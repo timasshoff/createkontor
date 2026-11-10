@@ -84,6 +84,45 @@ public final class KontorBlocks {
             .simpleItem()
             .register();
 
+    public static final BlockEntry<PaymentTerminalBlock> PAYMENT_TERMINAL = REGISTRATE
+            .block("payment_terminal", PaymentTerminalBlock::new)
+            .initialProperties(SharedProperties::softMetal)
+            .properties(p -> p.mapColor(MapColor.PODZOL)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.NETHERITE_BLOCK)
+                    .noOcclusion())
+            .tag(BlockTags.MINEABLE_WITH_AXE)
+            .tag(AllTags.AllBlockTags.WRENCH_PICKUP.tag)
+            .blockstate((ctx, prov) -> {
+                ResourceLocation base = prov.modLoc("block/payment_terminal_base");
+                ModelFile idle = prov.models()
+                        .withExistingParent("block/payment_terminal", base)
+                        .texture("0", prov.modLoc("block/payment_terminal"))
+                        .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"));
+                ModelFile active = prov.models()
+                        .withExistingParent("block/payment_terminal_active", base)
+                        .texture("0", prov.modLoc("block/payment_terminal_active"))
+                        .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"));
+                prov.getVariantBuilder(ctx.get())
+                        .forAllStates(state -> ConfiguredModel.builder()
+                                .modelFile(state.getValue(PaymentTerminalBlock.ACTIVE) ? active : idle)
+                                .rotationY((((int) state.getValue(PaymentTerminalBlock.FACING)
+                                                        .toYRot())
+                                                + 180)
+                                        % 360)
+                                .build());
+            })
+            .loot((loot, block) -> loot.add(
+                    block,
+                    LootTable.lootTable()
+                            .withPool(LootPool.lootPool()
+                                    .setRolls(ConstantValue.exactly(1))
+                                    .add(LootItem.lootTableItem(block))
+                                    .when(ExplosionCondition.survivesExplosion()))))
+            .lang("Payment Terminal")
+            .simpleItem()
+            .register();
+
     public static final BlockEntry<KontorDeskBlock> KONTOR_DESK = REGISTRATE
             .block("kontor_desk", KontorDeskBlock::new)
             .properties(KontorBlocks::deskProperties)

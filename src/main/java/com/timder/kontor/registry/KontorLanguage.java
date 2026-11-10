@@ -149,6 +149,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_acquired", "License %s acquired.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_reactivated", "License %s reactivated.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_cancelled", "License %s cancelled.");
+        REGISTRATE.addRawLang("message.createkontor.payment_terminal.paid", "Paid %s to %s.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.payment_terminal.busy",
+                "The terminal is currently busy. Try again in a few seconds.");
+        REGISTRATE.addRawLang("message.createkontor.payment_terminal.price_changed", "The price changed. Try again.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -630,6 +635,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_rent", "Property Rent");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_purchase", "Property Purchase");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_sale", "Property Sale");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.terminal_payment", "Terminal Payment");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.terminal_revenue", "Terminal Revenue");
 
         REGISTRATE.addRawLang("enum.createkontor.booking_category.cost", "Cost");
         REGISTRATE.addRawLang("enum.createkontor.booking_category.revenue", "Revenue");
@@ -666,6 +673,13 @@ public class KontorLanguage {
                 "enum.createkontor.purchase_status.not_operational", "Company is in payment difficulties.");
         REGISTRATE.addRawLang(
                 "enum.createkontor.purchase_status.insufficient_funds", "Company cannot afford this delivery.");
+
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.ok", "Transfered successfully.");
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.invalid_amount", "Invalid amount.");
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.same_company", "A company cannot transfer to itself.");
+        REGISTRATE.addRawLang(
+                "enum.createkontor.transfer_status.not_operational", "Company is in payment difficulties.");
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.cannot_afford", "Company cannot afford this payment.");
 
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.waiting", "Waiting");
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.connected", "Connected");

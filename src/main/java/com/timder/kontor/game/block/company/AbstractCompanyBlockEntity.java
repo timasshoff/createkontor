@@ -89,6 +89,10 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity
         return companyId != null;
     }
 
+    protected String getCompanyName() {
+        return companyName;
+    }
+
     @Nullable
     protected String boundResourceKey() {
         return null;

@@ -1,4 +1,4 @@
-package com.timder.kontor.game.advancements;
+package com.timder.kontor.game.advancement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

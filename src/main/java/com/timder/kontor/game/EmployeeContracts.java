@@ -7,7 +7,6 @@ import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.UpgradeApplication;
 import com.timder.kontor.core.company.legalform.UpgradeRules;
 import com.timder.kontor.game.block.LawyerDeskBlock;
-import com.timder.kontor.util.PlayerNotifications;
 import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.server.MinecraftServer;

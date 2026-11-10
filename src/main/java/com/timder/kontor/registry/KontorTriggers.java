@@ -2,7 +2,7 @@ package com.timder.kontor.registry;
 
 import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
-import com.timder.kontor.game.advancements.MilestoneTrigger;
+import com.timder.kontor.game.advancement.MilestoneTrigger;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.registries.Registries;

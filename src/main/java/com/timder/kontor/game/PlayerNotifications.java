@@ -1,10 +1,11 @@
-package com.timder.kontor.util;
+package com.timder.kontor.game;
 
 import com.timder.kontor.core.company.*;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.UpgradeEvent;
-import com.timder.kontor.game.advancements.Milestones;
+import com.timder.kontor.game.advancement.Milestones;
 import com.timder.kontor.game.network.SettlementPayload;
+import com.timder.kontor.util.ComponentFormatting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
