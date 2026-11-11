@@ -6,12 +6,11 @@ import com.timder.kontor.core.company.property.ChunkKey;
 import com.timder.kontor.core.company.property.DimensionId;
 import com.timder.kontor.core.company.property.PropertyIndex;
 import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.game.block.PaymentTerminalBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
-
-import com.timder.kontor.game.block.PaymentTerminalBlock;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

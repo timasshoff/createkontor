@@ -2,7 +2,6 @@ package com.timder.kontor.client.ponder;
 
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder;
 import com.timder.kontor.game.block.PaymentTerminalBlock;
-import com.timder.kontor.game.block.ShippingExitBlock;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
@@ -34,7 +33,9 @@ public class PaymentTerminalScenes {
                 .placeNearTarget();
         scene.idle(80);
 
-        scene.overlay().showControls(util.vector().centerOf(terminalPos), Pointing.DOWN, 20).rightClick();
+        scene.overlay()
+                .showControls(util.vector().centerOf(terminalPos), Pointing.DOWN, 20)
+                .rightClick();
         scene.idle(30);
         scene.overlay()
                 .showText(70)
@@ -44,16 +45,18 @@ public class PaymentTerminalScenes {
                 .placeNearTarget();
         scene.idle(80);
 
-        Selection selection = util.select()
-                .layersFrom(1)
-                .substract(util.select().fromTo(stoneBelowTerminal, terminalPos));
+        Selection selection =
+                util.select().layersFrom(1).substract(util.select().fromTo(stoneBelowTerminal, terminalPos));
         scene.world().showSection(selection, Direction.DOWN);
         scene.idle(10);
-        scene.overlay().showControls(util.vector().centerOf(terminalPos), Pointing.DOWN, 20).rightClick();
+        scene.overlay()
+                .showControls(util.vector().centerOf(terminalPos), Pointing.DOWN, 20)
+                .rightClick();
         scene.idle(30);
         scene.overlay()
                 .showText(80)
-                .text("When a member of another company right clicks the Payment Terminal, they will see the name, price and a payment button.")
+                .text(
+                        "When a member of another company right clicks the Payment Terminal, they will see the name, price and a payment button.")
                 .attachKeyFrame()
                 .pointAt(util.vector().centerOf(terminalPos))
                 .placeNearTarget();
@@ -61,7 +64,8 @@ public class PaymentTerminalScenes {
 
         scene.overlay()
                 .showText(80)
-                .text("If they decide to pay, the price will be booked from their bank account to yours and the configured redstone signal is given off.")
+                .text(
+                        "If they decide to pay, the price will be booked from their bank account to yours and the configured redstone signal is given off.")
                 .attachKeyFrame()
                 .pointAt(util.vector().centerOf(terminalPos))
                 .placeNearTarget();
@@ -96,25 +100,40 @@ public class PaymentTerminalScenes {
 
         scene.overlay()
                 .showText(80)
-                .text("The signal can be configured in two modes. The length decides how long it lasts or how far the pulses are apart.")
+                .text(
+                        "The signal can be configured in two modes. The length decides how long it lasts or how far the pulses are apart.")
                 .attachKeyFrame();
         scene.idle(90);
 
-        scene.overlay().showText(80).text("Continuous: The signal stays on for the entire configured length.")
-                .attachKeyFrame().pointAt(util.vector().centerOf(continuousTerminal)).placeNearTarget();
-        scene.overlay().showControls(util.vector().centerOf(continuousTerminal), Pointing.DOWN, 20).rightClick();
+        scene.overlay()
+                .showText(80)
+                .text("Continuous: The signal stays on for the entire configured length.")
+                .attachKeyFrame()
+                .pointAt(util.vector().centerOf(continuousTerminal))
+                .placeNearTarget();
+        scene.overlay()
+                .showControls(util.vector().centerOf(continuousTerminal), Pointing.DOWN, 20)
+                .rightClick();
         scene.idle(30);
-        scene.world().modifyBlock(continuousTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, true), false);
+        scene.world()
+                .modifyBlock(continuousTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, true), false);
         scene.world().modifyBlock(continuousLamp, state -> state.setValue(RedstoneLampBlock.LIT, true), false);
         scene.effects().indicateRedstone(continuousTerminal);
         scene.idle(60);
-        scene.world().modifyBlock(continuousTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, false), false);
+        scene.world()
+                .modifyBlock(continuousTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, false), false);
         scene.world().modifyBlock(continuousLamp, state -> state.setValue(RedstoneLampBlock.LIT, false), false);
         scene.idle(20);
 
-        scene.overlay().showText(90).text("Impulse: One pulse at the start and one after the configured length.")
-                .attachKeyFrame().pointAt(util.vector().centerOf(pulseTerminal)).placeNearTarget();
-        scene.overlay().showControls(util.vector().centerOf(pulseTerminal), Pointing.DOWN, 20).rightClick();
+        scene.overlay()
+                .showText(90)
+                .text("Impulse: One pulse at the start and one after the configured length.")
+                .attachKeyFrame()
+                .pointAt(util.vector().centerOf(pulseTerminal))
+                .placeNearTarget();
+        scene.overlay()
+                .showControls(util.vector().centerOf(pulseTerminal), Pointing.DOWN, 20)
+                .rightClick();
         scene.idle(30);
         scene.world().modifyBlock(pulseTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, true), false);
         scene.world().modifyBlock(pulseLamp, state -> state.setValue(RedstoneLampBlock.LIT, true), false);

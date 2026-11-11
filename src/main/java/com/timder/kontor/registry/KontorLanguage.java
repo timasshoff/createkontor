@@ -1033,14 +1033,26 @@ public class KontorLanguage {
                 "wiki.createkontor.page.shipping_exit.p3",
                 "A comparator can be used to check whether an order has been completed or not. If an order has been completed it will output a power level of 15 for 20 ticks.");
 
-        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.p1", "The Payment Terminal lets other companies pay you for something. It is bound to the company of the player who placed it. When a member of another company pays the price you set, the money is booked to your account and the terminal gives off a redstone signal. Payment Terminals can be used on protected properties by players outside of the company. Use it on a property to e.g. take entrance fees.");
-        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.scene1", "A Payment Terminal that grants access after payment by opening an iron door.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p1",
+                "The Payment Terminal lets other companies pay you for something. It is bound to the company of the player who placed it. When a member of another company pays the price you set, the money is booked to your account and the terminal gives off a redstone signal. Payment Terminals can be used on protected properties by players outside of the company. Use it on a property to e.g. take entrance fees.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.scene1",
+                "A Payment Terminal that grants access after payment by opening an iron door.");
         REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.b1", "Configuration");
-        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.p2", "Members, of the company that owns the Payment Terminal, can right-click the terminal to open the configuration UI. The UI provides you with several settings:");
-        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.settings", "§lName:§r The name of the Payment Terminal. It is shown to members of other companies in the payment UI, so use it to describe what they pay for.\n§lPrice:§r The price of using this payment terminal.\n§lSignal Mode:§r Decides how the redstone signal is given off. Continuous means one continuous signal for the configured length. Impulse means one short signal at the start and another one after the configured length.\n§lSignal Length / Impulse Interval:§r The length of the signal in Continuous mode or the time between the signals in Impulse mode.");
-        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.p3", "The configuration UI also has a Test button, that you can use to test your configuration.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p2",
+                "Members, of the company that owns the Payment Terminal, can right-click the terminal to open the configuration UI. The UI provides you with several settings:");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.settings",
+                "§lName:§r The name of the Payment Terminal. It is shown to members of other companies in the payment UI, so use it to describe what they pay for.\n§lPrice:§r The price of using this payment terminal.\n§lSignal Mode:§r Decides how the redstone signal is given off. Continuous means one continuous signal for the configured length. Impulse means one short signal at the start and another one after the configured length.\n§lSignal Length / Impulse Interval:§r The length of the signal in Continuous mode or the time between the signals in Impulse mode.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p3",
+                "The configuration UI also has a Test button, that you can use to test your configuration.");
         REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.b2", "Payment");
-        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.p4", "Only members of other companies can pay at a Payment Terminal. After right-clicking, the payment UI will appear. It shows the name of the Payment Terminal, the owner, the price and a payment button. Pressing the payment button will instantly book the amount from the payer's company's account to the owning company and trigger the redstone signal. You cannot pay, if your company is in payment difficulties. Payment is also blocked, if the Payment Terminal is currently processing another payment.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p4",
+                "Only members of other companies can pay at a Payment Terminal. After right-clicking, the payment UI will appear. It shows the name of the Payment Terminal, the owner, the price and a payment button. Pressing the payment button will instantly book the amount from the payer's company's account to the owning company and trigger the redstone signal. You cannot pay, if your company is in payment difficulties. Payment is also blocked, if the Payment Terminal is currently processing another payment.");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.getting_started.title", "Getting started");
         REGISTRATE.addRawLang(
@@ -1392,16 +1404,32 @@ public class KontorLanguage {
                 "If you need more information about delivering orders, ask a consultant.");
 
         REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_payments.header", "Taking Payments");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_payments.text_1", "When placed by a company member, the Payment Terminal is bound to that company.");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_payments.text_2", "Right-click the Payment Terminal to configure name, price and the redstone signal.");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_payments.text_3", "When a member of another company right clicks the Payment Terminal, they will see the name, price and a payment button.");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_payments.text_4", "If they decide to pay, the price will be booked from their bank account to yours and the configured redstone signal is given off.");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_payments.text_5", "If you need more information about the Payment Gate, ask a consultant.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_1",
+                "When placed by a company member, the Payment Terminal is bound to that company.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_2",
+                "Right-click the Payment Terminal to configure name, price and the redstone signal.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_3",
+                "When a member of another company right clicks the Payment Terminal, they will see the name, price and a payment button.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_4",
+                "If they decide to pay, the price will be booked from their bank account to yours and the configured redstone signal is given off.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_5",
+                "If you need more information about the Payment Gate, ask a consultant.");
 
         REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_signal_modes.header", "Signal Modes");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_signal_modes.text_1", "The signal can be configured in two modes. The length decides how long it lasts or how far the pulses are apart.");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_signal_modes.text_2", "Continuous: The signal stays on for the entire configured length.");
-        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_signal_modes.text_3", "Impulse: One pulse at the start and one after the configured length.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_signal_modes.text_1",
+                "The signal can be configured in two modes. The length decides how long it lasts or how far the pulses are apart.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_signal_modes.text_2",
+                "Continuous: The signal stays on for the entire configured length.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_signal_modes.text_3",
+                "Impulse: One pulse at the start and one after the configured length.");
     }
 
     static void touch() {}
