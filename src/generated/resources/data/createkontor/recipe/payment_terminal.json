@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": {
+      "item": "create:andesite_casing"
+    },
+    "E": {
+      "item": "create:electron_tube"
+    },
+    "T": {
+      "item": "create:transmitter"
+    }
+  },
+  "pattern": [
+    "T",
+    "C",
+    "E"
+  ],
+  "result": {
+    "count": 1,
+    "id": "createkontor:payment_terminal"
+  }
+}

@@ -4,6 +4,7 @@ import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TooltipModifier;
+import com.timder.kontor.game.item.CheckbookItem;
 import com.timder.kontor.game.item.NotebookItem;
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.ItemEntry;
@@ -28,6 +29,21 @@ public final class KontorItems {
                     .unlockedBy("has_kontor_desk", RegistrateRecipeProvider.has(KontorBlocks.KONTOR_DESK.get()))
                     .save(prov))
             .lang("Notebook")
+            .onRegisterAfter(Registries.ITEM, KontorItems::tooltip)
+            .register();
+
+    public static final ItemEntry<CheckbookItem> CHECKBOOK = REGISTRATE
+            .item("checkbook", CheckbookItem::new)
+            .properties(properties -> properties.stacksTo(1))
+            .recipe((ctx, prov) -> ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ctx.get())
+                    .pattern("GGG")
+                    .pattern("PPI")
+                    .define('G', Items.GOLD_NUGGET)
+                    .define('P', Items.PAPER)
+                    .define('I', Items.INK_SAC)
+                    .unlockedBy("has_kontor_desk", RegistrateRecipeProvider.has(KontorBlocks.KONTOR_DESK.get()))
+                    .save(prov))
+            .lang("Checkbook")
             .onRegisterAfter(Registries.ITEM, KontorItems::tooltip)
             .register();
 

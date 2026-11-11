@@ -1,5 +1,6 @@
 package com.timder.kontor;
 
+import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType;
 import com.mojang.logging.LogUtils;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.config.EconomyConfig;
@@ -14,9 +15,11 @@ import com.timder.kontor.game.command.*;
 import com.timder.kontor.game.network.KontorNetwork;
 import com.timder.kontor.game.property.BiomeMeasurer;
 import com.timder.kontor.game.property.PropertyProtection;
+import com.timder.kontor.game.ui.CheckbookUi;
 import com.timder.kontor.game.wiki.KontorWikiPages;
 import com.timder.kontor.registry.KontorRegistries;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -35,6 +38,8 @@ public class CreateKontor {
 
     public static final String MODID = "createkontor";
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final ResourceLocation CHECKBOOK_UI = ResourceLocation.fromNamespaceAndPath(MODID, "checkbook");
 
     public CreateKontor(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -73,7 +78,9 @@ public class CreateKontor {
         modContainer.registerConfig(ModConfig.Type.SERVER, PropertyConfig.SPEC, "createkontor-server-property.toml");
     }
 
-    private void commonSetup(FMLCommonSetupEvent event) {}
+    private void commonSetup(FMLCommonSetupEvent event) {
+        PlayerUIMenuType.register(CHECKBOOK_UI, player -> CheckbookUi::create);
+    }
 
     private void gatherData(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();

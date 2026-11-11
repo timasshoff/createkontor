@@ -124,6 +124,17 @@ public final class PlayerNotifications {
         sendMessageToAllMembers(company, server, message);
     }
 
+    public static void sendTransferReceivedNotification(
+            MinecraftServer server, Company payer, Company receiver, Money amount) {
+        sendMessageToAllMembers(
+                receiver,
+                server,
+                Component.translatable(
+                        "message.createkontor.transfer_received",
+                        ComponentFormatting.highlightStandard(payer.name()),
+                        ComponentFormatting.moneyColored(amount)));
+    }
+
     public static void sendMessageToAllMembers(Company company, MinecraftServer server, Component message) {
         List<UUID> members = new ArrayList<>();
         members.add(company.owner());

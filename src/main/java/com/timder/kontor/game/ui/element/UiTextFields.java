@@ -29,6 +29,15 @@ public class UiTextFields {
             @Nullable Component tooltip,
             String initial,
             Consumer<String> onCommit) {
+        return labeled(UiLabels.primary(label, Horizontal.LEFT), placeholder, tooltip, initial, onCommit);
+    }
+
+    public static LabeledTextField labeled(
+            Label label,
+            @Nullable Component placeholder,
+            @Nullable Component tooltip,
+            String initial,
+            Consumer<String> onCommit) {
         TextField field = new TextField();
         if (placeholder != null) {
             field.textFieldStyle(style -> style.placeholder(placeholder));
@@ -47,12 +56,10 @@ public class UiTextFields {
             }
         });
 
-        Label labelElement = UiLabels.primary(label, Horizontal.LEFT);
-
         LabeledTextField row = new LabeledTextField(field);
         row.layout(
                 layout -> layout.flexDirection(FlexDirection.COLUMN).gapAll(2).widthPercent(100));
-        row.addChildren(labelElement, field);
+        row.addChildren(label, field);
         if (tooltip != null) {
             row.style(style -> style.tooltips(tooltip));
         }

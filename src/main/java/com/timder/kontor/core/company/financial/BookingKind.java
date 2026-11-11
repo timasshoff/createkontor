@@ -34,6 +34,8 @@ public enum BookingKind {
     PROPERTY_RENT(BookingCategory.COST),
     /** Payment at a payment terminal **/
     TERMINAL_PAYMENT(BookingCategory.COST),
+    /** Payment of a check **/
+    CHECK_PAYMENT(BookingCategory.COST),
 
     /** Revenue from full-filled orders. */
     ORDER_REVENUE(BookingCategory.REVENUE),
@@ -43,6 +45,8 @@ public enum BookingKind {
     FEED_IN_REVENUE(BookingCategory.REVENUE),
     /** Revenue from a payment terminal. **/
     TERMINAL_REVENUE(BookingCategory.REVENUE),
+    /** Revenue of a check **/
+    CHECK_REVENUE(BookingCategory.REVENUE),
 
     /** The initial deposit of a new company */
     DEPOSIT(BookingCategory.FINANCING),
