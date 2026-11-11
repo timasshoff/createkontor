@@ -149,11 +149,15 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_acquired", "License %s acquired.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_reactivated", "License %s reactivated.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_cancelled", "License %s cancelled.");
+        REGISTRATE.addRawLang("message.createkontor.payment_terminal.disabled", "This terminal is currently disabled.");
         REGISTRATE.addRawLang("message.createkontor.payment_terminal.paid", "Paid %s to %s.");
         REGISTRATE.addRawLang(
                 "message.createkontor.payment_terminal.busy",
                 "The terminal is currently busy. Try again in a few seconds.");
         REGISTRATE.addRawLang("message.createkontor.payment_terminal.price_changed", "The price changed. Try again.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.payment_terminal.no_company",
+                "§c⚠ Only members of a company can use this terminal.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -610,6 +614,24 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.notebook.requests", "%s Open Requests");
         REGISTRATE.addRawLang("ui.createkontor.notebook.open_orders", "Open Orders (%s):");
 
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.configure", "Payment Terminal");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.activate_free", "Test");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.name", "Terminal Name");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.payment_terminal.name.tooltip",
+                "Displayed to anyone who wants to pay at this terminal.");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.price", "Price in $");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.payment_terminal.price.tooltip", "Set the price to $0.00 to disable the terminal.");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.signal_mode", "Signal Mode");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.length.continuous", "Signal Length");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.length.pulse", "Impulse Interval");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.seconds", "%s s");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.owner", "Belongs to");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.price_label", "Price");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.pay", "Pay");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.price_unset", "Terminal is currently disabled.");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -710,6 +732,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.biome_rarity.uncommon", "§bUncommon");
         REGISTRATE.addRawLang("enum.createkontor.biome_rarity.rare", "§dRare");
         REGISTRATE.addRawLang("enum.createkontor.biome_rarity.very_rare", "§5Very Rare");
+
+        REGISTRATE.addRawLang("enum.createkontor.payment_terminal.signal_mode.continuous", "Continuous");
+        REGISTRATE.addRawLang("enum.createkontor.payment_terminal.signal_mode.pulse", "Impuls");
 
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");

@@ -107,11 +107,12 @@ public final class UiContainer {
             return root.addChildren(tabView);
         }
 
-        hud.layout(layout -> layout.flexShrink(0)
-                .alignSelf(AlignItems.FLEX_END)
-                .marginLeft(4)
+        hud.layout(layout -> layout.positionType(TaffyPosition.ABSOLUTE)
+                .right(0)
+                .bottomPercent(100)
                 .marginBottom(HUD_GAP));
-        return root.addChildren(mainContent, hud);
+        mainContent.addChild(hud);
+        return root.addChildren(mainContent);
     }
 
     public static UIElement small() {

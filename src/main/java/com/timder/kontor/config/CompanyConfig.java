@@ -187,7 +187,7 @@ public class CompanyConfig {
                         "Longest redstone signal an operator can set for a payment terminal, in seconds (real time, 20 ticks each). If it is below the minimum, the minimum is used")
                 .defineInRange("maxSignalSeconds", 300, 1, 3_600);
         PAYMENT_TERMINAL_MAX_NAME_LENGTH = builder.comment("Longest name an operator can give a payment terminal")
-                .defineInRange("maxNameLength", 24, 1, 64);
+                .defineInRange("maxNameLength", 100, 1, 256);
         PAYMENT_TERMINAL_MAX_PRICE_IN_DOLLARS = builder.comment(
                         "Highest price an operator can set for a payment terminal")
                 .defineInRange("maxPriceInDollars", 1_000_000, 1, Integer.MAX_VALUE);

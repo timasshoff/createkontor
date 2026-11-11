@@ -1,10 +1,20 @@
 package com.timder.kontor.game.block;
 
+import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType;
+import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
 import com.simibubi.create.foundation.block.IBE;
-import com.timder.kontor.game.block.company.AbstractCompanyBlock;
+import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.game.block.company.CompanyBlockSupport;
+import com.timder.kontor.game.block.ui.AbstractUIBlock;
+import com.timder.kontor.game.ui.PaymentTerminalUi;
 import com.timder.kontor.registry.KontorBlockEntities;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -21,7 +31,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class PaymentTerminalBlock extends AbstractCompanyBlock implements IBE<PaymentTerminalBlockEntity> {
+public class PaymentTerminalBlock extends AbstractUIBlock<PaymentTerminalBlockEntity>
+        implements IBE<PaymentTerminalBlockEntity> {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
@@ -36,6 +47,13 @@ public class PaymentTerminalBlock extends AbstractCompanyBlock implements IBE<Pa
         super(properties);
         registerDefaultState(
                 stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(ACTIVE, false));
+    }
+
+    @Override
+    public void setPlacedBy(
+            Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        CompanyBlockSupport.bindOnPlacement(level, pos, placer);
     }
 
     @Override
@@ -63,6 +81,31 @@ public class PaymentTerminalBlock extends AbstractCompanyBlock implements IBE<Pa
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return state.getValue(FACING).getAxis() == Direction.Axis.X ? SHAPE_EAST_WEST : SHAPE_NORTH_SOUTH;
+    }
+
+    @Override
+    protected ModularUI createUI(BlockUIMenuType.BlockUIHolder holder, PaymentTerminalBlockEntity blockEntity) {
+        return PaymentTerminalUi.create(holder, blockEntity);
+    }
+
+    @Override
+    protected boolean canOpenUI(ServerPlayer player, ServerLevel level, BlockPos pos) {
+        boolean bound = getBlockEntityOptional(level, pos)
+                .map(PaymentTerminalBlockEntity::isBoundToCompany)
+                .orElse(false);
+        if (!bound) {
+            CompanyBlockSupport.message(player, CompanyBlockSupport.MESSAGE_UNBOUND);
+            return false;
+        }
+
+        boolean isMember = CompanySavedData.get(level.getServer())
+                .getRegistry()
+                .companyOf(player.getUUID())
+                .isPresent();
+        if (!isMember) {
+            CompanyBlockSupport.message(player, "message.createkontor.payment_terminal.no_company");
+        }
+        return isMember;
     }
 
     @Override

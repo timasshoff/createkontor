@@ -1,5 +1,6 @@
 package com.timder.kontor.game.block;
 
+import com.simibubi.create.AllSoundEvents;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
@@ -123,9 +124,10 @@ public class PaymentTerminalBlockEntity extends AbstractCompanyBlockEntity {
         notifyUpdate();
     }
 
-    public Optional<S2CActionResult> activateFree() {
+    public Optional<S2CActionResult> activateFree(ServerPlayer player) {
         if (!startSignal())
             return S2CActionResult.error(Component.translatable("message.createkontor.payment_terminal.busy"));
+        player.closeContainer();
         return S2CActionResult.empty();
     }
 
@@ -142,6 +144,9 @@ public class PaymentTerminalBlockEntity extends AbstractCompanyBlockEntity {
             return S2CActionResult.error(Component.translatable("message.createkontor.payment_terminal.busy"));
         if (priceCents != expectedPriceCents) {
             return S2CActionResult.error(Component.translatable("message.createkontor.payment_terminal.price_changed"));
+        }
+        if (!isPriceSet()) {
+            return S2CActionResult.error(Component.translatable("message.createkontor.payment_terminal.disabled"));
         }
 
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
@@ -168,6 +173,9 @@ public class PaymentTerminalBlockEntity extends AbstractCompanyBlockEntity {
 
         companyData.setDirty();
         startSignal();
+        player.closeContainer();
+        level.playSound(
+                null, getBlockPos(), AllSoundEvents.STOCK_TICKER_TRADE.getMainEvent(), SoundSource.BLOCKS, 0.6f, 1.0f);
         return S2CActionResult.success(Component.translatable(
                 "message.createkontor.payment_terminal.paid",
                 ComponentFormatting.moneyNegative(price),
