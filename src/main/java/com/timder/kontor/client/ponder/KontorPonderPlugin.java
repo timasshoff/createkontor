@@ -32,5 +32,9 @@ public class KontorPonderPlugin implements PonderPlugin {
 
         HELPER.forComponents(KontorBlocks.SHIPPING_EXIT)
                 .addStoryBoard("shipping_exit/delivery", ShippingExitScenes::delivery);
+
+        HELPER.forComponents(KontorBlocks.PAYMENT_TERMINAL)
+                .addStoryBoard("payment_terminal/payments", PaymentTerminalScenes::payments)
+                .addStoryBoard("payment_terminal/signal_modes", PaymentTerminalScenes::signalModes);
     }
 }

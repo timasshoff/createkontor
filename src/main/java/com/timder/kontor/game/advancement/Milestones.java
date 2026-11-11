@@ -1,4 +1,4 @@
-package com.timder.kontor.game.advancements;
+package com.timder.kontor.game.advancement;
 
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.registry.KontorTriggers;

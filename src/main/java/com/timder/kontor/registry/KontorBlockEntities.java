@@ -4,6 +4,7 @@ import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
 import com.timder.kontor.game.block.KontorDeskBlockEntity;
 import com.timder.kontor.game.block.LogisticsManagerDeskBlockEntity;
+import com.timder.kontor.game.block.PaymentTerminalBlockEntity;
 import com.timder.kontor.game.block.ShippingExitBlockEntity;
 import com.timder.kontor.game.block.buyer.BuyerDeskBlockEntity;
 import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
@@ -14,6 +15,11 @@ public final class KontorBlockEntities {
     public static final BlockEntityEntry<ShippingExitBlockEntity> SHIPPING_EXIT = REGISTRATE
             .blockEntity("shipping_exit", ShippingExitBlockEntity::new)
             .validBlocks(KontorBlocks.SHIPPING_EXIT)
+            .register();
+
+    public static final BlockEntityEntry<PaymentTerminalBlockEntity> PAYMENT_TERMINAL = REGISTRATE
+            .blockEntity("payment_terminal", PaymentTerminalBlockEntity::new)
+            .validBlocks(KontorBlocks.PAYMENT_TERMINAL)
             .register();
 
     public static final BlockEntityEntry<KontorDeskBlockEntity> KONTOR_DESK = REGISTRATE

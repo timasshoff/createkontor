@@ -15,7 +15,7 @@ import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
-import com.timder.kontor.game.advancements.Milestones;
+import com.timder.kontor.game.advancement.Milestones;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

@@ -49,6 +49,11 @@ public class CompanyConfig {
 
     public static final ModConfigSpec.DoubleValue STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS;
 
+    public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MIN_SIGNAL_SECONDS;
+    public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MAX_SIGNAL_SECONDS;
+    public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MAX_NAME_LENGTH;
+    public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MAX_PRICE_IN_DOLLARS;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -170,6 +175,22 @@ public class CompanyConfig {
         STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS = builder.comment(
                         "Dollars a company pays per day for each item stored in its logistics network (0.002 = 0.2 cents). The stock is sampled once per trading tick and billed at the end of the day, and when the connection ends")
                 .defineInRange("storageFeePerItemDayInDollars", 0.025, 0.0, 1_000.0);
+
+        builder.pop();
+
+        builder.comment("Payment terminal").push("paymentTerminal");
+
+        PAYMENT_TERMINAL_MIN_SIGNAL_SECONDS = builder.comment(
+                        "Shortest redstone signal an operator can set for a payment terminal, in seconds (real time, 20 ticks each)")
+                .defineInRange("minSignalSeconds", 1, 1, 3_600);
+        PAYMENT_TERMINAL_MAX_SIGNAL_SECONDS = builder.comment(
+                        "Longest redstone signal an operator can set for a payment terminal, in seconds (real time, 20 ticks each). If it is below the minimum, the minimum is used")
+                .defineInRange("maxSignalSeconds", 300, 1, 3_600);
+        PAYMENT_TERMINAL_MAX_NAME_LENGTH = builder.comment("Longest name an operator can give a payment terminal")
+                .defineInRange("maxNameLength", 100, 1, 256);
+        PAYMENT_TERMINAL_MAX_PRICE_IN_DOLLARS = builder.comment(
+                        "Highest price an operator can set for a payment terminal")
+                .defineInRange("maxPriceInDollars", 1_000_000, 1, Integer.MAX_VALUE);
 
         builder.pop();
 

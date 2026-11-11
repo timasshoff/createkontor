@@ -12,7 +12,6 @@ import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.macro.MacroHistoryEntry;
 import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.chunk.KontorChunkLoading;
-import com.timder.kontor.util.PlayerNotifications;
 import java.util.*;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;

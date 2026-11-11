@@ -14,7 +14,7 @@ import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.EmployeeContracts;
-import com.timder.kontor.game.advancements.Milestones;
+import com.timder.kontor.game.advancement.Milestones;
 import com.timder.kontor.game.block.company.AbstractCompanyBlockEntity;
 import com.timder.kontor.util.ComponentFormatting;
 import java.util.List;

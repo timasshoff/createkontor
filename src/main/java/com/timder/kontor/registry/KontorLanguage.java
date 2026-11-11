@@ -149,6 +149,15 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_acquired", "License %s acquired.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_reactivated", "License %s reactivated.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_cancelled", "License %s cancelled.");
+        REGISTRATE.addRawLang("message.createkontor.payment_terminal.disabled", "This terminal is currently disabled.");
+        REGISTRATE.addRawLang("message.createkontor.payment_terminal.paid", "Paid %s to %s.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.payment_terminal.busy",
+                "The terminal is currently busy. Try again in a few seconds.");
+        REGISTRATE.addRawLang("message.createkontor.payment_terminal.price_changed", "The price changed. Try again.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.payment_terminal.no_company",
+                "§c⚠ Only members of a company can use this terminal.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -605,6 +614,24 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.notebook.requests", "%s Open Requests");
         REGISTRATE.addRawLang("ui.createkontor.notebook.open_orders", "Open Orders (%s):");
 
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.configure", "Payment Terminal");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.activate_free", "Test");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.name", "Terminal Name");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.payment_terminal.name.tooltip",
+                "Displayed to anyone who wants to pay at this terminal.");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.price", "Price in $");
+        REGISTRATE.addRawLang(
+                "ui.createkontor.payment_terminal.price.tooltip", "Set the price to $0.00 to disable the terminal.");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.signal_mode", "Signal Mode");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.length.continuous", "Signal Length");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.length.pulse", "Impulse Interval");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.seconds", "%s s");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.owner", "Belongs to");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.price_label", "Price");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.pay", "Pay");
+        REGISTRATE.addRawLang("ui.createkontor.payment_terminal.price_unset", "Terminal is currently disabled.");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -630,6 +657,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_rent", "Property Rent");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_purchase", "Property Purchase");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_sale", "Property Sale");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.terminal_payment", "Terminal Payment");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.terminal_revenue", "Terminal Revenue");
 
         REGISTRATE.addRawLang("enum.createkontor.booking_category.cost", "Cost");
         REGISTRATE.addRawLang("enum.createkontor.booking_category.revenue", "Revenue");
@@ -667,6 +696,13 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "enum.createkontor.purchase_status.insufficient_funds", "Company cannot afford this delivery.");
 
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.ok", "Transfered successfully.");
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.invalid_amount", "Invalid amount.");
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.same_company", "A company cannot transfer to itself.");
+        REGISTRATE.addRawLang(
+                "enum.createkontor.transfer_status.not_operational", "Company is in payment difficulties.");
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.cannot_afford", "Company cannot afford this payment.");
+
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.waiting", "Waiting");
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.connected", "Connected");
         REGISTRATE.addRawLang("enum.createkontor.logistics_manager_desk_status.no_employee", "Not staffed");
@@ -696,6 +732,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.biome_rarity.uncommon", "§bUncommon");
         REGISTRATE.addRawLang("enum.createkontor.biome_rarity.rare", "§dRare");
         REGISTRATE.addRawLang("enum.createkontor.biome_rarity.very_rare", "§5Very Rare");
+
+        REGISTRATE.addRawLang("enum.createkontor.payment_terminal.signal_mode.continuous", "Continuous");
+        REGISTRATE.addRawLang("enum.createkontor.payment_terminal.signal_mode.pulse", "Impuls");
 
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
@@ -993,6 +1032,27 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.shipping_exit.p3",
                 "A comparator can be used to check whether an order has been completed or not. If an order has been completed it will output a power level of 15 for 20 ticks.");
+
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p1",
+                "The Payment Terminal lets other companies pay you for something. It is bound to the company of the player who placed it. When a member of another company pays the price you set, the money is booked to your account and the terminal gives off a redstone signal. Payment Terminals can be used on protected properties by players outside of the company. Use it on a property to e.g. take entrance fees.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.scene1",
+                "A Payment Terminal that grants access after payment by opening an iron door.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.b1", "Configuration");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p2",
+                "Members, of the company that owns the Payment Terminal, can right-click the terminal to open the configuration UI. The UI provides you with several settings:");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.settings",
+                "§lName:§r The name of the Payment Terminal. It is shown to members of other companies in the payment UI, so use it to describe what they pay for.\n§lPrice:§r The price of using this payment terminal.\n§lSignal Mode:§r Decides how the redstone signal is given off. Continuous means one continuous signal for the configured length. Impulse means one short signal at the start and another one after the configured length.\n§lSignal Length / Impulse Interval:§r The length of the signal in Continuous mode or the time between the signals in Impulse mode.");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p3",
+                "The configuration UI also has a Test button, that you can use to test your configuration.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.payment_terminal.b2", "Payment");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.payment_terminal.p4",
+                "Only members of other companies can pay at a Payment Terminal. After right-clicking, the payment UI will appear. It shows the name of the Payment Terminal, the owner, the price and a payment button. Pressing the payment button will instantly book the amount from the payer's company's account to the owning company and trigger the redstone signal. You cannot pay, if your company is in payment difficulties. Payment is also blocked, if the Payment Terminal is currently processing another payment.");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.getting_started.title", "Getting started");
         REGISTRATE.addRawLang(
@@ -1342,6 +1402,34 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "createkontor.ponder.shipping_exit_delivery.text_7",
                 "If you need more information about delivering orders, ask a consultant.");
+
+        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_payments.header", "Taking Payments");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_1",
+                "When placed by a company member, the Payment Terminal is bound to that company.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_2",
+                "Right-click the Payment Terminal to configure name, price and the redstone signal.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_3",
+                "When a member of another company right clicks the Payment Terminal, they will see the name, price and a payment button.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_4",
+                "If they decide to pay, the price will be booked from their bank account to yours and the configured redstone signal is given off.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_payments.text_5",
+                "If you need more information about the Payment Gate, ask a consultant.");
+
+        REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_signal_modes.header", "Signal Modes");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_signal_modes.text_1",
+                "The signal can be configured in two modes. The length decides how long it lasts or how far the pulses are apart.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_signal_modes.text_2",
+                "Continuous: The signal stays on for the entire configured length.");
+        REGISTRATE.addRawLang(
+                "createkontor.ponder.payment_terminal_signal_modes.text_3",
+                "Impulse: One pulse at the start and one after the configured length.");
     }
 
     static void touch() {}

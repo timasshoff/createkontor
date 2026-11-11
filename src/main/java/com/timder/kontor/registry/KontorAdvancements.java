@@ -1,10 +1,9 @@
 package com.timder.kontor.registry;
 
-import static com.lowdragmc.lowdraglib2.LDLib2.id;
 import static com.timder.kontor.registry.KontorRegistries.REGISTRATE;
 
 import com.timder.kontor.CreateKontor;
-import com.timder.kontor.game.advancements.MilestoneTrigger;
+import com.timder.kontor.game.advancement.MilestoneTrigger;
 import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.providers.RegistrateAdvancementProvider;
 import java.util.Optional;

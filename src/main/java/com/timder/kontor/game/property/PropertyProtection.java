@@ -6,6 +6,7 @@ import com.timder.kontor.core.company.property.ChunkKey;
 import com.timder.kontor.core.company.property.DimensionId;
 import com.timder.kontor.core.company.property.PropertyIndex;
 import com.timder.kontor.game.CompanySavedData;
+import com.timder.kontor.game.block.PaymentTerminalBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
@@ -119,6 +121,10 @@ public final class PropertyProtection {
         Player player = event.getEntity();
         Optional<Company> blocking = blockedByClick(level, player, event.getPos(), event.getFace());
         if (blocking.isPresent()) {
+            if (level.getBlockState(event.getPos()).getBlock() instanceof PaymentTerminalBlock) {
+                event.setUseItem(TriState.FALSE);
+                return;
+            }
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.FAIL);
             warn(player, blocking.get());

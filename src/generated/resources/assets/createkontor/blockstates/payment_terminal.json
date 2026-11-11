@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "active=false,facing=east": {
+      "model": "createkontor:block/payment_terminal",
+      "y": 90
+    },
+    "active=false,facing=north": {
+      "model": "createkontor:block/payment_terminal"
+    },
+    "active=false,facing=south": {
+      "model": "createkontor:block/payment_terminal",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "createkontor:block/payment_terminal",
+      "y": 270
+    },
+    "active=true,facing=east": {
+      "model": "createkontor:block/payment_terminal_active",
+      "y": 90
+    },
+    "active=true,facing=north": {
+      "model": "createkontor:block/payment_terminal_active"
+    },
+    "active=true,facing=south": {
+      "model": "createkontor:block/payment_terminal_active",
+      "y": 180
+    },
+    "active=true,facing=west": {
+      "model": "createkontor:block/payment_terminal_active",
+      "y": 270
+    }
+  }
+}

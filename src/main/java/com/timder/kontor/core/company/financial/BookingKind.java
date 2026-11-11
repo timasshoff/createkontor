@@ -32,6 +32,8 @@ public enum BookingKind {
     UPGRADE_FEE(BookingCategory.COST),
     /** Rent of a property **/
     PROPERTY_RENT(BookingCategory.COST),
+    /** Payment at a payment terminal **/
+    TERMINAL_PAYMENT(BookingCategory.COST),
 
     /** Revenue from full-filled orders. */
     ORDER_REVENUE(BookingCategory.REVENUE),
@@ -39,6 +41,8 @@ public enum BookingKind {
     PARTIAL_PAYMENT(BookingCategory.REVENUE),
     /** Feed in revenue */
     FEED_IN_REVENUE(BookingCategory.REVENUE),
+    /** Revenue from a payment terminal. **/
+    TERMINAL_REVENUE(BookingCategory.REVENUE),
 
     /** The initial deposit of a new company */
     DEPOSIT(BookingCategory.FINANCING),

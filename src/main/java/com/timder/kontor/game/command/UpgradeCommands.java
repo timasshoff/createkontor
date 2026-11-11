@@ -11,7 +11,7 @@ import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.KontorTickHandler;
-import com.timder.kontor.util.PlayerNotifications;
+import com.timder.kontor.game.PlayerNotifications;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
