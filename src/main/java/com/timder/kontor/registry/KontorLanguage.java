@@ -696,7 +696,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "enum.createkontor.purchase_status.insufficient_funds", "Company cannot afford this delivery.");
 
-        REGISTRATE.addRawLang("enum.createkontor.transfer_status.ok", "Transfered successfully.");
+        REGISTRATE.addRawLang("enum.createkontor.transfer_status.ok", "Transferred successfully.");
         REGISTRATE.addRawLang("enum.createkontor.transfer_status.invalid_amount", "Invalid amount.");
         REGISTRATE.addRawLang("enum.createkontor.transfer_status.same_company", "A company cannot transfer to itself.");
         REGISTRATE.addRawLang(
@@ -734,7 +734,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.biome_rarity.very_rare", "§5Very Rare");
 
         REGISTRATE.addRawLang("enum.createkontor.payment_terminal.signal_mode.continuous", "Continuous");
-        REGISTRATE.addRawLang("enum.createkontor.payment_terminal.signal_mode.pulse", "Impuls");
+        REGISTRATE.addRawLang("enum.createkontor.payment_terminal.signal_mode.pulse", "Impulse");
 
         REGISTRATE.addRawLang("legal_forms.createkontor.sole_proprietorship", "§7Sole Proprietorship");
         REGISTRATE.addRawLang("legal_forms.createkontor.partnership", "§bPartnership");
@@ -1418,7 +1418,7 @@ public class KontorLanguage {
                 "If they decide to pay, the price will be booked from their bank account to yours and the configured redstone signal is given off.");
         REGISTRATE.addRawLang(
                 "createkontor.ponder.payment_terminal_payments.text_5",
-                "If you need more information about the Payment Gate, ask a consultant.");
+                "If you need more information about the Payment Terminal, ask a consultant.");
 
         REGISTRATE.addRawLang("createkontor.ponder.payment_terminal_signal_modes.header", "Signal Modes");
         REGISTRATE.addRawLang(
