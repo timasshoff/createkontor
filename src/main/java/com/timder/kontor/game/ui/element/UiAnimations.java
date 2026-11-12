@@ -1,4 +1,4 @@
-package com.timder.kontor.game.ui;
+package com.timder.kontor.game.ui.element;
 
 import com.lowdragmc.lowdraglib2.gui.ui.data.Transform2D;
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Label;

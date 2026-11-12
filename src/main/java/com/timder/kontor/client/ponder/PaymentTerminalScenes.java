@@ -73,14 +73,23 @@ public class PaymentTerminalScenes {
 
         BlockPos doorPos = util.grid().at(2, 1, 2);
         Selection door = util.select().fromTo(doorPos, doorPos.above());
-        scene.world().modifyBlock(terminalPos, state -> state.setValue(PaymentTerminalBlock.ACTIVE, true), false);
+        scene.world()
+                .modifyBlock(
+                        terminalPos,
+                        state ->
+                                state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.POWERING),
+                        false);
         scene.world().modifyBlocks(door, state -> state.setValue(DoorBlock.OPEN, true), false);
         scene.effects().indicateRedstone(terminalPos);
         scene.idle(50);
-        scene.world().modifyBlock(terminalPos, state -> state.setValue(PaymentTerminalBlock.ACTIVE, false), false);
+        scene.world()
+                .modifyBlock(
+                        terminalPos,
+                        state -> state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.IDLE),
+                        false);
         scene.world().modifyBlocks(door, state -> state.setValue(DoorBlock.OPEN, false), false);
 
-        scene.overlay().showText(70).text("If you need more information about the Payment Gate, ask a consultant.");
+        scene.overlay().showText(70).text("If you need more information about the Payment Terminal, ask a consultant.");
     }
 
     public static void signalModes(SceneBuilder builder, SceneBuildingUtil util) {
@@ -116,12 +125,19 @@ public class PaymentTerminalScenes {
                 .rightClick();
         scene.idle(30);
         scene.world()
-                .modifyBlock(continuousTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, true), false);
+                .modifyBlock(
+                        continuousTerminal,
+                        state ->
+                                state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.POWERING),
+                        false);
         scene.world().modifyBlock(continuousLamp, state -> state.setValue(RedstoneLampBlock.LIT, true), false);
         scene.effects().indicateRedstone(continuousTerminal);
         scene.idle(60);
         scene.world()
-                .modifyBlock(continuousTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, false), false);
+                .modifyBlock(
+                        continuousTerminal,
+                        state -> state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.IDLE),
+                        false);
         scene.world().modifyBlock(continuousLamp, state -> state.setValue(RedstoneLampBlock.LIT, false), false);
         scene.idle(20);
 
@@ -135,18 +151,36 @@ public class PaymentTerminalScenes {
                 .showControls(util.vector().centerOf(pulseTerminal), Pointing.DOWN, 20)
                 .rightClick();
         scene.idle(30);
-        scene.world().modifyBlock(pulseTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, true), false);
+        scene.world()
+                .modifyBlock(
+                        pulseTerminal,
+                        state ->
+                                state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.POWERING),
+                        false);
         scene.world().modifyBlock(pulseLamp, state -> state.setValue(RedstoneLampBlock.LIT, true), false);
         scene.effects().indicateRedstone(pulseTerminal);
         scene.idle(10);
-        scene.world().modifyBlock(pulseTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, false), false);
+        scene.world()
+                .modifyBlock(
+                        pulseTerminal,
+                        state -> state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.ACTIVE),
+                        false);
         scene.world().modifyBlock(pulseLamp, state -> state.setValue(RedstoneLampBlock.LIT, false), false);
         scene.idle(50);
-        scene.world().modifyBlock(pulseTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, true), false);
+        scene.world()
+                .modifyBlock(
+                        pulseTerminal,
+                        state ->
+                                state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.POWERING),
+                        false);
         scene.world().modifyBlock(pulseLamp, state -> state.setValue(RedstoneLampBlock.LIT, true), false);
         scene.effects().indicateRedstone(pulseTerminal);
         scene.idle(10);
-        scene.world().modifyBlock(pulseTerminal, state -> state.setValue(PaymentTerminalBlock.ACTIVE, false), false);
+        scene.world()
+                .modifyBlock(
+                        pulseTerminal,
+                        state -> state.setValue(PaymentTerminalBlock.STATE, PaymentTerminalBlock.TerminalState.IDLE),
+                        false);
         scene.world().modifyBlock(pulseLamp, state -> state.setValue(RedstoneLampBlock.LIT, false), false);
         scene.idle(20);
     }

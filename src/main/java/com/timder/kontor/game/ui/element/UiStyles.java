@@ -24,17 +24,21 @@ public class UiStyles {
             SpriteTexture.of(GUI).setSprite(55, 1, 16, 16).setBorder(5, 5, 5, 5);
     private static final SpriteTexture NOTEBOOK_TEXTURE =
             SpriteTexture.of(GUI).setSprite(216, 1, 39, 237).setBorder(22, 4, 9, 9);
+    private static final SpriteTexture CHECKBOOK_TEXTURE =
+            SpriteTexture.of(GUI).setSprite(1, 231, 200, 24).setBorder(3, 7, 4, 9);
 
     public static final Consumer<BasicStyle> PANEL = style -> style.background(PANEL_TEXTURE);
     public static final Consumer<BasicStyle> CARD = style -> style.background(INSET_TEXTURE);
     public static final Consumer<BasicStyle> PAPER = style -> style.background(PAPER_TEXTURE);
     public static final Consumer<BasicStyle> NOTEBOOK = style -> style.background(NOTEBOOK_TEXTURE);
+    public static final Consumer<BasicStyle> CHECKBOOK = style -> style.background(CHECKBOOK_TEXTURE);
     public static final Consumer<BasicStyle> TRANSPARENT = style -> style.background(IGuiTexture.EMPTY);
     public static final Consumer<BasicStyle> DIVIDER = style -> style.background(new ColorRectTexture(0xFF555555));
 
     static {
         PANEL_TEXTURE.setWrapMode(SpriteTexture.WrapMode.REPEAT);
         PAPER_TEXTURE.setWrapMode(SpriteTexture.WrapMode.REPEAT);
+        CHECKBOOK_TEXTURE.setWrapMode(SpriteTexture.WrapMode.REPEAT);
     }
 
     public static UI ui(UIElement root) {

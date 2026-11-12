@@ -158,6 +158,11 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "message.createkontor.payment_terminal.no_company",
                 "§c⚠ Only members of a company can use this terminal.");
+        REGISTRATE.addRawLang("message.createkontor.checkbook.not_member", "§c⚠ You are not a member of a company.");
+        REGISTRATE.addRawLang("message.createkontor.checkbook.company_invalid", "Receiving company does not exist.");
+        REGISTRATE.addRawLang("message.createkontor.checkbook.amount_invalid", "The amount is not valid");
+        REGISTRATE.addRawLang("message.createkontor.checkbook.signed", "Check signed: %s to %s.");
+        REGISTRATE.addRawLang("message.createkontor.transfer_received", "%s §7sent you %s§7.");
 
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
@@ -260,6 +265,7 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.current_overdraft_limit", "Overdraft Limit: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.net_worth", "Net Worth: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.bookings_count", "Bookings (%s)");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.write_check", "Write a Check");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loans_count", "Open Loans (%s)");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.principal", "%s: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.loan.outstanding", "Outstanding: %s");
@@ -632,6 +638,12 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.payment_terminal.pay", "Pay");
         REGISTRATE.addRawLang("ui.createkontor.payment_terminal.price_unset", "Terminal is currently disabled.");
 
+        REGISTRATE.addRawLang("ui.createkontor.checkbook.company", "Check from %s");
+        REGISTRATE.addRawLang("ui.createkontor.checkbook.pay_to", "Pay to");
+        REGISTRATE.addRawLang("ui.createkontor.checkbook.amount", "Amount in $");
+        REGISTRATE.addRawLang("ui.createkontor.checkbook.amount_short", "Amount");
+        REGISTRATE.addRawLang("ui.createkontor.checkbook.sign", "Sign & Transfer Money");
+
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");
 
@@ -659,6 +671,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.property_sale", "Property Sale");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.terminal_payment", "Terminal Payment");
         REGISTRATE.addRawLang("enum.createkontor.booking_kind.terminal_revenue", "Terminal Revenue");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.check_payment", "Check Payment");
+        REGISTRATE.addRawLang("enum.createkontor.booking_kind.check_revenue", "Check Revenue");
 
         REGISTRATE.addRawLang("enum.createkontor.booking_category.cost", "Cost");
         REGISTRATE.addRawLang("enum.createkontor.booking_category.revenue", "Revenue");
@@ -1013,6 +1027,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "item.createkontor.notebook.tooltip.action1",
                 "Opens the _Notebook_ and provides a _read-only view_ of your company's open orders.");
+
+        REGISTRATE.addRawLang("item.createkontor.checkbook.tooltip.summary", "Lets you _transfer money_ on the go.");
+        REGISTRATE.addRawLang("item.createkontor.checkbook.tooltip.control1", "When R-Clicked");
+        REGISTRATE.addRawLang("item.createkontor.checkbook.tooltip.action1", "Opens the _Checkbook_.");
 
         REGISTRATE.addRawLang("wiki.createkontor.show_ponder", "Ponder");
         REGISTRATE.addRawLang("wiki.createkontor.category.guides", "Guides & Tips");

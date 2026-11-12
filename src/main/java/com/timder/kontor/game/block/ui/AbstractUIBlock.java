@@ -7,6 +7,7 @@ import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -54,10 +55,14 @@ public abstract class AbstractUIBlock<BE extends BlockEntity> extends Block
                 return InteractionResult.CONSUME;
             }
             if (BlockUIMenuType.openUI(serverPlayer, pos)) {
-                level.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 0.65f, 0.9f);
+                level.playSound(null, pos, getOpenSound(), SoundSource.BLOCKS, 0.65f, 0.9f);
             }
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
+    }
+
+    protected SoundEvent getOpenSound() {
+        return SoundEvents.BOOK_PAGE_TURN;
     }
 }

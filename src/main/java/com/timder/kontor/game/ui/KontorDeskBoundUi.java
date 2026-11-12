@@ -4,6 +4,7 @@ import static com.timder.kontor.game.ui.LawyerUi.itemIdsToTag;
 import static com.timder.kontor.game.ui.LawyerUi.tagToItemIds;
 
 import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType;
+import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.DataBindingBuilder;
 import com.lowdragmc.lowdraglib2.gui.sync.bindings.impl.SimpleBinding;
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI;
@@ -14,6 +15,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.*;
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents;
 import com.lowdragmc.lowdraglib2.gui.util.UISoundUtils;
 import com.mojang.authlib.GameProfile;
+import com.timder.kontor.CreateKontor;
 import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyHistoryEntry;
@@ -36,6 +38,7 @@ import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.EconomySavedData;
 import com.timder.kontor.game.block.KontorDeskBlockEntity;
+import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.network.ToastPayload;
 import com.timder.kontor.game.ui.chart.CompanyCharts;
 import com.timder.kontor.game.ui.chart.classic.ChartHost;
@@ -61,6 +64,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class KontorDeskBoundUi {
@@ -90,7 +94,7 @@ public class KontorDeskBoundUi {
                 overviewTab(company, be, economy, companyHistory, companyHistoryBinding));
         tabView.addTab(
                 UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.account")),
-                accountTab(company, companyHistory, companyHistoryBinding, liquidity, liquidityBinding));
+                accountTab(company, holder.player, companyHistory, companyHistoryBinding, liquidity, liquidityBinding));
         tabView.addTab(
                 UiContainer.tab(Component.translatable("ui.createkontor.kontor_desk.tab.requests_orders")),
                 requestsOrdersTab(company, be));
@@ -203,6 +207,7 @@ public class KontorDeskBoundUi {
 
     public static UIElement accountTab(
             Company company,
+            Player player,
             ObservableList<CompanyHistoryEntry> companyHistory,
             SimpleBinding<Tag> companyHistoryBinding,
             ObservableValue<Component> liquidity,
@@ -255,8 +260,30 @@ public class KontorDeskBoundUi {
                 Money.ofCents(overdraftLimitCents.get()).toString())));
         overdraftLimitLabel.addSyncValue(overdraftLimitBinding.getSyncValue());
 
-        content.addChild(UiContainer.headerWithSubtitle(
+        Button writeCheck = UiButtons.secondary(Component.translatable("ui.createkontor.kontor_desk.write_check"))
+                .setOnServerClick(e -> {
+                    if (!(player instanceof ServerPlayer serverPlayer)) return;
+                    boolean member = CompanySavedData.get(serverPlayer.getServer())
+                            .getRegistry()
+                            .companyOf(serverPlayer.getUUID())
+                            .isPresent();
+                    if (!member) {
+                        CompanyBlockSupport.message(serverPlayer, "message.createkontor.checkbook.not_member");
+                        return;
+                    }
+                    PlayerUIMenuType.openUI(serverPlayer, CreateKontor.CHECKBOOK_UI);
+                });
+
+        UIElement headerBlock = new UIElement()
+                .layout(layout -> layout.flexDirection(FlexDirection.COLUMN)
+                        .widthFitContent()
+                        .alignSelf(AlignItems.CENTER)
+                        .gapAll(4));
+        headerBlock.addChild(UiContainer.headerWithSubtitle(
                 balance, UiLabels.seperatedLabelRow(List.of(liquidityLabel, overdraftLimitLabel, netWorth))));
+        writeCheck.layout(layout -> layout.alignSelf(AlignItems.STRETCH));
+        headerBlock.addChild(writeCheck);
+        content.addChild(headerBlock);
 
         TabView tabView = (TabView) UiContainer.largeTabView()
                 .layout(layout -> layout.widthPercent(100).flexGrow(1).flexBasis(0));
