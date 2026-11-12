@@ -7,9 +7,7 @@ import com.timder.kontor.core.company.property.DimensionId;
 import com.timder.kontor.core.company.property.PropertyIndex;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.block.PaymentTerminalBlock;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -18,8 +16,10 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
@@ -34,6 +34,7 @@ import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -43,6 +44,14 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 public final class PropertyProtection {
+
+    private static final Set<MobSpawnType> BLOCKED_SPAWNS = EnumSet.of(
+            MobSpawnType.NATURAL,
+            MobSpawnType.SPAWNER,
+            MobSpawnType.PATROL,
+            MobSpawnType.REINFORCEMENT,
+            MobSpawnType.JOCKEY,
+            MobSpawnType.EVENT);
 
     private static final PropertyIndex INDEX = new PropertyIndex();
 
@@ -320,6 +329,19 @@ public final class PropertyProtection {
                                 oldCompany.get().name()),
                         true);
             }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
+        if (!(event.getEntity() instanceof Enemy) || !BLOCKED_SPAWNS.contains(event.getSpawnType())) {
+            return;
+        }
+        ServerLevel level = event.getLevel().getLevel();
+        ChunkKey chunk = new ChunkKey(
+                BiomeSampling.dimensionId(level), Mth.floor(event.getX()) >> 4, Mth.floor(event.getZ()) >> 4);
+        if (isProtected(level, chunk)) {
+            event.setSpawnCancelled(true);
         }
     }
 

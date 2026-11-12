@@ -1131,6 +1131,13 @@ public class KontorLanguage {
                 "A company is active when at least one member (owner or manager) of the company is online. When the company is inactive (= no member online), the entire company is frozen. The company will not receive requests, order deadlines will pause and chunks may get unloaded. Daily settlements occur when the company has been active on the current trading day at least once, even if a member was only online for a minute.");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.chunk_loading.title", "Chunk Loading");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.chunk_loading.p1",
+                "Every Kontor Desk and employee desk keeps the 3x3 chunks around it loaded, as long as your company is active. When no member of your company is online, these chunks are no longer kept loaded.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.chunk_loading.b1", "Loading Properties");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.chunk_loading.p2",
+                "Owned and rented land can be kept loaded as well by activating chunk loading in the property manager. Your company can keep up to %s chunks loaded. Like desk chunks, they are only loaded while your company is active. If you sell the land or the rent ends, it is no longer loaded.");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.finances.title", "Finances");
         REGISTRATE.addRawLang(
@@ -1374,6 +1381,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.property_manager.p3",
                 "The rent of a property is %s of the purchase price. A property is valued at %s of the purchase price. This value counts towards your net worth. If you decide to sell a property, it is going to be sold at this value.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.property_manager.b2", "Protection & Chunk Loading");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.property_manager.p4",
+                "Hostile mobs do not spawn naturally on your land. You can also keep a property loaded while your company is active.");
 
         REGISTRATE.addRawLang("createkontor.ponder.employee_desk_hiring.header", "Hiring Employees");
         REGISTRATE.addRawLang(
