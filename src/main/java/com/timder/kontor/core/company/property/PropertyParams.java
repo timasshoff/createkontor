@@ -8,12 +8,14 @@ import java.util.*;
  * @param frequencies The measured biome frequencies
  * @param dailyRentRate The daily rent as a fraction of the price
  * @param resaleShare The share of the price that a company gets when it sells a property
+ * @param maxLoadedChunks The max amount of loaded chunks per company
  */
 public record PropertyParams(
         PropertyPricingParams pricing,
         Map<DimensionId, BiomeFrequencies> frequencies,
         double dailyRentRate,
-        double resaleShare) {
+        double resaleShare,
+        int maxLoadedChunks) {
     public PropertyParams {
         Objects.requireNonNull(pricing, "pricing must not be null.");
         Objects.requireNonNull(frequencies, "frequencies must not be null.");
@@ -30,10 +32,13 @@ public record PropertyParams(
         if (!(resaleShare >= 0.0) || resaleShare > 1.0) {
             throw new IllegalArgumentException("resaleShare must be between 0 and 1.");
         }
+        if (maxLoadedChunks < 0) {
+            throw new IllegalArgumentException("maxLoadedChunks must not be negative.");
+        }
     }
 
     public static PropertyParams disabled() {
-        return new PropertyParams(new PropertyPricingParams(0.5, 0.2, 50.0, List.of()), Map.of(), 0.01, 0.6);
+        return new PropertyParams(new PropertyPricingParams(0.5, 0.2, 50.0, List.of()), Map.of(), 0.01, 0.6, 1);
     }
 
     public BiomeFrequencies frequenciesOf(DimensionId dimension) {

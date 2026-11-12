@@ -585,6 +585,7 @@ public class CompanySavedData extends SavedData {
         tag.putString("Kind", holding.kind().name());
         tag.putLong("AcquiredDay", holding.acquiredDay());
         tag.putBoolean("Cancelled", holding.cancelled());
+        tag.putBoolean("ChunkLoading", holding.chunkLoading());
         return tag;
     }
 
@@ -594,6 +595,7 @@ public class CompanySavedData extends SavedData {
                 new BiomeId(tag.getString("Biome")),
                 HoldingKind.valueOf(tag.getString("Kind")),
                 tag.getLong("AcquiredDay"),
-                tag.getBoolean("Cancelled"));
+                tag.getBoolean("Cancelled"),
+                tag.getBoolean("ChunkLoading"));
     }
 }

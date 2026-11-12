@@ -64,7 +64,7 @@ public record ToastPayload(ToastKind kind, Component message) implements CustomP
     }
 
     public static void send(Player player, Optional<S2CActionResult> result) {
-        if (result.isPresent() && player instanceof ServerPlayer serverPlayer) {
+        if (result.isPresent() && !result.get().silent() && player instanceof ServerPlayer serverPlayer) {
             PacketDistributor.sendToPlayer(
                     serverPlayer,
                     new ToastPayload(result.get().kind(), result.get().message()));

@@ -30,6 +30,7 @@ public class PropertyConfig {
     public static final ModConfigSpec.DoubleValue DAILY_RENT_RATE;
     public static final ModConfigSpec.DoubleValue RESALE_SHARE;
     public static final ModConfigSpec.IntValue MANAGER_RADIUS;
+    public static final ModConfigSpec.IntValue MAX_LOADED_CHUNKS;
 
     private record DimensionSetting(
             String dimension,
@@ -108,6 +109,12 @@ public class PropertyConfig {
                 .defineInRange("resaleShare", 0.6, 0.0, 1.0);
         MANAGER_RADIUS = builder.comment("The radius in chunks that a property manager can manage.")
                 .defineInRange("managerRadius", 8, 1, 32);
+        MAX_LOADED_CHUNKS = builder.comment(
+                        "How many of its held chunks (owned and rented, all dimensions) a company can keep loaded at the "
+                                + "same time. Chunks around desks do not count. Held chunks are only loaded while the "
+                                + "company is active. 0 = no chunk loading of land. Lowering the limit does not switch "
+                                + "off chunks that are already on, but no more can be switched on.")
+                .defineInRange("maxLoadedChunks", 9, 0, 1_000);
         builder.pop();
 
         SPEC = builder.build();
@@ -143,7 +150,8 @@ public class PropertyConfig {
                         PRICING_RARITY_EXPONENT.get(), PRICING_MIN_FACTOR.get(), PRICING_MAX_FACTOR.get(), dimensions),
                 frequencies,
                 DAILY_RENT_RATE.get(),
-                RESALE_SHARE.get());
+                RESALE_SHARE.get(),
+                MAX_LOADED_CHUNKS.get());
     }
 
     public static MeasurementGrid toMeasurementGrid() {

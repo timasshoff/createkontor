@@ -26,7 +26,12 @@ public final class KontorToasts {
         Component title = Component.translatable("toast.createkontor." + kind.key() + ".title")
                 .withStyle(kind.titleColor())
                 .withStyle(ChatFormatting.BOLD);
-        SystemToast.addOrUpdate(minecraft.getToasts(), IDS.get(kind), title, message);
+        SystemToast.SystemToastId id = IDS.get(kind);
+        SystemToast existing = minecraft.getToasts().getToast(SystemToast.class, id);
+        if (existing != null) {
+            existing.forceHide();
+        }
+        minecraft.getToasts().addToast(SystemToast.multiline(minecraft, id, title, message));
         switch (kind) {
             case SUCCESS -> UISoundUtils.playSound(AllSoundEvents.CONFIRM.getMainEvent(), 1.0f, 0.5f);
             case ERROR -> UISoundUtils.playSound(AllSoundEvents.DENY.getMainEvent(), 1.0f, 0.5f);

@@ -57,10 +57,7 @@ public final class LawyerActions extends EmployeeActions {
         }
         CompanySavedData.get(serverLevel.getServer()).setDirty();
         Component name = LicenseNames.of(key);
-        return result.status() == AcquireResult.Status.REACTIVATED
-                ? S2CActionResult.success(
-                        Component.translatable("message.createkontor.lawyer.license_reactivated", name))
-                : S2CActionResult.success(Component.translatable("message.createkontor.lawyer.license_acquired", name));
+        return S2CActionResult.silentSuccess();
     }
 
     public Optional<S2CActionResult> cancelLicense(LicenseKey key) {
