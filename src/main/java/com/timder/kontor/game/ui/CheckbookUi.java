@@ -238,8 +238,12 @@ public class CheckbookUi {
         }
 
         Money amount;
+        String amountText = tag.getString("Amount");
+        if (!amountText.matches("\\d{1,10}(\\.\\d{1,2})?")) {
+            return S2CActionResult.error(Component.translatable("message.createkontor.checkbook.amount_invalid"));
+        }
         try {
-            amount = Money.fromDollar(Double.parseDouble(tag.getString("Amount")));
+            amount = Money.fromDollar(Double.parseDouble(amountText));
         } catch (NumberFormatException | ArithmeticException e) {
             return S2CActionResult.error(Component.translatable("message.createkontor.checkbook.amount_invalid"));
         }
