@@ -161,6 +161,11 @@ public class PropertyManagerUi {
             ToastPayload.send(context.player(), actions.sell(selected[0]));
         });
 
+        content.onMessage("c2s_set_chunk_loading", tag -> {
+            if (selected[0] == null) return;
+            ToastPayload.send(context.player(), actions.setChunkLoading(selected[0], tag.getBoolean("Enable")));
+        });
+
         SimpleBinding<Tag> chunkBinding = DataBindingBuilder.tagS2C(() -> chunkInfoToTag(context, selected[0]))
                 .onRemoteSyncReceived(tag -> showChunk(content, tagToChunkInfo(tag)))
                 .build();
@@ -263,6 +268,22 @@ public class PropertyManagerUi {
             content.addScrollViewChildren(buttons);
         }
 
+        if (info.ownership() == Ownership.OWNED || info.ownership() == Ownership.RENTED) {
+            content.addScrollViewChildren(UiLabels.labelValueNoWrap(
+                    Component.translatable("ui.createkontor.property_manager.chunk_loading_slots"),
+                    Component.literal(info.loadedCount() + " / " + info.loadedLimit())));
+            UiSwitches.LabeledSwitch chunkLoading = UiSwitches.labeled(
+                    Component.translatable("ui.createkontor.property_manager.chunk_loading"),
+                    info.chunkLoading(),
+                    isOn -> {
+                        CompoundTag tag = new CompoundTag();
+                        tag.putBoolean("Enable", isOn);
+                        content.sendMessage("c2s_set_chunk_loading", tag);
+                    });
+            chunkLoading.getSwitch().setActive(info.chunkLoading() || info.loadedCount() < info.loadedLimit());
+            content.addScrollViewChildren(chunkLoading);
+        }
+
         if (info.ownership() == Ownership.RENTED) {
             UIElement buttons = new UIElement()
                     .layout(layout -> layout.widthPercent(100)
@@ -333,6 +354,9 @@ public class PropertyManagerUi {
             ownership = PropertyRules.ownerOf(companies, key).isPresent() ? Ownership.FOREIGN : Ownership.FREE;
         }
         tag.putString("Ownership", ownership.name());
+        tag.putBoolean("ChunkLoading", holding != null && holding.chunkLoading());
+        tag.putInt("LoadedCount", PropertyRules.chunkLoadingCount(context.company()));
+        tag.putInt("LoadedLimit", params.maxLoadedChunks());
         tag.putString(
                 "BuyStatus",
                 PropertyRules.preview(context.company(), companies, key, biome, PropertyRules.Mode.BUY, companyParams)
@@ -368,7 +392,10 @@ public class PropertyManagerUi {
             @Nullable Money resaleValue,
             @Nullable Money dailyRent,
             PropertyRules.AcquireResult.Status buyStatus,
-            PropertyRules.AcquireResult.Status rentStatus) {
+            PropertyRules.AcquireResult.Status rentStatus,
+            boolean chunkLoading,
+            int loadedCount,
+            int loadedLimit) {
 
         public boolean canBuy() {
             return buyStatus == PropertyRules.AcquireResult.Status.BOUGHT
@@ -394,7 +421,10 @@ public class PropertyManagerUi {
                 data.contains("ResaleValue") ? Money.ofCents(data.getLong("ResaleValue")) : null,
                 data.contains("DailyRent") ? Money.ofCents(data.getLong("DailyRent")) : null,
                 PropertyRules.AcquireResult.Status.valueOf(data.getString("BuyStatus")),
-                PropertyRules.AcquireResult.Status.valueOf(data.getString("RentStatus")));
+                PropertyRules.AcquireResult.Status.valueOf(data.getString("RentStatus")),
+                data.getBoolean("ChunkLoading"),
+                data.getInt("LoadedCount"),
+                data.getInt("LoadedLimit"));
     }
 
     private static Tag chunkOwnershipToTag(EmployeeDeskContext context) {

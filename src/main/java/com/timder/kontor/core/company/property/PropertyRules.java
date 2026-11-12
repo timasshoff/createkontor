@@ -334,6 +334,51 @@ public final class PropertyRules {
         return Optional.of(PropertyPricingRules.priceOf(params.pricing(), chunk.dimension(), measured, biome));
     }
 
+    public enum ChunkLoadingResult {
+        ENABLED,
+        DISABLED,
+        UNCHANGED,
+        NOT_HELD,
+        CANCELLED,
+        LIMIT_REACHED
+    }
+
+    public static ChunkLoadingResult setChunkLoading(
+            Company company, ChunkKey chunk, boolean enabled, PropertyParams params) {
+        Objects.requireNonNull(company, "company must not be null.");
+        Objects.requireNonNull(chunk, "chunk must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+
+        PropertyHolding holding = company.property(chunk).orElse(null);
+        if (holding == null) {
+            return ChunkLoadingResult.NOT_HELD;
+        }
+        if (holding.chunkLoading() == enabled) {
+            return ChunkLoadingResult.UNCHANGED;
+        }
+        if (enabled) {
+            if (holding.cancelled()) {
+                return ChunkLoadingResult.CANCELLED;
+            }
+            if (chunkLoadingCount(company) >= params.maxLoadedChunks()) {
+                return ChunkLoadingResult.LIMIT_REACHED;
+            }
+        }
+        company.replaceProperty(holding.withChunkLoading(enabled));
+        return enabled ? ChunkLoadingResult.ENABLED : ChunkLoadingResult.DISABLED;
+    }
+
+    public static int chunkLoadingCount(Company company) {
+        Objects.requireNonNull(company, "company must not be null.");
+        int count = 0;
+        for (PropertyHolding holding : company.properties()) {
+            if (holding.chunkLoading()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static AcquireResult result(AcquireResult.Status status) {
         return new AcquireResult(status, Money.ZERO, Money.ZERO);
     }

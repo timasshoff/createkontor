@@ -13,7 +13,6 @@ import com.timder.kontor.game.block.employee.EmployeeDeskBlockEntity;
 import com.timder.kontor.game.network.S2CActionResult;
 import com.timder.kontor.util.ComponentFormatting;
 import java.util.Optional;
-import net.minecraft.network.chat.Component;
 
 public class FinancesManagerActions extends EmployeeActions {
 
@@ -44,7 +43,6 @@ public class FinancesManagerActions extends EmployeeActions {
         }
 
         CompanySavedData.get(serverLevel.getServer()).setDirty();
-        return S2CActionResult.success(Component.translatable(
-                "message.createkontor.finances_manager.loan_taken", ComponentFormatting.moneyColored(amount)));
+        return S2CActionResult.silentSuccess();
     }
 }

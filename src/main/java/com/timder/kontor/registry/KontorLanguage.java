@@ -126,10 +126,24 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "message.createkontor.property_manager.not_held", "The property %s is not held by your company.");
         REGISTRATE.addRawLang("message.createkontor.property_manager.not_rented", "The property %s is owned by you.");
-        REGISTRATE.addRawLang("message.createkontor.property_manager.sold", "The property %s has been sold for %s.");
         REGISTRATE.addRawLang("message.createkontor.property_manager.not_owned", "The property %s is owned by you.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.chunk_loading_enabled", "Property %s is now chunk loaded.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.chunk_loading_disabled",
+                "Property %s is no longer being loaded.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.chunk_loading_unchanged", "Nothing changed for property %s.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.chunk_loading_not_held",
+                "The property %s is not held by your company.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.chunk_loading_cancelled_rent",
+                "The rent for property %s is cancelled, it cannot be chunk loaded.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.property_manager.chunk_loading_limit_reached",
+                "Your company cannot load more than %2$s properties.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
-        REGISTRATE.addRawLang("message.createkontor.finances_manager.loan_taken", "Loan of %s taken and paid out.");
         REGISTRATE.addRawLang(
                 "message.createkontor.measurement_running",
                 "§7Create: Kontor is measuring the biomes of dimension %s §7to calculate land prices (%s §7done). The server may lag, this is normal! Depending on your configuration, measurement might take a few minutes.");
@@ -146,8 +160,6 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "message.createkontor.kontor_desk.market_paused", "Paused participation in the %s market.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.upgrade_applied", "Application for %s submitted.");
-        REGISTRATE.addRawLang("message.createkontor.lawyer.license_acquired", "License %s acquired.");
-        REGISTRATE.addRawLang("message.createkontor.lawyer.license_reactivated", "License %s reactivated.");
         REGISTRATE.addRawLang("message.createkontor.lawyer.license_cancelled", "License %s cancelled.");
         REGISTRATE.addRawLang("message.createkontor.payment_terminal.disabled", "This terminal is currently disabled.");
         REGISTRATE.addRawLang("message.createkontor.payment_terminal.paid", "Paid %s to %s.");
@@ -614,6 +626,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.unpriceable", "§4Unpriceable");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.not_operational", "§c§l\u2717");
         REGISTRATE.addRawLang("ui.createkontor.property_manager.preview.cannot_afford", "§cCannot afford");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.chunk_loading", "Chunk Loading");
+        REGISTRATE.addRawLang("ui.createkontor.property_manager.chunk_loading_slots", "Loaded chunks");
 
         REGISTRATE.addRawLang("ui.createkontor.notebook.title", "Notebook");
         REGISTRATE.addRawLang("ui.createkontor.notebook.day_balance", "Day %s • %s");
@@ -1117,6 +1131,13 @@ public class KontorLanguage {
                 "A company is active when at least one member (owner or manager) of the company is online. When the company is inactive (= no member online), the entire company is frozen. The company will not receive requests, order deadlines will pause and chunks may get unloaded. Daily settlements occur when the company has been active on the current trading day at least once, even if a member was only online for a minute.");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.chunk_loading.title", "Chunk Loading");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.chunk_loading.p1",
+                "Every Kontor Desk and employee desk keeps the 3x3 chunks around it loaded, as long as your company is active. When no member of your company is online, these chunks are no longer kept loaded.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.chunk_loading.b1", "Loading Properties");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.chunk_loading.p2",
+                "Owned and rented land can be kept loaded as well by activating chunk loading in the property manager. Your company can keep up to %s chunks loaded. Like desk chunks, they are only loaded while your company is active. If you sell the land or the rent ends, it is no longer loaded.");
 
         REGISTRATE.addRawLang("wiki.createkontor.page.finances.title", "Finances");
         REGISTRATE.addRawLang(
@@ -1360,6 +1381,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "wiki.createkontor.page.property_manager.p3",
                 "The rent of a property is %s of the purchase price. A property is valued at %s of the purchase price. This value counts towards your net worth. If you decide to sell a property, it is going to be sold at this value.");
+        REGISTRATE.addRawLang("wiki.createkontor.page.property_manager.b2", "Protection & Chunk Loading");
+        REGISTRATE.addRawLang(
+                "wiki.createkontor.page.property_manager.p4",
+                "Hostile mobs do not spawn naturally on your land. You can also keep a property loaded while your company is active.");
 
         REGISTRATE.addRawLang("createkontor.ponder.employee_desk_hiring.header", "Hiring Employees");
         REGISTRATE.addRawLang(

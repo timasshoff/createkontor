@@ -2,7 +2,8 @@ package com.timder.kontor.core.company.property;
 
 import java.util.Objects;
 
-public record PropertyHolding(ChunkKey chunk, BiomeId biome, HoldingKind kind, long acquiredDay, boolean cancelled) {
+public record PropertyHolding(
+        ChunkKey chunk, BiomeId biome, HoldingKind kind, long acquiredDay, boolean cancelled, boolean chunkLoading) {
 
     public PropertyHolding {
         Objects.requireNonNull(chunk, "chunk must not be null.");
@@ -15,11 +16,11 @@ public record PropertyHolding(ChunkKey chunk, BiomeId biome, HoldingKind kind, l
     }
 
     public static PropertyHolding bought(ChunkKey chunk, BiomeId biome, long day) {
-        return new PropertyHolding(chunk, biome, HoldingKind.OWNED, day, false);
+        return new PropertyHolding(chunk, biome, HoldingKind.OWNED, day, false, false);
     }
 
     public static PropertyHolding rented(ChunkKey chunk, BiomeId biome, long day) {
-        return new PropertyHolding(chunk, biome, HoldingKind.RENTED, day, false);
+        return new PropertyHolding(chunk, biome, HoldingKind.RENTED, day, false, false);
     }
 
     public boolean isOwned() {
@@ -32,14 +33,18 @@ public record PropertyHolding(ChunkKey chunk, BiomeId biome, HoldingKind kind, l
 
     public PropertyHolding cancel() {
         if (!isRented()) throw new IllegalStateException("Only a rented chunk can be cancelled.");
-        return new PropertyHolding(chunk, biome, kind, acquiredDay, true);
+        return new PropertyHolding(chunk, biome, kind, acquiredDay, true, chunkLoading);
     }
 
     public PropertyHolding reactivate() {
-        return new PropertyHolding(chunk, biome, kind, acquiredDay, false);
+        return new PropertyHolding(chunk, biome, kind, acquiredDay, false, chunkLoading);
     }
 
     public PropertyHolding boughtOn(long day) {
-        return bought(chunk, biome, day);
+        return new PropertyHolding(chunk, biome, HoldingKind.OWNED, day, false, chunkLoading);
+    }
+
+    public PropertyHolding withChunkLoading(boolean enabled) {
+        return new PropertyHolding(chunk, biome, kind, acquiredDay, cancelled, enabled);
     }
 }

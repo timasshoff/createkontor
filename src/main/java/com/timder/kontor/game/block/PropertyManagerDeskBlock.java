@@ -45,5 +45,8 @@ public class PropertyManagerDeskBlock extends AbstractEmployeeDeskBlock {
                 "wiki.createkontor.page.property_manager.p3",
                 String.format(Locale.ROOT, "%.1f%%", PropertyConfig.DAILY_RENT_RATE.get() * 100.0),
                 String.format(Locale.ROOT, "%.1f%%", PropertyConfig.RESALE_SHARE.get() * 100.0))));
+
+        page.addChild(WikiUtils.heading(Component.translatable("wiki.createkontor.page.property_manager.b2")));
+        page.addChild(WikiUtils.paragraph(Component.translatable("wiki.createkontor.page.property_manager.p4")));
     }
 }

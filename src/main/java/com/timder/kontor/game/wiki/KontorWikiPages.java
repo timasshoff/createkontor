@@ -26,7 +26,7 @@ public final class KontorWikiPages {
                 "chunk_loading",
                 WikiCategory.BASICS,
                 Component.translatable("wiki.createkontor.page.chunk_loading.title"),
-                (e) -> {});
+                ChunkLoadingWikiPage::build);
         ConsultantWiki.register(
                 "finances",
                 WikiCategory.BASICS,

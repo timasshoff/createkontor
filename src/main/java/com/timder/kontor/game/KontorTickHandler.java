@@ -189,6 +189,9 @@ public class KontorTickHandler {
             PlayerNotifications.sendUpgradeEventNotifications(server, companyData.getRegistry(), upgradeEvents, params);
         }
         PlayerNotifications.sendSettlementHud(server, registry, latestEntries);
+        for (CompanyId id : activeNow) {
+            KontorChunkLoading.refreshHeld(server, registry, id);
+        }
         companyData.setDirty();
         economyData.setDirty();
     }
