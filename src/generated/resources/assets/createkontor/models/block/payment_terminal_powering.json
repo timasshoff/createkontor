@@ -1,0 +1,7 @@
+{
+  "parent": "createkontor:block/payment_terminal_base",
+  "textures": {
+    "0": "createkontor:block/payment_terminal_powering",
+    "particle": "create:block/andesite_casing"
+  }
+}

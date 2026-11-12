@@ -184,7 +184,7 @@ public class PaymentTerminalBlockEntity extends AbstractCompanyBlockEntity {
 
     private void cancelCycle() {
         signalTicksRemaining = 0;
-        setActive(false);
+        setState(PaymentTerminalBlock.TerminalState.IDLE);
     }
 
     public boolean startSignal() {
@@ -193,7 +193,7 @@ public class PaymentTerminalBlockEntity extends AbstractCompanyBlockEntity {
         }
 
         signalTicksRemaining = signalMode == SignalMode.PULSE ? signalSeconds * 20 + PULSE_TICKS : signalSeconds * 20;
-        setActive(isSignalOn(signalMode, signalSeconds, signalTicksRemaining));
+        setState(stateFor(signalMode, signalSeconds, signalTicksRemaining));
         setChanged();
         return true;
     }
@@ -212,7 +212,7 @@ public class PaymentTerminalBlockEntity extends AbstractCompanyBlockEntity {
     public void initialize() {
         super.initialize();
         if (level != null && !level.isClientSide()) {
-            setActive(isSignalOn(signalMode, signalSeconds, signalTicksRemaining));
+            setState(stateFor(signalMode, signalSeconds, signalTicksRemaining));
         }
     }
 
@@ -223,24 +223,42 @@ public class PaymentTerminalBlockEntity extends AbstractCompanyBlockEntity {
             return;
         }
         signalTicksRemaining--;
-        setActive(isSignalOn(signalMode, signalSeconds, signalTicksRemaining));
+        setState(stateFor(signalMode, signalSeconds, signalTicksRemaining));
         if (signalTicksRemaining == 0 || signalTicksRemaining % 20 == 0) {
             setChanged();
         }
     }
 
-    private void setActive(boolean active) {
+    private static PaymentTerminalBlock.TerminalState stateFor(SignalMode mode, int seconds, int remaining) {
+        if (remaining <= 0) {
+            return PaymentTerminalBlock.TerminalState.IDLE;
+        }
+        return isSignalOn(mode, seconds, remaining)
+                ? PaymentTerminalBlock.TerminalState.POWERING
+                : PaymentTerminalBlock.TerminalState.ACTIVE;
+    }
+
+    private void setState(PaymentTerminalBlock.TerminalState next) {
         BlockState state = getBlockState();
         if (level == null
                 || level.isClientSide()
-                || !state.hasProperty(PaymentTerminalBlock.ACTIVE)
-                || state.getValue(PaymentTerminalBlock.ACTIVE) == active) {
+                || !state.hasProperty(PaymentTerminalBlock.STATE)
+                || state.getValue(PaymentTerminalBlock.STATE) == next) {
             return;
         }
-        level.setBlock(getBlockPos(), state.setValue(PaymentTerminalBlock.ACTIVE, active), Block.UPDATE_ALL);
-        PaymentTerminalBlock.notifyNeighbours(level, getBlockPos(), state.getBlock());
-        level.playSound(
-                null, getBlockPos(), SoundEvents.COMPARATOR_CLICK, SoundSource.BLOCKS, 0.3f, active ? 0.6f : 0.5f);
+        boolean wasPowering = state.getValue(PaymentTerminalBlock.STATE) == PaymentTerminalBlock.TerminalState.POWERING;
+        boolean nowPowering = next == PaymentTerminalBlock.TerminalState.POWERING;
+        level.setBlock(getBlockPos(), state.setValue(PaymentTerminalBlock.STATE, next), Block.UPDATE_ALL);
+        if (wasPowering != nowPowering) {
+            PaymentTerminalBlock.notifyNeighbours(level, getBlockPos(), state.getBlock());
+            level.playSound(
+                    null,
+                    getBlockPos(),
+                    SoundEvents.COMPARATOR_CLICK,
+                    SoundSource.BLOCKS,
+                    0.3f,
+                    nowPowering ? 0.6f : 0.5f);
+        }
     }
 
     @Override

@@ -1,33 +1,48 @@
 {
   "variants": {
-    "active=false,facing=east": {
+    "facing=east,state=active": {
+      "model": "createkontor:block/payment_terminal_active",
+      "y": 90
+    },
+    "facing=east,state=idle": {
       "model": "createkontor:block/payment_terminal",
       "y": 90
     },
-    "active=false,facing=north": {
+    "facing=east,state=powering": {
+      "model": "createkontor:block/payment_terminal_powering",
+      "y": 90
+    },
+    "facing=north,state=active": {
+      "model": "createkontor:block/payment_terminal_active"
+    },
+    "facing=north,state=idle": {
       "model": "createkontor:block/payment_terminal"
     },
-    "active=false,facing=south": {
+    "facing=north,state=powering": {
+      "model": "createkontor:block/payment_terminal_powering"
+    },
+    "facing=south,state=active": {
+      "model": "createkontor:block/payment_terminal_active",
+      "y": 180
+    },
+    "facing=south,state=idle": {
       "model": "createkontor:block/payment_terminal",
       "y": 180
     },
-    "active=false,facing=west": {
+    "facing=south,state=powering": {
+      "model": "createkontor:block/payment_terminal_powering",
+      "y": 180
+    },
+    "facing=west,state=active": {
+      "model": "createkontor:block/payment_terminal_active",
+      "y": 270
+    },
+    "facing=west,state=idle": {
       "model": "createkontor:block/payment_terminal",
       "y": 270
     },
-    "active=true,facing=east": {
-      "model": "createkontor:block/payment_terminal_active",
-      "y": 90
-    },
-    "active=true,facing=north": {
-      "model": "createkontor:block/payment_terminal_active"
-    },
-    "active=true,facing=south": {
-      "model": "createkontor:block/payment_terminal_active",
-      "y": 180
-    },
-    "active=true,facing=west": {
-      "model": "createkontor:block/payment_terminal_active",
+    "facing=west,state=powering": {
+      "model": "createkontor:block/payment_terminal_powering",
       "y": 270
     }
   }

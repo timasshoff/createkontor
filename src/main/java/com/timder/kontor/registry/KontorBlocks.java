@@ -89,7 +89,7 @@ public final class KontorBlocks {
             .initialProperties(SharedProperties::softMetal)
             .properties(p -> p.mapColor(MapColor.PODZOL)
                     .strength(2.0F, 6.0F)
-                    .sound(SoundType.NETHERITE_BLOCK)
+                    .sound(SoundType.WOOD)
                     .noOcclusion())
             .tag(BlockTags.MINEABLE_WITH_AXE)
             .tag(AllTags.AllBlockTags.WRENCH_PICKUP.tag)
@@ -103,9 +103,18 @@ public final class KontorBlocks {
                         .withExistingParent("block/payment_terminal_active", base)
                         .texture("0", prov.modLoc("block/payment_terminal_active"))
                         .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"));
+                ModelFile powering = prov.models()
+                        .withExistingParent("block/payment_terminal_powering", base)
+                        .texture("0", prov.modLoc("block/payment_terminal_powering"))
+                        .texture("particle", ResourceLocation.fromNamespaceAndPath("create", "block/andesite_casing"));
                 prov.getVariantBuilder(ctx.get())
                         .forAllStates(state -> ConfiguredModel.builder()
-                                .modelFile(state.getValue(PaymentTerminalBlock.ACTIVE) ? active : idle)
+                                .modelFile(
+                                        switch (state.getValue(PaymentTerminalBlock.STATE)) {
+                                            case IDLE -> idle;
+                                            case ACTIVE -> active;
+                                            case POWERING -> powering;
+                                        })
                                 .rotationY((((int) state.getValue(PaymentTerminalBlock.FACING)
                                                         .toYRot())
                                                 + 180)

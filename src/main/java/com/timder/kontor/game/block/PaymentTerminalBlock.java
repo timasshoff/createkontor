@@ -16,12 +16,16 @@ import com.timder.kontor.game.ui.element.WikiUtils;
 import com.timder.kontor.game.wiki.WikiCategory;
 import com.timder.kontor.registry.KontorBlockEntities;
 import com.timder.kontor.registry.KontorBlocks;
+import java.util.Locale;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -31,10 +35,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -42,8 +43,19 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class PaymentTerminalBlock extends AbstractUIBlock<PaymentTerminalBlockEntity>
         implements IBE<PaymentTerminalBlockEntity> {
 
+    public enum TerminalState implements StringRepresentable {
+        IDLE,
+        ACTIVE,
+        POWERING;
+
+        @Override
+        public String getSerializedName() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+    }
+
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+    public static final EnumProperty<TerminalState> STATE = EnumProperty.create("state", TerminalState.class);
     private static final int SIGNAL_STRENGTH = 15;
 
     private static final VoxelShape SHAPE_NORTH_SOUTH =
@@ -54,7 +66,7 @@ public class PaymentTerminalBlock extends AbstractUIBlock<PaymentTerminalBlockEn
     public PaymentTerminalBlock(Properties properties) {
         super(properties);
         registerDefaultState(
-                stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(ACTIVE, false));
+                stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(STATE, TerminalState.IDLE));
         ConsultantWiki.register(
                 "payment_terminal",
                 WikiCategory.BLOCKS,
@@ -73,7 +85,7 @@ public class PaymentTerminalBlock extends AbstractUIBlock<PaymentTerminalBlockEn
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(FACING, ACTIVE);
+        builder.add(FACING, STATE);
     }
 
     @Override
@@ -127,6 +139,11 @@ public class PaymentTerminalBlock extends AbstractUIBlock<PaymentTerminalBlockEn
     }
 
     @Override
+    protected SoundEvent getOpenSound() {
+        return SoundEvents.STONE_BUTTON_CLICK_ON;
+    }
+
+    @Override
     public Class<PaymentTerminalBlockEntity> getBlockEntityClass() {
         return PaymentTerminalBlockEntity.class;
     }
@@ -143,17 +160,17 @@ public class PaymentTerminalBlock extends AbstractUIBlock<PaymentTerminalBlockEn
 
     @Override
     protected int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        return state.getValue(ACTIVE) ? SIGNAL_STRENGTH : 0;
+        return state.getValue(STATE) == TerminalState.POWERING ? SIGNAL_STRENGTH : 0;
     }
 
     @Override
     protected int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        return state.getValue(ACTIVE) ? SIGNAL_STRENGTH : 0;
+        return state.getValue(STATE) == TerminalState.POWERING ? SIGNAL_STRENGTH : 0;
     }
 
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        boolean wasActive = state.getValue(ACTIVE);
+        boolean wasActive = state.getValue(STATE) == TerminalState.POWERING;
         super.onRemove(state, level, pos, newState, movedByPiston);
         if (wasActive && !state.is(newState.getBlock()) && !level.isClientSide()) {
             notifyNeighbours(level, pos, state.getBlock());
