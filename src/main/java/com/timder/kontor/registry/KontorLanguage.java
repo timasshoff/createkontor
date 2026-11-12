@@ -142,7 +142,7 @@ public class KontorLanguage {
                 "The rent for property %s is cancelled, it cannot be chunk loaded.");
         REGISTRATE.addRawLang(
                 "message.createkontor.property_manager.chunk_loading_limit_reached",
-                "Your company cannot load more than %2$s properties loaded.");
+                "Your company cannot load more than %2$s properties.");
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.material_list_added", "Material List added to Cart.");
         REGISTRATE.addRawLang(
                 "message.createkontor.measurement_running",

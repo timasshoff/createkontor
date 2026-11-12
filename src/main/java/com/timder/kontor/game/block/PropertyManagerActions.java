@@ -78,6 +78,7 @@ public class PropertyManagerActions extends EmployeeActions {
 
         PropertyRules.SellResult result = PropertyRules.sell(company, key, economy.currentDay(), params);
         if (result.status() == PropertyRules.SellResult.Status.SOLD) {
+            comapnyData.setDirty();
             KontorChunkLoading.refreshHeld(serverLevel.getServer(), comapnyData.getRegistry(), company.id());
             return S2CActionResult.silentSuccess();
         }

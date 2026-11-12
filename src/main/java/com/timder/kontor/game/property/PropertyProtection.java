@@ -16,7 +16,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobSpawnType;
@@ -339,7 +338,9 @@ public final class PropertyProtection {
         }
         ServerLevel level = event.getLevel().getLevel();
         ChunkKey chunk = new ChunkKey(
-                BiomeSampling.dimensionId(level), Mth.floor(event.getX()) >> 4, Mth.floor(event.getZ()) >> 4);
+                BiomeSampling.dimensionId(level),
+                event.getEntity().blockPosition().getX() >> 4,
+                event.getEntity().blockPosition().getZ() >> 4);
         if (isProtected(level, chunk)) {
             event.setSpawnCancelled(true);
         }
