@@ -16,6 +16,7 @@ import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.OrderPhase;
 import com.timder.kontor.core.company.order.RequestOrigin;
+import com.timder.kontor.core.company.power.PowerState;
 import com.timder.kontor.core.company.property.*;
 import com.timder.kontor.core.company.request.Request;
 import com.timder.kontor.core.company.request.RequestArrivals;
@@ -187,6 +188,8 @@ public class CompanySavedData extends SavedData {
         }
         tag.put("Properties", properties);
 
+        tag.put("Power", writePower(state.power()));
+
         return tag;
     }
 
@@ -268,6 +271,9 @@ public class CompanySavedData extends SavedData {
             properties.add(readPropertyHolding((CompoundTag) t));
         }
 
+        PowerState power =
+                tag.contains("Power", Tag.TAG_COMPOUND) ? readPower(tag.getCompound("Power")) : PowerState.empty();
+
         return new Company.SaveState(
                 id,
                 name,
@@ -294,7 +300,8 @@ public class CompanySavedData extends SavedData {
                 lastActiveDay,
                 departures,
                 logistics,
-                properties);
+                properties,
+                power);
     }
 
     private static CompoundTag writeAccount(Account.SaveState state) {
@@ -597,5 +604,16 @@ public class CompanySavedData extends SavedData {
                 tag.getLong("AcquiredDay"),
                 tag.getBoolean("Cancelled"),
                 tag.getBoolean("ChunkLoading"));
+    }
+
+    private static CompoundTag writePower(PowerState state) {
+        CompoundTag tag = new CompoundTag();
+        tag.putLong("FixedSuTicks", state.fixedSuTicks());
+        tag.putLong("DynamicSuTicks", state.dynamicSuTicks());
+        return tag;
+    }
+
+    private static PowerState readPower(CompoundTag tag) {
+        return new PowerState(tag.getLong("FixedSuTicks"), tag.getLong("DynamicSuTicks"));
     }
 }

@@ -13,6 +13,7 @@ import com.timder.kontor.core.company.logistics.LogisticsState;
 import com.timder.kontor.core.company.order.Order;
 import com.timder.kontor.core.company.order.OrderBook;
 import com.timder.kontor.core.company.order.RequestOrigin;
+import com.timder.kontor.core.company.power.PowerState;
 import com.timder.kontor.core.company.property.ChunkKey;
 import com.timder.kontor.core.company.property.PropertyHolding;
 import com.timder.kontor.core.company.property.PropertyRules;
@@ -67,6 +68,8 @@ public final class Company {
     private final Map<String, Integer> boundResourceCounts = new LinkedHashMap<>();
 
     private LogisticsState logistics = LogisticsState.disconnected();
+
+    private PowerState power = PowerState.empty();
 
     private long lastActiveDay = NEVER_ACTIVE;
     private boolean active = false;
@@ -720,6 +723,14 @@ public final class Company {
         this.liquidity = Objects.requireNonNull(liquidity, "liquidity must not be null.");
     }
 
+    public PowerState power() {
+        return power;
+    }
+
+    public void setPower(PowerState power) {
+        this.power = Objects.requireNonNull(power, "power must not be null.");
+    }
+
     void setDaysInTrouble(int daysInTrouble) {
         if (daysInTrouble < 0) throw new IllegalArgumentException("daysInTrouble must not be negative.");
         this.daysInTrouble = daysInTrouble;
@@ -768,7 +779,8 @@ public final class Company {
             long lastActiveDay,
             List<Departure> departures,
             LogisticsState logistics,
-            List<PropertyHolding> properties) {
+            List<PropertyHolding> properties,
+            PowerState power) {
         public SaveState {
             Objects.requireNonNull(id, "id must not be null.");
             Objects.requireNonNull(name, "name must not be null.");
@@ -834,6 +846,7 @@ public final class Company {
             }
 
             logistics = logistics == null ? LogisticsState.disconnected() : logistics;
+            power = power == null ? PowerState.empty() : power;
 
             properties = properties == null ? List.of() : List.copyOf(properties);
             Set<ChunkKey> chunks = new HashSet<>();
@@ -875,7 +888,8 @@ public final class Company {
                 lastActiveDay,
                 List.copyOf(departures),
                 logistics,
-                List.copyOf(properties.values()));
+                List.copyOf(properties.values()),
+                power);
     }
 
     public static Company restore(SaveState saveState) {
@@ -911,6 +925,7 @@ public final class Company {
         company.lastActiveDay = saveState.lastActiveDay();
         company.departures.addAll(saveState.departures());
         company.logistics = saveState.logistics();
+        company.power = saveState.power();
 
         for (PropertyHolding holding : saveState.properties()) {
             company.properties.put(holding.chunk(), holding);

@@ -5,6 +5,7 @@ import com.timder.kontor.core.company.financial.BankLoanParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
 import com.timder.kontor.core.company.license.LicenseParams;
+import com.timder.kontor.core.company.power.PowerParams;
 import com.timder.kontor.data.KontorData;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -48,6 +49,9 @@ public class CompanyConfig {
     public static final ModConfigSpec.DoubleValue AUTO_PURCHASE_MARKUP;
 
     public static final ModConfigSpec.DoubleValue STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS;
+
+    public static final ModConfigSpec.DoubleValue SU_PRICE_PER_SU_DAY_IN_DOLLARS;
+    public static final ModConfigSpec.DoubleValue BRASS_OUTLET_PRICE_FACTOR;
 
     public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MIN_SIGNAL_SECONDS;
     public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MAX_SIGNAL_SECONDS;
@@ -178,6 +182,16 @@ public class CompanyConfig {
 
         builder.pop();
 
+        builder.comment("Stress units bought from outlets").push("power");
+        SU_PRICE_PER_SU_DAY_IN_DOLLARS = builder.comment(
+                        "Dollars a company pays for one stress unit provided by an andesite outlet for one day. The unbilled stress units are collected and billed at the next settled day")
+                .defineInRange("suPricePerSuMinuteInDollars", 0.015, 0.0, 1_000.0);
+        BRASS_OUTLET_PRICE_FACTOR = builder.comment(
+                        "Factor on the stress unit price for brass outlets (1.5 = 50 % more expensive than andesite outlets). At least 1")
+                .defineInRange("brassOutletPriceFactor", 1.5, 1.0, 100.0);
+
+        builder.pop();
+
         builder.comment("Payment terminal").push("paymentTerminal");
 
         PAYMENT_TERMINAL_MIN_SIGNAL_SECONDS = builder.comment(
@@ -226,6 +240,7 @@ public class CompanyConfig {
                         BANK_LOAN_CREDIT_LIMIT_REVENUE_MULTIPLE.get(),
                         BANK_LOAN_CREDIT_LIMIT_REVENUE_DAYS.get(),
                         BANK_LOAN_MINIMUM_AMOUNT_SHARE.get()),
-                PropertyConfig.toPropertyParams());
+                PropertyConfig.toPropertyParams(),
+                new PowerParams(SU_PRICE_PER_SU_DAY_IN_DOLLARS.get(), BRASS_OUTLET_PRICE_FACTOR.get()));
     }
 }

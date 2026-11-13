@@ -7,6 +7,7 @@ import com.timder.kontor.core.company.financial.*;
 import com.timder.kontor.core.company.license.HeldLicense;
 import com.timder.kontor.core.company.license.LicenseHoldingRules;
 import com.timder.kontor.core.company.logistics.LogisticsStorageRules;
+import com.timder.kontor.core.company.power.PowerRules;
 import com.timder.kontor.core.company.property.PropertyHolding;
 import com.timder.kontor.core.company.property.PropertyRules;
 import java.util.*;
@@ -20,7 +21,7 @@ public final class CompanyRules {
      * @param day The current day being settled
      * @param policyRate The current policy rate
      * @param otherCosts Extra costs of that day.
-     *                   Must not contain {@link BookingKind#BUSINESS_LICENSE} or {@link BookingKind#INTEREST} as these are already being computed here.
+     *                   Must not contain {@link BookingKind#BUSINESS_LICENSE}, {@link BookingKind#INTEREST} or {@link BookingKind#POWER} as these are already being computed here.
      * @param params The company parameters
      * @return The history entry of that day
      */
@@ -45,6 +46,7 @@ public final class CompanyRules {
         bookSalaries(company, day, params);
         bookPropertyRent(company, day, params);
         LogisticsStorageRules.bookUnbilled(company, day, params);
+        PowerRules.bookUnbilled(company, day, params);
         for (Map.Entry<BookingKind, Money> entry : otherCosts.entrySet()) {
             account.book(day, entry.getKey(), entry.getValue().negate(), "");
         }
@@ -232,6 +234,7 @@ public final class CompanyRules {
                     || kind == BookingKind.TURNOVER_LICENSE
                     || kind == BookingKind.INTEREST
                     || kind == BookingKind.STORAGE
+                    || kind == BookingKind.POWER
                     || kind == BookingKind.SALARY
                     || kind == BookingKind.PROPERTY_RENT) {
                 throw new IllegalArgumentException(
