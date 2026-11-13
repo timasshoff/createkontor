@@ -20,6 +20,7 @@ import com.timder.kontor.util.ComponentFormatting;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -303,37 +304,33 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);
+        tooltip.add(Component.literal(""));
 
         if (getBlockState().getBlock() instanceof AbstractEmployeeDeskBlock desk) {
             CreateLang.builder()
-                    .add(Component.translatable(
-                                    "goggle.createkontor.employee_desk.role",
-                                    ComponentFormatting.highlightStandardTranslatable(desk.roleTranslationKey()))
-                            .withStyle(ComponentFormatting.DEFAULT))
-                    .forGoggles(tooltip, 1);
-        }
-
-        if (!seated) {
-            CreateLang.builder()
-                    .add(ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.seat_empty"))
-                    .forGoggles(tooltip, 1);
+                    .add(Component.translatable(desk.roleTranslationKey())
+                            .append(Component.literal(":"))
+                            .withStyle(ChatFormatting.WHITE))
+                    .forGoggles(tooltip, 0);
         }
 
         switch (status) {
             case EMPLOYED -> {
                 CreateLang.builder()
-                        .add(Component.translatable(
-                                        "goggle.createkontor.employee_desk.employed",
-                                        ComponentFormatting.highlightStandard("#" + employeeNumber))
+                        .add(Component.translatable("goggle.createkontor.employee_desk.salary")
                                 .withStyle(ComponentFormatting.DEFAULT))
+                        .forGoggles(tooltip, 0);
+                CreateLang.builder()
+                        .add(ComponentFormatting.highlightStandard(
+                                Money.ofCents(salaryCents).toString()))
                         .forGoggles(tooltip, 1);
+
                 CreateLang.builder()
                         .add(Component.translatable(
-                                        "goggle.createkontor.employee_desk.salary",
-                                        ComponentFormatting.highlightStandard(
-                                                Money.ofCents(salaryCents).toString()))
+                                        "goggle.createkontor.employee_desk.employed",
+                                        Component.literal("#" + employeeNumber))
                                 .withStyle(ComponentFormatting.DEFAULT))
-                        .forGoggles(tooltip, 2);
+                        .forGoggles(tooltip, 0);
             }
             case VACANT -> {
                 line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.vacant"));
@@ -364,24 +361,33 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     }
 
     private static void line(List<Component> tooltip, Component text) {
-        CreateLang.builder().add(text).forGoggles(tooltip, 1);
+        CreateLang.builder().add(text).forGoggles(tooltip, 0);
     }
 
     private void offer(List<Component> tooltip) {
         CreateLang.builder()
-                .add(Component.translatable(
-                                "goggle.createkontor.employee_desk.offer_salary",
-                                ComponentFormatting.highlightStandard(
-                                        Money.ofCents(salaryCents).toString()))
+                .add(Component.translatable("goggle.createkontor.employee_desk.offer_salary")
                         .withStyle(ComponentFormatting.DEFAULT))
-                .forGoggles(tooltip, 2);
+                .forGoggles(tooltip, 0);
         CreateLang.builder()
                 .add(Component.translatable(
-                                "goggle.createkontor.employee_desk.offer_bonus",
+                                "goggle.createkontor.employee_desk.offer_salary.value",
+                                ComponentFormatting.highlightStandard(
+                                        Money.ofCents(salaryCents).toString()))
+                        .withStyle(ChatFormatting.DARK_GRAY))
+                .forGoggles(tooltip, 1);
+
+        CreateLang.builder()
+                .add(Component.translatable("goggle.createkontor.employee_desk.offer_bonus")
+                        .withStyle(ComponentFormatting.DEFAULT))
+                .forGoggles(tooltip, 0);
+        CreateLang.builder()
+                .add(Component.translatable(
+                                "goggle.createkontor.employee_desk.offer_bonus.value",
                                 ComponentFormatting.highlightStandard(
                                         Money.ofCents(bonusCents).toString()))
-                        .withStyle(ComponentFormatting.DEFAULT))
-                .forGoggles(tooltip, 2);
+                        .withStyle(ChatFormatting.DARK_GRAY))
+                .forGoggles(tooltip, 1);
     }
 
     @Override

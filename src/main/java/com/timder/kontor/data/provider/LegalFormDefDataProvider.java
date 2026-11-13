@@ -49,6 +49,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 true,
                 1,
                 6,
+                2,
                 null));
 
         futures.add(save(
@@ -75,6 +76,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 false,
                 2,
                 16,
+                8,
                 new UpgradeRequirements(
                         Money.ofDollars(10_000), // Fee
                         Money.ofDollars(5000), // Net worth
@@ -107,6 +109,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 false,
                 3,
                 48,
+                32,
                 new UpgradeRequirements(
                         Money.ofDollars(25_000), // Fee
                         Money.ofDollars(20_000), // Net worth
@@ -138,6 +141,7 @@ public class LegalFormDefDataProvider implements DataProvider {
                 Money.ofDollars(40000), // Free storage
                 false,
                 6,
+                LegalFormDef.UNLIMITED,
                 LegalFormDef.UNLIMITED,
                 new UpgradeRequirements(
                         Money.ofDollars(50_000), // Fee
@@ -174,6 +178,7 @@ public class LegalFormDefDataProvider implements DataProvider {
             boolean founderProtection,
             int maxShippingExits,
             int maxProperties,
+            int maxPowerOutlets,
             UpgradeRequirements entryRequirements) {
         JsonObject json = new JsonObject();
         json.addProperty("level", level);
@@ -197,6 +202,7 @@ public class LegalFormDefDataProvider implements DataProvider {
         json.addProperty("founder_protection", founderProtection);
         json.addProperty("max_shipping_exits", maxShippingExits);
         json.addProperty("max_properties", maxProperties);
+        json.addProperty("max_power_outlets", maxPowerOutlets);
 
         if (entryRequirements != null) {
             JsonObject requirements = new JsonObject();

@@ -52,6 +52,9 @@ public class CompanyConfig {
 
     public static final ModConfigSpec.DoubleValue SU_PRICE_PER_SU_DAY_IN_DOLLARS;
     public static final ModConfigSpec.DoubleValue BRASS_OUTLET_PRICE_FACTOR;
+    public static final ModConfigSpec.IntValue ANDESITE_OUTLET_MAX_SU;
+    public static final ModConfigSpec.IntValue BRASS_OUTLET_MAX_SU;
+    public static final ModConfigSpec.IntValue OUTLET_MAX_RPM;
 
     public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MIN_SIGNAL_SECONDS;
     public static final ModConfigSpec.IntValue PAYMENT_TERMINAL_MAX_SIGNAL_SECONDS;
@@ -179,13 +182,22 @@ public class CompanyConfig {
         STORAGE_FEE_PER_ITEM_DAY_IN_DOLLARS = builder.comment(
                         "Dollars a company pays per day for each item stored in its logistics network (0.002 = 0.2 cents). The stock is sampled once per trading tick and billed at the end of the day, and when the connection ends")
                 .defineInRange("storageFeePerItemDayInDollars", 0.025, 0.0, 1_000.0);
+        ANDESITE_OUTLET_MAX_SU = builder.comment(
+                        "Most stress units a single andesite outlet can provide. Applies to every andesite outlet, not to the company as a whole")
+                .defineInRange("andesiteOutletMaxSu", 1_024, 1, 1_000_000);
+        BRASS_OUTLET_MAX_SU = builder.comment(
+                        "Most stress units a single brass outlet can buy, even if the connected network needs more. If it is below the andesite limit, the andesite limit is used")
+                .defineInRange("brassOutletMaxSu", 4_096, 1, 1_000_000);
+        OUTLET_MAX_RPM = builder.comment(
+                        "Highest speed in RPM (in either direction) that can be set on an outlet. Create's default maximum is 256")
+                .defineInRange("outletMaxRpm", 256, 1, 256);
 
         builder.pop();
 
         builder.comment("Stress units bought from outlets").push("power");
         SU_PRICE_PER_SU_DAY_IN_DOLLARS = builder.comment(
                         "Dollars a company pays for one stress unit provided by an andesite outlet for one day. The unbilled stress units are collected and billed at the next settled day")
-                .defineInRange("suPricePerSuMinuteInDollars", 0.015, 0.0, 1_000.0);
+                .defineInRange("suPricePerSuDayInDollars", 0.30, 0.0, 1_000.0);
         BRASS_OUTLET_PRICE_FACTOR = builder.comment(
                         "Factor on the stress unit price for brass outlets (1.5 = 50 % more expensive than andesite outlets). At least 1")
                 .defineInRange("brassOutletPriceFactor", 1.5, 1.0, 100.0);

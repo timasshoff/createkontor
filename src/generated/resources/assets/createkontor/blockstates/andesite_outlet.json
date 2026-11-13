@@ -1,0 +1,50 @@
+{
+  "variants": {
+    "facing=down,powered=false": {
+      "model": "createkontor:block/power_outlet_andesite",
+      "x": 270
+    },
+    "facing=down,powered=true": {
+      "model": "createkontor:block/andesite_outlet_powered",
+      "x": 270
+    },
+    "facing=east,powered=false": {
+      "model": "createkontor:block/power_outlet_andesite",
+      "y": 270
+    },
+    "facing=east,powered=true": {
+      "model": "createkontor:block/andesite_outlet_powered",
+      "y": 270
+    },
+    "facing=north,powered=false": {
+      "model": "createkontor:block/power_outlet_andesite",
+      "y": 180
+    },
+    "facing=north,powered=true": {
+      "model": "createkontor:block/andesite_outlet_powered",
+      "y": 180
+    },
+    "facing=south,powered=false": {
+      "model": "createkontor:block/power_outlet_andesite"
+    },
+    "facing=south,powered=true": {
+      "model": "createkontor:block/andesite_outlet_powered"
+    },
+    "facing=up,powered=false": {
+      "model": "createkontor:block/power_outlet_andesite",
+      "x": 90
+    },
+    "facing=up,powered=true": {
+      "model": "createkontor:block/andesite_outlet_powered",
+      "x": 90
+    },
+    "facing=west,powered=false": {
+      "model": "createkontor:block/power_outlet_andesite",
+      "y": 90
+    },
+    "facing=west,powered=true": {
+      "model": "createkontor:block/andesite_outlet_powered",
+      "y": 90
+    }
+  }
+}

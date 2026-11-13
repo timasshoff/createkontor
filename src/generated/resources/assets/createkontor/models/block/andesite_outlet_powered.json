@@ -1,0 +1,6 @@
+{
+  "parent": "createkontor:block/power_outlet_andesite",
+  "textures": {
+    "0": "createkontor:block/power_outlet_andesite_powered"
+  }
+}

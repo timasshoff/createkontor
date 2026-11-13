@@ -584,7 +584,10 @@ public final class LawyerUi {
                         count(current.maxOpenOrders(), nextOf(next, LegalFormDef::maxOpenOrders), true)),
                 statRow(
                         Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.max_shipping_exits"),
-                        count(current.maxShippingExits(), nextOf(next, LegalFormDef::maxShippingExits), true)));
+                        count(current.maxShippingExits(), nextOf(next, LegalFormDef::maxShippingExits), true)),
+                statRow(
+                        Component.translatable("ui.createkontor.lawyer_desk.legal_form.stats.max_power_outlets"),
+                        count(current.maxPowerOutlets(), nextOf(next, LegalFormDef::maxPowerOutlets), true)));
 
         return UiContainer.twoColumns(left, right);
     }
@@ -679,6 +682,7 @@ public final class LawyerUi {
                 t.getBoolean("FounderProtection"),
                 t.getInt("MaxShippingExits"),
                 t.getInt("MaxProperties"),
+                t.getInt("MaxPowerOutlets"),
                 requirements));
     }
 
@@ -705,6 +709,7 @@ public final class LawyerUi {
         t.putBoolean("FounderProtection", legalForm.founderProtection());
         t.putInt("MaxShippingExits", legalForm.maxShippingExits());
         t.putInt("MaxProperties", legalForm.maxProperties());
+        t.putInt("MaxPowerOutlets", legalForm.maxPowerOutlets());
         if (legalForm.hasEntryRequirements()) {
             t.put("Requirements", requirementsToTag(legalForm.entryRequirements()));
         }

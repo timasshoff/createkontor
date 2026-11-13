@@ -27,6 +27,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "message.createkontor.shipping_exit.limit",
                 "§c⚠ Limit reached: Legal form allows at most %s §cbound shipping exits.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.power_outlet.limit",
+                "§c⚠ Limit reached: Legal form allows at most %s §cbound power outlets.");
         REGISTRATE.addRawLang("message.createkontor.kontor_desk.limit", "§c⚠ This company already has a Kontor Desk.");
         REGISTRATE.addRawLang(
                 "message.createkontor.kontor_desk.request_accepting_failed", "§cAccepting request %s §cfailed: %s");
@@ -176,12 +179,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.checkbook.signed", "Check signed: %s to %s.");
         REGISTRATE.addRawLang("message.createkontor.transfer_received", "%s §7sent you %s§7.");
 
-        REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company");
+        REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK, "Company:");
         REGISTRATE.addRawLang(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND, "Not bound to any company.");
-        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.role", "Role: %s");
-        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.seat_empty", "Seat: empty");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.employed", "Employed: %s");
-        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.salary", "Daily salary: %s");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.salary", "Daily salary:");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.vacant", "Not staffed.");
         REGISTRATE.addRawLang(
                 "goggle.createkontor.employee_desk.no_free_slot",
@@ -192,8 +193,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang(
                 "goggle.createkontor.employee_desk.not_affordable",
                 "Cannot hire: the company cannot afford the hiring bonus.");
-        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_salary", "Salary: %s per day");
-        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_bonus", "Hiring bonus: %s once");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_salary", "Salary:");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_salary.value", "%s per day");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_bonus", "Hiring bonus:");
+        REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_bonus.value", "%s once");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.inactive", "Paused");
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.postboxes", "Connected postboxes: %s");
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.no_postbox", "No postbox connected");
@@ -336,6 +339,7 @@ public class KontorLanguage {
                 "Max. Open Requests Per Product");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.order_book_size", "Order Book Size");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.max_shipping_exits", "Max. Shipping Exits");
+        REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.stats.max_power_outlets", "Max. Power Outlets");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.application_fee", "Application Fee: %s");
         REGISTRATE.addRawLang("ui.createkontor.lawyer_desk.legal_form.upgrade_requirements", "Upgrade Requirements");
         REGISTRATE.addRawLang(
@@ -657,6 +661,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.checkbook.amount", "Amount in $");
         REGISTRATE.addRawLang("ui.createkontor.checkbook.amount_short", "Amount");
         REGISTRATE.addRawLang("ui.createkontor.checkbook.sign", "Sign & Transfer Money");
+
+        REGISTRATE.addRawLang("ui.createkontor.power_outlet.stress_units", "Stress Units");
+        REGISTRATE.addRawLang("ui.createkontor.power_outlet.rotation_speed", "Rotation Speed");
 
         REGISTRATE.addRawLang("enum.createkontor.liquidity.normal", "§2Normal Liquidity");
         REGISTRATE.addRawLang("enum.createkontor.liquidity.illiquidity", "§4Illiquidity");

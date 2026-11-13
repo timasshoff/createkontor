@@ -27,6 +27,7 @@ import java.util.Objects;
  * @param founderProtection Whether the founder protection applies
  * @param maxShippingExits The max shipping exits
  * @param maxProperties The max chunks
+ * @param maxPowerOutlets The max amount of power outlets
  */
 public record LegalFormDef(
         int level,
@@ -50,6 +51,7 @@ public record LegalFormDef(
         boolean founderProtection,
         int maxShippingExits,
         int maxProperties,
+        int maxPowerOutlets,
         UpgradeRequirements entryRequirements) {
 
     public static final int UNLIMITED = Integer.MAX_VALUE;
@@ -77,6 +79,7 @@ public record LegalFormDef(
         if (bankLoanLimit.isNegative()) throw new IllegalArgumentException("bankLoanLimit must not be negative.");
         if (freeStorage.isNegative()) throw new IllegalArgumentException("freeStorage must not be negative.");
         if (maxProperties < 0) throw new IllegalArgumentException("maxProperties must not be negative.");
+        if (maxPowerOutlets < 0) throw new IllegalArgumentException("maxPowerOutlets must not be negative.");
         if (level == 1 && entryRequirements != null)
             throw new IllegalArgumentException("The first legal form must not have entry requirements.");
         if (level > 1 && entryRequirements == null)
@@ -89,6 +92,10 @@ public record LegalFormDef(
 
     public boolean allowsMoreShippingExits(int currentCount) {
         return currentCount < maxShippingExits;
+    }
+
+    public boolean allowsMorePowerOutlets(int currentCount) {
+        return currentCount < maxPowerOutlets;
     }
 
     public boolean hasEntryRequirements() {

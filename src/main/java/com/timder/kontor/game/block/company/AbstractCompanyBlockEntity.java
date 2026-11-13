@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -191,17 +192,18 @@ public abstract class AbstractCompanyBlockEntity extends SmartBlockEntity
         if (companyId == null || companyName.isEmpty()) {
             CreateLang.builder(CreateKontor.MODID)
                     .add(ComponentFormatting.errorTranslatable(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK_UNBOUND))
-                    .forGoggles(tooltip, 1);
+                    .forGoggles(tooltip, 0);
             return true;
         }
 
         CreateLang.builder()
-                .add(ComponentFormatting.standardTranslatable(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK))
-                .forGoggles(tooltip, 1);
+                .add(Component.translatable(CompanyBlockSupport.GOGGLE_COMPANY_BLOCK)
+                        .withStyle(ChatFormatting.WHITE))
+                .forGoggles(tooltip, 0);
 
         CreateLang.builder()
                 .add(ComponentFormatting.highlightStandard(companyName))
-                .forGoggles(tooltip, 2);
+                .forGoggles(tooltip, 1);
 
         return true;
     }

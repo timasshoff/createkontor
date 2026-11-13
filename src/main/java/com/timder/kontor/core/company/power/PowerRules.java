@@ -4,13 +4,12 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.economy.Economy;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 public final class PowerRules {
-
-    public static final long TICKS_PER_MINUTE = 1_200L;
 
     public static void add(Company company, PowerKind kind, long suTicks) {
         Objects.requireNonNull(company, "company must not be null.");
@@ -37,7 +36,7 @@ public final class PowerRules {
                 .multiply(BigDecimal.valueOf(params.pricePerSuDay()))
                 .multiply(BigDecimal.valueOf(params.factorOf(kind)))
                 .movePointRight(2)
-                .divide(BigDecimal.valueOf(TICKS_PER_MINUTE), 0, RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(Economy.DAY_LENGTH), 0, RoundingMode.HALF_UP);
         if (cents.compareTo(BigDecimal.valueOf(Long.MAX_VALUE)) > 0) {
             return Money.ofCents(Long.MAX_VALUE);
         }

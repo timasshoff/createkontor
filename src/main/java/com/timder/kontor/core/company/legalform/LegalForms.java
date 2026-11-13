@@ -98,6 +98,7 @@ public record LegalForms(List<LegalFormDef> forms) {
                         true, // founder protection
                         1,
                         2,
+                        1,
                         null),
                 new LegalFormDef(
                         2,
@@ -121,6 +122,7 @@ public record LegalForms(List<LegalFormDef> forms) {
                         false,
                         2,
                         6,
+                        1,
                         new UpgradeRequirements(Money.ofDollars(1_000), Money.ofDollars(5_000), 30, 3.0, 24_000, 7)),
                 new LegalFormDef(
                         3,
@@ -144,6 +146,7 @@ public record LegalForms(List<LegalFormDef> forms) {
                         false,
                         4,
                         15,
+                        2,
                         new UpgradeRequirements(Money.ofDollars(5_000), Money.ofDollars(25_000), 150, 3.5, 48_000, 7)),
                 new LegalFormDef(
                         4,
@@ -166,6 +169,7 @@ public record LegalForms(List<LegalFormDef> forms) {
                         Money.ofDollars(100_000),
                         false,
                         8,
+                        3,
                         UNLIMITED,
                         new UpgradeRequirements(
                                 Money.ofDollars(25_000), Money.ofDollars(150_000), 500, 4.0, 72_000, 7))));

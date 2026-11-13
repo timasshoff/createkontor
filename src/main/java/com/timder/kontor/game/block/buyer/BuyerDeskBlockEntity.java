@@ -395,21 +395,22 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);
+        tooltip.add(Component.literal(""));
 
         if (portCount == 0) {
             CreateLang.builder()
                     .add(ComponentFormatting.errorTranslatable("goggle.createkontor.buyer_desk.no_postbox"))
-                    .forGoggles(tooltip, 1);
+                    .forGoggles(tooltip, 0);
             CreateLang.builder()
                     .add(ComponentFormatting.standardTranslatable("goggle.createkontor.buyer_desk.connect_hint"))
-                    .forGoggles(tooltip, 2);
+                    .forGoggles(tooltip, 1);
         } else {
             CreateLang.builder()
                     .add(Component.translatable(
                                     "goggle.createkontor.buyer_desk.postboxes",
                                     ComponentFormatting.highlightStandard(String.valueOf(portCount)))
                             .withStyle(ComponentFormatting.DEFAULT))
-                    .forGoggles(tooltip, 1);
+                    .forGoggles(tooltip, 0);
         }
         if (pendingCount > 0) {
             CreateLang.builder()
@@ -417,7 +418,7 @@ public class BuyerDeskBlockEntity extends EmployeeDeskBlockEntity {
                                     "goggle.createkontor.buyer_desk.pending",
                                     ComponentFormatting.highlightError(String.valueOf(pendingCount)))
                             .withStyle(ComponentFormatting.ERROR))
-                    .forGoggles(tooltip, 1);
+                    .forGoggles(tooltip, 0);
         }
         return true;
     }

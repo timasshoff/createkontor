@@ -74,6 +74,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
         boolean founderProtection = GsonHelper.getAsBoolean(object, "founder_protection");
         int maxShippingExits = GsonHelper.getAsInt(object, "max_shipping_exits");
         int maxProperties = GsonHelper.getAsInt(object, "max_properties");
+        int maxPowerOutlets = GsonHelper.getAsInt(object, "max_power_outlets");
 
         UpgradeRequirements entryRequirements = object.has("upgrade_requirements")
                 ? parseUpgradeRequirements(GsonHelper.getAsJsonObject(object, "upgrade_requirements"))
@@ -101,6 +102,7 @@ public class LegalFormDefDataLoader extends SimpleJsonResourceReloadListener {
                 founderProtection,
                 maxShippingExits,
                 maxProperties,
+                maxPowerOutlets,
                 entryRequirements);
     }
 

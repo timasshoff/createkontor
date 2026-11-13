@@ -1,6 +1,7 @@
 {
   "values": [
     "createkontor:shipping_exit",
-    "createkontor:payment_terminal"
+    "createkontor:payment_terminal",
+    "createkontor:andesite_outlet"
   ]
 }

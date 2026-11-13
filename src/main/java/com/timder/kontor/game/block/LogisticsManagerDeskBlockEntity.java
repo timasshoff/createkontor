@@ -446,6 +446,8 @@ public class LogisticsManagerDeskBlockEntity extends EmployeeDeskBlockEntity {
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);
+        tooltip.add(Component.literal(""));
+
         if (!isBoundToCompany()) {
             return true;
         }

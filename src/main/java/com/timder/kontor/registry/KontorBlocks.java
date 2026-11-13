@@ -12,12 +12,14 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import com.timder.kontor.game.block.*;
 import com.timder.kontor.game.block.buyer.BuyerDeskBlock;
 import com.timder.kontor.game.block.consultant.ConsultantDeskBlock;
+import com.timder.kontor.game.block.power.PowerOutletBlock;
 import com.timder.kontor.game.display.KontorDisplaySources;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.createmod.catnip.lang.FontHelper;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -139,6 +141,45 @@ public final class KontorBlocks {
                     .save(prov))
             .lang("Payment Terminal")
             .simpleItem()
+            .register();
+
+    public static final BlockEntry<PowerOutletBlock> ANDESITE_OUTLET = REGISTRATE
+            .block("andesite_outlet", PowerOutletBlock::new)
+            .initialProperties(SharedProperties::stone)
+            .properties(p -> p.mapColor(MapColor.PODZOL)
+                    .strength(2.0F, 6.0F)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion())
+            .tag(BlockTags.MINEABLE_WITH_PICKAXE)
+            .tag(AllTags.AllBlockTags.WRENCH_PICKUP.tag)
+            .blockstate((ctx, prov) -> {
+                ModelFile idle = prov.models().getExistingFile(prov.modLoc("block/power_outlet_andesite"));
+                ModelFile powered = prov.models()
+                        .withExistingParent("block/andesite_outlet_powered", prov.modLoc("block/power_outlet_andesite"))
+                        .texture("0", prov.modLoc("block/power_outlet_andesite_powered"));
+                prov.getVariantBuilder(ctx.get()).forAllStates(state -> {
+                    Direction facing = state.getValue(PowerOutletBlock.FACING);
+                    int xRot = facing == Direction.UP ? 90 : facing == Direction.DOWN ? 270 : 0;
+                    int yRot = facing.getAxis().isVertical() ? 0 : (int) facing.toYRot();
+                    return ConfiguredModel.builder()
+                            .modelFile(state.getValue(PowerOutletBlock.POWERED) ? powered : idle)
+                            .rotationX(xRot)
+                            .rotationY(yRot)
+                            .build();
+                });
+            })
+            .loot((loot, block) -> loot.add(
+                    block,
+                    LootTable.lootTable()
+                            .withPool(LootPool.lootPool()
+                                    .setRolls(ConstantValue.exactly(1))
+                                    .add(LootItem.lootTableItem(block))
+                                    .when(ExplosionCondition.survivesExplosion()))))
+            .lang("Andesite Outlet")
+            .item()
+            .model((ctx, prov) ->
+                    prov.withExistingParent(ctx.getName(), prov.modLoc("block/power_outlet_andesite_item")))
+            .build()
             .register();
 
     public static final BlockEntry<KontorDeskBlock> KONTOR_DESK = REGISTRATE

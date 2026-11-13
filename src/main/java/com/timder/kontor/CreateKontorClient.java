@@ -1,8 +1,12 @@
 package com.timder.kontor;
 
+import com.simibubi.create.AllPartialModels;
+import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
 import com.timder.kontor.client.ponder.KontorPonderPlugin;
 import com.timder.kontor.client.ui.SettlementHud;
 import com.timder.kontor.config.ClientConfig;
+import com.timder.kontor.registry.KontorBlockEntities;
+import dev.engine_room.flywheel.lib.visualization.SimpleBlockEntityVisualizer;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
@@ -27,6 +31,10 @@ public class CreateKontorClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         PonderIndex.addPlugin(new KontorPonderPlugin());
+        event.enqueueWork(() -> SimpleBlockEntityVisualizer.builder(KontorBlockEntities.POWER_OUTLET.get())
+                .factory(OrientedRotatingVisual.of(AllPartialModels.SHAFT_HALF))
+                .skipVanillaRender(be -> true)
+                .apply());
     }
 
     @SubscribeEvent

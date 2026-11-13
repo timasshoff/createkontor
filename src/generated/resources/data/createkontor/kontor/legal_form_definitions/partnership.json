@@ -16,6 +16,7 @@
   "max_open_requests_per_product": 3,
   "max_open_requests_total": 12,
   "max_order_quantity": 512,
+  "max_power_outlets": 8,
   "max_product_licenses": 6,
   "max_properties": 16,
   "max_shipping_exits": 2,
