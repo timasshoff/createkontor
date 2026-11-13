@@ -197,10 +197,10 @@ public class CompanyConfig {
         builder.comment("Stress units bought from outlets").push("power");
         SU_PRICE_PER_SU_DAY_IN_DOLLARS = builder.comment(
                         "Dollars a company pays for one stress unit provided by an andesite outlet for one day. The unbilled stress units are collected and billed at the next settled day")
-                .defineInRange("suPricePerSuDayInDollars", 0.30, 0.0, 1_000.0);
+                .defineInRange("suPricePerSuDayInDollars", 0.20, 0.0, 1_000.0);
         BRASS_OUTLET_PRICE_FACTOR = builder.comment(
                         "Factor on the stress unit price for brass outlets (1.5 = 50 % more expensive than andesite outlets). At least 1")
-                .defineInRange("brassOutletPriceFactor", 1.5, 1.0, 100.0);
+                .defineInRange("brassOutletPriceFactor", 1.15, 1.0, 100.0);
 
         builder.pop();
 

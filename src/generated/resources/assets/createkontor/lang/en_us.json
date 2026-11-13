@@ -244,6 +244,8 @@
   "goggle.createkontor.employee_desk.vacant": "Not staffed.",
   "goggle.createkontor.logistics_manager_desk.ordering": "Ordering: %s",
   "goggle.createkontor.logistics_manager_desk.status": "Logistics network: %s",
+  "goggle.createkontor.power_outlet.daily_cost": "Current Cost:",
+  "goggle.createkontor.power_outlet.daily_cost.value": "%s per day",
   "hud.createkontor.settlement.best_day": "★ Best day so far!",
   "hud.createkontor.settlement.comeback": "Loss streak broken!",
   "hud.createkontor.settlement.costs": "Costs",

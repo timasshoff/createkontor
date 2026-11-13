@@ -206,6 +206,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("goggle.createkontor.logistics_manager_desk.status", "Logistics network: %s");
         REGISTRATE.addRawLang("goggle.createkontor.logistics_manager_desk.ordering", "Ordering: %s");
 
+        REGISTRATE.addRawLang("goggle.createkontor.power_outlet.daily_cost", "Current Cost:");
+        REGISTRATE.addRawLang("goggle.createkontor.power_outlet.daily_cost.value", "%s per day");
+
         REGISTRATE.addRawLang("createkontor.display_source.company_overview", "Company Overview");
         REGISTRATE.addRawLang("display.createkontor.company_overview.balance", "Balance: %s");
         REGISTRATE.addRawLang("display.createkontor.company_overview.open_requests", "Open Requests: %s");

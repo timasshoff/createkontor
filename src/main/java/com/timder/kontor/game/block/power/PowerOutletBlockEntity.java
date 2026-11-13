@@ -12,6 +12,12 @@ import com.timder.kontor.config.CompanyConfig;
 import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyId;
 import com.timder.kontor.core.company.CompanyRegistry;
+import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.legalform.LegalForms;
+import com.timder.kontor.core.company.power.PowerKind;
+import com.timder.kontor.core.company.power.PowerRules;
+import com.timder.kontor.core.economy.Economy;
+import com.timder.kontor.data.KontorData;
 import com.timder.kontor.game.CompanySavedData;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.block.company.CompanyBound;
@@ -39,8 +45,11 @@ public class PowerOutletBlockEntity extends GeneratingKineticBlockEntity impleme
     private static final int FALLBACK_MAX_SU = 1_024;
     private static final int FALLBACK_MAX_RPM = 256;
 
+    private static final int FLUSH_INTERVAL = 20;
+
     private StressUnitsBehaviour stressUnits;
     private ScrollValueBehaviour rotationSpeed;
+    private long pendingSuTicks;
 
     @Nullable
     private CompanyId companyId;
@@ -82,6 +91,39 @@ public class PowerOutletBlockEntity extends GeneratingKineticBlockEntity impleme
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        if (level == null || level.isClientSide() || companyId == null) {
+            return;
+        }
+        if (getGeneratedSpeed() != 0) {
+            pendingSuTicks += stressUnits.getValue();
+        }
+        if ((level.getGameTime() & FLUSH_INTERVAL) == 0) {
+            flushPower();
+        }
+    }
+
+    private void flushPower() {
+        if (pendingSuTicks == 0 || companyId == null || !(level instanceof ServerLevel serverLevel)) {
+            return;
+        }
+        CompanySavedData data = CompanySavedData.get(serverLevel.getServer());
+        Company company = data.getRegistry().get(companyId).orElse(null);
+        if (company != null) {
+            PowerRules.add(company, PowerKind.FIXED, pendingSuTicks);
+            data.setDirty();
+        }
+        pendingSuTicks = 0;
+    }
+
+    @Override
+    public void onChunkUnloaded() {
+        flushPower();
+        super.onChunkUnloaded();
+    }
+
+    @Override
     public float getGeneratedSpeed() {
         BlockState state = getBlockState();
         if (rotationSpeed == null
@@ -113,6 +155,7 @@ public class PowerOutletBlockEntity extends GeneratingKineticBlockEntity impleme
         if (Objects.equals(companyId, id)) {
             return;
         }
+        flushPower();
         updateBoundResourceCount(companyId, id);
         companyId = id;
         companyName = resolveCompanyName();
@@ -140,7 +183,9 @@ public class PowerOutletBlockEntity extends GeneratingKineticBlockEntity impleme
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);
-        tooltip.add(Component.literal(""));
+        if (getGeneratedSpeed() != 0) {
+            tooltip.add(Component.literal(""));
+        }
 
         if (companyId == null || companyName.isEmpty()) {
             CreateLang.builder(CreateKontor.MODID)
@@ -156,6 +201,23 @@ public class PowerOutletBlockEntity extends GeneratingKineticBlockEntity impleme
 
         CreateLang.builder()
                 .add(ComponentFormatting.highlightStandard(companyName))
+                .forGoggles(tooltip, 1);
+
+        CreateLang.builder()
+                .add(ComponentFormatting.standardTranslatable("goggle.createkontor.power_outlet.daily_cost"))
+                .forGoggles(tooltip, 0);
+        Money perDay = getGeneratedSpeed() <= 0
+                ? Money.ZERO
+                : PowerRules.cost(
+                        (long) stressUnits.getValue() * Economy.DAY_LENGTH,
+                        PowerKind.FIXED,
+                        CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()))
+                                .power());
+        CreateLang.builder(CreateKontor.MODID)
+                .add(Component.translatable(
+                                "goggle.createkontor.power_outlet.daily_cost.value",
+                                ComponentFormatting.moneyNegative(perDay))
+                        .withStyle(ChatFormatting.DARK_GRAY))
                 .forGoggles(tooltip, 1);
 
         return true;
