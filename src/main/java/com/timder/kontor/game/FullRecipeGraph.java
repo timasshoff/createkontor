@@ -13,12 +13,14 @@ import com.timder.kontor.core.value.RecipeOutput;
 import java.util.*;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 public class FullRecipeGraph implements RecipeGraph {
@@ -47,13 +49,8 @@ public class FullRecipeGraph implements RecipeGraph {
                     continue;
                 }
 
-                String id = processIdOf(recipe);
-                if (id == null) {
-                    CreateKontor.LOGGER.warn("Recipe {} uses a recipe type that is not registered, skipped.", context);
-                    continue;
-                }
+                RecipeNode node = new RecipeNode(outputs, inputsOf(recipe, context), processIdOf(recipe, context));
 
-                RecipeNode node = new RecipeNode(outputs, inputsOf(recipe, context), id);
                 for (RecipeOutput output : outputs) {
                     graph.computeIfAbsent(output.item().value(), key -> new ArrayList<>())
                             .add(node);
@@ -76,10 +73,14 @@ public class FullRecipeGraph implements RecipeGraph {
         return graph.getOrDefault(output.value(), List.of());
     }
 
-    private static String processIdOf(Recipe<?> recipe) {
-        return BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType()) == null
-                ? null
-                : BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType()).toString();
+    private static String processIdOf(Recipe<?> recipe, String context) {
+        RecipeType<?> type = recipe.getType();
+        ResourceLocation key = type != null ? BuiltInRegistries.RECIPE_TYPE.getKey(type) : null;
+        if (key == null) {
+            CreateKontor.LOGGER.warn("Recipe {} has unregistered recipe type, using fallback.", context);
+            return "unknown";
+        }
+        return key.toString();
     }
 
     private static List<RecipeOutput> outputsOf(Recipe<?> recipe, RegistryAccess registryAccess) {
