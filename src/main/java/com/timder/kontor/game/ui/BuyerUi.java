@@ -16,10 +16,7 @@ import com.timder.kontor.core.company.Company;
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalForms;
-import com.timder.kontor.core.company.purchase.PurchaseKind;
-import com.timder.kontor.core.company.purchase.PurchaseOffer;
-import com.timder.kontor.core.company.purchase.PurchaseOffers;
-import com.timder.kontor.core.company.purchase.PurchaseQuote;
+import com.timder.kontor.core.company.purchase.*;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
@@ -91,16 +88,28 @@ public final class BuyerUi {
     public static UIElement catalogTab(
             EmployeeDeskContext context, BuyerDeskBlockEntity be, ObservableValue<Map<ItemId, Integer>> quote) {
         ObservableList<PurchaseOffer> offers = new ObservableList<>();
+        int[] companyLevel = {0};
         SimpleBinding<Tag> offersBinding = DataBindingBuilder.tagS2C(() -> offersToTag(context))
-                .onRemoteSyncReceived(tag -> offers.set(tagToOffers(tag).stream()
-                        .sorted(Comparator.comparing(
-                                offer -> BuiltInRegistries.ITEM
-                                        .get(ResourceLocation.parse(offer.item().value()))
-                                        .asItem()
-                                        .getDescription()
-                                        .getString(),
-                                String.CASE_INSENSITIVE_ORDER))
-                        .toList()))
+                .onRemoteSyncReceived(tag -> {
+                    int level = ((CompoundTag) tag).getInt("CompanyLevel");
+                    if (level != companyLevel[0]) {
+                        companyLevel[0] = level;
+                        offers.set(List.of());
+                    }
+                    List<PurchaseOffer> sorted = tagToOffers(tag).stream()
+                            .sorted(Comparator.comparing((PurchaseOffer offer) -> !offer.isUnlockedAt(level))
+                                    .thenComparing(
+                                            offer -> BuiltInRegistries.ITEM
+                                                    .get(ResourceLocation.parse(
+                                                            offer.item().value()))
+                                                    .asItem()
+                                                    .getDescription()
+                                                    .getString(),
+                                            String.CASE_INSENSITIVE_ORDER))
+                            .toList();
+                    offers.set(sorted);
+                    removeLockedFromQuote(quote, sorted, level);
+                })
                 .build();
 
         SplitView.Horizontal split = new SplitView.Horizontal();
@@ -109,7 +118,7 @@ public final class BuyerUi {
         split.setMaxPercentage(80);
         split.setPercentage(75);
 
-        split.left(offers(offers, offersBinding, quote));
+        split.left(offers(offers, offersBinding, quote, companyLevel));
         split.right(quote(context, be, offers, offersBinding, quote));
 
         return split;
@@ -118,7 +127,8 @@ public final class BuyerUi {
     public static UIElement offers(
             ObservableList<PurchaseOffer> offers,
             SimpleBinding<Tag> offersBinding,
-            ObservableValue<Map<ItemId, Integer>> quote) {
+            ObservableValue<Map<ItemId, Integer>> quote,
+            int[] companyLevel) {
         UIElement content = new UIElement()
                 .layout(layout -> layout.widthPercent(100).heightPercent(100))
                 .style(UiStyles.PANEL)
@@ -138,6 +148,9 @@ public final class BuyerUi {
         filters.put(
                 Component.translatable("ui.createkontor.buyer_desk.catalog.filter.only_products"),
                 offer -> offer.kind() == PurchaseKind.PRODUCT);
+        filters.put(
+                Component.translatable("ui.createkontor.buyer_desk.catalog.filter.only_available"),
+                offer -> offer.isUnlockedAt(companyLevel[0]));
 
         content.addChild(UiContainer.searchableGrid(
                 offers,
@@ -184,6 +197,16 @@ public final class BuyerUi {
                                     "ui.createkontor.buyer_desk.catalog.price",
                                     ComponentFormatting.moneyColored(offer.unitPrice())),
                             Horizontal.LEFT));
+
+                    if (!offer.isUnlockedAt(companyLevel[0])) {
+                        element.addChild(new UIElement().layout(layout -> layout.flexGrow(1)));
+                        element.addChild(UiLabels.paragraphError(
+                                Component.translatable(
+                                        "ui.createkontor.buyer_desk.catalog.legal_level_too_low",
+                                        offer.requiredLegalLevel()),
+                                Horizontal.LEFT));
+                        return element;
+                    }
 
                     int[] quantity = {1};
                     UIElement buyRow = new UIElement()
@@ -530,6 +553,8 @@ public final class BuyerUi {
             String raw = tag.getString("Item");
             ResourceLocation location = raw.isBlank() ? null : ResourceLocation.tryParse(raw);
             Economy economy = context.economy();
+            CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+
             if (location == null || economy == null || !BuiltInRegistries.ITEM.containsKey(location)) return;
             ItemId id = new ItemId(raw);
             if (!economy.isMarket(id) && !economy.isRawMaterial(id)) return;
@@ -537,10 +562,19 @@ public final class BuyerUi {
             Component name = BuiltInRegistries.ITEM
                     .get(ResourceLocation.parse(id.value()))
                     .getDescription();
+
+            PurchaseKind kind = economy.isMarket(id) ? PurchaseKind.PRODUCT : PurchaseKind.RAW_MATERIAL;
+            boolean levelSufficient =
+                    context.company().legalLevel() >= PurchaseOffers.requiredLegalLevel(kind, id, params);
+
             if (be.getRefillTargets().containsKey(id)) {
                 ToastPayload.sendInfo(
                         context.player(),
                         Component.translatable("message.createkontor.buyer_desk.auto_stock.already_added", name));
+            } else if (!levelSufficient) {
+                ToastPayload.sendError(
+                        context.player(),
+                        Component.translatable("message.createkontor.buyer_desk.auto_stock.legal_level_too_low", name));
             } else if (!be.setRefillTarget(id, 0)) {
                 ToastPayload.sendError(
                         context.player(),
@@ -764,11 +798,28 @@ public final class BuyerUi {
         return content;
     }
 
-    private static Tag offersToTag(EmployeeDeskContext context) {
-        ListTag list = new ListTag();
-        if (context.economy() == null) {
-            return list;
+    private static void removeLockedFromQuote(
+            ObservableValue<Map<ItemId, Integer>> quote, List<PurchaseOffer> offers, int companyLevel) {
+        Set<ItemId> locked = new HashSet<>();
+        for (PurchaseOffer offer : offers) {
+            if (!offer.isUnlockedAt(companyLevel)) {
+                locked.add(offer.item());
+            }
         }
+        Map<ItemId, Integer> next = new LinkedHashMap<>(quote.get());
+        if (next.keySet().removeAll(locked)) {
+            quote.set(next);
+        }
+    }
+
+    private static Tag offersToTag(EmployeeDeskContext context) {
+        CompoundTag root = new CompoundTag();
+        ListTag list = new ListTag();
+        root.put("Offers", list);
+        if (context.economy() == null || context.company() == null) {
+            return root;
+        }
+        root.putInt("CompanyLevel", context.company().legalLevel());
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         for (PurchaseOffer offer : PurchaseOffers.list(context.economy(), params, false)) {
             CompoundTag entry = new CompoundTag();
@@ -776,23 +827,26 @@ public final class BuyerUi {
             entry.putString("Kind", offer.kind().name());
             entry.putDouble("MarketPrice", offer.marketPrice());
             entry.putLong("UnitPriceCents", offer.unitPrice().cents());
+            entry.putInt("RequiredLegalLevel", offer.requiredLegalLevel());
             list.add(entry);
         }
-        return list;
+        return root;
     }
 
     private static List<PurchaseOffer> tagToOffers(Tag tag) {
         List<PurchaseOffer> offers = new ArrayList<>();
-        if (!(tag instanceof ListTag list)) {
+        if (!(tag instanceof CompoundTag root)) {
             return offers;
         }
+        ListTag list = root.getList("Offers", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);
             offers.add(new PurchaseOffer(
                     new ItemId(entry.getString("Item")),
                     PurchaseKind.valueOf(entry.getString("Kind")),
                     entry.getDouble("MarketPrice"),
-                    Money.ofCents(entry.getLong("UnitPriceCents"))));
+                    Money.ofCents(entry.getLong("UnitPriceCents")),
+                    entry.getInt("RequiredLegalLevel")));
         }
         return offers;
     }
@@ -825,13 +879,20 @@ public final class BuyerUi {
     private static Tag purchasableToTag(EmployeeDeskContext context) {
         ListTag list = new ListTag();
         Economy economy = context.economy();
-        if (economy == null) {
+        Company company = context.company();
+        if (economy == null || company == null) {
             return list;
         }
-        Set<ItemId> ids = new LinkedHashSet<>(economy.marketIds());
-        ids.addAll(economy.rawMaterialIds());
-        for (ItemId id : ids) {
-            list.add(StringTag.valueOf(id.value()));
+        CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
+        for (ItemId id : economy.marketIds()) {
+            if (company.legalLevel() >= PurchaseOffers.requiredLegalLevel(PurchaseKind.PRODUCT, id, params)) {
+                list.add(StringTag.valueOf(id.value()));
+            }
+        }
+        for (ItemId id : economy.rawMaterialIds()) {
+            if (company.legalLevel() >= PurchaseOffers.requiredLegalLevel(PurchaseKind.RAW_MATERIAL, id, params)) {
+                list.add(StringTag.valueOf(id.value()));
+            }
         }
         return list;
     }

@@ -157,6 +157,14 @@ public class KontorDeskBoundUi {
                 .build()
                 .getSyncValue());
 
+        Label employeeAmount = UiLabels.primary(Component.empty(), Horizontal.CENTER);
+        openOrders.addSyncValue(DataBindingBuilder.componentS2C(() -> Component.translatable(
+                        "ui.createkontor.kontor_desk.employee_amount",
+                        ComponentFormatting.highlightStandard(Integer.toString(company.employeeCount()))))
+                .onRemoteSyncReceived(employeeAmount::setText)
+                .build()
+                .getSyncValue());
+
         Label legalForm = UiLabels.primary(Component.empty(), Horizontal.CENTER);
         legalForm.addSyncValue(DataBindingBuilder.componentS2C(() -> Component.translatable("legal_forms.createkontor."
                         + company.legalForm(CompanyConfig.toCompanyParams(
@@ -166,8 +174,8 @@ public class KontorDeskBoundUi {
                 .build()
                 .getSyncValue());
 
-        UIElement headerSubtitle =
-                UiLabels.seperatedLabelRow(List.of(currentDay, balance, liquidity, openOrders, legalForm));
+        UIElement headerSubtitle = UiLabels.seperatedLabelRow(
+                List.of(currentDay, balance, liquidity, openOrders, legalForm, employeeAmount));
 
         overviewContent.addScrollViewChildren(UiContainer.headerWithSubtitle(title, headerSubtitle));
 

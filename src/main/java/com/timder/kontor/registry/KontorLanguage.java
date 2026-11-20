@@ -100,6 +100,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.buyer_desk.auto_stock.already_added", "%s is already added.");
         REGISTRATE.addRawLang(
                 "message.createkontor.buyer_desk.auto_stock.limit_reached", "This buyer can handle at most %s items.");
+        REGISTRATE.addRawLang(
+                "message.createkontor.buyer_desk.auto_stock.legal_level_too_low", "Legal level too low for %s.");
         REGISTRATE.addRawLang("message.createkontor.property_manager.bought", "The property %s has been bought.");
         REGISTRATE.addRawLang(
                 "message.createkontor.property_manager.rented",
@@ -284,6 +286,7 @@ public class KontorLanguage {
                 "ui.createkontor.kontor_desk.tab.bankruptcy.not_insolvent",
                 "Your company is not insolvent and you cannot declare bankruptcy.");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.open_orders", "Open Orders: %s");
+        REGISTRATE.addRawLang("ui.createkontor.kontor_desk.employee_amount", "%s Employee(s)");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.total_bookings_visible", "Visible Bookings: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.current_overdraft_limit", "Overdraft Limit: %s");
         REGISTRATE.addRawLang("ui.createkontor.kontor_desk.net_worth", "Net Worth: %s");
@@ -421,8 +424,10 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.raw_material", "Raw Material");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.product", "Product");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.add", "Add");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.legal_level_too_low", "Requires legal level %s");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.filter.only_raw", "Only Raw Materials");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.filter.only_products", "Only Products");
+        REGISTRATE.addRawLang("ui.createkontor.buyer_desk.catalog.filter.only_available", "Only Available");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.empty", "Empty");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.line", "%sx %s");
         REGISTRATE.addRawLang("ui.createkontor.buyer_desk.quote.total", "Total: %s");
@@ -778,6 +783,7 @@ public class KontorLanguage {
                 "enum.createkontor.purchase_status.not_operational", "Company is in payment difficulties.");
         REGISTRATE.addRawLang(
                 "enum.createkontor.purchase_status.insufficient_funds", "Company cannot afford this delivery.");
+        REGISTRATE.addRawLang("enum.createkontor.purchase_status.legal_level_too_low", "Legal level too low.");
 
         REGISTRATE.addRawLang("enum.createkontor.transfer_status.ok", "Transferred successfully.");
         REGISTRATE.addRawLang("enum.createkontor.transfer_status.invalid_amount", "Invalid amount.");

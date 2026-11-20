@@ -16,6 +16,11 @@ public final class PurchaseRules {
         if (!company.isOperational()) {
             return PurchaseStatus.NOT_OPERATIONAL;
         }
+        for (PurchaseQuote.Line line : quote.lines()) {
+            if (company.legalLevel() < PurchaseOffers.requiredLegalLevel(line.kind(), line.item(), params)) {
+                return PurchaseStatus.LEGAL_LEVEL_TOO_LOW;
+            }
+        }
         if (!company.canSpend(quote.total(), params)) {
             return PurchaseStatus.INSUFFICIENT_FUNDS;
         }

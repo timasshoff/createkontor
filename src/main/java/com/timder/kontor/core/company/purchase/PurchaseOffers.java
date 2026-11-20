@@ -2,6 +2,7 @@ package com.timder.kontor.core.company.purchase;
 
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.license.LicenseDef;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
 import java.math.BigDecimal;
@@ -64,7 +65,8 @@ public final class PurchaseOffers {
                 market,
                 PurchaseKind.PRODUCT,
                 price,
-                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()));
+                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()),
+                requiredLegalLevel(PurchaseKind.PRODUCT, market, params));
     }
 
     private static PurchaseOffer rawMaterialOffer(
@@ -74,6 +76,18 @@ public final class PurchaseOffers {
                 material,
                 PurchaseKind.RAW_MATERIAL,
                 price,
-                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()));
+                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()),
+                requiredLegalLevel(PurchaseKind.RAW_MATERIAL, material, params));
+    }
+
+    public static int requiredLegalLevel(PurchaseKind kind, ItemId item, CompanyParams params) {
+        if (kind != PurchaseKind.PRODUCT) {
+            return 1;
+        }
+        int lowest = Integer.MAX_VALUE;
+        for (LicenseDef license : params.licenses().licensesCovering(item)) {
+            lowest = Math.min(lowest, license.minLegalLevel());
+        }
+        return lowest == Integer.MAX_VALUE ? 1 : lowest;
     }
 }

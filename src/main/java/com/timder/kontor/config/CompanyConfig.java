@@ -127,8 +127,7 @@ public class CompanyConfig {
                 .defineInRange("consultantSalaryInDollars", 40, 0, Integer.MAX_VALUE);
         LOGISTICS_MANAGER_SALARY_IN_DOLLARS = builder.comment("Base salary of a logistics manager per day")
                 .defineInRange("logisticsManagerSalaryInDollars", 90, 0, Integer.MAX_VALUE);
-        LOGISTICS_MANAGER_MIN_LEGAL_LEVEL = builder.comment(
-                        "Min legal level to hire a logistics manager")
+        LOGISTICS_MANAGER_MIN_LEGAL_LEVEL = builder.comment("Min legal level to hire a logistics manager")
                 .defineInRange("logisticsManagerMinLegalLevel", 3, 1, 4);
         FINANCES_MANAGER_SALARY_IN_DOLLARS = builder.comment("Base salary of a finances manager per day")
                 .defineInRange("financesManagerSalaryInDollars", 100, 0, Integer.MAX_VALUE);
@@ -164,10 +163,10 @@ public class CompanyConfig {
 
         builder.comment("Purchasing").push("purchasing");
         PURCHASE_MARKUP = builder.comment("Factor times market prices a company pays when it buys goods")
-                .defineInRange("purchaseMarkup", 1.6, 0.0, 10.0);
+                .defineInRange("purchaseMarkup", 1.8, 0.0, 10.0);
         AUTO_PURCHASE_MARKUP = builder.comment(
                         "Factor times market prices a company pays when it buys goods automatically")
-                .defineInRange("autoPurchaseMarkup", 1.9, 0.0, 10.0);
+                .defineInRange("autoPurchaseMarkup", 2.1, 0.0, 10.0);
 
         builder.pop();
 
