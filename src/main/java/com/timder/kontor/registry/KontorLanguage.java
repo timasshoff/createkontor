@@ -25,6 +25,9 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("message.createkontor.already_member", "§c⚠ You are already a member of a company.");
         REGISTRATE.addRawLang("message.createkontor.employee_desk.vacant", "§c⚠ This desk is not staffed.");
         REGISTRATE.addRawLang(
+                "message.createkontor.employee_desk.legal_level_too_low",
+                "§c⚠ This role needs at least legal level %s§c.");
+        REGISTRATE.addRawLang(
                 "message.createkontor.shipping_exit.limit",
                 "§c⚠ Limit reached: Legal form allows at most %s §cbound shipping exits.");
         REGISTRATE.addRawLang(
@@ -197,6 +200,8 @@ public class KontorLanguage {
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_bonus", "Hiring bonus:");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.offer_bonus.value", "%s once");
         REGISTRATE.addRawLang("goggle.createkontor.employee_desk.inactive", "Paused");
+        REGISTRATE.addRawLang(
+                "goggle.createkontor.employee_desk.legal_level_too_low", "Legal level too low. Level %s required.");
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.postboxes", "Connected postboxes: %s");
         REGISTRATE.addRawLang("goggle.createkontor.buyer_desk.no_postbox", "No postbox connected");
         REGISTRATE.addRawLang(

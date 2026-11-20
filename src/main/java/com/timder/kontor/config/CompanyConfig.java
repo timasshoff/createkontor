@@ -31,9 +31,11 @@ public class CompanyConfig {
     public static final ModConfigSpec.IntValue LAWYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CALCULATOR_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue MARKET_ANALYST_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue BUYER_MIN_LEGAL_LEVEL;
     public static final ModConfigSpec.IntValue BUYER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue CONSULTANT_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue LOGISTICS_MANAGER_SALARY_IN_DOLLARS;
+    public static final ModConfigSpec.IntValue LOGISTICS_MANAGER_MIN_LEGAL_LEVEL;
     public static final ModConfigSpec.IntValue FINANCES_MANAGER_SALARY_IN_DOLLARS;
     public static final ModConfigSpec.IntValue PROPERTY_MANAGER_SALARY_IN_DOLLARS;
 
@@ -117,12 +119,17 @@ public class CompanyConfig {
                 .defineInRange("calculatorSalaryInDollars", 80, 0, Integer.MAX_VALUE);
         MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment("Base salary of a market analyst per day")
                 .defineInRange("marketAnalystSalaryInDollars", 90, 0, Integer.MAX_VALUE);
+        BUYER_MIN_LEGAL_LEVEL =
+                builder.comment("Min legal level to hire a buyer").defineInRange("buyerMinLegalLevel", 2, 1, 4);
         BUYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a buyer per day")
                 .defineInRange("buyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
         CONSULTANT_SALARY_IN_DOLLARS = builder.comment("Base salary of a consultant per day")
                 .defineInRange("consultantSalaryInDollars", 40, 0, Integer.MAX_VALUE);
         LOGISTICS_MANAGER_SALARY_IN_DOLLARS = builder.comment("Base salary of a logistics manager per day")
                 .defineInRange("logisticsManagerSalaryInDollars", 90, 0, Integer.MAX_VALUE);
+        LOGISTICS_MANAGER_MIN_LEGAL_LEVEL = builder.comment(
+                        "Min legal level to hire a logistics manager")
+                .defineInRange("logisticsManagerMinLegalLevel", 3, 1, 4);
         FINANCES_MANAGER_SALARY_IN_DOLLARS = builder.comment("Base salary of a finances manager per day")
                 .defineInRange("financesManagerSalaryInDollars", 100, 0, Integer.MAX_VALUE);
         PROPERTY_MANAGER_SALARY_IN_DOLLARS = builder.comment("Base salary of a property manager per day")

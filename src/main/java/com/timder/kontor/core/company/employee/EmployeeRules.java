@@ -5,7 +5,6 @@ import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.BookingKind;
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.company.legalform.LegalFormDef;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -81,6 +80,10 @@ public final class EmployeeRules {
         Objects.requireNonNull(params, "params must not be null.");
         if (day < 0) throw new IllegalArgumentException("day must not be negative.");
 
+        if (!spec.isUnlockedAt(company.legalLevel())) {
+            throw new IllegalStateException(
+                    "The role " + spec.id() + " needs at least legal level " + spec.minLegalLevel() + ".");
+        }
         if (freeSlots(company, params) <= 0) {
             throw new IllegalStateException("The company has no free employee slot.");
         }
@@ -94,8 +97,11 @@ public final class EmployeeRules {
         Employee employee = Employee.hire(company.issueEmployeeNumber(), spec, day);
         company.addEmployee(employee);
         company.consumeDeparture(spec.id(), day);
-        if (bonus.isPositive() && !company.trySpend(day, BookingKind.HIRE_BONUS, bonus, spec.id().value(), params)) {
-            throw new IllegalStateException("The company could pay the hiring bonus of " + bonus + " a moment ago but cannot now.");
+        if (bonus.isPositive()
+                && !company.trySpend(
+                        day, BookingKind.HIRE_BONUS, bonus, spec.id().value(), params)) {
+            throw new IllegalStateException(
+                    "The company could pay the hiring bonus of " + bonus + " a moment ago but cannot now.");
         }
         return employee;
     }

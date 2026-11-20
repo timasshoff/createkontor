@@ -41,7 +41,7 @@ public class LogisticsManagerDeskBlock extends AbstractEmployeeDeskBlock {
     public static final String RESOURCE_KEY = "logistics_manager_desk";
 
     public LogisticsManagerDeskBlock(Properties properties) {
-        super(properties, ROLE, CompanyConfig.LOGISTICS_MANAGER_SALARY_IN_DOLLARS);
+        super(properties, ROLE, CompanyConfig.LOGISTICS_MANAGER_SALARY_IN_DOLLARS, CompanyConfig.LOGISTICS_MANAGER_MIN_LEGAL_LEVEL);
         ConsultantWiki.register(
                 "logistics_manager",
                 WikiCategory.EMPLOYEES,
