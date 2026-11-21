@@ -2,5 +2,6 @@
   "base_value": 0.8,
   "daily_volatility": 0.01,
   "item": "minecraft:netherrack",
+  "min_legal_level": 1,
   "reference_volume": 9000.0
 }

@@ -2,7 +2,6 @@ package com.timder.kontor.core.company.purchase;
 
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.value.ItemId;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +21,8 @@ public record PurchaseQuote(List<Line> lines) {
         return total;
     }
 
-    public record Line(ItemId item, PurchaseKind kind, int quantity, Money unitPrice, Money lineTotal) {
+    public record Line(
+            ItemId item, PurchaseKind kind, int quantity, Money unitPrice, Money lineTotal, int requiredLegalLevel) {
 
         public Line {
             Objects.requireNonNull(item, "item must not be null.");
@@ -30,6 +30,7 @@ public record PurchaseQuote(List<Line> lines) {
             Objects.requireNonNull(unitPrice, "unitPrice must not be null.");
             Objects.requireNonNull(lineTotal, "lineTotal must not be null.");
             if (quantity < 1) throw new IllegalArgumentException("quantity must be at least 1.");
+            if (requiredLegalLevel < 1) throw new IllegalArgumentException("requiredLegalLevel must be at least 1.");
             if (!lineTotal.equals(unitPrice.multipliedBy(quantity)))
                 throw new IllegalArgumentException("lineTotal must be unitPrice times quantity.");
         }

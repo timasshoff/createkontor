@@ -2,5 +2,6 @@
   "base_value": 5.5,
   "daily_volatility": 0.03,
   "item": "create:raw_zinc",
+  "min_legal_level": 2,
   "reference_volume": 2800.0
 }

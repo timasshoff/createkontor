@@ -120,7 +120,7 @@ public class CompanyConfig {
         MARKET_ANALYST_SALARY_IN_DOLLARS = builder.comment("Base salary of a market analyst per day")
                 .defineInRange("marketAnalystSalaryInDollars", 90, 0, Integer.MAX_VALUE);
         BUYER_MIN_LEGAL_LEVEL =
-                builder.comment("Min legal level to hire a buyer").defineInRange("buyerMinLegalLevel", 2, 1, 4);
+                builder.comment("Min legal level to hire a buyer").defineInRange("buyerMinLegalLevel", 1, 1, 4);
         BUYER_SALARY_IN_DOLLARS = builder.comment("Base salary of a buyer per day")
                 .defineInRange("buyerSalaryInDollars", 80, 0, Integer.MAX_VALUE);
         CONSULTANT_SALARY_IN_DOLLARS = builder.comment("Base salary of a consultant per day")

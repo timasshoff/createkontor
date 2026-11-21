@@ -5,6 +5,6 @@
   "markets": [
     "netherite_ingot"
   ],
-  "min_legal_level": 3,
+  "min_legal_level": 4,
   "revenue_share": 0.125
 }

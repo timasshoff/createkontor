@@ -2,5 +2,6 @@
   "base_value": 2.0,
   "daily_volatility": 0.015,
   "item": "minecraft:calcite",
+  "min_legal_level": 1,
   "reference_volume": 4000.0
 }

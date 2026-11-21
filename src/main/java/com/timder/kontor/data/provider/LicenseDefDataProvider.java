@@ -801,7 +801,7 @@ public class LicenseDefDataProvider implements DataProvider {
                 0.0,
                 2));
 
-        futures.add(save(cache, "netherite_ingot", "netherite_ingot", List.of("netherite_ingot"), 0.8, 0.15, 0.125, 3));
+        futures.add(save(cache, "netherite_ingot", "netherite_ingot", List.of("netherite_ingot"), 0.8, 0.15, 0.125, 4));
 
         futures.add(save(
                 cache,

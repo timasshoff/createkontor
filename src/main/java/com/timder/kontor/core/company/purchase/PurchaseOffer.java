@@ -22,6 +22,7 @@ public record PurchaseOffer(
 
     public PurchaseQuote.Line lineFor(int quantity) {
         if (quantity < 1) throw new IllegalArgumentException("quantity must be at least 1.");
-        return new PurchaseQuote.Line(item, kind, quantity, unitPrice, unitPrice.multipliedBy(quantity));
+        return new PurchaseQuote.Line(
+                item, kind, quantity, unitPrice, unitPrice.multipliedBy(quantity), requiredLegalLevel);
     }
 }

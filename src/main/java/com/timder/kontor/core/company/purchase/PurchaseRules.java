@@ -17,7 +17,7 @@ public final class PurchaseRules {
             return PurchaseStatus.NOT_OPERATIONAL;
         }
         for (PurchaseQuote.Line line : quote.lines()) {
-            if (company.legalLevel() < PurchaseOffers.requiredLegalLevel(line.kind(), line.item(), params)) {
+            if (company.legalLevel() < line.requiredLegalLevel()) {
                 return PurchaseStatus.LEGAL_LEVEL_TOO_LOW;
             }
         }

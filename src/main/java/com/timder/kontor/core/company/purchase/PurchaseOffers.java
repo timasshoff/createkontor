@@ -66,7 +66,7 @@ public final class PurchaseOffers {
                 PurchaseKind.PRODUCT,
                 price,
                 unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()),
-                requiredLegalLevel(PurchaseKind.PRODUCT, market, params));
+                productLegalLevel(market, params));
     }
 
     private static PurchaseOffer rawMaterialOffer(
@@ -77,17 +77,31 @@ public final class PurchaseOffers {
                 PurchaseKind.RAW_MATERIAL,
                 price,
                 unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()),
-                requiredLegalLevel(PurchaseKind.RAW_MATERIAL, material, params));
+                economy.rawMaterialMinLegalLevel(material));
     }
 
-    public static int requiredLegalLevel(PurchaseKind kind, ItemId item, CompanyParams params) {
-        if (kind != PurchaseKind.PRODUCT) {
-            return 1;
-        }
+    public static int productLegalLevel(ItemId market, CompanyParams params) {
+        Objects.requireNonNull(market, "market must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+
         int lowest = Integer.MAX_VALUE;
-        for (LicenseDef license : params.licenses().licensesCovering(item)) {
+        for (LicenseDef license : params.licenses().licensesCovering(market)) {
             lowest = Math.min(lowest, license.minLegalLevel());
         }
         return lowest == Integer.MAX_VALUE ? 1 : lowest;
+    }
+
+    public static int requiredLegalLevel(Economy economy, ItemId item, CompanyParams params) {
+        Objects.requireNonNull(economy, "economy must not be null.");
+        Objects.requireNonNull(item, "item must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+
+        if (economy.isMarket(item)) {
+            return productLegalLevel(item, params);
+        }
+        if (economy.isRawMaterial(item)) {
+            return economy.rawMaterialMinLegalLevel(item);
+        }
+        throw new IllegalArgumentException(item + " cannot be purchased.");
     }
 }

@@ -8,16 +8,15 @@ import com.timder.kontor.core.raw.RawMaterialDefinition;
 import com.timder.kontor.core.raw.RawMaterialParams;
 import com.timder.kontor.core.value.ItemId;
 import com.timder.kontor.data.KontorData;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class RawMaterialDataLoader extends SimpleJsonResourceReloadListener {
 
@@ -26,7 +25,10 @@ public class RawMaterialDataLoader extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> resourceList, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(
+            Map<ResourceLocation, JsonElement> resourceList,
+            ResourceManager resourceManager,
+            ProfilerFiller profilerFiller) {
         Map<ItemId, RawMaterialDefinition> byItem = new LinkedHashMap<>();
 
         for (Map.Entry<ResourceLocation, JsonElement> entry : resourceList.entrySet()) {
@@ -34,7 +36,10 @@ public class RawMaterialDataLoader extends SimpleJsonResourceReloadListener {
             try {
                 RawMaterialDefinition definition = parse(entry.getValue());
                 if (byItem.containsKey(definition.id())) {
-                    CreateKontor.LOGGER.warn("Raw material {} in {} overrides another already loaded definition for this material.", definition.id(), file);
+                    CreateKontor.LOGGER.warn(
+                            "Raw material {} in {} overrides another already loaded definition for this material.",
+                            definition.id(),
+                            file);
                 }
                 byItem.put(definition.id(), definition);
             } catch (RuntimeException e) {
@@ -52,15 +57,18 @@ public class RawMaterialDataLoader extends SimpleJsonResourceReloadListener {
 
         String itemString = GsonHelper.getAsString(object, "item");
         ResourceLocation location = ResourceLocation.tryParse(itemString);
-        if (location == null) throw new IllegalArgumentException("'item' is not a valid resource location: " + itemString);
-        if (!BuiltInRegistries.ITEM.containsKey(location)) throw new IllegalArgumentException("'item' is not a registered item: " + itemString);
+        if (location == null)
+            throw new IllegalArgumentException("'item' is not a valid resource location: " + itemString);
+        if (!BuiltInRegistries.ITEM.containsKey(location))
+            throw new IllegalArgumentException("'item' is not a registered item: " + itemString);
 
         double baseValue = GsonHelper.getAsDouble(object, "base_value");
         double dailyVolatility = GsonHelper.getAsDouble(object, "daily_volatility");
         double referenceVolume = GsonHelper.getAsDouble(object, "reference_volume");
+        int minLegalLevel = GsonHelper.getAsInt(object, "min_legal_level", 1);
 
         ItemId itemId = new ItemId(location.toString());
         RawMaterialParams params = new RawMaterialParams(baseValue, dailyVolatility, referenceVolume);
-        return new RawMaterialDefinition(itemId, params);
+        return new RawMaterialDefinition(itemId, params, minLegalLevel);
     }
 }

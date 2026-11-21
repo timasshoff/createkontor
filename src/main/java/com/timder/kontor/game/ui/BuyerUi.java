@@ -563,9 +563,8 @@ public final class BuyerUi {
                     .get(ResourceLocation.parse(id.value()))
                     .getDescription();
 
-            PurchaseKind kind = economy.isMarket(id) ? PurchaseKind.PRODUCT : PurchaseKind.RAW_MATERIAL;
             boolean levelSufficient =
-                    context.company().legalLevel() >= PurchaseOffers.requiredLegalLevel(kind, id, params);
+                    context.company().legalLevel() >= PurchaseOffers.requiredLegalLevel(economy, id, params);
 
             if (be.getRefillTargets().containsKey(id)) {
                 ToastPayload.sendInfo(
@@ -885,12 +884,12 @@ public final class BuyerUi {
         }
         CompanyParams params = CompanyConfig.toCompanyParams(new LegalForms(KontorData.getLegalFormDefinitions()));
         for (ItemId id : economy.marketIds()) {
-            if (company.legalLevel() >= PurchaseOffers.requiredLegalLevel(PurchaseKind.PRODUCT, id, params)) {
+            if (company.legalLevel() >= PurchaseOffers.requiredLegalLevel(economy, id, params)) {
                 list.add(StringTag.valueOf(id.value()));
             }
         }
         for (ItemId id : economy.rawMaterialIds()) {
-            if (company.legalLevel() >= PurchaseOffers.requiredLegalLevel(PurchaseKind.RAW_MATERIAL, id, params)) {
+            if (company.legalLevel() >= PurchaseOffers.requiredLegalLevel(economy, id, params)) {
                 list.add(StringTag.valueOf(id.value()));
             }
         }
