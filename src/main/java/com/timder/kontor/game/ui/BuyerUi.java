@@ -199,7 +199,6 @@ public final class BuyerUi {
                             Horizontal.LEFT));
 
                     if (!offer.isUnlockedAt(companyLevel[0])) {
-                        element.addChild(new UIElement().layout(layout -> layout.flexGrow(1)));
                         element.addChild(UiLabels.paragraphError(
                                 Component.translatable(
                                         "ui.createkontor.buyer_desk.catalog.legal_level_too_low",
