@@ -11,6 +11,7 @@ import com.timder.kontor.game.block.company.AbstractCompanyBlock;
 import com.timder.kontor.game.block.company.CompanyBlockSupport;
 import com.timder.kontor.game.chunk.ChunkLoadingDesk;
 import com.timder.kontor.registry.KontorBlockEntities;
+import com.timder.kontor.util.ComponentFormatting;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +39,7 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
 
     private final RoleId role;
     private final Supplier<Integer> baseSalaryInDollars;
+    private final Supplier<Integer> minLegalLevel;
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     private static final double TOP_X1 = 0, TOP_Z1 = 0, TOP_X2 = 16, TOP_Z2 = 16;
@@ -47,9 +49,18 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
     private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
 
     protected AbstractEmployeeDeskBlock(Properties properties, RoleId role, Supplier<Integer> baseSalaryInDollars) {
+        this(properties, role, baseSalaryInDollars, () -> 1);
+    }
+
+    protected AbstractEmployeeDeskBlock(
+            Properties properties,
+            RoleId role,
+            Supplier<Integer> baseSalaryInDollars,
+            Supplier<Integer> minLegalLevel) {
         super(properties);
         this.role = Objects.requireNonNull(role, "role must not be null.");
         this.baseSalaryInDollars = Objects.requireNonNull(baseSalaryInDollars, "baseSalaryInDollars must not be null.");
+        this.minLegalLevel = Objects.requireNonNull(minLegalLevel, "minLegalLevel must not be null.");
         for (Direction facing : Direction.Plane.HORIZONTAL) {
             shapes.put(facing, Shapes.or(BASE, itemsShape(facing)));
         }
@@ -61,7 +72,7 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
     }
 
     public RoleSpec roleSpec() {
-        return new RoleSpec(role, Money.ofDollars(baseSalaryInDollars.get()));
+        return new RoleSpec(role, Money.ofDollars(baseSalaryInDollars.get()), minLegalLevel.get());
     }
 
     public String roleTranslationKey() {
@@ -144,7 +155,14 @@ public abstract class AbstractEmployeeDeskBlock extends AbstractCompanyBlock
             return false;
         }
         if (!desk.hasEmployee()) {
-            CompanyBlockSupport.message(player, "message.createkontor.employee_desk.vacant");
+            if (desk.status() == EmployeeDeskBlockEntity.Status.LEGAL_LEVEL_TOO_LOW) {
+                CompanyBlockSupport.message(
+                        player,
+                        "message.createkontor.employee_desk.legal_level_too_low",
+                        ComponentFormatting.highlightError(String.valueOf(desk.requiredLegalLevel())));
+            } else {
+                CompanyBlockSupport.message(player, "message.createkontor.employee_desk.vacant");
+            }
             return false;
         }
         return true;

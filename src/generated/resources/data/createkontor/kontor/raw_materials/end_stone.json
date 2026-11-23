@@ -2,5 +2,6 @@
   "base_value": 3.0,
   "daily_volatility": 0.02,
   "item": "minecraft:end_stone",
+  "min_legal_level": 1,
   "reference_volume": 4000.0
 }

@@ -52,11 +52,13 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private static final String TAG_STATUS = "Status";
     private static final String TAG_SALARY = "SalaryCents";
     private static final String TAG_BONUS = "HireBonusCents";
+    private static final String TAG_REQUIRED_LEVEL = "RequiredLevel";
 
     public enum Status {
         NO_COMPANY,
         INACTIVE,
         VACANT,
+        LEGAL_LEVEL_TOO_LOW,
         NO_FREE_SLOT,
         NOT_OPERATIONAL,
         NOT_AFFORDABLE,
@@ -70,6 +72,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
     private Status status = Status.NO_COMPANY;
     private long salaryCents = 0;
     private long bonusCents = 0;
+    private int requiredLevel = 0;
     private @Nullable UUID dressedVillager = null;
 
     public EmployeeDeskBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -189,7 +192,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
 
         if (employeeNumber == NO_EMPLOYEE) {
-            showOffer(nowSeated, Status.VACANT, company, day, params);
+            showOffer(nowSeated, vacantStatus(company), company, day, params);
         } else {
             show(nowSeated, Status.EMPLOYED, salaryOf(company, params).cents(), 0);
         }
@@ -199,9 +202,28 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         return employeeNumber != NO_EMPLOYEE;
     }
 
+    public Status status() {
+        return status;
+    }
+
+    public int requiredLegalLevel() {
+        return requiredLevel;
+    }
+
+    private Status vacantStatus(Company company) {
+        if (getBlockState().getBlock() instanceof AbstractEmployeeDeskBlock desk
+                && !desk.roleSpec().isUnlockedAt(company.legalLevel())) {
+            return Status.LEGAL_LEVEL_TOO_LOW;
+        }
+        return Status.VACANT;
+    }
+
     private Status tryHire(Company company, long day, CompanyParams params) {
         if (!(getBlockState().getBlock() instanceof AbstractEmployeeDeskBlock desk)) {
             return Status.VACANT;
+        }
+        if (!desk.roleSpec().isUnlockedAt(company.legalLevel())) {
+            return Status.LEGAL_LEVEL_TOO_LOW;
         }
         if (EmployeeRules.freeSlots(company, params) <= 0) {
             return Status.NO_FREE_SLOT;
@@ -269,20 +291,26 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
         }
         Money salary = EmployeeRules.dailySalary(desk.roleSpec().baseSalary(), company.legalForm(params));
         Money bonus = EmployeeRules.hireCost(company, desk.roleSpec(), day, params);
-        show(seated, status, salary.cents(), bonus.cents());
+        show(seated, status, salary.cents(), bonus.cents(), desk.roleSpec().minLegalLevel());
     }
 
     private void show(boolean seated, Status status, long salaryCents, long bonusCents) {
+        show(seated, status, salaryCents, bonusCents, 0);
+    }
+
+    private void show(boolean seated, Status status, long salaryCents, long bonusCents, int requiredLevel) {
         if (this.seated == seated
                 && this.status == status
                 && this.salaryCents == salaryCents
-                && this.bonusCents == bonusCents) {
+                && this.bonusCents == bonusCents
+                && this.requiredLevel == requiredLevel) {
             return;
         }
         this.seated = seated;
         this.status = status;
         this.salaryCents = salaryCents;
         this.bonusCents = bonusCents;
+        this.requiredLevel = requiredLevel;
         notifyUpdate();
     }
 
@@ -346,6 +374,15 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             }
             case INACTIVE ->
                 line(tooltip, ComponentFormatting.standardTranslatable("goggle.createkontor.employee_desk.inactive"));
+            case LEGAL_LEVEL_TOO_LOW -> {
+                line(
+                        tooltip,
+                        Component.translatable(
+                                        "goggle.createkontor.employee_desk.legal_level_too_low",
+                                        ComponentFormatting.highlightError(String.valueOf(requiredLevel)))
+                                .withStyle(ComponentFormatting.ERROR));
+                offer(tooltip);
+            }
             case NO_COMPANY -> {}
         }
 
@@ -389,6 +426,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             tag.putString(TAG_STATUS, status.name());
             tag.putLong(TAG_SALARY, salaryCents);
             tag.putLong(TAG_BONUS, bonusCents);
+            tag.putInt(TAG_REQUIRED_LEVEL, requiredLevel);
         }
         if (!clientPacket && dressedVillager != null) {
             tag.putUUID(TAG_DRESSED_VILLAGER, dressedVillager);
@@ -408,6 +446,7 @@ public class EmployeeDeskBlockEntity extends AbstractCompanyBlockEntity {
             }
             salaryCents = tag.getLong(TAG_SALARY);
             bonusCents = tag.getLong(TAG_BONUS);
+            requiredLevel = tag.getInt(TAG_REQUIRED_LEVEL);
         }
         dressedVillager = tag.hasUUID(TAG_DRESSED_VILLAGER) ? tag.getUUID(TAG_DRESSED_VILLAGER) : null;
     }

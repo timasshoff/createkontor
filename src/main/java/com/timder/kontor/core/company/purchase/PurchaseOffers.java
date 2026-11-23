@@ -2,6 +2,7 @@ package com.timder.kontor.core.company.purchase;
 
 import com.timder.kontor.core.company.CompanyParams;
 import com.timder.kontor.core.company.financial.Money;
+import com.timder.kontor.core.company.license.LicenseDef;
 import com.timder.kontor.core.economy.Economy;
 import com.timder.kontor.core.value.ItemId;
 import java.math.BigDecimal;
@@ -64,7 +65,8 @@ public final class PurchaseOffers {
                 market,
                 PurchaseKind.PRODUCT,
                 price,
-                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()));
+                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()),
+                productLegalLevel(market, params));
     }
 
     private static PurchaseOffer rawMaterialOffer(
@@ -74,6 +76,32 @@ public final class PurchaseOffers {
                 material,
                 PurchaseKind.RAW_MATERIAL,
                 price,
-                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()));
+                unitPrice(price, automaticPurchase ? params.autoPurchaseMarkup() : params.purchaseMarkup()),
+                economy.rawMaterialMinLegalLevel(material));
+    }
+
+    public static int productLegalLevel(ItemId market, CompanyParams params) {
+        Objects.requireNonNull(market, "market must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+
+        int lowest = Integer.MAX_VALUE;
+        for (LicenseDef license : params.licenses().licensesCovering(market)) {
+            lowest = Math.min(lowest, license.minLegalLevel());
+        }
+        return lowest == Integer.MAX_VALUE ? 1 : lowest;
+    }
+
+    public static int requiredLegalLevel(Economy economy, ItemId item, CompanyParams params) {
+        Objects.requireNonNull(economy, "economy must not be null.");
+        Objects.requireNonNull(item, "item must not be null.");
+        Objects.requireNonNull(params, "params must not be null.");
+
+        if (economy.isMarket(item)) {
+            return productLegalLevel(item, params);
+        }
+        if (economy.isRawMaterial(item)) {
+            return economy.rawMaterialMinLegalLevel(item);
+        }
+        throw new IllegalArgumentException(item + " cannot be purchased.");
     }
 }

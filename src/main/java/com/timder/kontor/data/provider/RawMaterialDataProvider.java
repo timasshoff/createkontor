@@ -47,17 +47,17 @@ public class RawMaterialDataProvider implements DataProvider {
         Gems & Ores
          */
         futures.add(save(cache, "coal", "minecraft:coal", 2.0, 0.02, 7000.0));
-        futures.add(save(cache, "raw_copper", "minecraft:raw_copper", 4.5, 0.025, 3500.0));
-        futures.add(save(cache, "raw_iron", "minecraft:raw_iron", 6.2, 0.025, 3000.0));
-        futures.add(save(cache, "raw_zinc", "create:raw_zinc", 5.5, 0.03, 2800.0));
-        futures.add(save(cache, "redstone", "minecraft:redstone", 3.0, 0.03, 4000.0));
+        futures.add(save(cache, "raw_copper", "minecraft:raw_copper", 4.5, 0.025, 3500.0, 2));
+        futures.add(save(cache, "raw_iron", "minecraft:raw_iron", 6.2, 0.025, 3000.0, 2));
+        futures.add(save(cache, "raw_zinc", "create:raw_zinc", 5.5, 0.03, 2800.0, 2));
+        futures.add(save(cache, "redstone", "minecraft:redstone", 3.0, 0.03, 4000.0, 2));
         futures.add(save(cache, "amethyst_shard", "minecraft:amethyst_shard", 3.5, 0.05, 2000.0));
-        futures.add(save(cache, "quartz", "minecraft:quartz", 3.5, 0.03, 3500.0));
-        futures.add(save(cache, "raw_gold", "minecraft:raw_gold", 9.5, 0.035, 1800));
-        futures.add(save(cache, "lapis_lazuli", "minecraft:lapis_lazuli", 7.0, 0.035, 2200));
-        futures.add(save(cache, "emerald", "minecraft:emerald", 100.0, 0.045, 400));
-        futures.add(save(cache, "diamond", "minecraft:diamond", 120.0, 0.045, 200));
-        futures.add(save(cache, "ancient_debris", "minecraft:ancient_debris", 180.0, 0.06, 100));
+        futures.add(save(cache, "quartz", "minecraft:quartz", 3.5, 0.03, 3500.0, 2));
+        futures.add(save(cache, "raw_gold", "minecraft:raw_gold", 9.5, 0.035, 1800, 3));
+        futures.add(save(cache, "lapis_lazuli", "minecraft:lapis_lazuli", 7.0, 0.035, 2200, 3));
+        futures.add(save(cache, "emerald", "minecraft:emerald", 100.0, 0.045, 400, 3));
+        futures.add(save(cache, "diamond", "minecraft:diamond", 120.0, 0.045, 200, 4));
+        futures.add(save(cache, "ancient_debris", "minecraft:ancient_debris", 180.0, 0.06, 100, 4));
 
         /*
         Wood
@@ -97,10 +97,10 @@ public class RawMaterialDataProvider implements DataProvider {
         futures.add(save(cache, "limestone", "create:limestone", 2.4, 0.02, 3500.0));
         futures.add(save(cache, "scoria", "create:scoria", 2.5, 0.02, 3200.0));
         futures.add(save(cache, "scorchia", "create:scorchia", 2.5, 0.02, 3200.0));
-        futures.add(save(cache, "asurine", "create:asurine", 2.6, 0.02, 3200.0));
-        futures.add(save(cache, "crimsite", "create:crimsite", 2.6, 0.02, 3200.0));
-        futures.add(save(cache, "ochrum", "create:ochrum", 2.6, 0.02, 3200.0));
-        futures.add(save(cache, "veridium", "create:veridium", 2.6, 0.02, 3200.0));
+        futures.add(save(cache, "asurine", "create:asurine", 2.6, 0.02, 3200.0, 2));
+        futures.add(save(cache, "crimsite", "create:crimsite", 2.6, 0.02, 3200.0, 2));
+        futures.add(save(cache, "ochrum", "create:ochrum", 2.6, 0.02, 3200.0, 3));
+        futures.add(save(cache, "veridium", "create:veridium", 2.6, 0.02, 3200.0, 2));
         futures.add(save(cache, "netherrack", "minecraft:netherrack", 0.8, 0.01, 9000.0));
         futures.add(save(cache, "basalt", "minecraft:basalt", 1.5, 0.01, 6000.0));
         futures.add(save(cache, "end_stone", "minecraft:end_stone", 3.0, 0.02, 4000.0));
@@ -126,10 +126,10 @@ public class RawMaterialDataProvider implements DataProvider {
         futures.add(save(cache, "string", "minecraft:string", 3.0, 0.025, 3000.0));
         futures.add(save(cache, "gunpowder", "minecraft:gunpowder", 5.0, 0.03, 2000.0));
         futures.add(save(cache, "slime_ball", "minecraft:slime_ball", 6.0, 0.03, 1400.0));
-        futures.add(save(cache, "magma_cream", "minecraft:magma_cream", 8.0, 0.035, 1000.0));
-        futures.add(save(cache, "blaze_rod", "minecraft:blaze_rod", 25.0, 0.045, 600.0));
-        futures.add(save(cache, "ender_pearl", "minecraft:ender_pearl", 30.0, 0.045, 800.0));
-        futures.add(save(cache, "shulker_shell", "minecraft:shulker_shell", 55.0, 0.05, 200.0));
+        futures.add(save(cache, "magma_cream", "minecraft:magma_cream", 8.0, 0.035, 1000.0, 3));
+        futures.add(save(cache, "blaze_rod", "minecraft:blaze_rod", 25.0, 0.045, 600.0, 3));
+        futures.add(save(cache, "ender_pearl", "minecraft:ender_pearl", 30.0, 0.045, 800.0, 4));
+        futures.add(save(cache, "shulker_shell", "minecraft:shulker_shell", 55.0, 0.05, 200.0, 4));
         futures.add(save(cache, "honeycomb", "minecraft:honeycomb", 4.0, 0.02, 2500.0));
         futures.add(save(cache, "glowstone_dust", "minecraft:glowstone_dust", 3.5, 0.03, 3000.0));
         futures.add(save(cache, "prismarine_shard", "minecraft:prismarine_shard", 5.0, 0.03, 2000.0));
@@ -153,10 +153,10 @@ public class RawMaterialDataProvider implements DataProvider {
         futures.add(save(cache, "sunflower", "minecraft:sunflower", 7.5, 0.037, 3500.0));
         futures.add(save(cache, "lilac", "minecraft:lilac", 7.5, 0.037, 3500.0));
         futures.add(save(cache, "rose_bush", "minecraft:rose_bush", 7.5, 0.037, 3500.0));
-        futures.add(save(cache, "wither_rose", "minecraft:wither_rose", 18.0, 0.04, 1500.0));
+        futures.add(save(cache, "wither_rose", "minecraft:wither_rose", 18.0, 0.04, 1500.0, 3));
         futures.add(save(cache, "azalea", "minecraft:azalea", 3.0, 0.03, 3500.0));
         futures.add(save(cache, "nether_wart", "minecraft:nether_wart", 3.0, 0.03, 3500.0));
-        futures.add(save(cache, "chorus_fruit", "minecraft:chorus_fruit", 4.0, 0.035, 2000.0));
+        futures.add(save(cache, "chorus_fruit", "minecraft:chorus_fruit", 4.0, 0.035, 2000.0, 3));
 
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
@@ -168,11 +168,23 @@ public class RawMaterialDataProvider implements DataProvider {
             double baseValue,
             double dailyVolatility,
             double referenceVolume) {
+        return save(cache, fileName, item, baseValue, dailyVolatility, referenceVolume, 1);
+    }
+
+    private CompletableFuture<?> save(
+            CachedOutput cache,
+            String fileName,
+            String item,
+            double baseValue,
+            double dailyVolatility,
+            double referenceVolume,
+            int minLegalLevel) {
         JsonObject json = new JsonObject();
         json.addProperty("item", item);
         json.addProperty("base_value", baseValue);
         json.addProperty("daily_volatility", dailyVolatility);
         json.addProperty("reference_volume", referenceVolume);
+        json.addProperty("min_legal_level", minLegalLevel);
 
         ResourceLocation fileId = ResourceLocation.fromNamespaceAndPath(CreateKontor.MODID, fileName);
         return DataProvider.saveStable(cache, json, pathProvider.json(fileId));

@@ -995,6 +995,15 @@ public final class Economy {
         return rawMaterialDefinitions.stream().map(RawMaterialDefinition::id).toList();
     }
 
+    public int rawMaterialMinLegalLevel(ItemId material) {
+        for (RawMaterialDefinition def : rawMaterialDefinitions) {
+            if (def.id().equals(material)) {
+                return def.minLegalLevel();
+            }
+        }
+        throw new IllegalArgumentException("No such raw material: " + material);
+    }
+
     public long ticksElapsed() {
         return ticksElapsed;
     }

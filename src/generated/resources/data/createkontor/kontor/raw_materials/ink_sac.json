@@ -2,5 +2,6 @@
   "base_value": 10.0,
   "daily_volatility": 0.04,
   "item": "minecraft:ink_sac",
+  "min_legal_level": 1,
   "reference_volume": 1500.0
 }

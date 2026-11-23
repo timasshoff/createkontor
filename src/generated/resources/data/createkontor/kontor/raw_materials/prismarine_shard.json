@@ -2,5 +2,6 @@
   "base_value": 5.0,
   "daily_volatility": 0.03,
   "item": "minecraft:prismarine_shard",
+  "min_legal_level": 1,
   "reference_volume": 2000.0
 }

@@ -2,25 +2,27 @@ package com.timder.kontor.core.company.purchase;
 
 import com.timder.kontor.core.company.financial.Money;
 import com.timder.kontor.core.value.ItemId;
-
 import java.util.Objects;
 
 public record PurchaseOffer(
-        ItemId item,
-        PurchaseKind kind,
-        double marketPrice,
-        Money unitPrice
-) {
+        ItemId item, PurchaseKind kind, double marketPrice, Money unitPrice, int requiredLegalLevel) {
     public PurchaseOffer {
         Objects.requireNonNull(item, "item must not be null.");
         Objects.requireNonNull(kind, "kind must not be null.");
         Objects.requireNonNull(unitPrice, "unitPrice must not be null.");
-        if (!(marketPrice > 0.0) || Double.isInfinite(marketPrice)) throw new IllegalArgumentException("marketPrice must be a finite, positive number.");
+        if (!(marketPrice > 0.0) || Double.isInfinite(marketPrice))
+            throw new IllegalArgumentException("marketPrice must be a finite, positive number.");
         if (!unitPrice.isPositive()) throw new IllegalArgumentException("unitPrice must be positive.");
+        if (requiredLegalLevel < 1) throw new IllegalArgumentException("requiredLegalLevel must be at least 1.");
+    }
+
+    public boolean isUnlockedAt(int legalLevel) {
+        return legalLevel >= requiredLegalLevel;
     }
 
     public PurchaseQuote.Line lineFor(int quantity) {
         if (quantity < 1) throw new IllegalArgumentException("quantity must be at least 1.");
-        return new PurchaseQuote.Line(item, kind, quantity, unitPrice, unitPrice.multipliedBy(quantity));
+        return new PurchaseQuote.Line(
+                item, kind, quantity, unitPrice, unitPrice.multipliedBy(quantity), requiredLegalLevel);
     }
 }

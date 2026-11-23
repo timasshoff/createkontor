@@ -34,7 +34,7 @@ public class BuyerDeskBlock extends AbstractEmployeeDeskBlock {
     public static final RoleId ROLE = new RoleId("buyer");
 
     public BuyerDeskBlock(Properties properties) {
-        super(properties, ROLE, CompanyConfig.BUYER_SALARY_IN_DOLLARS);
+        super(properties, ROLE, CompanyConfig.BUYER_SALARY_IN_DOLLARS, CompanyConfig.BUYER_MIN_LEGAL_LEVEL);
         ConsultantWiki.register(
                 "buyer",
                 WikiCategory.EMPLOYEES,
