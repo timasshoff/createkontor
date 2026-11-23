@@ -12,6 +12,7 @@ body:
 
         **Before you file a new bug report:**
         - Search the [existing issues](https://github.com/timasshoff/createkontor/issues) first to check if your bug has already been reported.
+        - If your issue is about odd market behaviour: Please use the `/kontor market export <product> [company]` command to export all recorded data of this market to a .csv file and attach the file to this issue.
         - Betas can break save data. **Keep a backup of your world.**
 
   - type: input
@@ -67,7 +68,7 @@ body:
   - type: textarea
     id: attachments
     attributes:
-      label: Screenshots and other attachments
-      description: Drag and drop files into this field.
+      label: Screenshots and other attachments (like market export csv)
+      description: Drag and drop files into this field. Use the `/kontor market export <product> [company]`to export data about a market if relevant. Then attach the .csv file here.
     validations:
       required: false
