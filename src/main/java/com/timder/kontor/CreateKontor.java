@@ -119,6 +119,7 @@ public class CreateKontor {
         EmployeeCommands.register(event.getDispatcher());
         ManagerInviteCommands.register(event.getDispatcher());
         PropertyCommands.register(event.getDispatcher());
+        MarketExportCommand.register(event.getDispatcher());
     }
 
     @SubscribeEvent
